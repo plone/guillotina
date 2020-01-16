@@ -4,7 +4,8 @@ CHANGELOG
 5.3.11 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Better error handling on redis connection issues
+  [vangheem]
 
 
 5.3.10 (2020-01-16)
