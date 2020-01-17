@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.0a7 (unreleased)
+6.0.0a7 (2020-01-17)
 --------------------
 
 - Better error handling on redis connection issues
