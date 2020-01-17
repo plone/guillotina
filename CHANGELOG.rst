@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a7 (unreleased)
 --------------------
 
+- Better error handling on redis connection issues
+  [vangheem]
+
 - Run _update_from_pytest_markers() after configuring db settings
   [masipcat]
 

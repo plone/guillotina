@@ -2,8 +2,8 @@
 debug: true
 applications:
   - guillotina.contrib.redis
-  - guillotina.contrib.cache
   - guillotina.contrib.pubsub
+  - guillotina.contrib.cache
 databases:
   d:
     storage: DUMMY
@@ -19,22 +19,25 @@ redis:
     minsize: 5
     maxsize: 100
   cluster_mode: False
+cache:
+  driver: guillotina.contrib.redis
+  updates_channel: guillotina
 root_user:
   password: root
 cors:
   allow_origin:
-  - "*"
+    - "*"
   allow_methods:
-  - GET
-  - POST
-  - DELETE
-  - HEAD
-  - PATCH
-  - PUT
+    - GET
+    - POST
+    - DELETE
+    - HEAD
+    - PATCH
+    - PUT
   allow_headers:
-  - "*"
+    - "*"
   expose_headers:
-  - "*"
+    - "*"
   allow_credentials: true
   max_age: 3660
 utilities: []
