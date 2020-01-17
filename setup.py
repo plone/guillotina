@@ -69,6 +69,7 @@ setup(
         "lru-dict",
         "mypy_extensions",
         "argon2-cffi",
+        "multidict",
     ],
     extras_require={
         "test": [
