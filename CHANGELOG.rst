@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a7 (unreleased)
 --------------------
 
+- Run _update_from_pytest_markers() after configuring db settings
+  [masipcat]
+
 - Fix validating array params in query parameters [lferran]
 
 - Add open api tests and fix ones that do not pass tests
@@ -18,8 +21,10 @@ CHANGELOG
 - Fix automatic type conversion on nested fields. Fixes #832
   [vangheem]
 
+
 6.0.0a6 (2020-01-13)
 --------------------
+
 - Fix bug on swagger with endpoints without explicit security declarations
   [jordic]
 
