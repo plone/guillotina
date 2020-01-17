@@ -70,6 +70,7 @@ setup(
         "mypy_extensions",
         "argon2-cffi",
         "multidict",
+        "async-timeout"
     ],
     extras_require={
         "test": [
