@@ -4,7 +4,8 @@ CHANGELOG
 6.0.0a8 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Add missing dependencies in `setup.py`
+  [masipcat]
 
 
 6.0.0a7 (2020-01-17)
