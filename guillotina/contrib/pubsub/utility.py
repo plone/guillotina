@@ -5,6 +5,7 @@ from typing import Any
 from typing import Callable
 
 import asyncio
+import backoff
 import logging
 import pickle
 
@@ -28,11 +29,23 @@ class PubSubUtility:
     @profilable
     async def initialize(self, app=None):
         driver = self._settings["driver"]
-        klass = resolve_dotted_name(driver)
-        if klass is not None:
-            self._driver = await klass.get_driver()
-            await self._driver.initialize(self._loop)
-            self._initialized = True
+        if driver:
+            klass = resolve_dotted_name(driver)
+            if klass is None:  # pragma: no cover
+                raise Exception(f"Invalid configuration for pubsub driver: {driver}")
+            while True:
+                try:
+                    await self._connect()
+                    break
+                except Exception:  # pragma: no cover
+                    logger.error("Error initializing pubsub", exc_info=True)
+
+    @backoff.on_exception(backoff.expo, (OSError,), max_time=30, max_tries=4)
+    async def _connect(self):
+        klass = resolve_dotted_name(self._settings["driver"])
+        self._driver = await klass.get_driver()
+        await self._driver.initialize(self._loop)
+        self._initialized = True
 
     async def finalize(self, app):
         self._subscribers.clear()

@@ -1,5 +1,6 @@
 try:
     import aioredis
+    import aioredis.errors
 except ImportError:
     print("If you add guillotina.contrib.redis you need to add aioredis on your requirements")
     raise
@@ -11,6 +12,7 @@ from typing import List
 from typing import Optional
 
 import asyncio
+import backoff
 import logging
 
 
@@ -23,6 +25,8 @@ class RedisDriver:
         self._pubsub = None
         self._loop = None
         self._receivers = {}
+        self._pubsub_subscriptor = None
+        self._conn = None
         self.initialized = False
         self.init_lock = asyncio.Lock()
 
@@ -30,15 +34,22 @@ class RedisDriver:
         self._loop = loop
         async with self.init_lock:
             if self.initialized is False:
-                try:
-                    settings = app_settings["redis"]
-                    self._pool = await aioredis.create_pool(
-                        (settings["host"], settings["port"]), **settings["pool"], loop=loop
-                    )
-                    self._pubsub_subscriptor = aioredis.Redis(await self._pool.acquire())
-                    self.initialized = True
-                except AssertionError:
-                    logger.error("Error on initializing redis", exc_info=True)
+                while True:
+                    try:
+                        await self._connect()
+                        self.initialized = True
+                        break
+                    except Exception:  # pragma: no cover
+                        logger.error("Error initializing pubsub", exc_info=True)
+
+    @backoff.on_exception(backoff.expo, (OSError,), max_time=30, max_tries=4)
+    async def _connect(self):
+        settings = app_settings["redis"]
+        self._pool = await aioredis.create_pool(
+            (settings["host"], settings["port"]), **settings["pool"], loop=self._loop
+        )
+        self._conn = await self._pool.acquire()
+        self._pubsub_subscriptor = aioredis.Redis(self._conn)
 
     async def finalize(self):
         if self._pool is not None:
@@ -107,7 +118,18 @@ class RedisDriver:
     async def subscribe(self, channel_name: str):
         if self._pubsub_subscriptor is None:
             raise NoRedisConfigured()
-        (channel,) = await self._pubsub_subscriptor.subscribe(channel_name)
+        try:
+            (channel,) = await self._pubsub_subscriptor.subscribe(channel_name)
+        except aioredis.errors.ConnectionClosedError:  # pragma: no cover
+            # closed in middle
+            try:
+                self._pool.close(self._conn)
+            except Exception:
+                pass
+            self._conn = await self._pool.acquire()
+            self._pubsub_subscriptor = aioredis.Redis(self._conn)
+            (channel,) = await self._pubsub_subscriptor.subscribe(channel_name)
+
         return self._listener(channel)
 
     async def _listener(self, channel: aioredis.Channel):
