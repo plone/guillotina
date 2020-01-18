@@ -69,8 +69,9 @@ setup(
         "lru-dict",
         "mypy_extensions",
         "argon2-cffi",
+        "backoff",
         "multidict",
-        "async-timeout"
+        "async-timeout",
     ],
     extras_require={
         "test": [

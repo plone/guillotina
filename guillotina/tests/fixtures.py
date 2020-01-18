@@ -65,9 +65,9 @@ def event_loop():
 
 def get_dummy_settings(pytest_node=None):
     settings = testing.get_settings()
-    settings = _update_from_pytest_markers(settings, pytest_node)
     settings["databases"]["db"]["storage"] = "DUMMY"
     settings["databases"]["db"]["dsn"] = {}
+    settings = _update_from_pytest_markers(settings, pytest_node)
     return settings
 
 
@@ -115,7 +115,6 @@ def _update_from_pytest_markers(settings, pytest_node):
 
 def get_db_settings(pytest_node=None):
     settings = testing.get_settings()
-    settings = _update_from_pytest_markers(settings, pytest_node)
     if annotations["redis"] is not None:
         if "redis" not in settings:
             settings["redis"] = {}
@@ -123,7 +122,7 @@ def get_db_settings(pytest_node=None):
         settings["redis"]["port"] = annotations["redis"][1]
 
     if annotations["testdatabase"] == "DUMMY":
-        return settings
+        return _update_from_pytest_markers(settings, pytest_node)
 
     settings["databases"]["db"]["storage"] = "postgresql"
     settings["databases"]["db"]["db_schema"] = annotations["test_dbschema"]
@@ -138,6 +137,7 @@ def get_db_settings(pytest_node=None):
     }
 
     options = dict(host=annotations.get("pg_host", "localhost"), port=annotations.get("pg_port", 5432))
+    settings = _update_from_pytest_markers(settings, pytest_node)
 
     if annotations["testdatabase"] == "cockroachdb":
         configure_db(settings["databases"]["db"], **options, user="root", storage="cockroach")
