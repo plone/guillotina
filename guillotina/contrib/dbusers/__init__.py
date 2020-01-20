@@ -16,3 +16,4 @@ def includeme(root, settings):
     configure.scan("guillotina.contrib.dbusers.subscribers")
     configure.scan("guillotina.contrib.dbusers.permissions")
     configure.scan("guillotina.contrib.dbusers.serializers")
+    configure.scan("guillotina.contrib.dbusers.groups")
