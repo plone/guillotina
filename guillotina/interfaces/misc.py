@@ -15,6 +15,7 @@ class IRequest(Interface):
     exc: Optional[Exception]
     found_view: Optional[Type]
     view_name: Optional[str]
+    view_dotted_name: str
     application: Optional[IApplication]
 
     def record(event_name) -> None:

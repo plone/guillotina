@@ -45,6 +45,7 @@ from guillotina.response import HTTPUnauthorized
 from guillotina.security.utils import get_view_permission
 from guillotina.transactions import abort
 from guillotina.transactions import commit
+from guillotina.utils import get_dotted_name
 from guillotina.utils import get_registry
 from guillotina.utils import get_security_policy
 from guillotina.utils import import_class
@@ -471,6 +472,7 @@ class TraversalRouter:
             raise HTTPNotFound(content={"reason": "object and/or route not found"})
 
         request.found_view = view
+        request.view_dotted_name = get_view_dotted_name(view)
         request.view_name = view_name
         request.record("viewfound")
 
@@ -513,3 +515,13 @@ class TraversalRouter:
             return await traverse(request, self._root, path)
         else:  # pragma: no cover
             raise ApplicationNotFound()
+
+
+def get_view_dotted_name(view):
+    try:
+        try:
+            return get_dotted_name(view.view_func)
+        except AttributeError:
+            return get_dotted_name(view)
+    except AttributeError:
+        return None

@@ -284,6 +284,7 @@ class Request(object):
     application: Optional[IApplication] = None
     exc = None
     view_name = None
+    view_dotted_name = ""
     found_view = None
     resource: Optional[IBaseObject] = None
     tail = None
