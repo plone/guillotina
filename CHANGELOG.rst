@@ -7,6 +7,9 @@ CHANGELOG
 - Fix command 'create'
   [masipcat]
 
+- Add missing dependencies in `setup.py`
+  [masipcat]
+
 
 6.0.0a7 (2020-01-17)
 --------------------

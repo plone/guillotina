@@ -70,6 +70,8 @@ setup(
         "mypy_extensions",
         "argon2-cffi",
         "backoff",
+        "multidict",
+        "async-timeout",
     ],
     extras_require={
         "test": [
@@ -84,6 +86,7 @@ setup(
             "pytest-rerunfailures<=7.0",
             "async-asgi-testclient~=1.2.0",
             "openapi-spec-validator",
+            "aiohttp>=3.0.0,<4.0.0",
         ],
         "docs": [
             "aiohttp>=3.0.0,<4.0.0",
