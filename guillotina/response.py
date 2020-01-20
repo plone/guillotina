@@ -3,7 +3,6 @@ from guillotina.interfaces import IResponse
 from guillotina.request import Request
 from multidict import CIMultiDict
 from multidict import istr
-from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -63,7 +62,6 @@ class ASGIResponse:
         self.content_type = content_type
         self.content_length = content_length
 
-        self._state: Dict[str, Any] = {}
         self._prepared = False
         self._eof_sent = False
 
@@ -123,21 +121,6 @@ class ASGIResponse:
         else:
             info = "not prepared"
         return "<{} {}>".format(self.__class__.__name__, info)
-
-    def __getitem__(self, key: str) -> Any:
-        return self._state[key]
-
-    def __setitem__(self, key: str, value: Any) -> None:
-        self._state[key] = value
-
-    def __delitem__(self, key: str) -> None:
-        del self._state[key]
-
-    def __len__(self) -> int:
-        return len(self._state)
-
-    def __iter__(self):
-        return iter(self._state)
 
     def __hash__(self) -> int:
         return hash(id(self))

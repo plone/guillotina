@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a8 (unreleased)
 --------------------
 
+- Remove unused methods in Response
+  [masipcat]
+
 - Add missing dependencies in `setup.py`
   [masipcat]
 
