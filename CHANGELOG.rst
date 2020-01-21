@@ -4,7 +4,8 @@ CHANGELOG
 5.3.12 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Add title/description to json schema field serialization
+  [vangheem]
 
 
 5.3.11 (2020-01-16)

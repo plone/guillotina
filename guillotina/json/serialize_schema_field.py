@@ -193,7 +193,13 @@ class DefaultJSONFieldSerializer(DefaultObjectSchemaFieldSerializer):
         return "object"
 
     def serialize(self):
-        return self.field.json_schema
+        data = self.field.json_schema.copy()
+        for attr_name in ("title", "description"):
+            if attr_name not in data:
+                value = getattr(self.field, attr_name, None)
+                if value:
+                    data[attr_name] = value
+        return data
 
 
 @configure.adapter(for_=(ITextLine, Interface, Interface), provides=ISchemaFieldSerializeToJson)
