@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.12 (unreleased)
+5.3.12 (2020-01-21)
 -------------------
 
 - Add title/description to json schema field serialization
