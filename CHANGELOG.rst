@@ -7,6 +7,12 @@ CHANGELOG
 - Execute _clean_request() after middlewares execution
   [masipcat]
 
+- Fix command 'create'
+  [masipcat]
+
+- Remove unused methods in Response
+  [masipcat]
+
 - Add missing dependencies in `setup.py`
   [masipcat]
 
