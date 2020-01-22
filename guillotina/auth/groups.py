@@ -14,21 +14,18 @@ class GuillotinaGroup(GuillotinaUser):
 class GroupsUtility:
     """ Class used to get groups. """
 
-    def __init__(self):
-        self._managers_group = GuillotinaGroup(
-            roles={
-                "guillotina.ContainerAdmin": 1,
-                "guillotina.ContainerDeleter": 1,
-                "guillotina.Owner": 1,
-                "guillotina.Member": 1,
-                "guillotina.Manager": 1,
-            }
-        )
-
-        self._groups: typing.Dict[str, GuillotinaGroup] = {"Managers": self._managers_group}
-
     async def load_groups(self, groups):
         pass
 
     def get_principal(self, ident: str, principal: typing.Optional[IPrincipal]) -> IPrincipal:
-        return self._groups.get(ident) or GuillotinaGroup()
+        if ident == "Managers":
+            return GuillotinaGroup(
+                roles={
+                    "guillotina.ContainerAdmin": 1,
+                    "guillotina.ContainerDeleter": 1,
+                    "guillotina.Owner": 1,
+                    "guillotina.Member": 1,
+                    "guillotina.Manager": 1,
+                }
+            )
+        return GuillotinaGroup()

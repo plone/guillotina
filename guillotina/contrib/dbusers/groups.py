@@ -1,5 +1,4 @@
 from collections import defaultdict
-from guillotina import configure
 from guillotina.auth.groups import GuillotinaGroup
 from guillotina.exceptions import ContainerNotFound
 from guillotina.interfaces import IPrincipal
