@@ -4,6 +4,8 @@ CHANGELOG
 6.0.0a8 (unreleased)
 --------------------
 
+- Correctly bubble http errors for file downloads
+  [vangheem]
 
 - Fix command 'create'
   [masipcat]
