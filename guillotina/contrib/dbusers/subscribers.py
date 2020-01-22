@@ -6,15 +6,11 @@ from guillotina.contrib.dbusers.content.groups import IGroup
 from guillotina.contrib.dbusers.content.users import IUser
 from guillotina.event import notify
 from guillotina.events import BeforeObjectModifiedEvent
-from guillotina.events import BeforeObjectRemovedEvent
 from guillotina.events import NewUserAdded
 from guillotina.events import ObjectAddedEvent
-from guillotina.events import ObjectModifiedEvent
-from guillotina.interfaces import IBeforeObjectAddedEvent
 from guillotina.interfaces import IBeforeObjectModifiedEvent
 from guillotina.interfaces import IBeforeObjectRemovedEvent
 from guillotina.interfaces import IObjectAddedEvent
-from guillotina.interfaces import IObjectModifiedEvent
 from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.response import HTTPPreconditionFailed
 from guillotina.utils import get_current_container
