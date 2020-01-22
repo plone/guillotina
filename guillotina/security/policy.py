@@ -263,6 +263,7 @@ class SecurityPolicy:
             # Its the actual user id
             # We return all the global roles (including group)
             roles = self.principal.roles.copy()
+
             for group in self.principal.groups:
                 roles.update(groups.get_principal(group, self.principal).roles)
             return roles
