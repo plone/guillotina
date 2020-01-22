@@ -4,7 +4,8 @@ CHANGELOG
 5.3.13 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Correctly bubble http errors for file downloads
+  [vangheem]
 
 
 5.3.12 (2020-01-21)
