@@ -7,6 +7,9 @@ CHANGELOG
 - Improvements in contrib.dbusers
   [masipcat]
 
+- Correctly bubble http errors for file downloads
+  [vangheem]
+
 - Fix command 'create'
   [masipcat]
 
