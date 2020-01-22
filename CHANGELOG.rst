@@ -4,6 +4,13 @@ CHANGELOG
 6.0.0a8 (unreleased)
 --------------------
 
+
+- Fix command 'create'
+  [masipcat]
+
+- Remove unused methods in Response
+  [masipcat]
+
 - Add missing dependencies in `setup.py`
   [masipcat]
 
