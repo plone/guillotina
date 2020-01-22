@@ -215,7 +215,7 @@ class FileManager(object):
         **kwargs,
     ):
         download_resp = None
-        http_exception = False
+        exception = False
         try:
             async for chunk in self.file_storage_manager.iter_data(**kwargs):
                 if download_resp is None:
@@ -232,18 +232,18 @@ class FileManager(object):
                     )
                 await download_resp.write(chunk)
                 await download_resp.drain()
-        except Response:  # pragma: no cover
-            http_exception = True
-            raise
         except asyncio.CancelledError:  # pragma: no cover
+            exception = True
             logger.info(f"Download cancelled: {self.request}")
             # when supporting range headers, the browser will
             # cancel downloads. This is fine.
             if download_resp is None:
-                http_exception = True
                 raise HTTPClientClosedRequest()
+        except Exception:  # pragma: no cover
+            exception = True
+            raise
         finally:
-            if not http_exception:
+            if not exception:
                 if download_resp is None:
                     # deferred
                     download_resp = await self.prepare_download(
