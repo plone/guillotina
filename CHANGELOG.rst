@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.13 (unreleased)
+5.3.13 (2020-01-22)
 -------------------
 
 - Correctly bubble http errors for file downloads
