@@ -240,6 +240,7 @@ class FileManager(object):
             # when supporting range headers, the browser will
             # cancel downloads. This is fine.
             if download_resp is None:
+                http_exception = True
                 raise HTTPClientClosedRequest()
         finally:
             if not http_exception:
