@@ -232,7 +232,7 @@ class FileManager(object):
                     )
                 await download_resp.write(chunk)
                 await download_resp.drain()
-        except Response:
+        except Response:  # pragma: no cover
             http_exception = True
             raise
         except asyncio.CancelledError:  # pragma: no cover
@@ -242,7 +242,6 @@ class FileManager(object):
             if download_resp is None:
                 raise HTTPClientClosedRequest()
         finally:
-            breakpoint()
             if not http_exception:
                 if download_resp is None:
                     # deferred
