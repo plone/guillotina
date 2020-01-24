@@ -7,6 +7,9 @@ CHANGELOG
 - Improvements in contrib.dbusers
   [masipcat]
 
+- Execute _clean_request() after middlewares execution
+  [masipcat]
+
 - Correctly bubble http errors for file downloads
   [vangheem]
 
