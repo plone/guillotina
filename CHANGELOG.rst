@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a8 (unreleased)
 --------------------
 
+- Execute _clean_request() after middlewares execution
+  [masipcat]
+
 - Correctly bubble http errors for file downloads
   [vangheem]
 

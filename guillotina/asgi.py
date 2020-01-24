@@ -9,6 +9,7 @@ from guillotina.utils import resolve_dotted_name
 
 import asyncio
 import enum
+import traceback
 
 
 logger = glogging.getLogger("guillotina")
@@ -107,12 +108,29 @@ class AsgiApp:
             scope["method"] = "GET"
 
         resp = await self.next_app(scope, receive, send)
+        request = task_vars.request.get()
 
         if not resp.prepared:
-            request = task_vars.request.get()
             await resp.prepare(request)
 
-        return
+        self._cleanup(request, resp)
+
+    def _cleanup(self, request, response):
+        try:
+            if isinstance(response, Exception):
+                traceback.clear_frames(response.__traceback__)
+            if response.exc is not None:
+                traceback.clear_frames(response.exc.__traceback__)
+        except AttributeError:  # pragma: no cover
+            pass
+
+        for attr in ("resource", "found_view", "exc"):
+            if getattr(request, attr, None) is not None:
+                setattr(request, attr, None)
+
+        for attr in ("_cache_data", "_last_read_pos"):
+            if hasattr(request, attr):
+                delattr(request, attr)
 
 
 class Guillotina:
