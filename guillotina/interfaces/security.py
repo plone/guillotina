@@ -412,11 +412,6 @@ class IAuthExtractor(Interface):
 class IGroups(Interface):
     """A group Utility search."""
 
-    async def load_groups(groups: typing.Optional[typing.List[str]] = None) -> None:
-        """
-        Load group roles and permissions
-        """
-
     def get_principal(ident: str, principal: typing.Optional[IPrincipal]) -> IPrincipal:
         """
         Get group principal object
