@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a8 (unreleased)
 --------------------
 
+- Alpha version of @guillotinaweb/react-gmi available at /+manage
+  [jordic]
+
 - Improvements in contrib.dbusers
   [masipcat]
 
