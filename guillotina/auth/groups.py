@@ -26,7 +26,10 @@ class GroupsUtility:
 
     def get_principal(self, ident: str, principal: typing.Optional[IPrincipal]) -> IPrincipal:
         if principal is not None:
-            cache = principal._groups_cache
+            try:
+                cache = principal._groups_cache
+            except AttributeError:
+                cache = principal._groups_cache = {}
             if ident not in cache:
                 cache[ident] = GuillotinaGroup(ident)
             return cache[ident]
