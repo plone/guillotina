@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.0a8 (unreleased)
+6.0.0a8 (2020-01-24)
 --------------------
 
 - Alpha version of @guillotinaweb/react-gmi available at /+manage
