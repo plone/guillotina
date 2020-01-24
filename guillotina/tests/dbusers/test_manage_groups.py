@@ -49,11 +49,15 @@ async def test_ensure_crud_groups(dbusers_requester, user_data):
         assert status == 204
         resp, status = await requester("GET", "/db/guillotina/@groups/foo")
         assert set(resp["users"]["items"]) == set(["foobar"])
+        resp, status = await requester("GET", "/db/guillotina/users/foobar")
+        assert resp["user_groups"] == ["foo"]
         data = {"users": {"foobar": False}}
         resp, status = await requester("PATCH", "/db/guillotina/@groups/foo", data=json.dumps(data))
         assert status == 204
         resp, status = await requester("GET", "/db/guillotina/@groups/foo")
         assert len(resp["users"]["items"]) == 0
+        resp, status = await requester("GET", "/db/guillotina/users/foobar")
+        assert resp["user_groups"] == []
 
         # ensure we cannot patch invalid users
         data = {"users": {"foobarx": True}}

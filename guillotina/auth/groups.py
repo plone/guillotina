@@ -1,6 +1,9 @@
 from guillotina import configure
 from guillotina.auth.users import GuillotinaUser
 from guillotina.interfaces import IGroups
+from guillotina.interfaces import IPrincipal
+
+import typing
 
 
 class GuillotinaGroup(GuillotinaUser):
@@ -21,7 +24,7 @@ class GuillotinaGroup(GuillotinaUser):
 class GroupsUtility:
     """ Class used to get groups. """
 
-    def get_principal(self, ident, principal=None):
+    def get_principal(self, ident: str, principal: typing.Optional[IPrincipal]) -> IPrincipal:
         if principal is not None:
             try:
                 cache = principal._groups_cache

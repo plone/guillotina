@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a8 (unreleased)
 --------------------
 
+- Improvements in contrib.dbusers
+  [masipcat]
+
 - Execute _clean_request() after middlewares execution
   [masipcat]
 

@@ -4,6 +4,7 @@ from guillotina.content import Folder
 from guillotina.contrib.dbusers import _
 from guillotina.directives import index_field
 from guillotina.interfaces import IFolder
+from guillotina.interfaces import IPrincipal
 from zope.interface import implementer
 
 
@@ -11,7 +12,7 @@ class IGroupManager(IFolder):
     pass
 
 
-class IGroup(IFolder):
+class IGroup(IFolder, IPrincipal):
     index_field("name", index_name="group_name", type="textkeyword")
     name = schema.TextLine(title=_("Group name"), required=False)
 
@@ -44,6 +45,10 @@ class Group(Folder):
         for role in getattr(self, "user_roles", []) or []:
             roles[role] = 1
         return roles
+
+    @property
+    def permissions(self):
+        return {}
 
     @property
     def properties(self):

@@ -11,6 +11,11 @@ ANONYMOUS_USER_ID = "Anonymous User"
 class BaseUser:
     groups: list
     id: str
+    # This is used in IGroups.get_principal() to retrieve the group by id
+    _groups_cache: dict
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__}: {self.id}>"
 
 
 class SystemUser(BaseUser):
@@ -27,15 +32,25 @@ class RootUser(BaseUser):
         self.roles = {}
         self.properties = {}
         self.permissions = {}
+        self._groups_cache = {}
 
 
 class GuillotinaUser(BaseUser):
-    def __init__(self, user_id="guillotina", groups=None, roles=None, permissions=None, properties=None):
+    def __init__(
+        self,
+        user_id="guillotina",
+        groups=None,
+        roles=None,
+        permissions=None,
+        properties=None,
+        groups_cache=None,
+    ):
         self.id = user_id
         self._groups = groups or []
         self._roles = roles or {}
         self._permissions = permissions or {}
         self._properties = properties or {}
+        self._groups_cache = groups_cache or {}
 
     @property
     def groups(self):
