@@ -1,7 +1,10 @@
 from .misc import IRequest
 from guillotina.db.orm.interfaces import IBaseObject
+from guillotina.directives import read_permission
 from guillotina.i18n import MessageFactory
+from guillotina.schema import Dict
 from guillotina.schema import List
+from guillotina.schema import Object
 from guillotina.schema import Text
 from guillotina.schema import TextLine
 from zope.interface import Attribute
@@ -340,14 +343,17 @@ class IPrincipal(Interface):  # pylint: disable=E0239
     purpose.
     """
 
-    groups = List(value_type=TextLine())
-
     id = TextLine(
         title=_("Id"),
         description=_("The unique identification of the principal."),
         required=True,
         readonly=True,
     )
+
+    groups = List(value_type=TextLine())
+
+    read_permission(password="guillotina.Nobody")
+    _groups_cache = Dict(key_type=TextLine(), value_type=Object(schema=Interface))  # value_type=IPrincipal
 
 
 SettingType = typing.Union[bool, None, str]

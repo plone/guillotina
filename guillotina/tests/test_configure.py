@@ -96,6 +96,7 @@ async def test_register_contenttype(container_requester):
         config.execute_actions()
 
         response, status = await requester("GET", "/db/guillotina/@types")
+        assert status == 200
         assert any("MyType1" in s["title"] for s in response)
 
 

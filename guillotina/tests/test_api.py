@@ -1204,7 +1204,8 @@ class ITestSchema(Interface):
 
 @contenttype(type_name="TestSchema", schema=ITestSchema)
 class TestSchema(Item):
-    pass
+
+    __test__ = False  # prevent pytest.PytestCollectionWarning
 
 
 async def test_deserialization_errors(container_requester):

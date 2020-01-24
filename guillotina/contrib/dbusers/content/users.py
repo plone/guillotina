@@ -58,6 +58,7 @@ class User(Folder):
         self.user_permissions = []
         self.user_roles = []
         self.properties = {}
+        self._groups_cache = {}
         self.username = self.email = self.name = self.password = None
         self.disabled = False
         super().__init__(*args, **kwargs)
