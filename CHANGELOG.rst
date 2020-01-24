@@ -7,6 +7,9 @@ CHANGELOG
 - Execute _clean_request() after middlewares execution
   [masipcat]
 
+- Correctly bubble http errors for file downloads
+  [vangheem]
+
 - Fix command 'create'
   [masipcat]
 
