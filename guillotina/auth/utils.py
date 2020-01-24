@@ -6,7 +6,6 @@ from guillotina.auth.users import AnonymousUser
 from guillotina.auth.users import ROOT_USER_ID
 from guillotina.component import get_utility
 from guillotina.interfaces import IApplication
-from guillotina.interfaces import IGroups
 from guillotina.interfaces import IPrincipal
 from guillotina.profile import profilable
 from guillotina.utils import get_security_policy
@@ -44,16 +43,11 @@ def set_authenticated_user(user):
 async def find_user(token):
     if token.get("id") == ROOT_USER_ID:
         root = get_utility(IApplication, name="root")
-        user = root.root_user
-    else:
-        for identifier in app_settings["auth_user_identifiers"]:
-            user = await identifier().get_user(token)
-            if user is not None:
-                break
-    if user:
-        groups = get_utility(IGroups)
-        await groups.load_groups(user.groups)
-    return user
+        return root.root_user
+    for identifier in app_settings["auth_user_identifiers"]:
+        user = await identifier().get_user(token)
+        if user is not None:
+            return user
 
 
 def authenticate_user(userid, data=None, timeout=60 * 60 * 1):

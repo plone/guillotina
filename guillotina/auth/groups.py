@@ -7,25 +7,31 @@ import typing
 
 
 class GuillotinaGroup(GuillotinaUser):
-    pass
+    def __init__(self, ident, roles=None):
+        if ident == "Managers":
+            # Special Case its a Root Manager user
+            roles = {
+                "guillotina.ContainerAdmin": 1,
+                "guillotina.ContainerDeleter": 1,
+                "guillotina.Owner": 1,
+                "guillotina.Member": 1,
+                "guillotina.Manager": 1,
+            }
+
+        super(GuillotinaGroup, self).__init__(ident, roles=roles)
 
 
 @configure.utility(provides=IGroups)
 class GroupsUtility:
     """ Class used to get groups. """
 
-    async def load_groups(self, groups):
-        pass
-
     def get_principal(self, ident: str, principal: typing.Optional[IPrincipal]) -> IPrincipal:
-        if ident == "Managers":
-            return GuillotinaGroup(
-                roles={
-                    "guillotina.ContainerAdmin": 1,
-                    "guillotina.ContainerDeleter": 1,
-                    "guillotina.Owner": 1,
-                    "guillotina.Member": 1,
-                    "guillotina.Manager": 1,
-                }
-            )
-        return GuillotinaGroup()
+        if principal is not None:
+            try:
+                cache = principal._groups_cache
+            except AttributeError:
+                cache = principal._groups_cache = {}
+            if ident not in cache:
+                cache[ident] = GuillotinaGroup(ident)
+            return cache[ident]
+        return GuillotinaGroup(ident)

@@ -7,13 +7,6 @@ _ = MessageFactory("guillotina.contrib.dbusers")
 
 app_settings = {
     "auth_user_identifiers": ["guillotina.contrib.dbusers.users.DBUserIdentifier"],
-    "load_utilities": {
-        "guillotina.dbusers": {
-            "provides": "guillotina.interfaces.IGroups",
-            "factory": "guillotina.contrib.dbusers.groups.DbUsersGroupsUtility",
-            "settings": {},
-        }
-    },
 }
 
 
@@ -25,4 +18,3 @@ def includeme(root, settings):
     configure.scan("guillotina.contrib.dbusers.subscribers")
     configure.scan("guillotina.contrib.dbusers.permissions")
     configure.scan("guillotina.contrib.dbusers.serializers")
-    configure.scan("guillotina.contrib.dbusers.groups")

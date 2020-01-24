@@ -1,5 +1,7 @@
+from guillotina.auth.groups import GuillotinaGroup
 from guillotina.exceptions import ContainerNotFound
 from guillotina.utils import get_current_container
+from guillotina.utils import navigate_to
 
 
 class DBUserIdentifier:
@@ -27,5 +29,17 @@ class DBUserIdentifier:
         if user.disabled:
             # User is disabled
             return
+
+        if not hasattr(user, "_groups_cache"):
+            user._groups_cache = {}
+
+        # load groups
+        for ident in user.groups:
+            try:
+                group = await navigate_to(container, f"groups/{ident}")
+            except KeyError:
+                continue
+
+            user._groups_cache[ident] = GuillotinaGroup(ident, roles=group.roles)
 
         return user
