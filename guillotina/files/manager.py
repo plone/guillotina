@@ -237,7 +237,7 @@ class FileManager(object):
             # cancel downloads. This is fine.
             if download_resp is None:
                 raise HTTPClientClosedRequest()
-        finally:
+        else:
             if download_resp is None:
                 # deferred
                 download_resp = await self.prepare_download(

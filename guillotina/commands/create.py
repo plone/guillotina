@@ -8,11 +8,6 @@ import sys
 class CreateCommand(Command):
     description = "Guillotina server runner"
 
-    def make_app(self, settings):
-        """
-        We don't need an application object for this command...
-        """
-
     def get_parser(self):
         parser = super(CreateCommand, self).get_parser()
         parser.add_argument("command", help="`create` position command argument")

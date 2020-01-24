@@ -7,6 +7,21 @@ CHANGELOG
 - Alpha version of @guillotinaweb/react-gmi available at /+manage
   [jordic]
 
+- Improvements in contrib.dbusers
+  [masipcat]
+
+- Execute _clean_request() after middlewares execution
+  [masipcat]
+
+- Correctly bubble http errors for file downloads
+  [vangheem]
+
+- Fix command 'create'
+  [masipcat]
+
+- Remove unused methods in Response
+  [masipcat]
+
 - Add missing dependencies in `setup.py`
   [masipcat]
 

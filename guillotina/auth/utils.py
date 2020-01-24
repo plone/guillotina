@@ -2,7 +2,6 @@ from datetime import datetime
 from datetime import timedelta
 from guillotina import task_vars
 from guillotina._settings import app_settings
-from guillotina.auth import groups  # noqa
 from guillotina.auth.users import AnonymousUser
 from guillotina.auth.users import ROOT_USER_ID
 from guillotina.component import get_utility
