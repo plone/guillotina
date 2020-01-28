@@ -4,7 +4,8 @@ CHANGELOG
 5.3.14 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix DummyCache type signature to be the same as base class
+  [vangheem]
 
 
 5.3.13 (2020-01-22)
