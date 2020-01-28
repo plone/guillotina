@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.14 (unreleased)
+5.3.14 (2020-01-28)
 -------------------
 
 - Fix DummyCache type signature to be the same as base class
