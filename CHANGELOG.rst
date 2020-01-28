@@ -4,7 +4,8 @@ CHANGELOG
 6.0.0a9 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Fix DummyCache.set type signature to be the same as base class
+  [vangheem]
 
 
 6.0.0a8 (2020-01-24)
