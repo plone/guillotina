@@ -4,7 +4,8 @@ CHANGELOG
 5.3.15 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Add json to IRequest for mypy
+  [vangheem]
 
 
 5.3.14 (2020-01-28)

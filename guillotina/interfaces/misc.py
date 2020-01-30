@@ -1,5 +1,7 @@
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces.content import IApplication
+from typing import Any
+from typing import Dict
 from typing import Optional
 from typing import Tuple
 from typing import Type
@@ -22,6 +24,9 @@ class IRequest(Interface):
         """
         record request event
         """
+
+    async def json() -> Dict[str, Any]:
+        ...
 
 
 class ILanguage(Interface):
