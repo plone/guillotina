@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.15 (unreleased)
+5.3.15 (2020-01-30)
 -------------------
 
 - Add json to IRequest for mypy
