@@ -4,8 +4,8 @@ CHANGELOG
 5.3.16 (unreleased)
 -------------------
 
-- Nothing changed yet.
-
+- more IRequest type hints
+  [vangheem]
 
 5.3.15 (2020-01-30)
 -------------------

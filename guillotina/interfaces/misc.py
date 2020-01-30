@@ -19,6 +19,8 @@ class IRequest(Interface):
     found_view: Optional[Type]
     view_name: Optional[str]
     application: Optional[IApplication]
+    headers: Dict[str, str]
+    uid: str
 
     def record(event_name) -> None:
         """
