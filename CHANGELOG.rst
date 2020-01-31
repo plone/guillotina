@@ -4,7 +4,8 @@ CHANGELOG
 5.3.17 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Add pg db constraint for annotation data
+  [vangheem]
 
 
 5.3.16 (2020-01-30)
