@@ -27,7 +27,7 @@ DROP CONSTRAINT {}_parent_id_id_key;
                 )
             )
             await conn.execute(
-                storage._unique_constraint.format(
+                storage._unique_constraints[0].format(
                     objects_table_name=storage._objects_table_name,
                     constraint_name=table_name,
                     TRASHED_ID=TRASHED_ID,

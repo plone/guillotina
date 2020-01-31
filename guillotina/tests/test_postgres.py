@@ -8,6 +8,7 @@ from guillotina.exceptions import ConflictError
 from guillotina.tests import mocks
 from guillotina.tests.utils import create_content
 from unittest.mock import Mock
+from uuid import uuid4
 
 import asyncio
 import asyncpg
@@ -33,7 +34,6 @@ async def cleanup(aps):
         await conn.execute("ALTER SEQUENCE tid_sequence RESTART WITH 1")
     await txn._db_txn.commit()
     await aps.pool.release(conn)
-    await aps.create()
     await aps.finalize()
 
 
@@ -665,6 +665,49 @@ async def test_vacuum_objects(db, dummy_guillotina):
     async with aps.pool.acquire() as conn:
         result = await conn.fetch("select * from objects where zoid=$1;", ob1.__uuid__)
         assert len(result) == 0
+
+    await aps.remove()
+    await cleanup(aps)
+
+
+@pytest.mark.skipif(DATABASE in ("DUMMY",), reason="only for rdms")
+async def test_constraint_error_inserting_duplicate_annotations(db, dummy_guillotina):
+    aps = await get_aps(db, autovacuum=False)
+    tm = TransactionManager(aps)
+
+    # create objects first, commit it...
+    txn = await tm.begin()
+
+    ob1 = create_content()
+    txn.register(ob1)
+
+    with txn, tm:
+        await tm.commit(txn=txn)
+
+    async with aps.pool.acquire() as conn:
+        # first ok
+        await conn.execute(
+            f"""
+insert into objects (tid, state_size, part, zoid, resource, of, id, type)
+values(0, 0, 0, $1, $2, $3, $4, $5)""",
+            str(uuid4()),
+            True,
+            ob1.__uuid__,
+            "foo",
+            "Item",
+        )
+        # should fail
+        with pytest.raises(asyncpg.exceptions.UniqueViolationError):
+            await conn.execute(
+                f"""
+    insert into objects (tid, state_size, part, zoid, resource, of, id, type)
+    values(0, 0, 0, $1, $2, $3, $4, $5)""",
+                str(uuid4()),
+                True,
+                ob1.__uuid__,
+                "foo",
+                "Item",
+            )
 
     await aps.remove()
     await cleanup(aps)
