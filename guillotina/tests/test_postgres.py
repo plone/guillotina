@@ -34,7 +34,6 @@ async def cleanup(aps):
         await conn.execute("ALTER SEQUENCE tid_sequence RESTART WITH 1")
     await txn._db_txn.commit()
     await aps.pool.release(conn)
-    await aps.create()
     await aps.finalize()
 
 
