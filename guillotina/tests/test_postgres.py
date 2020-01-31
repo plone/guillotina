@@ -37,7 +37,6 @@ async def cleanup(aps):
         await conn.execute("ALTER SEQUENCE tid_sequence RESTART WITH 1")
     await txn._db_txn.commit()
     await aps.pool.release(conn)
-    await aps.create()
     await aps.finalize()
 
 
@@ -700,6 +699,7 @@ values(0, 0, 0, $1, $2, $3, $4, $5)""",
             "foo",
             "Item",
         )
+    async with aps.pool.acquire() as conn:
         # should fail
         with pytest.raises(asyncpg.exceptions.UniqueViolationError):
             await conn.execute(
