@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.17 (unreleased)
+5.3.17 (2020-01-31)
 -------------------
 
 - Add pg db constraint for annotation data
