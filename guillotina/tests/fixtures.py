@@ -125,7 +125,11 @@ def get_db_settings(pytest_node=None):
         "password": "",
     }
 
-    options = dict(host=annotations.get("pg_host", "localhost"), port=annotations.get("pg_port", 5432))
+    options = dict(
+        host=annotations.get("pg_host", "localhost"),
+        port=annotations.get("pg_port", 5432),
+        dbname=annotations.get("pg_db", "guillotina"),
+    )
 
     if annotations["testdatabase"] == "cockroachdb":
         configure_db(settings["databases"]["db"], **options, user="root", storage="cockroach")
