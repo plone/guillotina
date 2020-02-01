@@ -259,6 +259,11 @@ class IAnnotations(Interface):
         Set annotation
         """
 
+    async def async_del(name):
+        """
+        Set annotation
+        """
+
 
 class IAnnotationData(Interface):
     """
