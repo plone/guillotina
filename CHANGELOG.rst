@@ -4,8 +4,8 @@ CHANGELOG
 5.3.20 (unreleased)
 -------------------
 
-- Nothing changed yet.
-
+- Be able to customize pg db in test fixtures
+  [vangheem]
 
 5.3.19 (2020-02-01)
 -------------------
