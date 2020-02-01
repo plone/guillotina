@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a9 (unreleased)
 --------------------
 
+- Be able to customize pg db in test fixtures
+  [vangheem]
+
 - More type annotations
   [vangheem]
 
