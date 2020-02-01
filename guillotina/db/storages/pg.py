@@ -790,8 +790,8 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def remove(self):
         """Reset the tables"""
         async with self.pool.acquire() as conn:
-            await conn.execute("DROP TABLE IF EXISTS {};".format(self._blobs_table_name))
-            await conn.execute("DROP TABLE IF EXISTS {};".format(self._objects_table_name))
+            await conn.execute("DROP TABLE IF EXISTS {} CASCADE;".format(self._blobs_table_name))
+            await conn.execute("DROP TABLE IF EXISTS {} CASCADE;".format(self._objects_table_name))
 
     @restart_conn_on_exception
     async def open(self):
