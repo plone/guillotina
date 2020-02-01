@@ -4,7 +4,8 @@ CHANGELOG
 5.3.19 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- fix release
+  [vangheem]
 
 
 5.3.18 (2020-01-31)
