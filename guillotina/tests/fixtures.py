@@ -118,7 +118,7 @@ def get_db_settings(pytest_node=None):
 
     settings["databases"]["db"]["dsn"] = {
         "scheme": "postgres",
-        "dbname": "guillotina",
+        "dbname": annotations.get("pg_db", "guillotina"),
         "user": "postgres",
         "host": annotations.get("pg_host", "localhost"),
         "port": annotations.get("pg_port", 5432),
