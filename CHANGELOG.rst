@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.18 (unreleased)
+5.3.18 (2020-01-31)
 -------------------
 
 - add IAnnotations.async_del type annotation
