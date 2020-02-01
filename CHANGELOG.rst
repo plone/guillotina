@@ -4,7 +4,8 @@ CHANGELOG
 5.3.18 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- add IAnnotations.async_del type annotation
+  [vangheem]
 
 
 5.3.17 (2020-01-31)

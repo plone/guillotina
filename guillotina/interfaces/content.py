@@ -3,6 +3,8 @@ from guillotina.component.interfaces import ISite as IComponentSite
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces.common import IMapping
 from guillotina.schema import TextLine
+from typing import Any
+from typing import Optional
 from typing import TYPE_CHECKING
 from zope.interface import Attribute
 from zope.interface import Interface
@@ -243,16 +245,21 @@ class IItem(IResource):
     """
 
 
+class IAnnotationData(Interface):
+    """
+    """
+
+
 class IAnnotations(Interface):
     """
     """
 
-    def get(name, default=None):
+    def get(name, default: Optional[Any] = None):
         """
         get already loaded annotation
         """
 
-    async def async_get(name, default=None):
+    async def async_get(name, default: Optional[Any] = None):
         """
         Get annotation
         """
@@ -262,10 +269,10 @@ class IAnnotations(Interface):
         Set annotation
         """
 
-
-class IAnnotationData(Interface):
-    """
-    """
+    async def async_del(name):
+        """
+        Set annotation
+        """
 
 
 class IGroupFolder(IFolder):

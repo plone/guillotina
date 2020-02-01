@@ -858,6 +858,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                     pickled,  # Pickle state)
                 )
             except asyncpg.exceptions.UniqueViolationError as ex:
+                breakpoint()
                 if "Key (parent_id, id)" in ex.detail or "Key (of, id)" in ex.detail:
                     raise ConflictIdOnContainer(ex)
                 raise
