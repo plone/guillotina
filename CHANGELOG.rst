@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.20 (unreleased)
+5.3.20 (2020-02-01)
 -------------------
 
 - Be able to customize pg db in test fixtures
