@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a9 (unreleased)
 --------------------
 
+- More type annotations
+  [vangheem]
+
 - Add pg db constraint for annotation data
   [vangheem]
 
