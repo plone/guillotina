@@ -112,6 +112,35 @@ class UploadFile(TraversableFieldService):
 
 @configure.service(
     context=IResource,
+    method="POST",
+    permission="guillotina.DeleteContent",
+    name="@delete/{field_name}",
+    parameters=[{"in": "path", "name": "field_name", "required": True, "schema": {"type": "string"}}],
+    **_traversed_file_doc("Update the content of a file"),
+)
+@configure.service(
+    context=IResource,
+    method="POST",
+    permission="guillotina.DeleteContent",
+    name="@delete/{field_name}/{filename}",
+    parameters=[{"in": "path", "name": "field_name", "required": True, "schema": {"type": "string"}}],
+    **_traversed_file_doc("Update the content of a file"),
+)
+class DeleteFile(TraversableFieldService):
+    async def __call__(self):
+        if self.behavior is not None and IAsyncBehavior.implementedBy(self.behavior.__class__):
+            # providedBy not working here?
+            await self.behavior.load(create=True)
+        # We need to get the upload as async IO and look for an adapter
+        # for the field to save there by chunks
+        adapter = get_multi_adapter((self.context, self.request, self.field), IFileManager)
+        result = await adapter.delete()
+        # TODO: remove content from CloudFileField
+        return result
+
+
+@configure.service(
+    context=IResource,
     method="GET",
     permission="guillotina.ViewContent",
     name="@download/{field_name}",

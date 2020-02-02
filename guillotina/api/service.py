@@ -9,7 +9,7 @@ from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import ICloudFileField
 from guillotina.response import HTTPNotFound
 from guillotina.response import HTTPPreconditionFailed
-from guillotina.schema import Dict
+from guillotina.schema.interfaces import IDict
 from guillotina.utils import get_schema_validator
 from typing import Any
 from typing import Union
@@ -216,7 +216,7 @@ class TraversableFieldService(Service):
             # providedBy not working here?
             await self.behavior.load()
 
-        if type(field) == Dict:
+        if IDict.providedBy(field):
             key = self.request.matchdict["filename"]
             self.field = CloudFileField(__name__=name).bind(DictFieldProxy(key, ctx, name))
         elif ICloudFileField.providedBy(field):
