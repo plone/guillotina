@@ -4,6 +4,7 @@ from .async_util import IAsyncUtility  # noqa
 from .async_util import ICacheUtility  # noqa
 from .async_util import IPubSubUtility  # noqa
 from .async_util import IQueueUtility  # noqa
+from .async_util import IAuthValidationUtility  # noqa
 from .behaviors import IAsyncBehavior  # noqa
 from .behaviors import IBehavior  # noqa
 from .behaviors import IBehaviorAdapterFactory  # noqa

@@ -5,11 +5,13 @@ from guillotina import app_settings
 from guillotina import configure
 from guillotina.api.service import Service
 from guillotina.auth import authenticate_user
+from guillotina.component import get_utility
 from guillotina.event import notify
 from guillotina.events import UserLogin
 from guillotina.events import UserRefreshToken
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
+from guillotina.interfaces import IAuthValidationUtility
 from guillotina.response import HTTPUnauthorized
 from guillotina.response import HTTPPreconditionFailed
 from guillotina.utils import get_authenticated_user
@@ -111,7 +113,7 @@ class Logout(Service):
         try:
             await user.logout(self.request)
         except AttributeError:
-            pass
+            raise HTTPNotAcceptable()
 
 @configure.service(
     context=IContainer,
@@ -174,10 +176,10 @@ class ResetPasswordUsers(Service):
                 )
 
             # We need to generate a token and send to user email
-            validation = app_settings.get('validation_process', None)
-            if validation is not None:
+            validation_utility = get_utility(IAuthValidationUtility)
+            if validation_utility is not None:
                 redirect_url = self.request.query.get('redirect_url', None)
-                await validation.start(
+                await validation_utility.start(
                     as_user=user_id,
                     from_user=actual_user.id,
                     email=email,
@@ -204,9 +206,9 @@ class ResetPasswordUsers(Service):
 )
 class ValidateOperation(Service):
     async def __call__(self):
-        validation = app_settings.get('validation_process', None)
-        if validation is not None:
-            payload = await validation.schema(token=self.request.matchdict["token"])
+        validation_utility = get_utility(IAuthValidationUtility)
+        if validation_utility is not None:
+            payload = await validation_utility.schema(token=self.request.matchdict["token"])
             return payload
         else:
             raise HTTPNotAcceptable()
@@ -227,13 +229,13 @@ class ValidateOperation(Service):
 )
 class ValidateOperation(Service):
     async def __call__(self):
-        validation = app_settings.get('validation_process', None)
-        if validation is not None:
+        validation_utility = get_utility(IAuthValidationUtility)
+        if validation_utility is not None:
             try:
                 request_payload = await self.request.json()
             except JSONDecodeError:
                 request_payload = None
-            payload = await validation.finish(
+            payload = await validation_utility.finish(
                 token=self.request.matchdict["token"],
                 payload=request_payload)
             return payload
@@ -272,13 +274,13 @@ class RegisterUsers(Service):
         if user is not None:
             raise HTTPUnauthorized(content={"text": "Invalid login"})
 
-        validation = app_settings.get('validation_process', None)
-        if validation is not None:
+        validation_utility = get_utility(IAuthValidationUtility)
+        if validation_utility is not None:
             redirect_url = self.request.query.get('redirect_url', None)
             username = payload.get('fullname', payload.get('id', ''))
             task_description = f"Registering user {username}"
             actual_user = get_authenticated_user()
-            await validation.start(
+            await validation_utility.start(
                 as_user=payload.get('id'),
                 from_user=actual_user.id,
                 task_description=task_description,

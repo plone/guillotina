@@ -3,11 +3,16 @@ from guillotina import configure
 
 app_settings = {
     "applications": ["guillotina.contrib.templates"],
-    "validation_process": "guillotina.contrib.email_validation.process",
+    "load_utilities": {
+        "auth_validation": {
+            "provides": "guillotina.interfaces.IAuthValidationUtility",
+            "factory": "guillotina.contrib.email_validation.utility.EmailValidationUtility"
+        }
+    },
     "templates": [
         "guillotina.contrib.email_validation:templates"
     ],
-    "validation_tasks": {
+    "auth_validation_tasks": {
         "reset_password": {
             "schema": {
                 "title": "Reset password validation information",
