@@ -176,3 +176,9 @@ class IAfterAsyncUtilityLoadedEvent(Interface):
     """
     Right after async utility is loaded
     """
+
+
+class IValidationEvent(Interface):
+    """
+    Validation event finished with data
+    """

@@ -4,8 +4,17 @@ CHANGELOG
 6.0.0a9 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Registration workflow with generic validation package on contrib
+  [bloodbare]
 
+- Reset password workflow with generic validation package on contrib
+  [bloodbare]
+
+- Jinja template engine to render on executors
+  [bloodbare]
+
+- Recaptcha support for public endpoints
+  [bloodbare]
 
 6.0.0a8 (2020-01-24)
 --------------------

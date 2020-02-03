@@ -34,6 +34,7 @@ from guillotina.interfaces import ITraversalRouteMissEvent
 from guillotina.interfaces import ITraversalViewMissEvent
 from guillotina.interfaces import IUserLogin
 from guillotina.interfaces import IUserRefreshToken
+from guillotina.interfaces import IValidationEvent
 from zope.interface import implementer
 
 import typing
@@ -275,3 +276,9 @@ class AfterAsyncUtilityLoadedEvent:
         self.config = config
         self.utility = utility
         self.task = task
+
+
+@implementer(IValidationEvent)
+class ValidationEvent:
+    def __init__(self, data):
+        self.data = data

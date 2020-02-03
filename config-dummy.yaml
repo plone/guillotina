@@ -30,6 +30,7 @@ cors:
 utilities: []
 jsapps:
   +admin: guillotina:static/executioner
+  +manage: guillotina:static/gmi
 static:
   assets: guillotina:static/assets
 jwt:

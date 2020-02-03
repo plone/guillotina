@@ -131,6 +131,7 @@ _dotted_name_settings = (
     "auth_user_identifiers",
     "http_methods",
     "pg_connection_class",
+    "validation_process",
     "cloud_storage",
     "router",
     "uid_generator",

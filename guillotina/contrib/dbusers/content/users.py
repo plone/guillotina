@@ -8,7 +8,10 @@ from guillotina.directives import write_permission
 from guillotina.interfaces import Allow
 from guillotina.interfaces import IFolder
 from guillotina.interfaces import IPrincipal
-
+from guillotina.response import HTTPUnauthorized
+from guillotina.auth.validators import check_password
+from guillotina.auth.validators import hash_password
+from guillotina import app_settings
 
 class IUserManager(IFolder):
     pass
@@ -84,6 +87,15 @@ class User(Folder):
     @property
     def _properties(self):
         return {}
+
+    async def set_password(self, new_password, old_password=None):
+        if old_password is not None:
+            valid = check_password(self.password, old_password)
+            if not valid:
+                raise HTTPUnauthorized()
+
+        self.password = hash_password(new_password)
+        self.register()
 
 
 @configure.contenttype(

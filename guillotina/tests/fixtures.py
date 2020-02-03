@@ -534,6 +534,11 @@ def container_requester(guillotina):
 
 
 @pytest.fixture(scope="function")
+def container_install_requester(guillotina, install_addons):
+    return ContainerRequesterAsyncContextManager(guillotina, install_addons)
+
+
+@pytest.fixture(scope="function")
 def container_requester_server(guillotina_server):
     return ContainerRequesterAsyncContextManager(guillotina_server)
 
@@ -618,13 +623,6 @@ def redis_container():
     annotations["redis"] = None
 
 
-class DBUsersRequester(ContainerRequesterAsyncContextManager):
-    async def __aenter__(self):
-        requester = await super().__aenter__()
-        await requester("POST", "/db/guillotina/@addons", data=json.dumps({"id": "dbusers"}))
-        return requester
-
-
 @pytest.fixture(scope="function")
 async def dbusers_requester(guillotina):
-    return DBUsersRequester(guillotina)
+    return ContainerRequesterAsyncContextManager(guillotina, ["dbusers"])

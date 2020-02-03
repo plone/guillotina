@@ -77,8 +77,9 @@ def register(ob):
 
 
 class ContainerRequesterAsyncContextManager:
-    def __init__(self, guillotina):
+    def __init__(self, guillotina, install=[]):
         self.guillotina = guillotina
+        self.install = install
         self.requester = None
 
     async def get_requester(self):
@@ -101,6 +102,8 @@ class ContainerRequesterAsyncContextManager:
             ),
         )
         assert status == 200
+        for addon in self.install:
+            await self.requester("POST", "/db/guillotina/@addons", data=json.dumps({"id": addon}))
         return self.requester
 
     async def __aexit__(self, exc_type, exc, tb):

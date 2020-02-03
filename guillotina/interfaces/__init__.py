@@ -68,6 +68,7 @@ from .events import ITraversalRouteMissEvent  # noqa
 from .events import ITraversalViewMissEvent  # noqa
 from .events import IUserLogin  # noqa
 from .events import IUserRefreshToken  # noqa
+from .events import IValidationEvent  # noqa
 from .exceptions import IErrorResponseException  # noqa
 from .exceptions import IUnauthorized  # noqa
 from .files import ICloudFileField  # noqa
