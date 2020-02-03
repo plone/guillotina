@@ -12,8 +12,8 @@ from guillotina.response import HTTPPreconditionFailed
 from guillotina.response import HTTPServiceUnavailable
 from guillotina.utils import get_registry
 from guillotina.utils import resolve_dotted_name
-from jsonschema.exceptions import ValidationError
 from jsonschema import validate as jsonvalidate
+from jsonschema.exceptions import ValidationError
 
 import logging
 
