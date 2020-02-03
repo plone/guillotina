@@ -219,7 +219,7 @@ class ValidateOperation(Service):
     permission="guillotina.Public",
     responses={
         "200": {
-            "description": "Validate operation",
+            "description": "Validate operation"
         }
     },
     summary="Validate operation",
@@ -299,7 +299,18 @@ class RegisterUsers(Service):
     responses={
         "200": {
             "description": "Get public information about user access",
-            # TODO: add response content schema here
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "register": {"type": "boolean"},
+                            "title": {"type": "string"},
+                            "social": {"type": "array"},
+                        }
+                    }
+                }
+            }
         }
     },
     summary="Info Access",

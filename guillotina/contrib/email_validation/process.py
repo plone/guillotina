@@ -84,22 +84,23 @@ async def finish(token: str, payload=None):
     
     action = data.get('v_task')
     if action in app_settings['validation_tasks']:
-        schema = app_settings['validation_tasks'][action]['schema']
+        if 'schema' in app_settings['validation_tasks'][action]:
+            schema = app_settings['validation_tasks'][action]['schema']
 
-        try:
-            jsonschema.validate(instance=payload, schema=schema)
-        except jsonschema.exceptions.ValidationError as e:
-            raise HTTPPreconditionFailed(
-                content={
-                    "reason": "json schema validation error",
-                    "message": e.message,
-                    "validator": e.validator,
-                    "validator_value": e.validator_value,
-                    "path": [i for i in e.path],
-                    "schema_path": [i for i in e.schema_path],
-                    "schema": schema,
-                }
-            )
+            try:
+                jsonschema.validate(instance=payload, schema=schema)
+            except jsonschema.exceptions.ValidationError as e:
+                raise HTTPPreconditionFailed(
+                    content={
+                        "reason": "json schema validation error",
+                        "message": e.message,
+                        "validator": e.validator,
+                        "validator_value": e.validator_value,
+                        "path": [i for i in e.path],
+                        "schema_path": [i for i in e.schema_path],
+                        "schema": schema,
+                    }
+                )
 
         task = resolve_dotted_name(app_settings['validation_tasks'][action]['executor'])
 
