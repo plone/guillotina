@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a9 (unreleased)
 --------------------
 
+- Implemented endpoint @delete for IAttachments and IMultiAttachments
+  [masipcat]
+
 - Add pg db constraint for annotation data
   [vangheem]
 

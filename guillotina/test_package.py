@@ -12,6 +12,7 @@ from guillotina.directives import index_field
 from guillotina.directives import metadata
 from guillotina.directives import read_permission
 from guillotina.directives import write_permission
+from guillotina.exceptions import FileNotFoundException
 from guillotina.exceptions import NoIndexField
 from guillotina.fields import CloudFileField
 from guillotina.files import BaseCloudFile
@@ -351,6 +352,8 @@ class InMemoryFileManager:
         if uri is None:
             file = self.field.get(self.field.context or self.context)
             uri = file.uri
+        if uri not in _tmp_files:
+            raise FileNotFoundException(uri)
         with open(_tmp_files[uri], "rb") as fi:
             chunk = fi.read(1024)
             while chunk:
@@ -422,6 +425,10 @@ class InMemoryFileManager:
                 "filename": file.filename or "unknown",
             }
         )
+
+    async def delete(self):
+        file = self.field.get(self.field.context or self.context)
+        return await self.delete_upload(file.uri)
 
 
 @implementer(IMemoryFileField)

@@ -4,6 +4,7 @@ from guillotina.api.content import DefaultOPTIONS
 from guillotina.api.service import DownloadService
 from guillotina.api.service import TraversableFieldService
 from guillotina.component import get_multi_adapter
+from guillotina.exceptions import FileNotFoundException
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IFileManager
 from guillotina.interfaces import IResource
@@ -135,7 +136,8 @@ class DeleteFile(TraversableFieldService):
         # for the field to save there by chunks
         adapter = get_multi_adapter((self.context, self.request, self.field), IFileManager)
         result = await adapter.delete()
-        # TODO: remove content from CloudFileField
+        self.field.set(self.context, None)
+        self.context.register()
         return result
 
 
@@ -169,7 +171,7 @@ class DownloadFile(TraversableFieldService):
         try:
             adapter = get_multi_adapter((self.context, self.request, self.field), IFileManager)
             return await self.handle(adapter, kwargs)
-        except AttributeError:
+        except (AttributeError, FileNotFoundException):
             # file does not exist
             return HTTPNotFound(content={"reason": "File does not exist"})
 
