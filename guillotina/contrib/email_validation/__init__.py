@@ -8,7 +8,20 @@ app_settings = {
         "guillotina.contrib.email_validation:templates"
     ],
     "validation_tasks": {
-        "reset_password": "guillotina.contrib.email_validation.reset_password"
+        "reset_password": {
+            "schema": {
+                "title": "Reset password validation information",
+                "required": ["password"],
+                "type": "object",
+                "properties": {
+                    "password": {
+                        "type": "string",
+                        "minLength": 6
+                    }
+                }
+            },
+            "executor": "guillotina.contrib.email_validation.reset_password"
+        }
     }
 }
 

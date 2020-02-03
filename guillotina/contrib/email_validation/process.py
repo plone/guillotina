@@ -7,10 +7,12 @@ from guillotina.contrib.email_validation.utils import extract_validation_token
 from guillotina.contrib.templates.interfaces import IJinjaUtility
 from guillotina.utils import resolve_dotted_name
 from guillotina.component import get_utility
+from guillotina.response import HTTPPreconditionFailed
 from guillotina.utils import get_registry
 from guillotina import app_settings
 from guillotina.event import notify
 from guillotina.events import ValidationEvent
+import jsonschema
 
 
 async def start(
@@ -67,13 +69,39 @@ async def start(
         html=template
     )
 
+async def schema(token: str):
+    data = await extract_validation_token(token)
+
+    action = data.get('v_task')
+    if action in app_settings['validation_tasks']:
+        return app_settings['validation_tasks'][action]['schema']
+    else:
+        return None
+
 
 async def finish(token: str, payload=None):
     data = await extract_validation_token(token)
     
     action = data.get('v_task')
     if action in app_settings['validation_tasks']:
-        task = resolve_dotted_name(app_settings['validation_tasks'][action])
+        schema = app_settings['validation_tasks'][action]['schema']
+
+        try:
+            jsonschema.validate(instance=payload, schema=schema)
+        except jsonschema.exceptions.ValidationError as e:
+            raise HTTPPreconditionFailed(
+                content={
+                    "reason": "json schema validation error",
+                    "message": e.message,
+                    "validator": e.validator,
+                    "validator_value": e.validator_value,
+                    "path": [i for i in e.path],
+                    "schema_path": [i for i in e.schema_path],
+                    "schema": schema,
+                }
+            )
+
+        task = resolve_dotted_name(app_settings['validation_tasks'][action]['executor'])
 
         result = await task.run(data, payload)
     else:

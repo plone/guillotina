@@ -8,7 +8,15 @@ _ = MessageFactory("guillotina.contrib.dbusers")
 app_settings = {
     "auth_user_identifiers": ["guillotina.contrib.dbusers.users.DBUserIdentifier"],
     "validation_tasks": {
-        "register_user": "guillotina.contrib.dbusers.register_user"
+        "register_user": {
+            "schema": {
+                "title": "Register validation information",
+                "required": [],
+                "type": "object",
+                "properties": {}
+            },
+            "executor": "guillotina.contrib.dbusers.register_user"
+        }
     }
 }
 

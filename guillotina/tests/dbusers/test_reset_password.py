@@ -32,6 +32,23 @@ async def test_reset_password(container_install_requester):
 
         resp, status_code = await requester(
             "POST",
+            f"/db/guillotina/@validate_schema/{token}",
+            authenticated=False)
+        assert status_code == 200
+        assert resp['title'] == 'Reset password validation information'
+        assert resp['properties']['password']['minLength'] == 6
+
+        resp, status_code = await requester(
+            "POST",
+            f"/db/guillotina/@validate/{token}",
+            authenticated=False,
+            data=json.dumps({
+                'passworda': NEW_PASSWORD
+            }))
+        assert status_code == 412
+
+        resp, status_code = await requester(
+            "POST",
             f"/db/guillotina/@validate/{token}",
             authenticated=False,
             data=json.dumps({

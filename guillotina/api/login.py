@@ -121,7 +121,6 @@ class Logout(Service):
     responses={
         "200": {
             "description": "Reset password",
-            # TODO: add response content schema here
         }
     },
     summary="Reset password",
@@ -192,6 +191,29 @@ class ResetPasswordUsers(Service):
 
 @configure.service(
     context=IContainer,
+    name="@validate_schema/{token}",
+    method="POST",
+    permission="guillotina.Public",
+    responses={
+        "200": {
+            "description": "Validate operation",
+        }
+    },
+    summary="Validate operation",
+    allow_access=True,
+)
+class ValidateOperation(Service):
+    async def __call__(self):
+        validation = app_settings.get('validation_process', None)
+        if validation is not None:
+            payload = await validation.schema(token=self.request.matchdict["token"])
+            return payload
+        else:
+            raise HTTPNotAcceptable()
+
+
+@configure.service(
+    context=IContainer,
     name="@validate/{token}",
     method="POST",
     permission="guillotina.Public",
@@ -227,7 +249,6 @@ class ValidateOperation(Service):
     responses={
         "200": {
             "description": "Register a user",
-            # TODO: add response content schema here
         }
     },
     summary="Register Users",
