@@ -7,6 +7,12 @@ CHANGELOG
 - Implemented endpoint @delete for IAttachments and IMultiAttachments
   [masipcat]
 
+- Be able to customize pg db in test fixtures
+  [vangheem]
+
+- More type annotations
+  [vangheem]
+
 - Add pg db constraint for annotation data
   [vangheem]
 
