@@ -3,5 +3,5 @@ DEFAULT_SETTINGS = {
     "auth_token_validators": [
         "guillotina.auth.validators.JWTSessionValidator",
         "guillotina.auth.validators.SaltedHashPasswordValidator",
-    ]
+    ],
 }

@@ -1,5 +1,6 @@
 from guillotina import configure
 
+
 app_settings = {
     "load_utilities": {
         "template": {
@@ -8,10 +9,10 @@ app_settings = {
         }
     },
     "templates": [],
-    "template_content_type": False
+    "template_content_type": False,
 }
 
 
 def includeme(root, settings):
-    if settings.get('template_content_type', False):
+    if settings.get("template_content_type", False):
         configure.scan("guillotina.contrib.templates.content")

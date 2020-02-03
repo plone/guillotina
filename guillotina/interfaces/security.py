@@ -360,6 +360,7 @@ class IPrincipal(Interface):  # pylint: disable=E0239
         Set new password on user
         """
 
+
 SettingType = typing.Union[bool, None, str]
 
 

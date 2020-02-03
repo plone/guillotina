@@ -1,7 +1,7 @@
 from guillotina.interfaces import Allow
 from guillotina.interfaces import IPrincipal
-from zope.interface import implementer
 from typing import Optional
+from zope.interface import implementer
 
 
 ROOT_USER_ID = "root"

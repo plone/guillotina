@@ -1,9 +1,11 @@
-import pytest
-import json
-import jwt
 from . import settings
 from guillotina.auth.users import ROOT_USER_ID
 from guillotina.testing import TESTING_SETTINGS
+
+import json
+import jwt
+import pytest
+
 
 pytestmark = pytest.mark.asyncio
 
@@ -27,46 +29,26 @@ async def test_login_root_session(redis_container, container_requester):
         valid_token = response["token"]
 
         response, status = await requester(
-            "GET",
-            "/@users/root/sessions",
-            auth_type="Bearer",
-            token=valid_token
+            "GET", "/@users/root/sessions", auth_type="Bearer", token=valid_token
         )
         assert status == 200
         assert len(response) == 1
 
         response, status = await requester(
-            "GET",
-            f"/@users/root/session/{response[0]}",
-            auth_type="Bearer",
-            token=valid_token
+            "GET", f"/@users/root/session/{response[0]}", auth_type="Bearer", token=valid_token
         )
 
         assert status == 200
-        assert response['user-agent'] == 'ASGI-Test-Client'
+        assert response["user-agent"] == "ASGI-Test-Client"
 
+        response, status = await requester("POST", "/@login-renew", auth_type="Bearer", token=valid_token)
+        assert status == 200
 
-        response, status = await requester(
-            "POST",
-            "/@login-renew",
-            auth_type="Bearer",
-            token=valid_token
-        )
+        response, status = await requester("POST", "/@logout", auth_type="Bearer", token=valid_token)
         assert status == 200
 
         response, status = await requester(
-            "POST",
-            "/@logout",
-            auth_type="Bearer",
-            token=valid_token
-        )
-        assert status == 200
-        
-        response, status = await requester(
-            "GET",
-            f"/@users/root/sessions",
-            auth_type="Bearer",
-            token=valid_token
+            "GET", f"/@users/root/sessions", auth_type="Bearer", token=valid_token
         )
 
         assert status == 401

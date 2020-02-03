@@ -5,25 +5,25 @@ from guillotina import app_settings
 from guillotina import configure
 from guillotina.api.service import Service
 from guillotina.auth import authenticate_user
+from guillotina.auth.recaptcha import RecaptchaValidator
+from guillotina.auth.utils import find_user
 from guillotina.component import get_utility
 from guillotina.component import query_utility
 from guillotina.event import notify
 from guillotina.events import UserLogin
 from guillotina.events import UserRefreshToken
 from guillotina.interfaces import IApplication
-from guillotina.interfaces import IContainer
 from guillotina.interfaces import IAuthValidationUtility
+from guillotina.interfaces import IContainer
 from guillotina.interfaces import ISessionManagerUtility
-from guillotina.response import HTTPUnauthorized
-from guillotina.response import HTTPPreconditionFailed
 from guillotina.response import HTTPNotAcceptable
+from guillotina.response import HTTPPreconditionFailed
+from guillotina.response import HTTPUnauthorized
 from guillotina.utils import get_authenticated_user
-from guillotina.auth.recaptcha import RecaptchaValidator
-from guillotina.auth.utils import find_user
 from json.decoder import JSONDecodeError
-import jwt
+
 import json
-from copy import deepcopy
+import jwt
 
 
 @configure.service(
@@ -61,13 +61,13 @@ class Login(Service):
         if session_manager is not None:
             data = json.dumps(dict(self.request.headers))
             session = await session_manager.new_session(user.id, data=data)
-            data = {
-                'session': session
-            }
+            data = {"session": session}
         else:
             data = {}
 
-        jwt_token, data = authenticate_user(user.id, timeout=app_settings["jwt"]["token_expiration"], data=data)
+        jwt_token, data = authenticate_user(
+            user.id, timeout=app_settings["jwt"]["token_expiration"], data=data
+        )
         await notify(UserLogin(user, jwt_token))
 
         return {"exp": data["exp"], "token": jwt_token}
@@ -103,7 +103,7 @@ class Refresh(Service):
         if session_manager is not None:
             try:
                 session = await session_manager.refresh_session(user.id, user._v_session)
-                data['session'] = session
+                data["session"] = session
             except AttributeError:
                 raise HTTPPreconditionFailed("Session manager configured but no session on jwt")
 
@@ -145,17 +145,12 @@ class Logout(Service):
             raise HTTPNotAcceptable()
 
 
-
 @configure.service(
     context=IContainer,
     name="@users/{user}/sessions",
     method="GET",
     permission="guillotina.SeeSession",
-    responses={
-        "200": {
-            "description": "Sessions enabled",
-        }
-    },
+    responses={"200": {"description": "Sessions enabled"}},
     summary="See open sessions",
     allow_access=True,
 )
@@ -164,11 +159,7 @@ class Logout(Service):
     name="@users/{user}/sessions",
     method="GET",
     permission="guillotina.SeeSession",
-    responses={
-        "200": {
-            "description": "Sessions enabled",
-        }
-    },
+    responses={"200": {"description": "Sessions enabled"}},
     summary="See open sessions",
     allow_access=True,
 )
@@ -191,11 +182,7 @@ class CheckSessions(Service):
     name="@users/{user}/session/{session}",
     method="GET",
     permission="guillotina.SeeSession",
-    responses={
-        "200": {
-            "description": "Check session information",
-        }
-    },
+    responses={"200": {"description": "Check session information"}},
     summary="See open session information",
     allow_access=True,
 )
@@ -204,11 +191,7 @@ class CheckSessions(Service):
     name="@users/{user}/session/{session}",
     method="GET",
     permission="guillotina.SeeSession",
-    responses={
-        "200": {
-            "description": "Check session information",
-        }
-    },
+    responses={"200": {"description": "Check session information"}},
     summary="See open session information",
     allow_access=True,
 )
@@ -227,16 +210,13 @@ class GetSession(Service):
         else:
             raise HTTPNotAcceptable()
 
+
 @configure.service(
     context=IContainer,
     name="@users/{user}/reset-password",
     method="POST",
     permission="guillotina.Public",
-    responses={
-        "200": {
-            "description": "Reset password",
-        }
-    },
+    responses={"200": {"description": "Reset password"}},
     summary="Reset password",
     allow_access=True,
 )
@@ -254,8 +234,7 @@ class ResetPasswordUsers(Service):
             data = await self.request.json()
             try:
                 await actual_user.set_password(
-                    data.get('new_password', None),
-                    old_password=data.get('old_password', None)
+                    data.get("new_password", None), old_password=data.get("old_password", None)
                 )
             except AttributeError:
                 raise HTTPNotAcceptable()
@@ -267,38 +246,35 @@ class ResetPasswordUsers(Service):
                 raise HTTPUnauthorized(content={"text": "Invalid validation"})
 
             # We need to validate is a valid user
-            user = await find_user({'id': user_id})
+            user = await find_user({"id": user_id})
 
             if user is None:
                 raise HTTPUnauthorized(content={"text": "Invalid operation"})
 
             # We need to validate is a valid user
             try:
-                email = user.properties.get('email', user.email)
+                email = user.properties.get("email", user.email)
             except AttributeError:
                 email = None
-            if email is None and '@' in user_id:
+            if email is None and "@" in user_id:
                 email = user_id
 
             if email is None:
-                raise HTTPPreconditionFailed(
-                    content={
-                        "reason": "User without mail configured"
-                    }
-                )
+                raise HTTPPreconditionFailed(content={"reason": "User without mail configured"})
 
             # We need to generate a token and send to user email
             validation_utility = get_utility(IAuthValidationUtility)
             if validation_utility is not None:
-                redirect_url = self.request.query.get('redirect_url', None)
+                redirect_url = self.request.query.get("redirect_url", None)
                 await validation_utility.start(
                     as_user=user_id,
                     from_user=actual_user.id,
                     email=email,
-                    task_description='Reset password',
-                    task_id='reset_password',
+                    task_description="Reset password",
+                    task_id="reset_password",
                     context_description=self.context.title,
-                    redirect_url=redirect_url)
+                    redirect_url=redirect_url,
+                )
             else:
                 raise HTTPNotAcceptable()
 
@@ -308,11 +284,7 @@ class ResetPasswordUsers(Service):
     name="@validate_schema/{token}",
     method="POST",
     permission="guillotina.Public",
-    responses={
-        "200": {
-            "description": "Validate operation",
-        }
-    },
+    responses={"200": {"description": "Validate operation"}},
     summary="Validate operation",
     allow_access=True,
 )
@@ -331,11 +303,7 @@ class ValidateSchema(Service):
     name="@validate/{token}",
     method="POST",
     permission="guillotina.Public",
-    responses={
-        "200": {
-            "description": "Validate operation"
-        }
-    },
+    responses={"200": {"description": "Validate operation"}},
     summary="Validate operation",
     allow_access=True,
 )
@@ -348,8 +316,8 @@ class ValidateOperation(Service):
             except JSONDecodeError:
                 request_payload = None
             payload = await validation_utility.finish(
-                token=self.request.matchdict["token"],
-                payload=request_payload)
+                token=self.request.matchdict["token"], payload=request_payload
+            )
             return payload
         else:
             raise HTTPNotAcceptable()
@@ -360,17 +328,13 @@ class ValidateOperation(Service):
     name="@users",
     method="POST",
     permission="guillotina.Public",
-    responses={
-        "200": {
-            "description": "Register a user",
-        }
-    },
+    responses={"200": {"description": "Register a user"}},
     summary="Register Users",
     allow_access=True,
 )
 class RegisterUsers(Service):
     async def __call__(self):
-        allowed = app_settings.get('allow_register', False)
+        allowed = app_settings.get("allow_register", False)
         if allowed is False:
             raise HTTPUnauthorized(content={"text": "Not allowed registration"})
 
@@ -381,26 +345,27 @@ class RegisterUsers(Service):
 
         payload = await self.request.json()
 
-        user_id = payload.get('id', None)
-        user = await find_user({'id': user_id})
+        user_id = payload.get("id", None)
+        user = await find_user({"id": user_id})
         if user is not None:
             raise HTTPUnauthorized(content={"text": "Invalid login"})
 
         validation_utility = get_utility(IAuthValidationUtility)
         if validation_utility is not None:
-            redirect_url = self.request.query.get('redirect_url', None)
-            username = payload.get('fullname', payload.get('id', ''))
+            redirect_url = self.request.query.get("redirect_url", None)
+            username = payload.get("fullname", payload.get("id", ""))
             task_description = f"Registering user {username}"
             actual_user = get_authenticated_user()
             await validation_utility.start(
-                as_user=payload.get('id'),
+                as_user=payload.get("id"),
                 from_user=actual_user.id,
                 task_description=task_description,
-                task_id='register_user',
-                email=payload.get('email'),
+                task_id="register_user",
+                email=payload.get("email"),
                 context_description=self.context.title,
                 redirect_url=redirect_url,
-                data=payload)
+                data=payload,
+            )
         else:
             raise HTTPNotAcceptable()
 
@@ -421,10 +386,10 @@ class RegisterUsers(Service):
                             "register": {"type": "boolean"},
                             "title": {"type": "string"},
                             "social": {"type": "array"},
-                        }
+                        },
                     }
                 }
-            }
+            },
         }
     },
     summary="Info Access",
@@ -437,17 +402,17 @@ class InfoAccess(Service):
         if status is False:
             raise HTTPUnauthorized(content={"text": "Invalid validation"})
 
-        auth_providers = app_settings.get('auth_providers', {})
+        auth_providers = app_settings.get("auth_providers", {})
         providers = []
-        if 'twitter' in auth_providers:
-            providers.append('twitter')
-        if 'facebook' in auth_providers:
-            providers.append('facebook')
-        if 'google' in auth_providers:
-            providers.append('google')
+        if "twitter" in auth_providers:
+            providers.append("twitter")
+        if "facebook" in auth_providers:
+            providers.append("facebook")
+        if "google" in auth_providers:
+            providers.append("google")
 
         return {
-            'register': app_settings.get('allow_register', False),
-            'social': providers,
-            'title': self.context.title
+            "register": app_settings.get("allow_register", False),
+            "social": providers,
+            "title": self.context.title,
         }

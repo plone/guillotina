@@ -1,5 +1,3 @@
-from guillotina import configure
-
 app_settings = {
     "applications": ["guillotina.contrib.redis"],
     "load_utilities": {
@@ -8,9 +6,7 @@ app_settings = {
             "factory": "guillotina.contrib.redis_session.utility.RedisSessionManagerUtility",
         }
     },
-    "auth_token_validators": [
-        "guillotina.auth.validators.JWTSessionValidator",
-    ]
+    "auth_token_validators": ["guillotina.auth.validators.JWTSessionValidator"],
 }
 
 

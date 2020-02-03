@@ -1,5 +1,7 @@
 from guillotina import configure
 from guillotina import schema
+from guillotina.auth.validators import check_password
+from guillotina.auth.validators import hash_password
 from guillotina.content import Folder
 from guillotina.contrib.dbusers import _
 from guillotina.directives import index_field
@@ -9,8 +11,6 @@ from guillotina.interfaces import Allow
 from guillotina.interfaces import IFolder
 from guillotina.interfaces import IPrincipal
 from guillotina.response import HTTPUnauthorized
-from guillotina.auth.validators import check_password
-from guillotina.auth.validators import hash_password
 
 
 class IUserManager(IFolder):

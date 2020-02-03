@@ -1,23 +1,26 @@
-
-
-from guillotina.interfaces import IMailer
-from guillotina.contrib.email_validation.interfaces import IValidationSettings
-from guillotina.contrib.email_validation.utils import generate_validation_token
-from guillotina.contrib.email_validation.utils import extract_validation_token
-from guillotina.contrib.templates.interfaces import IJinjaUtility
-from guillotina.utils import resolve_dotted_name
-from guillotina.component import get_utility
-from guillotina.response import HTTPPreconditionFailed
-from guillotina.response import HTTPServiceUnavailable
-from guillotina.response import HTTPNotImplemented
-from guillotina.utils import get_registry
 from guillotina import app_settings
+from guillotina.component import get_utility
+from guillotina.contrib.email_validation.interfaces import IValidationSettings
+from guillotina.contrib.email_validation.utils import extract_validation_token
+from guillotina.contrib.email_validation.utils import generate_validation_token
+from guillotina.contrib.templates.interfaces import IJinjaUtility
 from guillotina.event import notify
 from guillotina.events import ValidationEvent
+from guillotina.interfaces import IMailer
+from guillotina.response import HTTPNotImplemented
+from guillotina.response import HTTPPreconditionFailed
+from guillotina.response import HTTPServiceUnavailable
+from guillotina.utils import get_registry
+from guillotina.utils import resolve_dotted_name
+
 import jsonschema
+import logging
+
+
+logger = logging.getLogger("guillotina.email_validation")
+
 
 class EmailValidationUtility:
-
     def __init__(self, settings):
         pass
 
@@ -28,46 +31,52 @@ class EmailValidationUtility:
         pass
 
     async def start(
-            self,
-            as_user: str,
-            email: str,
-            from_user: str,
-            task_description: str,
-            task_id: str,
-            redirect_url=None,
-            context_description=None,
-            ttl=3660,
-            data=None):
+        self,
+        as_user: str,
+        email: str,
+        from_user: str,
+        task_description: str,
+        task_id: str,
+        redirect_url=None,
+        context_description=None,
+        ttl=3660,
+        data=None,
+    ):
         # from_user will be mostly anonymous
         registry = await get_registry()
+        if registry is None:
+            logger.error("No registry")
+            raise HTTPServiceUnavailable()
+
         config = registry.for_interface(IValidationSettings)
         if config is None:
-            raise HTTPServiceUnavailable("Not configured")
+            logger.error("No configuration on registry")
+            raise HTTPServiceUnavailable()
 
         util = get_utility(IMailer)
         if util is None:
-            raise HTTPServiceUnavailable("Mail service")
+            logger.error("No mail service configured")
+            raise HTTPServiceUnavailable()
 
-        template_name = config['validation_template']
-        site_url = config['site_url']
-        validate_url = config['validation_url']
+        template_name = config["validation_template"]
+        site_url = config["site_url"]
+        validate_url = config["validation_url"]
 
         render_util = get_utility(IJinjaUtility)
         if render_util is None:
-            raise HTTPServiceUnavailable("Template render")
+            logger.error("Template render not enabled")
+            raise HTTPServiceUnavailable()
 
-        if task_id not in app_settings['auth_validation_tasks']:
-            raise HTTPServiceUnavailable("Task unavailable")
+        if task_id not in app_settings["auth_validation_tasks"]:
+            logger.error(f"Task {task_id} unavailable")
+            raise HTTPServiceUnavailable()
 
         if data is None:
             data = {}
 
-        data.update({
-            'v_user': as_user,
-            'v_querier': from_user,
-            'v_task': task_id,
-            'v_redirect_url': redirect_url
-        })
+        data.update(
+            {"v_user": as_user, "v_querier": from_user, "v_task": task_id, "v_redirect_url": redirect_url}
+        )
 
         token, last_date = await generate_validation_token(data, ttl=ttl)
 
@@ -77,30 +86,26 @@ class EmailValidationUtility:
             context_description=context_description,
             link=link,
             last_date=last_date,
-            task=task_description
+            task=task_description,
         )
-        await util.send(
-            recipient=email,
-            subject=task_description,
-            html=template
-        )
+        await util.send(recipient=email, subject=task_description, html=template)
 
     async def schema(self, token: str):
         data = await extract_validation_token(token)
 
-        action = data.get('v_task')
-        if action in app_settings['auth_validation_tasks']:
-            return app_settings['auth_validation_tasks'][action]['schema']
+        action = data.get("v_task")
+        if action in app_settings["auth_validation_tasks"]:
+            return app_settings["auth_validation_tasks"][action]["schema"]
         else:
             return None
 
     async def finish(self, token: str, payload=None):
         data = await extract_validation_token(token)
 
-        action = data.get('v_task')
-        if action in app_settings['auth_validation_tasks']:
-            if 'schema' in app_settings['auth_validation_tasks'][action]:
-                schema = app_settings['auth_validation_tasks'][action]['schema']
+        action = data.get("v_task")
+        if action in app_settings["auth_validation_tasks"]:
+            if "schema" in app_settings["auth_validation_tasks"][action]:
+                schema = app_settings["auth_validation_tasks"][action]["schema"]
 
                 try:
                     jsonschema.validate(instance=payload, schema=schema)
@@ -117,10 +122,11 @@ class EmailValidationUtility:
                         }
                     )
 
-            task = resolve_dotted_name(app_settings['auth_validation_tasks'][action]['executor'])
+            task = resolve_dotted_name(app_settings["auth_validation_tasks"][action]["executor"])
 
             result = await task.run(data, payload)
         else:
-            raise HTTPNotImplemented("Invalid task")
+            logger.error(f"Invalid task {action}")
+            raise HTTPNotImplemented()
         await notify(ValidationEvent(data))
         return result

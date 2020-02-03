@@ -1,12 +1,15 @@
-from guillotina.utils import get_current_request
 from guillotina import app_settings
+from guillotina.utils import get_current_request
+
 import aiohttp
 import logging
+
 
 logger = logging.getLogger("guillotina")
 
 RECAPTCHA_VALIDATION_URL = "https://www.google.com/recaptcha/api/siteverify"
 VALIDATION_HEADER = "X-VALIDATION-G"
+
 
 class RecaptchaValidator:
     # Not valid to generate a user
@@ -18,7 +21,7 @@ class RecaptchaValidator:
 
         if token == app_settings.get("_fake_recaptcha_") and token is not None:
             return True
-        if app_settings.get("recaptcha") is None or app_settings['recaptcha'].get('private') is None:
+        if app_settings.get("recaptcha") is None or app_settings["recaptcha"].get("private") is None:
             logger.warning("Validating with recaptcha and no configuration found")
             return True
         async with aiohttp.ClientSession() as session:

@@ -6,28 +6,21 @@ app_settings = {
     "load_utilities": {
         "auth_validation": {
             "provides": "guillotina.interfaces.IAuthValidationUtility",
-            "factory": "guillotina.contrib.email_validation.utility.EmailValidationUtility"
+            "factory": "guillotina.contrib.email_validation.utility.EmailValidationUtility",
         }
     },
-    "templates": [
-        "guillotina.contrib.email_validation:templates"
-    ],
+    "templates": ["guillotina.contrib.email_validation:templates"],
     "auth_validation_tasks": {
         "reset_password": {
             "schema": {
                 "title": "Reset password validation information",
                 "required": ["password"],
                 "type": "object",
-                "properties": {
-                    "password": {
-                        "type": "string",
-                        "minLength": 6
-                    }
-                }
+                "properties": {"password": {"type": "string", "minLength": 6}},
             },
-            "executor": "guillotina.contrib.email_validation.reset_password"
+            "executor": "guillotina.contrib.email_validation.reset_password",
         }
-    }
+    },
 }
 
 

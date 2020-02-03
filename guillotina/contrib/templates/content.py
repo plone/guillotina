@@ -1,5 +1,5 @@
-from guillotina.content import Resource
 from guillotina import configure
+from guillotina.content import Resource
 from guillotina.contrib.templates.interfaces import IJinjaTemplate
 
 

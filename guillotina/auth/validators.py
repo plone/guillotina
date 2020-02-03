@@ -159,7 +159,7 @@ class JWTSessionValidator:
 
             session_manager = query_utility(ISessionManagerUtility)
             if session_manager is not None:
-                session = validated_jwt.get('session', None)
+                session = validated_jwt.get("session", None)
                 valid_session = await session_manager.exist_session(validated_jwt["id"], session)
                 if valid_session:
                     token["id"] = validated_jwt["id"]
