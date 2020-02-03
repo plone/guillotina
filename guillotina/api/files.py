@@ -113,7 +113,7 @@ class UploadFile(TraversableFieldService):
 
 @configure.service(
     context=IResource,
-    method="POST",
+    method="DELETE",
     permission="guillotina.DeleteContent",
     name="@delete/{field_name}",
     parameters=[{"in": "path", "name": "field_name", "required": True, "schema": {"type": "string"}}],
@@ -121,7 +121,7 @@ class UploadFile(TraversableFieldService):
 )
 @configure.service(
     context=IResource,
-    method="POST",
+    method="DELETE",
     permission="guillotina.DeleteContent",
     name="@delete/{field_name}/{filename}",
     parameters=[{"in": "path", "name": "field_name", "required": True, "schema": {"type": "string"}}],

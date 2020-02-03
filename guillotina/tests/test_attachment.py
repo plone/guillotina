@@ -72,7 +72,7 @@ async def test_create_content_with_behavior(manager_type, redis_container, conta
         assert status == 200
         assert len(response) == (1024 * 1024 * 4)
 
-        response, status = await requester("POST", "/db/guillotina/foobar/@delete/file")
+        response, status = await requester("DELETE", "/db/guillotina/foobar/@delete/file")
         assert status == 200
 
         response, status = await requester("GET", "/db/guillotina/foobar/@download/file")
@@ -126,7 +126,7 @@ async def test_multi_upload(manager_type, redis_container, container_requester):
             assert behavior.files["key1"].chunks == 2
             assert behavior.files["key2"].chunks == 2
 
-        response, status = await requester("POST", "/db/guillotina/foobar/@delete/files/key2")
+        response, status = await requester("DELETE", "/db/guillotina/foobar/@delete/files/key2")
         assert status == 200
 
         response, status = await requester("GET", "/db/guillotina/foobar/@download/files/key2")
