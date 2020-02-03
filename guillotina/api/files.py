@@ -136,8 +136,6 @@ class DeleteFile(TraversableFieldService):
         # for the field to save there by chunks
         adapter = get_multi_adapter((self.context, self.request, self.field), IFileManager)
         result = await adapter.delete()
-        self.field.set(self.context, None)
-        self.context.register()
         return result
 
 
