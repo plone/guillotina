@@ -11,7 +11,7 @@ from guillotina.interfaces import IPrincipal
 from guillotina.response import HTTPUnauthorized
 from guillotina.auth.validators import check_password
 from guillotina.auth.validators import hash_password
-from guillotina import app_settings
+
 
 class IUserManager(IFolder):
     pass

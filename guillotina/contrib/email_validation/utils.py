@@ -1,10 +1,12 @@
 import ujson
 import time
+import logging
 from datetime import datetime
 from jwcrypto import jwe
 from jwcrypto.common import json_encode
 from guillotina.utils import get_jwk_key
 
+logger = logging.getLogger("guillotina.email_validation")
 
 async def generate_validation_token(data, ttl=3660):
     data = data or {}

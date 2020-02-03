@@ -14,6 +14,7 @@ from guillotina.interfaces import IContainer
 from guillotina.interfaces import IAuthValidationUtility
 from guillotina.response import HTTPUnauthorized
 from guillotina.response import HTTPPreconditionFailed
+from guillotina.response import HTTPNotAcceptable
 from guillotina.utils import get_authenticated_user
 from guillotina.auth.recaptcha import RecaptchaValidator
 from guillotina.auth.utils import find_user
@@ -204,7 +205,7 @@ class ResetPasswordUsers(Service):
     summary="Validate operation",
     allow_access=True,
 )
-class ValidateOperation(Service):
+class ValidateSchema(Service):
     async def __call__(self):
         validation_utility = get_utility(IAuthValidationUtility)
         if validation_utility is not None:

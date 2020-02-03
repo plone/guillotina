@@ -8,7 +8,6 @@ from guillotina.interfaces import IMailer
 pytestmark = pytest.mark.asyncio
 
 
-
 @pytest.mark.app_settings(settings.DEFAULT_REGISTRATION_SETTINGS)
 @pytest.mark.parametrize("install_addons", [['dbusers', 'email_validation']])
 async def test_registration(container_install_requester):

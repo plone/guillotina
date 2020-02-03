@@ -1,6 +1,8 @@
 from jinja2 import Environment, PackageLoader, BaseLoader, select_autoescape
+from jinja2.exceptions import TemplateNotFound
 from lru import LRU
 from concurrent.futures import ThreadPoolExecutor
+from guillotina.contrib.templates.interfaces import IJinjaTemplate
 from guillotina.utils import get_current_container
 from guillotina.utils import navigate_to
 from guillotina import app_settings
@@ -52,7 +54,7 @@ class JinjaUtility:
                     template_obj = None
 
                 if template_obj is not None and IJinjaTemplate.providedBy(template_obj):
-                    template_string: str = obj.template
+                    template_string: str = template_obj.template
                     template = Environment(loader=BaseLoader()).from_string(template_string)
                 else:
                     raise KeyError(f"Wrong traversal template object {name}")
@@ -60,7 +62,7 @@ class JinjaUtility:
                 for env in self.envs:
                     try:
                         template = env.get_template(name)
-                    except jinja2.exceptions.TemplateNotFound:
+                    except TemplateNotFound:
                         pass
                     if template is not None:
                         break
@@ -71,4 +73,3 @@ class JinjaUtility:
                 self.cache[name] = template
                 func = partial(template.render, **options)
                 return await self._loop.run_in_executor(self.executor, func)
-

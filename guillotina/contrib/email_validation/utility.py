@@ -8,6 +8,8 @@ from guillotina.contrib.templates.interfaces import IJinjaUtility
 from guillotina.utils import resolve_dotted_name
 from guillotina.component import get_utility
 from guillotina.response import HTTPPreconditionFailed
+from guillotina.response import HTTPServiceUnavailable
+from guillotina.response import HTTPNotImplemented
 from guillotina.utils import get_registry
 from guillotina import app_settings
 from guillotina.event import notify
@@ -40,7 +42,7 @@ class EmailValidationUtility:
         registry = await get_registry()
         config = registry.for_interface(IValidationSettings)
         if config is None:
-            raise HTTP
+            raise HTTPServiceUnavailable("Not configured")
 
         util = get_utility(IMailer)
         if util is None:
@@ -92,10 +94,9 @@ class EmailValidationUtility:
         else:
             return None
 
-
     async def finish(self, token: str, payload=None):
         data = await extract_validation_token(token)
-        
+
         action = data.get('v_task')
         if action in app_settings['auth_validation_tasks']:
             if 'schema' in app_settings['auth_validation_tasks'][action]:

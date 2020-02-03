@@ -8,7 +8,7 @@ from guillotina.interfaces import IMailer
 
 pytestmark = pytest.mark.asyncio
 
-NEW_PASSWORD="password2"
+NEW_PASSWORD = "password2"
 
 @pytest.mark.app_settings(settings.DEFAULT_REGISTRATION_SETTINGS)
 @pytest.mark.parametrize("install_addons", [['dbusers', 'email_validation']])

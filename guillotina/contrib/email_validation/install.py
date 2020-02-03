@@ -4,7 +4,6 @@ from guillotina.contrib.email_validation.interfaces import IValidationSettings
 from guillotina.utils import get_registry
 
 
-
 @configure.addon(name="email_validation", title="Guillotina Email Validation")
 class EmailValidationAddon(Addon):
     @classmethod

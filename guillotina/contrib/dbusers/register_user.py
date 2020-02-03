@@ -7,6 +7,7 @@ from guillotina.auth import authenticate_user
 from guillotina import app_settings
 from copy import deepcopy
 
+
 async def run(token_data, payload):
     # Payload : {
     #   'new_password': 'secret',

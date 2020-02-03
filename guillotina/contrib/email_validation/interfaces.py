@@ -3,7 +3,7 @@ from guillotina import schema
 
 
 class IValidationSettings(Interface):
-    
+
     site_url = schema.Text(
         title="Public frontend site url",
         description="Full url without tailing /",

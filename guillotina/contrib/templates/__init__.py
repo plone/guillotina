@@ -12,9 +12,6 @@ app_settings = {
 }
 
 
-
 def includeme(root, settings):
     if settings.get('template_content_type', False):
         configure.scan("guillotina.contrib.templates.content")
-
-
