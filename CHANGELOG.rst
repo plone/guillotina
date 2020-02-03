@@ -10,6 +10,18 @@ CHANGELOG
 - Reset password workflow with generic validation package on contrib
   [bloodbare]
 
+- Be able to customize pg db in test fixtures
+  [vangheem]
+
+- More type annotations
+  [vangheem]
+
+- Add pg db constraint for annotation data
+  [vangheem]
+
+- Fix DummyCache.set type signature to be the same as base class
+  [vangheem]
+
 - Jinja template engine to render on executors
   [bloodbare]
 

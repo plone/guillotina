@@ -1,5 +1,6 @@
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces.content import IApplication
+from typing import Dict
 from typing import Optional
 from typing import Tuple
 from typing import Type
@@ -16,6 +17,8 @@ class IRequest(Interface):
     found_view: Optional[Type]
     view_name: Optional[str]
     application: Optional[IApplication]
+    headers: Dict[str, str]
+    uid: str
 
     def record(event_name) -> None:
         """

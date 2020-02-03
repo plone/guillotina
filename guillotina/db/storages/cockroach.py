@@ -148,10 +148,13 @@ class CockroachStorage(pg.PostgresqlStorage):
     _db_transaction_factory = CockroachDBTransaction
     _connection_manager_class = CRConnectionManager
     _vacuum = _vacuum_task = None
-    _unique_constraint = """CREATE UNIQUE INDEX {constraint_name}_parent_id_id_key
-                            ON {objects_table_name} (parent_id, id)"""
-    # not supported yet
-    #                        WHERE parent_id != '{TRASHED_ID}'"""
+    _unique_constraints = [
+        """CREATE UNIQUE INDEX {constraint_name}_parent_id_id_key
+           ON {objects_table_name} (parent_id, id)""",
+        # not supported yet
+        #                        WHERE parent_id != '{TRASHED_ID}'"""
+        """CREATE UNIQUE INDEX CONCURRENTLY {constraint_name}_annotations_unique ON {objects_table_name} (of, id);""",
+    ]
 
     def __init__(self, *args, **kwargs):
         transaction_strategy = kwargs.get("transaction_strategy", "dbresolve_readcommitted")

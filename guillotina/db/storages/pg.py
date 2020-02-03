@@ -608,9 +608,12 @@ class PostgresqlStorage(BaseStorage):
         "ALTER TABLE {objects_table_name} ADD CONSTRAINT {object_table_name}_parent_id_zoid_check CHECK (parent_id != zoid) NOT VALID;",  # noqa
     ]
 
-    _unique_constraint = """CREATE UNIQUE INDEX CONCURRENTLY {constraint_name}_parent_id_id_key
-                            ON {objects_table_name} (parent_id, id)
-                            WHERE parent_id != '{TRASHED_ID}'"""
+    _unique_constraints = [
+        """CREATE UNIQUE INDEX CONCURRENTLY {constraint_name}_parent_id_id_key
+           ON {objects_table_name} (parent_id, id)
+           WHERE parent_id != '{TRASHED_ID}' """,
+        """CREATE UNIQUE INDEX CONCURRENTLY {constraint_name}_annotations_unique ON {objects_table_name} (of, id);""",
+    ]
 
     def __init__(
         self,
@@ -770,13 +773,14 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                 async with conn.transaction():
                     await self.create(conn)
                     # only available on new databases
-                    await conn.execute(
-                        self._unique_constraint.format(
-                            objects_table_name=self._objects_table_name,
-                            constraint_name=clear_table_name(self._objects_table_name),
-                            TRASHED_ID=TRASHED_ID,
-                        ).replace("CONCURRENTLY", "")
-                    )
+                    for constraint in self._unique_constraints:
+                        await conn.execute(
+                            constraint.format(
+                                objects_table_name=self._objects_table_name,
+                                constraint_name=clear_table_name(self._objects_table_name),
+                                TRASHED_ID=TRASHED_ID,
+                            ).replace("CONCURRENTLY", "")
+                        )
                     self._supports_unique_constraints = True
                     await conn.execute(trash_sql)
                     await notify(StorageCreatedEvent(self, db_conn=conn))
@@ -786,8 +790,8 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def remove(self):
         """Reset the tables"""
         async with self.pool.acquire() as conn:
-            await conn.execute("DROP TABLE IF EXISTS {};".format(self._blobs_table_name))
-            await conn.execute("DROP TABLE IF EXISTS {};".format(self._objects_table_name))
+            await conn.execute("DROP TABLE IF EXISTS {} CASCADE;".format(self._blobs_table_name))
+            await conn.execute("DROP TABLE IF EXISTS {} CASCADE;".format(self._objects_table_name))
 
     @restart_conn_on_exception
     async def open(self):
@@ -854,7 +858,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                     pickled,  # Pickle state)
                 )
             except asyncpg.exceptions.UniqueViolationError as ex:
-                if "Key (parent_id, id)" in ex.detail:
+                if "Key (parent_id, id)" in ex.detail or "Key (of, id)" in ex.detail:
                     raise ConflictIdOnContainer(ex)
                 raise
             except asyncpg.exceptions.ForeignKeyViolationError:
