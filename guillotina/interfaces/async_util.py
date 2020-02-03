@@ -50,3 +50,26 @@ class IAuthValidationUtility(IAsyncUtility):
 
     async def finish(token: str, payload: Optional[Dict] = None):
         pass
+
+class ISessionManagerUtility(IAsyncUtility):
+    """Session manager interface."""
+
+    async def new_session(ident: str, data: Optional[str]) -> str:
+        """
+        Create new session
+        """
+
+    async def exist_session(ident: str, session: str) -> bool:
+        """
+        Is a valid session?
+        """
+
+    async def drop_session(ident: str, session: str):
+        """
+        Remove session
+        """
+
+    async def refresh_session(ident: str, session: str) -> str:
+        """
+        Refresh an actual session
+        """

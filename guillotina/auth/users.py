@@ -1,6 +1,7 @@
 from guillotina.interfaces import Allow
 from guillotina.interfaces import IPrincipal
 from zope.interface import implementer
+from typing import Optional
 
 
 ROOT_USER_ID = "root"
@@ -16,6 +17,9 @@ class BaseUser:
 
     def __repr__(self):
         return f"<{self.__class__.__name__}: {self.id}>"
+
+    async def set_password(self, ew_password: str, old_password: Optional[str]):
+        raise NotImplementedError()
 
 
 class SystemUser(BaseUser):

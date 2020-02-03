@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a9 (unreleased)
 --------------------
 
+- Adding session manager support with redis backend
+  [bloodbare]
+
 - Registration workflow with generic validation package on contrib
   [bloodbare]
 

@@ -360,11 +360,6 @@ class IPrincipal(Interface):  # pylint: disable=E0239
         Set new password on user
         """
 
-    async def logout(request: IRequest):
-        """
-        Logout actual session
-        """
-
 SettingType = typing.Union[bool, None, str]
 
 

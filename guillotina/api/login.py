@@ -6,12 +6,14 @@ from guillotina import configure
 from guillotina.api.service import Service
 from guillotina.auth import authenticate_user
 from guillotina.component import get_utility
+from guillotina.component import query_utility
 from guillotina.event import notify
 from guillotina.events import UserLogin
 from guillotina.events import UserRefreshToken
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IAuthValidationUtility
+from guillotina.interfaces import ISessionManagerUtility
 from guillotina.response import HTTPUnauthorized
 from guillotina.response import HTTPPreconditionFailed
 from guillotina.response import HTTPNotAcceptable
@@ -20,6 +22,8 @@ from guillotina.auth.recaptcha import RecaptchaValidator
 from guillotina.auth.utils import find_user
 from json.decoder import JSONDecodeError
 import jwt
+import json
+from copy import deepcopy
 
 
 @configure.service(
@@ -53,7 +57,17 @@ class Login(Service):
         if user is None:
             raise HTTPUnauthorized(content={"text": "login failed"})
 
-        jwt_token, data = authenticate_user(user.id, timeout=app_settings["jwt"]["token_expiration"])
+        session_manager = query_utility(ISessionManagerUtility)
+        if session_manager is not None:
+            data = json.dumps(dict(self.request.headers))
+            session = await session_manager.new_session(user.id, data=data)
+            data = {
+                'session': session
+            }
+        else:
+            data = {}
+
+        jwt_token, data = authenticate_user(user.id, timeout=app_settings["jwt"]["token_expiration"], data=data)
         await notify(UserLogin(user, jwt_token))
 
         return {"exp": data["exp"], "token": jwt_token}
@@ -78,11 +92,21 @@ class Login(Service):
 class Refresh(Service):
     async def __call__(self):
         user = get_authenticated_user()
+
         data = {
             "iat": datetime.utcnow(),
             "exp": datetime.utcnow() + timedelta(seconds=app_settings["jwt"]["token_expiration"]),
             "id": user.id,
         }
+
+        session_manager = query_utility(ISessionManagerUtility)
+        if session_manager is not None:
+            try:
+                session = await session_manager.refresh_session(user.id, user._v_session)
+                data['session'] = session
+            except AttributeError:
+                raise HTTPPreconditionFailed("Session manager configured but no session on jwt")
+
         jwt_token = jwt.encode(
             data, app_settings["jwt"]["secret"], algorithm=app_settings["jwt"]["algorithm"]
         ).decode("utf-8")
@@ -111,9 +135,96 @@ class Refresh(Service):
 class Logout(Service):
     async def __call__(self):
         user = get_authenticated_user()
-        try:
-            await user.logout(self.request)
-        except AttributeError:
+        session_manager = query_utility(ISessionManagerUtility)
+        if session_manager is not None:
+            try:
+                await session_manager.drop_session(user.id, user._v_session)
+            except AttributeError:
+                raise HTTPPreconditionFailed("Session manager configured but no session on jwt")
+        else:
+            raise HTTPNotAcceptable()
+
+
+
+@configure.service(
+    context=IContainer,
+    name="@users/{user}/sessions",
+    method="GET",
+    permission="guillotina.SeeSession",
+    responses={
+        "200": {
+            "description": "Sessions enabled",
+        }
+    },
+    summary="See open sessions",
+    allow_access=True,
+)
+@configure.service(
+    context=IApplication,
+    name="@users/{user}/sessions",
+    method="GET",
+    permission="guillotina.SeeSession",
+    responses={
+        "200": {
+            "description": "Sessions enabled",
+        }
+    },
+    summary="See open sessions",
+    allow_access=True,
+)
+class CheckSessions(Service):
+    async def __call__(self):
+        user = get_authenticated_user()
+        user_id: str = self.request.matchdict["user"]
+        if user.id != user_id:
+            raise HTTPUnauthorized()
+
+        session_manager = query_utility(ISessionManagerUtility)
+        if session_manager is not None:
+            return await session_manager.list_sessions(user.id)
+        else:
+            raise HTTPNotAcceptable()
+
+
+@configure.service(
+    context=IContainer,
+    name="@users/{user}/session/{session}",
+    method="GET",
+    permission="guillotina.SeeSession",
+    responses={
+        "200": {
+            "description": "Check session information",
+        }
+    },
+    summary="See open session information",
+    allow_access=True,
+)
+@configure.service(
+    context=IApplication,
+    name="@users/{user}/session/{session}",
+    method="GET",
+    permission="guillotina.SeeSession",
+    responses={
+        "200": {
+            "description": "Check session information",
+        }
+    },
+    summary="See open session information",
+    allow_access=True,
+)
+class GetSession(Service):
+    async def __call__(self):
+        user = get_authenticated_user()
+        user_id: str = self.request.matchdict["user"]
+        session_id: str = self.request.matchdict["session"]
+        if user.id != user_id:
+            raise HTTPUnauthorized()
+
+        session_manager = query_utility(ISessionManagerUtility)
+        if session_manager is not None:
+            value = await session_manager.get_session(user.id, session_id)
+            return json.loads(value)
+        else:
             raise HTTPNotAcceptable()
 
 @configure.service(
