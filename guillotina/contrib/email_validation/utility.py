@@ -12,8 +12,9 @@ from guillotina.response import HTTPPreconditionFailed
 from guillotina.response import HTTPServiceUnavailable
 from guillotina.utils import get_registry
 from guillotina.utils import resolve_dotted_name
+from jsonschema.exceptions import ValidationError
+from jsonschema import validate as jsonvalidate
 
-import jsonschema
 import logging
 
 
@@ -108,8 +109,8 @@ class EmailValidationUtility:
                 schema = app_settings["auth_validation_tasks"][action]["schema"]
 
                 try:
-                    jsonschema.validate(instance=payload, schema=schema)
-                except jsonschema.exceptions.ValidationError as e:
+                    jsonvalidate(instance=payload, schema=schema)
+                except ValidationError as e:
                     raise HTTPPreconditionFailed(
                         content={
                             "reason": "json schema validation error",
