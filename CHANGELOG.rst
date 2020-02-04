@@ -4,7 +4,7 @@ CHANGELOG
 5.3.21 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Validate POST @sharing payload too [lferran]
 
 
 5.3.20 (2020-02-01)
