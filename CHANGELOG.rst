@@ -4,7 +4,7 @@ CHANGELOG
 6.0.0a10 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Validate POST @sharing payload too [lferran]
 
 
 6.0.0a9 (2020-02-04)

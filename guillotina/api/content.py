@@ -393,6 +393,7 @@ async def all_permissions(context, request):
     permission="guillotina.ChangePermissions",
     name="@sharing",
     summary="Change permissions for a resource",
+    validate=True,
     requestBody={
         "required": True,
         "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Permissions"}}},

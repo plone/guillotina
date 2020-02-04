@@ -469,3 +469,13 @@ async def test_bad_sharing_request_array(container_requester):
                 "POST", "/db/guillotina/@sharing", data=json.dumps({utype: {"foo": "bar"}})
             )
             assert status == 412
+
+
+async def test_bad_sharing_payload(container_requester):
+    async with container_requester as requester:
+        response, status = await requester(
+            "POST",
+            "/db/guillotina/@sharing",
+            data=json.dumps({"prinrole": [{"role": "guillotina.Owner", "setting": "Allow", "XX": "foobar"}]}),
+        )
+        assert status == 412
