@@ -57,6 +57,9 @@ async def test_create_content_with_behavior(manager_type, redis_container, conta
         )
         assert status == 201
 
+        response, status = await requester("GET", "/db/guillotina/foobar/@download/file")
+        assert status == 404
+
         response, status = await requester(
             "PATCH",
             "/db/guillotina/foobar/@upload/file",
@@ -68,6 +71,12 @@ async def test_create_content_with_behavior(manager_type, redis_container, conta
         response, status = await requester("GET", "/db/guillotina/foobar/@download/file")
         assert status == 200
         assert len(response) == (1024 * 1024 * 4)
+
+        response, status = await requester("DELETE", "/db/guillotina/foobar/@delete/file")
+        assert status == 200
+
+        response, status = await requester("GET", "/db/guillotina/foobar/@download/file")
+        assert status == 404
 
 
 @pytest.mark.parametrize("manager_type", _pytest_params)
@@ -116,6 +125,12 @@ async def test_multi_upload(manager_type, redis_container, container_requester):
             await behavior.load()
             assert behavior.files["key1"].chunks == 2
             assert behavior.files["key2"].chunks == 2
+
+        response, status = await requester("DELETE", "/db/guillotina/foobar/@delete/files/key2")
+        assert status == 200
+
+        response, status = await requester("GET", "/db/guillotina/foobar/@download/files/key2")
+        assert status == 404
 
 
 @pytest.mark.parametrize("manager_type", _pytest_params)

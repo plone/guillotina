@@ -80,6 +80,11 @@ class IFileStorageManager(Interface):
         copy file to another file
         """
 
+    async def delete():
+        """
+        delete file
+        """
+
 
 class IExternalFileStorageManager(IFileStorageManager):
     """
@@ -133,6 +138,11 @@ class IFileManager(Interface):
     async def copy(other_manager):
         """
         Copy current file to new one
+        """
+
+    async def delete():
+        """
+        Delete file
         """
 
 

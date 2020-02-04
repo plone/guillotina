@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a9 (unreleased)
 --------------------
 
+- Implemented endpoint @delete for IAttachments and IMultiAttachments
+  [masipcat]
+
 - Adding session manager support with redis backend
   [bloodbare]
 

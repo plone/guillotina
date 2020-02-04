@@ -8,6 +8,7 @@ from guillotina.events import FileBeforeUploadFinishedEvent
 from guillotina.events import FileUploadFinishedEvent
 from guillotina.events import FileUploadStartedEvent
 from guillotina.exceptions import BlobChunkNotFound
+from guillotina.exceptions import FileNotFoundException
 from guillotina.files.utils import guess_content_type
 from guillotina.interfaces import IDBFileField
 from guillotina.interfaces import IFileCleanup
@@ -173,6 +174,8 @@ class DBFileStorageManagerAdapter:
 
     async def iter_data(self) -> AsyncIterator[bytes]:
         file = self.field.get(self.field.context or self.context)
+        if not getattr(file, "_blob", None):
+            raise FileNotFoundException()
         blob = file._blob
         bfile = blob.open()
         async for chunk in bfile.iter_async_read():
@@ -240,3 +243,11 @@ class DBFileStorageManagerAdapter:
         await to_storage_manager.append(dm, to_storage_manager.iter_data(), 0)
         await to_storage_manager.finish(dm)
         await dm.finish()
+
+    async def delete(self):
+        file = self.field.get(self.field.context or self.context)
+        blobfile = file._blob.open("w")
+        await blobfile.async_del()
+        delattr(file, "_blob")
+        self.field.context.register()
+        return True
