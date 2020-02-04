@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.0a9 (unreleased)
+6.0.0a9 (2020-02-04)
 --------------------
 
 - Implemented endpoint @delete for IAttachments and IMultiAttachments
