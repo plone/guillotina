@@ -4,6 +4,15 @@ CHANGELOG
 6.0.0a9 (unreleased)
 --------------------
 
+- Adding session manager support with redis backend
+  [bloodbare]
+
+- Registration workflow with generic validation package on contrib
+  [bloodbare]
+
+- Reset password workflow with generic validation package on contrib
+  [bloodbare]
+
 - Be able to customize pg db in test fixtures
   [vangheem]
 
@@ -16,6 +25,11 @@ CHANGELOG
 - Fix DummyCache.set type signature to be the same as base class
   [vangheem]
 
+- Jinja template engine to render on executors
+  [bloodbare]
+
+- Recaptcha support for public endpoints
+  [bloodbare]
 
 6.0.0a8 (2020-01-24)
 --------------------

@@ -8,6 +8,7 @@ from guillotina.component import query_utility
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IPasswordChecker
 from guillotina.interfaces import IPasswordHasher
+from guillotina.interfaces import ISessionManagerUtility
 from guillotina.utils import strings_differ
 from lru import LRU
 
@@ -134,6 +135,41 @@ class JWTValidator:
             user = await find_user(token)
             if user is not None and user.id == token["id"]:
                 return user
+        except (jwt.exceptions.DecodeError, jwt.exceptions.ExpiredSignatureError, KeyError):
+            pass
+
+        return
+
+
+class JWTSessionValidator:
+    for_validators = ("bearer", "wstoken", "cookie")
+
+    async def validate(self, token):
+        if token.get("type") not in ("bearer", "wstoken", "cookie"):
+            return
+
+        if "." not in token.get("token", ""):
+            # quick way to check if actually might be jwt
+            return
+
+        try:
+            validated_jwt = jwt.decode(
+                token["token"], app_settings["jwt"]["secret"], algorithms=[app_settings["jwt"]["algorithm"]]
+            )
+
+            session_manager = query_utility(ISessionManagerUtility)
+            if session_manager is not None:
+                session = validated_jwt.get("session", None)
+                valid_session = await session_manager.exist_session(validated_jwt["id"], session)
+                if valid_session:
+                    token["id"] = validated_jwt["id"]
+                    token["decoded"] = validated_jwt
+                    user = await find_user(token)
+                    user._v_session = session
+                    if user is not None and user.id == token["id"]:
+                        return user
+            else:
+                return
         except (jwt.exceptions.DecodeError, jwt.exceptions.ExpiredSignatureError, KeyError):
             pass
 
