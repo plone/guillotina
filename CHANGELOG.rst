@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.21 (unreleased)
+5.3.21 (2020-02-04)
 -------------------
 
 - Validate POST @sharing payload too [lferran]
