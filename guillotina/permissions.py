@@ -29,6 +29,8 @@ configure.permission("guillotina.SeePermissions", "See permissions")
 configure.permission("guillotina.ChangePermissions", "Change permissions")
 
 configure.permission("guillotina.RefreshToken", "Refresh token")
+configure.permission("guillotina.SeeSession", "Check open session")
+configure.permission("guillotina.Logout", "Logout site")
 
 configure.permission("guillotina.SearchContent", "Search content")
 configure.permission("guillotina.RawSearchContent", "Raw search content")
@@ -69,6 +71,8 @@ configure.grant(permission="guillotina.Public", role="guillotina.Anonymous")
 
 # Authenticated
 configure.grant(permission="guillotina.RefreshToken", role="guillotina.Authenticated")
+configure.grant(permission="guillotina.SeeSession", role="guillotina.Authenticated")
+configure.grant(permission="guillotina.Logout", role="guillotina.Authenticated")
 configure.grant(permission="guillotina.AccessPreflight", role="guillotina.Authenticated")
 configure.grant(permission="guillotina.Public", role="guillotina.Authenticated")
 

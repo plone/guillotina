@@ -85,6 +85,16 @@ class RedisDriver:
             raise NoRedisConfigured()
         await self._pool.execute(b"DEL", key)
 
+    async def expire(self, key: str, expire: int):
+        if self._pool is None:
+            raise NoRedisConfigured()
+        await self._pool.execute(b"EXPIRE", key, expire)
+
+    async def keys_startswith(self, key: str):
+        if self._pool is None:
+            raise NoRedisConfigured()
+        return await self._pool.execute(b"KEYS", f"{key}*")
+
     async def delete_all(self, keys: List[str]):
         if self._pool is None:
             raise NoRedisConfigured()

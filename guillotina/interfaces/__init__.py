@@ -1,9 +1,11 @@
 # zope.interface convenience imports
 from .async_util import IAsyncJobPool  # noqa
 from .async_util import IAsyncUtility  # noqa
+from .async_util import IAuthValidationUtility  # noqa
 from .async_util import ICacheUtility  # noqa
 from .async_util import IPubSubUtility  # noqa
 from .async_util import IQueueUtility  # noqa
+from .async_util import ISessionManagerUtility  # noqa
 from .behaviors import IAsyncBehavior  # noqa
 from .behaviors import IBehavior  # noqa
 from .behaviors import IBehaviorAdapterFactory  # noqa
@@ -68,6 +70,7 @@ from .events import ITraversalRouteMissEvent  # noqa
 from .events import ITraversalViewMissEvent  # noqa
 from .events import IUserLogin  # noqa
 from .events import IUserRefreshToken  # noqa
+from .events import IValidationEvent  # noqa
 from .exceptions import IErrorResponseException  # noqa
 from .exceptions import IUnauthorized  # noqa
 from .files import ICloudFileField  # noqa

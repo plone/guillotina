@@ -355,6 +355,11 @@ class IPrincipal(Interface):  # pylint: disable=E0239
     read_permission(password="guillotina.Nobody")
     _groups_cache = Dict(key_type=TextLine(), value_type=Object(schema=Interface))  # value_type=IPrincipal
 
+    async def set_password(new_password: str, old_password: typing.Optional[str]):
+        """
+        Set new password on user
+        """
+
 
 SettingType = typing.Union[bool, None, str]
 

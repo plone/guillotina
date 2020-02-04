@@ -21,10 +21,15 @@ async def test_redis_ops(redis_container, guillotina_main):
     await driver.set("test3", "testdata", expire=10)
     await driver.set("test4", "testdata", expire=1)
     await driver.set("test5", "testdata", expire=20)
+    await driver.set("test6", "testdata", expire=20)
+    await driver.expire("test5", 1)
 
     await driver.delete("test")
     result = await driver.get("test")
     assert result is None
+
+    result = await driver.keys_startswith("test")
+    assert len(result) == 5
 
     await driver.delete_all(["test2", "test3"])
     result = await driver.get("test2")
@@ -34,8 +39,11 @@ async def test_redis_ops(redis_container, guillotina_main):
     result = await driver.get("test4")
     assert result is None
 
-    await driver.flushall()
     result = await driver.get("test5")
+    assert result is None
+
+    await driver.flushall()
+    result = await driver.get("test6")
     assert result is None
 
     result = await driver.info()
