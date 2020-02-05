@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.22 (unreleased)
+5.3.22 (2020-02-05)
 -------------------
 
 - Fix asyncpg integration with connection leaks on timeout
