@@ -4,7 +4,8 @@ CHANGELOG
 5.3.22 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix asyncpg integration with connection leaks on timeout
+  [vangheem]
 
 
 5.3.21 (2020-02-04)
