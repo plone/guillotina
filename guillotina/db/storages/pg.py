@@ -623,6 +623,7 @@ class PostgresqlStorage(BaseStorage):
         pool_size=13,
         transaction_strategy="resolve_readcommitted",
         conn_acquire_timeout=20,
+        conn_release_timeout=60,
         db_schema="public",
         store_json=True,
         objects_table_name="objects",
@@ -638,6 +639,7 @@ class PostgresqlStorage(BaseStorage):
         self._read_only = read_only
         self.__name__ = name
         self._conn_acquire_timeout = conn_acquire_timeout
+        self._conn_release_timeout = conn_release_timeout
         self._options = options
         self._store_json = store_json
         self._connection_options = {}
@@ -796,11 +798,29 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def open(self):
         return await self.pool.acquire(timeout=self._conn_acquire_timeout)
 
-    async def close(self, con):
+    async def _close(self, con):
         try:
-            await shield(self.pool.release(con, timeout=1))
-        except (asyncio.CancelledError, asyncio.TimeoutError, asyncpg.exceptions.ConnectionDoesNotExistError):
-            log.warning("Exception on connection close", exc_info=True)
+            await self.pool.release(con, self._conn_release_timeout)
+        except asyncpg.exceptions.InterfaceError as ex:  # pragma: no cover
+            if "received invalid connection" in str(ex):
+                # ignore, new pool was created so we can not close this conn
+                pass
+            else:
+                raise
+        except Exception:  # pragma: no cover
+            # unhandled, still try to terminate
+            log.warning("Exception when closing connection", exc_info=True)
+            try:
+                con.terminate()
+            except asyncpg.exceptions.InterfaceError as ex:
+                if "released back to the pool" in str(ex):
+                    pass
+                else:
+                    raise
+
+    async def close(self, con):
+        # we should never worry about correctly closing a connection
+        asyncio.ensure_future(self._close(con))
 
     async def terminate(self, conn):
         log.warning(f"Terminate connection {conn}", exc_info=True)
