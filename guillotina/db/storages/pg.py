@@ -623,6 +623,7 @@ class PostgresqlStorage(BaseStorage):
         pool_size=13,
         transaction_strategy="resolve_readcommitted",
         conn_acquire_timeout=20,
+        conn_release_timeout=60,
         db_schema="public",
         store_json=True,
         objects_table_name="objects",
@@ -638,6 +639,7 @@ class PostgresqlStorage(BaseStorage):
         self._read_only = read_only
         self.__name__ = name
         self._conn_acquire_timeout = conn_acquire_timeout
+        self._conn_release_timeout = conn_release_timeout
         self._options = options
         self._store_json = store_json
         self._connection_options = {}
@@ -798,7 +800,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
     async def _close(self, con):
         try:
-            await self.pool.release(con)
+            await self.pool.release(con, self._conn_release_timeout)
         except asyncpg.exceptions.InterfaceError as ex:
             if "received invalid connection" in str(ex):
                 # ignore, new pool was created so we can not close this conn
