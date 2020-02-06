@@ -4,7 +4,8 @@ CHANGELOG
 6.0.0a10 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Fix asyncpg integration with connection leaks on timeout
+  [vangheem]
 
 
 6.0.0a9 (2020-02-04)
