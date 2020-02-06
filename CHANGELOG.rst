@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.23 (unreleased)
+5.3.23 (2020-02-06)
 -------------------
 
 - Be able to configure `max_inactive_connection_lifetime` and `max_queries`
