@@ -8,9 +8,9 @@ from guillotina.auth.extractors import BasicAuthPolicy
 from guillotina.component import get_utility
 from guillotina.component import query_multi_adapter
 from guillotina.interfaces import IApplication
-from guillotina.interfaces import IASGIResponse
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IPermission
+from guillotina.interfaces import IResponse
 from guillotina.request import WebSocketJsonDecodeError
 from guillotina.security.utils import get_view_permission
 from guillotina.transactions import get_tm
@@ -147,7 +147,7 @@ class WebsocketsView(Service):
             view = (await view.prepare()) or view
 
         view_result = await view()
-        if IASGIResponse.providedBy(view_result):
+        if IResponse.providedBy(view_result):
             raise Exception("Do not accept raw ASGI exceptions in ws")
         else:
             from guillotina.traversal import apply_rendering

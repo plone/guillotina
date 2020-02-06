@@ -27,7 +27,6 @@ from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
 from guillotina.interfaces import ACTIVE_LAYERS_KEY
 from guillotina.interfaces import IApplication
-from guillotina.interfaces import IASGIResponse
 from guillotina.interfaces import IAsyncContainer
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IDatabase
@@ -36,12 +35,14 @@ from guillotina.interfaces import IOPTIONS
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IRenderer
 from guillotina.interfaces import IRequest
+from guillotina.interfaces import IResponse
 from guillotina.interfaces import ITraversable
 from guillotina.profile import profilable
 from guillotina.response import HTTPBadRequest
 from guillotina.response import HTTPMethodNotAllowed
 from guillotina.response import HTTPNotFound
 from guillotina.response import HTTPUnauthorized
+from guillotina.response import Response
 from guillotina.security.utils import get_view_permission
 from guillotina.transactions import abort
 from guillotina.transactions import commit
@@ -196,7 +197,7 @@ async def apply_rendering(view, request, view_result):
     return await renderer(view_result)
 
 
-async def _apply_cors(request, resp):
+async def _apply_cors(request, resp) -> IResponse:
     cors_renderer = app_settings["cors_renderer"](request)
     try:
         cors_headers = await cors_renderer.get_headers()
@@ -267,10 +268,11 @@ class MatchInfo(BaseMatchInfo):
 
         request.record("viewrendered")
 
-        if IASGIResponse.providedBy(view_result):
-            resp = view_result
-        else:
-            resp = await apply_rendering(self.view, self.request, view_result)
+        resp = view_result
+        if resp is None:
+            resp = Response(status=200)
+        if not IResponse.providedBy(resp) or not resp.prepared:
+            resp = await apply_rendering(self.view, self.request, resp)
             request.record("renderer")
             resp = await _apply_cors(request, resp)
 
@@ -308,14 +310,13 @@ class BasicMatchInfo(BaseMatchInfo):
     @profilable
     async def handler(self, request):
         """Main handler function"""
+        resp = self.resp
         request.record("finish")
-        self.debug(request, self.resp)
-        if IASGIResponse.providedBy(self.resp):
-            return self.resp
-        else:
-            resp = await apply_rendering(View(None, request), request, self.resp)
+        self.debug(request, resp)
+        if not IResponse.providedBy(resp) or not resp.prepared:
+            resp = await apply_rendering(View(None, request), request, resp)
             resp = await _apply_cors(request, resp)
-            return resp
+        return resp
 
     def get_info(self):
         return {"request": self.request, "resp": self.resp}

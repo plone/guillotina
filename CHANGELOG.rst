@@ -4,7 +4,8 @@ CHANGELOG
 6.0.0a10 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Moved the ASGI logic from ASGIResponse and ASGISimpleResponse to class Response
+  [masipcat]
 
 
 6.0.0a9 (2020-02-04)

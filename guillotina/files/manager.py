@@ -12,7 +12,6 @@ from guillotina.interfaces import IFileStorageManager
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IUploadDataManager
-from guillotina.response import ASGIResponse
 from guillotina.response import HTTPClientClosedRequest
 from guillotina.response import HTTPConflict
 from guillotina.response import HTTPNotFound
@@ -80,7 +79,7 @@ class FileManager(object):
         else:  # pragma: no cover
             headers["Accept-Ranges"] = "none"
 
-        download_resp = ASGIResponse(
+        download_resp = Response(
             status=200,
             headers=headers,
             content_type=content_type or file.guess_content_type(),

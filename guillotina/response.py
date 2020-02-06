@@ -1,4 +1,3 @@
-from guillotina.interfaces import IASGIResponse
 from guillotina.interfaces import IResponse
 from guillotina.request import Request
 from multidict import CIMultiDict
@@ -7,63 +6,75 @@ from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Tuple
+from typing import Union
 from zope.interface import implementer
 
 
 @implementer(IResponse)
 class Response(Exception):
-
     status_code: Optional[int] = None
     empty_body = False
     default_content: dict = {}  # noqa
 
-    def __init__(self, *, content: dict = None, headers: dict = None, status: int = None) -> None:
+    def __init__(
+        self,
+        *,
+        body: bytes = None,
+        content: dict = None,
+        headers: Union[dict, CIMultiDict] = None,
+        status: int = None,
+        content_type: str = None,
+        content_length: int = None,
+    ) -> None:
         """
+        :param body: raw body
         :param content: content to serialize
         :param headers: headers to set on response
         :param status: customize the response status
         """
-        if self.empty_body:
-            self.content = None
-        else:
-            self.content = content or self.default_content.copy()
+        self.content = None
+        self.body = b""
+        if not self.empty_body:
+            if body and content:
+                raise ValueError("body and content cannot be set at the same time")
+            elif body is not None:
+                self.body = body
+            else:
+                self.content = content or self.default_content.copy()
+
         if headers is None:
-            self.headers = CIMultiDict()  # type: ignore
-        else:
-            self.headers = CIMultiDict(headers)  # type: ignore
+            headers = CIMultiDict()
+        elif not isinstance(headers, CIMultiDict):
+            headers = CIMultiDict(headers)
+
         if status is not None:
             if self.status_code:
                 raise ValueError("Can not customize status code of this type")
             else:
                 if status in (204, 205):
                     self.content = None
-                self.status_code = status
+        else:
+            status = self.status_code or 200
+
+        if status is None:
+            raise ValueError("Status is none")
+
+        self.status_code = status
+        self.headers: CIMultiDict = headers
+        self.content_type = content_type
+        self.content_length = content_length
+
+        self._prepared = False
+        self._start_body = False
+        self._eof_sent = False
 
     @property
     def status(self):
         return self.status_code
 
-
-@implementer(IASGIResponse)
-class ASGIResponse:
-    def __init__(
-        self,
-        *,
-        headers: dict = None,
-        status: int = None,
-        content_type: str = None,
-        content_length: int = None,
-    ) -> None:
-        if status is None:
-            raise ValueError("Status is none")
-
-        self.status_code = status
-        self.headers = headers or {}
-        self.content_type = content_type
-        self.content_length = content_length
-
-        self._prepared = False
-        self._eof_sent = False
+    def set_body(self, body):
+        self.content = None
+        self.body = body
 
     @property
     def prepared(self) -> bool:
@@ -96,20 +107,30 @@ class ASGIResponse:
             }
         )
 
+    async def send_body(self):
+        if self._eof_sent:
+            raise RuntimeError("Cannot call send_body() after sending eof")
+        if self._start_body is True:
+            raise RuntimeError("Cannot call send_body() for a started response")
+
+        body = self.body if self.body is not None else b""
+        await self.write(body, eof=True)
+
     async def write(self, data: bytes = b"", eof=False) -> None:
         assert isinstance(data, (bytes, bytearray, memoryview)), "data argument must be byte-ish (%r)" % type(
             data
         )
 
         if self._eof_sent:
-            raise RuntimeError("Cannot call write() after write_eof()")
+            raise RuntimeError("Cannot call write() after sending eof")
         if self._prepared is False:
             raise RuntimeError("Cannot call write() before prepare()")
 
         await self._req.send({"type": "http.response.body", "body": data, "more_body": not eof})
         self._eof_sent = eof
+        self._start_body = True
 
-    def _headers_to_list(self, headers: Dict) -> List[Tuple[bytes, bytes]]:
+    def _headers_to_list(self, headers: Union[Dict, CIMultiDict]) -> List[Tuple[bytes, bytes]]:
         return [(k.encode(), v.encode()) for k, v in headers.items()]
 
     def __repr__(self) -> str:
@@ -127,17 +148,6 @@ class ASGIResponse:
 
     def __eq__(self, other: object) -> bool:
         return self is other
-
-
-class ASGISimpleResponse(ASGIResponse):
-    def __init__(self, *, body: bytes = b"", **kwargs) -> None:
-        self.body = body
-        super().__init__(**kwargs)
-
-    async def prepare(self, request: "Request"):
-        await super().prepare(request)
-        if self._eof_sent is False:
-            await self.write(self.body, eof=True)
 
 
 class ErrorResponse(Response):

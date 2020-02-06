@@ -10,8 +10,8 @@ from guillotina.interfaces import IFileManager
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IStaticDirectory
 from guillotina.interfaces import IStaticFile
-from guillotina.response import ASGIResponse
 from guillotina.response import HTTPNotFound
+from guillotina.response import Response
 
 import mimetypes
 
@@ -55,7 +55,7 @@ class FileGET(DownloadService):
         filepath = str(fi.file_path.absolute())
         filename = fi.file_path.name
         with open(filepath, "rb") as f:
-            resp = ASGIResponse(status=200)
+            resp = Response(status=200)
             resp.content_type, _ = mimetypes.guess_type(filename)
 
             disposition = 'filename="{}"'.format(filename)
