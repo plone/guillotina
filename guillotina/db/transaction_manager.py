@@ -124,18 +124,7 @@ class TransactionManager:
             except AttributeError:
                 pass
             try:
-                try:
-                    await self._storage.close(txn._db_conn)
-                except asyncpg.exceptions.InterfaceError as ex:
-                    if "received invalid connection" in str(ex):
-                        # ignore, new pool was created so we can not close this conn
-                        pass
-                    else:
-                        raise
-                except asyncpg.exceptions.InternalClientError:
-                    # edge-case where connection is already released
-                    if txn._db_conn is not None:
-                        raise
+                await self._storage.close(txn._db_conn)
             except Exception:
                 # failsafe terminate to make sure connection is cleaned
                 if txn._db_conn is None:

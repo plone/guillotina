@@ -796,11 +796,21 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def open(self):
         return await self.pool.acquire(timeout=self._conn_acquire_timeout)
 
-    async def close(self, con):
+    async def _close(self, con):
         try:
-            await shield(self.pool.release(con, timeout=1))
+            await self.pool.release(con)
+        except asyncpg.exceptions.InterfaceError as ex:
+            if "received invalid connection" in str(ex):
+                # ignore, new pool was created so we can not close this conn
+                pass
+            else:
+                raise
         except (asyncio.CancelledError, asyncio.TimeoutError, asyncpg.exceptions.ConnectionDoesNotExistError):
             log.warning("Exception on connection close", exc_info=True)
+
+    async def close(self, con):
+        # we should never worry about correctly closing a connection
+        asyncio.ensure_future(self._close(con))
 
     async def terminate(self, conn):
         log.warning(f"Terminate connection {conn}", exc_info=True)
