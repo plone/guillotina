@@ -123,21 +123,7 @@ class TransactionManager:
                 txn._query_count_end = txn.get_query_count()
             except AttributeError:
                 pass
-            try:
-                await self._storage.close(txn._db_conn)
-            except Exception:
-                # failsafe terminate to make sure connection is cleaned
-                if txn._db_conn is None:
-                    raise
-                if txn._db_conn._con is None:
-                    raise
-                try:
-                    await self._storage.terminate(txn._db_conn)
-                except asyncpg.exceptions.InterfaceError as ex:
-                    if "released back to the pool" in str(ex):
-                        pass
-                    else:
-                        raise
+            await self._storage.close(txn._db_conn)
             txn._db_conn = None
 
     async def abort(self, *, txn: typing.Optional[ITransaction] = None) -> None:

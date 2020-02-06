@@ -807,6 +807,15 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                 raise
         except (asyncio.CancelledError, asyncio.TimeoutError, asyncpg.exceptions.ConnectionDoesNotExistError):
             log.warning("Exception on connection close", exc_info=True)
+        except Exception:
+            # unhandled, terminate
+            try:
+                con.terminate()
+            except asyncpg.exceptions.InterfaceError as ex:
+                if "released back to the pool" in str(ex):
+                    pass
+                else:
+                    raise
 
     async def close(self, con):
         # we should never worry about correctly closing a connection
