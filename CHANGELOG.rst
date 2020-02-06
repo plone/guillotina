@@ -7,6 +7,9 @@ CHANGELOG
 - Moved the ASGI logic from ASGIResponse and ASGISimpleResponse to class Response
   [masipcat]
 
+- Fix asyncpg integration with connection leaks on timeout
+  [vangheem]
+
 
 6.0.0a9 (2020-02-04)
 --------------------

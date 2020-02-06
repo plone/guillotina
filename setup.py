@@ -71,7 +71,6 @@ setup(
         "argon2-cffi",
         "backoff",
         "multidict",
-        "async-timeout",
     ],
     extras_require={
         "test": [
