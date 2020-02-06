@@ -805,10 +805,9 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                 pass
             else:
                 raise
-        except (asyncio.CancelledError, asyncio.TimeoutError, asyncpg.exceptions.ConnectionDoesNotExistError):
-            log.warning("Exception on connection close", exc_info=True)
         except Exception:
-            # unhandled, terminate
+            # unhandled, still try to terminate
+            log.warning("Exception when closing connection", exc_info=True)
             try:
                 con.terminate()
             except asyncpg.exceptions.InterfaceError as ex:
