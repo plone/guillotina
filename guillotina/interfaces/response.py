@@ -1,7 +1,7 @@
+from multidict import CIMultiDict
+from typing import Union
 from zope.interface import Attribute
 from zope.interface import Interface
-from typing import Union
-from multidict import CIMultiDict
 
 
 class IResponse(Interface):
