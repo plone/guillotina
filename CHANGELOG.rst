@@ -4,7 +4,12 @@ CHANGELOG
 5.3.23 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Be able to configure `max_inactive_connection_lifetime` and `max_queries`
+  of pg pool.
+  [vangheem]
+
+- Do not have timeout when closing pg connection.
+  [vangheem]
 
 
 5.3.22 (2020-02-05)

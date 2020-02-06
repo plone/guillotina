@@ -17,7 +17,6 @@ from guillotina.utils import get_authenticated_user_id
 from zope.interface import implementer
 
 import asyncio
-import asyncpg
 import typing
 
 
