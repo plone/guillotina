@@ -4,7 +4,8 @@ CHANGELOG
 6.0.0a11 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Small improvement in asgi.py
+  [masipcat]
 
 
 6.0.0a10 (2020-02-07)
