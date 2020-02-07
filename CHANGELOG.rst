@@ -7,6 +7,10 @@ CHANGELOG
 - Moving validation endpoint from traversal to query param
   [bloodbare]
 
+- Small improvement in asgi.py
+- Call IIDGenerator with apply_coro
+  [masipcat]
+
 
 6.0.0a10 (2020-02-07)
 ---------------------

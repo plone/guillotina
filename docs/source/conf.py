@@ -61,7 +61,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "Guillotina"
-copyright = "2016, Ramon Navarro Bosch & Nathan Van Gheem"
+copyright = "2020, Ramon Navarro Bosch & Nathan Van Gheem"
 author = "Ramon Navarro Bosch & Nathan Van Gheem"
 
 # The version info for the project you're documenting, acts as replacement for
