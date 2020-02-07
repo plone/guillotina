@@ -7,6 +7,8 @@ CHANGELOG
 - Moved the ASGI logic from ASGIResponse and ASGISimpleResponse to class Response
   [masipcat]
 
+- Validate POST @sharing payload too [lferran]
+
 - Fix asyncpg integration with connection leaks on timeout
   [vangheem]
 
