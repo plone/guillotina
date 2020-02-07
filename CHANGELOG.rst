@@ -4,7 +4,8 @@ CHANGELOG
 6.0.0a10 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Add mail from on email validation
+  [bloodbare]
 
 
 6.0.0a9 (2020-02-04)

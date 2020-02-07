@@ -62,6 +62,7 @@ class EmailValidationUtility:
         template_name = config["validation_template"]
         site_url = config["site_url"]
         validate_url = config["validation_url"]
+        from_email = config["site_mails_from"]
 
         render_util = get_utility(IJinjaUtility)
         if render_util is None:
@@ -89,7 +90,7 @@ class EmailValidationUtility:
             last_date=last_date,
             task=task_description,
         )
-        await util.send(recipient=email, subject=task_description, html=template)
+        await util.send(recipient=email, sender=from_email, subject=task_description, html=template)
 
     async def schema(self, token: str):
         data = await extract_validation_token(token)
