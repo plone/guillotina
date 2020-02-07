@@ -1,6 +1,5 @@
 Cython==0.29.13
-async-timeout==3.0.0
-asyncpg==0.19.0
+asyncpg==0.20.0
 cffi==1.12.2
 chardet==3.0.4
 jsonschema==2.6.0

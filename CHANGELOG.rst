@@ -6,6 +6,9 @@ CHANGELOG
 
 - Validate POST @sharing payload too [lferran]
 
+- Fix asyncpg integration with connection leaks on timeout
+  [vangheem]
+
 
 6.0.0a9 (2020-02-04)
 --------------------

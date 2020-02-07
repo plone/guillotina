@@ -1,4 +1,3 @@
-from async_timeout import timeout
 from asyncio import shield
 from guillotina._settings import app_settings
 from guillotina.const import TRASHED_ID
@@ -505,7 +504,7 @@ class PGConnectionManager:
             if retried:  # pragma: no cover
                 # always good to have prevention of infinity recursion
                 raise Exception("Error creating tid_sequence, this should never happen", exc_info=True)
-            async with self.pool.acquire() as conn:
+            async with self.pool.acquire(timeout=self._conn_acquire_timeout) as conn:
                 if self._db_schema != "public":
                     await conn.execute(f"CREATE SCHEMA IF NOT EXISTS {self._db_schema}")
                 await conn.execute(
@@ -759,7 +758,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
             )
             await self._connection_manager.initialize(loop, **kw)
 
-        async with self.pool.acquire() as conn:
+        async with self.pool.acquire(timeout=self._conn_acquire_timeout) as conn:
             if await self.has_unique_constraint(conn):
                 self._supports_unique_constraints = True
 
@@ -789,14 +788,13 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
     async def remove(self):
         """Reset the tables"""
-        async with self.pool.acquire() as conn:
+        async with self.pool.acquire(timeout=self._conn_acquire_timeout) as conn:
             await conn.execute("DROP TABLE IF EXISTS {} CASCADE;".format(self._blobs_table_name))
             await conn.execute("DROP TABLE IF EXISTS {} CASCADE;".format(self._objects_table_name))
 
     @restart_conn_on_exception
     async def open(self):
-        async with timeout(self._conn_acquire_timeout):
-            return await self.pool.acquire()
+        return await self.pool.acquire(timeout=self._conn_acquire_timeout)
 
     async def close(self, con):
         try:
