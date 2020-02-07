@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.0a10 (unreleased)
+6.0.0a10 (2020-02-07)
 ---------------------
 
 - Moved the ASGI logic from ASGIResponse and ASGISimpleResponse to class Response
