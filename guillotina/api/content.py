@@ -56,6 +56,7 @@ from guillotina.response import HTTPUnauthorized
 from guillotina.response import Response
 from guillotina.security.utils import apply_sharing
 from guillotina.transactions import get_transaction
+from guillotina.utils import apply_coroutine
 from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import get_behavior
 from guillotina.utils import get_object_by_uid
@@ -170,7 +171,7 @@ class DefaultPOST(Service):
         if not id_:
             generator = query_adapter(self.request, IIDGenerator)
             if generator is not None:
-                new_id = generator(data)
+                new_id = await apply_coroutine(generator, data)
                 if isinstance(new_id, str) and not await id_checker(new_id, type_):
                     raise ErrorResponse(
                         "PreconditionFailed",
