@@ -4,7 +4,8 @@ CHANGELOG
 5.3.24 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix release
+  [vangheem]
 
 
 5.3.23 (2020-02-06)

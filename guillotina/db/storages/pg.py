@@ -800,7 +800,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
     async def _close(self, con):
         try:
-            await self.pool.release(con, self._conn_release_timeout)
+            await self.pool.release(con, timeout=self._conn_release_timeout)
         except asyncpg.exceptions.InterfaceError as ex:  # pragma: no cover
             if "received invalid connection" in str(ex):
                 # ignore, new pool was created so we can not close this conn
