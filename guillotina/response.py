@@ -72,6 +72,10 @@ class Response(Exception):
     def status(self):
         return self.status_code
 
+    @property
+    def eof_sent(self):
+        return self._eof_sent
+
     def set_body(self, body):
         self.content = None
         self.body = body

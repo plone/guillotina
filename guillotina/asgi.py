@@ -114,6 +114,9 @@ class AsgiApp:
             await resp.prepare(request)
             await resp.send_body()
 
+        if not resp.eof_sent:
+            await resp.write(eof=True)
+
         self._cleanup(request, resp)
 
     def _cleanup(self, request, response):
