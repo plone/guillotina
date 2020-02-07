@@ -4,7 +4,8 @@ CHANGELOG
 6.0.0a11 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Moving validation endpoint from traversal to query param
+  [bloodbare]
 
 
 6.0.0a10 (2020-02-07)

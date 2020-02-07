@@ -82,7 +82,7 @@ class EmailValidationUtility:
 
         token, last_date = await generate_validation_token(data, ttl=ttl)
 
-        link = f"{site_url}{validate_url}/{token}"
+        link = f"{site_url}{validate_url}?token={token}"
         template = await render_util.render(
             template_name,
             context_description=context_description,
