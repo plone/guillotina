@@ -10,6 +10,7 @@ import pytest
 pytestmark = pytest.mark.asyncio
 
 
+@pytest.mark.app_settings({"cors": {"allow_origin": ["http://localhost"]}})
 async def test_get_root(container_requester):
     async with container_requester as requester:
         value, status, headers = await requester.make_request(
@@ -17,9 +18,17 @@ async def test_get_root(container_requester):
             "/db/guillotina",
             headers={"Origin": "http://localhost", "Access-Control-Request-Method": "Get"},
         )
+        assert status == 200
         assert "ACCESS-CONTROL-ALLOW-CREDENTIALS" in headers
         assert "ACCESS-CONTROL-EXPOSE-HEADERS" in headers
         assert "ACCESS-CONTROL-ALLOW-HEADERS" in headers
+
+        value, status, headers = await requester.make_request(
+            "OPTIONS",
+            "/db/guillotina",
+            headers={"Origin": "http://localhost:8080", "Access-Control-Request-Method": "Get"},
+        )
+        assert status == 401
 
 
 async def test_get_endpoint(container_requester):

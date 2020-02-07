@@ -33,7 +33,7 @@ TESTING_SETTINGS: Dict[str, Any] = {
     "default_static_filenames": ["teststatic.txt"],
     "creator": {"admin": "admin", "password": "admin"},
     "cors": {
-        "allow_origin": ["*"],
+        "allow_origin": ["http://localhost", "http://foobar.com", "http://foobar.com:8080"],
         "allow_methods": ["GET", "POST", "DELETE", "HEAD", "PATCH"],
         "allow_headers": ["*"],
         "expose_headers": ["*"],

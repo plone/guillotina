@@ -3,8 +3,8 @@ from guillotina import configure
 from guillotina.interfaces import IResponse
 from guillotina.interfaces.security import PermissionSetting
 from guillotina.profile import profilable
-from guillotina.response import ASGISimpleResponse
-from typing import Dict
+from guillotina.response import Response
+from typing import cast
 from typing import Optional
 from zope.interface.interface import InterfaceClass
 
@@ -48,22 +48,19 @@ class Renderer:
         return str(value).encode("utf-8")
 
     @profilable
-    async def __call__(self, value) -> ASGISimpleResponse:
+    async def __call__(self, value) -> Response:
         """
         Value can be:
         - Guillotina response object
         - serializable value
         """
-        status = 200
-        headers: Dict[str, str] = {}
         if IResponse.providedBy(value):
-            headers = value.headers
-            status = value.status_code or 200
-            value = value.content
+            resp = cast(Response, value)
+            if resp.content is not None:
+                resp.set_body(self.get_body(resp.content))
+            return resp
 
-        return ASGISimpleResponse(
-            body=self.get_body(value) or b"", status=status, headers=headers, content_type=self.content_type
-        )
+        return Response(body=self.get_body(value) or b"", status=200, content_type=self.content_type)
 
 
 @configure.renderer(name="application/json")

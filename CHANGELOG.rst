@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a10 (unreleased)
 ---------------------
 
+- Moved the ASGI logic from ASGIResponse and ASGISimpleResponse to class Response
+  [masipcat]
+
 - Add mail from on email validation
   [bloodbare]
 

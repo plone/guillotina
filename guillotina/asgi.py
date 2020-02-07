@@ -112,6 +112,7 @@ class AsgiApp:
 
         if not resp.prepared:
             await resp.prepare(request)
+            await resp.send_body()
 
         self._cleanup(request, resp)
 

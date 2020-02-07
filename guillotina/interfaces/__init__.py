@@ -103,7 +103,6 @@ from .misc import IRenderer  # noqa
 from .misc import IRequest  # noqa
 from .registry import IAddons  # noqa
 from .registry import ILayers  # noqa
-from .response import IASGIResponse  # noqa
 from .response import IResponse  # noqa
 from .security import Allow  # noqa
 from .security import AllowSingle  # noqa
