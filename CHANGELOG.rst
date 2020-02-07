@@ -4,7 +4,8 @@ CHANGELOG
 6.0.0a11 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Call IIDGenerator with apply_coro
+  [masipcat]
 
 
 6.0.0a10 (2020-02-07)
