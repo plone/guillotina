@@ -34,7 +34,7 @@ Anonymous user has on DB/StaticFiles/StaticDirectories/Application object :
 
 Defined at:
 
- * guillotina/permissions.py
+ * [guillotina/permissions.py](https://github.com/plone/guillotina/blob/master/guillotina/permissions.py "Link to permissions.py on GitHub")
 
 ## Content Related
 
