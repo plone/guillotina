@@ -4,6 +4,8 @@ CHANGELOG
 6.0.0a10 (unreleased)
 ---------------------
 
+- Validate POST @sharing payload too [lferran]
+
 - Fix asyncpg integration with connection leaks on timeout
   [vangheem]
 
