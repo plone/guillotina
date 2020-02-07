@@ -17,3 +17,7 @@ class IValidationSettings(Interface):
     validation_url = schema.Text(
         title="Validation frontend tail url", description="Tail url starting with /", default="/@@validation"
     )
+
+    site_mails_from = schema.Text(
+        title="Site mails from", description="Orig email to send mails", default="noreply@test.org"
+    )

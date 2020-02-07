@@ -43,6 +43,8 @@ class JinjaUtility:
         pass
 
     async def render(self, name, **options):
+        if name is None:
+            raise AttributeError("Template None is not a valid name")
         if name in self.cache:
             func = partial(self.cache[name].render, **options)
             return await self._loop.run_in_executor(self.executor, func)

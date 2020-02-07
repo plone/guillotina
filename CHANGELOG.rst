@@ -1,11 +1,20 @@
 CHANGELOG
 =========
 
-6.0.0a10 (unreleased)
+6.0.0a11 (unreleased)
+---------------------
+
+- Nothing changed yet.
+
+
+6.0.0a10 (2020-02-07)
 ---------------------
 
 - Moved the ASGI logic from ASGIResponse and ASGISimpleResponse to class Response
   [masipcat]
+
+- Add mail from on email validation
+  [bloodbare]
 
 - Validate POST @sharing payload too [lferran]
 
