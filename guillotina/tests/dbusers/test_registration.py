@@ -24,7 +24,9 @@ async def test_registration(container_install_requester):
         assert "<p>Registering user foobar</p>" in util.mail[0]["html"]
 
         token = (
-            util.mail[0]["html"].split("http://localhost:4200/@@validation?token=")[1].split('" target="_blank"')[0]
+            util.mail[0]["html"]
+            .split("http://localhost:4200/@@validation?token=")[1]
+            .split('" target="_blank"')[0]
         )
 
         resp, status_code = await requester("POST", f"/db/guillotina/@validate/{token}", authenticated=False)
