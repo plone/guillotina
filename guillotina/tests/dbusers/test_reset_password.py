@@ -32,7 +32,9 @@ async def test_reset_password(container_install_requester):
         assert "<p>Reset password</p>" in util.mail[0]["html"]
 
         token = (
-            util.mail[0]["html"].split("http://localhost:4200/@@validation?token=")[1].split('" target="_blank"')[0]
+            util.mail[0]["html"]
+            .split("http://localhost:4200/@@validation?token=")[1]
+            .split('" target="_blank"')[0]
         )
 
         resp, status_code = await requester(
