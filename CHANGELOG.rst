@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.0a11 (unreleased)
+6.0.0a11 (2020-02-09)
 ---------------------
 
 - Moving validation endpoint from traversal to query param
