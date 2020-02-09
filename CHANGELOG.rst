@@ -4,6 +4,8 @@ CHANGELOG
 6.0.0a11 (unreleased)
 ---------------------
 
+- Moving validation endpoint from traversal to query param
+  [bloodbare]
 
 - Small improvement in asgi.py
 - Call IIDGenerator with apply_coro
