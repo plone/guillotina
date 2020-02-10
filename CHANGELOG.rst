@@ -4,7 +4,8 @@ CHANGELOG
 6.0.0a12 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Fix validation authorization in case token is expired
+  [bloodbare]
 
 
 6.0.0a11 (2020-02-09)

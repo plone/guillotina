@@ -9,6 +9,7 @@ from guillotina.events import ValidationEvent
 from guillotina.interfaces import IMailer
 from guillotina.response import HTTPNotImplemented
 from guillotina.response import HTTPPreconditionFailed
+from guillotina.response import HTTPUnauthorized
 from guillotina.response import HTTPServiceUnavailable
 from guillotina.utils import get_registry
 from guillotina.utils import resolve_dotted_name
@@ -103,6 +104,8 @@ class EmailValidationUtility:
 
     async def finish(self, token: str, payload=None):
         data = await extract_validation_token(token)
+        if data is None:
+            raise HTTPUnauthorized()
 
         action = data.get("v_task")
         if action in app_settings["auth_validation_tasks"]:
