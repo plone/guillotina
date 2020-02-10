@@ -2,28 +2,25 @@
 
 In these narrative docs, we'll go through creating a todo application.
 
-
 ## Installation
 
-
-```
+```shell
 pip install guillotina
 ```
 
-
 ## Generating the initial application
 
-Guillotina comes with a `cookiecutter` template for creating a base application.
+Guillotina comes with a [cookiecutter](https://cookiecutter.readthedocs.io/en/1.7.0/ "Link to cookiecutter") template for creating a base application.
 
 First, install `cookiecutter` if it isn't already installed.
 
-```
+```shell
 pip install cookiecutter
 ```
 
 Then, run the generate command:
 
-```
+```shell
 guillotina create --template=application
 ```
 
@@ -31,7 +28,7 @@ Enter `guillotina_todo` for package_name.
 
 Then, install your package:
 
-```
+```shell
 cd guillotina_todo
 python setup.py develop
 ```
@@ -41,17 +38,15 @@ python setup.py develop
 The scaffold produces an initial `config.yaml` configuration file for you.
 
 You can inspect and customize your configuration. Most notable is the database
-configuration. If you want to run a development `postgresql` server, I
-recommend you use docker:
+configuration. If you want to run a development PostgreSQL server, use docker:
 
-```bash
+```shell
 docker run --rm \
   -e POSTGRES_DB=guillotina \
   -e POSTGRES_USER=guillotina \
   -p 127.0.0.1:5432:5432 \
   --name postgres postgres:9.6
 ```
-
 
 ## Creating to-do type
 
@@ -92,10 +87,9 @@ configure.scan('guillotina_todo.content')
 
 You run you application by using the guillotina command runner again:
 
-```
+```shell
 guillotina serve -c config.yaml
 ```
-
 
 ## Creating your todo list
 
