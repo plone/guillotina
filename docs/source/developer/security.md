@@ -25,8 +25,9 @@ Where `db` is the database, `todo` a container with to content inside.
 More than that we need some users in order to be able to compute permssion(s)
 for them, to do so we are going to install
 [guillotina_dbusers](https://github.com/guillotinaweb/guillotina_dbusers), once
-installed create two users, let's say "Bob" and "Alice". You can find more
-informations about this addon especially how to get **Bearer Authorization JWT**
+installed create two users, let's say "Bob" and "Alice".
+
+You can find more information about this addon especially how to get **Bearer Authorization JWT**
 see [training's users section](../../training/extending/users.html).
 
 Note that at this moment the resource tree can be represented like this:
@@ -65,8 +66,7 @@ Now login with "Bob" and try access `/db/todo` endpoint:
     }
 ```
 
-Like you can see in the response you are not authorized to view, and that's great
-because it means that the security system works like a charm.
+Like you can see in the response you are not authorized to view.
 
 Let's grant "Bob" view permission for this `db/todo/` resource tree node:
 
@@ -193,8 +193,9 @@ The last parameter in our permission definition we've talk so far is the
 **permission** parameter itself, Guillotina provided a lot of permission by
 default, you can find an exhaustive like by reading
 [Guillotina permissions definitions from the source code](https://github.com/plone/guillotina/blob/master/guillotina/permissions.py).
-Most of the permissions your application will need should be defined there, but
-obviously you can also defined your own, more on that later.
+
+Most of the application permissions your application should be defined there, but
+you can also define your own, more on that later.
 <!-- TODO: write an "How to defined permission" section in developer. not sure exactly where ATM -->
 
 
@@ -301,9 +302,9 @@ Let's grant `todo_viewer` view permission for this `db/todo/` resource tree node
     Content-Type: application/json
 ```
 
-Now alice should be able to view todo container and all it's children.
+Now Alice should be able to view todo container and all it's children.
 
-At the moment alice can view users and groups which is not convenient for a
+At the moment Alice can view users and groups which is not convenient for a
 `todo_viewer` group, let's deny that.
 
 ```eval_rst
@@ -456,7 +457,7 @@ Security for every operation is managed against three definitions (in order of p
 And finally "Code" for code level, like services, containers or whatever code
 exposed to the API.
 
-This means that principal or role could be mandatory to acces them.
+This means that principal or role could be mandatory to access them.
 
 Locals can defined:
 
