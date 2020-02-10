@@ -1,11 +1,11 @@
 # Quickstart
 
-How to quickly get started using `guillotina`.
+How to quickly get started using Guillotina.
 
-This tutorial will assume usage of venv. You can use your own preferred
-tool for managing your python environment.
+This tutorial will assume usage of [venv](https://docs.python-guide.org/dev/virtualenvs/ "Link to docs about different venvs").
+You can use your own preferred tool for managing your python environment.
 
-*This tutorial assumes you have postgresql running*
+*This tutorial assumes you have [PostgreSQL](https://www.postgresql.org/ "Link to PostgreSQL") running*
 
 Setup the environment:
 
@@ -13,13 +13,13 @@ Setup the environment:
 python3.7 -m venv .
 ```
 
-Install `guillotina`:
+Install Guillotina:
 
 ```
 ./bin/pip install guillotina
 ```
 
-Generate configuration file (requires `cookiecutter`):
+Generate configuration file (requires [cookiecutter](https://cookiecutter.readthedocs.io "Link to cookiecutter")):
 
 ```
 ./bin/pip install cookiecutter
@@ -34,17 +34,17 @@ Finally, run the server:
 
 The server should now be running on http://0.0.0.0:8080
 
-Then, [use Postman](https://www.getpostman.com/), `curl` or whatever tool you
+Then, use [Postman](https://www.getpostman.com/ "Link to Postman"), `curl` or whatever tool you
 prefer to interact with the [REST API](./rest/index.html).
 
 You can also navigate in your Guillotina server with its built-in web admin interface by visiting http://localhost:8080/+admin/.
 
-Modify the configuration in `config.yaml` to customize server setttings.
+Modify the configuration in `config.yaml` to customize server settings.
 
 
 ### Postgresql installation instructions
 
-If you do not have a postgresql database server installed, you can use docker
+If you do not have a PostgreSQL database server installed, you can use docker
 to get one running quickly.
 
 Example docker run command:
@@ -56,9 +56,10 @@ docker run -e POSTGRES_DB=guillotina -e POSTGRES_USER=guillotina -p 127.0.0.1:54
 
 ## Creating a container
 
-Guillotina containers are the building block of all other content. A container
-is where you place all other content for your application. Only containers can
-be created inside databases.
+Guillotina containers are the building block of all other content.
+A container is where you place all other content for your application.
+
+Only containers can be created inside databases.
 
 Let's create one:
 
@@ -109,7 +110,7 @@ and create content inside the container:
 
 ## Retrieving your data
 
-Let's navigating throught your newly created data.
+Let's navigating through your newly created data.
 
 First you can see all your containers using the following, notice that at the moment there's only one named `guillotina`:
 
