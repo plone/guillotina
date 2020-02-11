@@ -1,4 +1,3 @@
-from copy import deepcopy
 from guillotina import app_settings
 from guillotina.auth import authenticate_user
 from guillotina.content import create_content_in_container
@@ -15,19 +14,18 @@ async def run(token_data, payload):
     container = get_current_container()
     user_folders = await container.async_get("users")
 
-    data = deepcopy(token_data)
+    data = {}
 
-    del data["iat"]
-    del data["exp"]
+    valid_data = ['username', 'email', 'name', 'password', 'properties']
 
-    keys = list(data.keys())
-    for key in keys:
-        if key.startswith("v_"):
-            del data[key]
+    for key in valid_data:
+        if key in token_data:
+            data[key] = token_data[key]
 
     user = await create_content_in_container(
         user_folders, "User", token_data["id"], creators=(token_data["id"],), check_security=False, **data
     )
+    user.user_roles = ["guillotina.Member"]
     await notify(ObjectAddedEvent(user))
 
     jwt_token, data = authenticate_user(user.id, timeout=app_settings["jwt"]["token_expiration"])
