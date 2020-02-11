@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.25 (unreleased)
+5.3.25 (2020-02-11)
 -------------------
 
 - Fix storages integration with some asyncpg pool settings
