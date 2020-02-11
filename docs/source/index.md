@@ -3,16 +3,16 @@
 Guillotina is the only full-featured Python AsyncIO REST Resource Application
 Server designed for high-performance, horizontally scaling solutions.
 
-## Getting started(quick)
+## Quick Start
 
 Install Guillotina:
 
-```
+```shell
 pip install guillotina
 g serve --port=8080
 ```
 
-Then use curl, postman or build something with it::
+Then use curl, [Postman](https://www.postman.com/ "Link to Postman) or build something with it::
 
 ```
 curl -XPOST --user root:root http://localhost:8080/db -d '{
@@ -43,22 +43,21 @@ curl --user root:root http://localhost:8080/db/container
  - **Scale**: With integrations like Redis, ElasticSearch and Cockroach, you
    have the tools to scale.
 
-# Getting started(longer)
+# Getting started
 
 Are you new to Guillotina? This is the place to start!
 
-[Quick tour of Guillotina](./quick-tour.html) gives an overview of the major features in
-Guillotina, covering a little about a lot.
+The [quick tour](./quick-tour.html) gives an overview of the major features in Guillotina.
 
 Need help? Join our [Gitter channel](https://gitter.im/plone/guillotina).
 
-# Build a Guillotina app(quick)
+# Build a Guillotina app
 
-You can even run Guillotina as a singlepage app if you so desire.
+You can even run Guillotina as a single page app if you so desire.
 
 Here is an example with content type and service::
 
-```
+```python
 from aiohttp import web
 from guillotina import configure
 from guillotina import content
@@ -179,8 +178,8 @@ Now you can start hands-on style guide to learn how to use it.
 
 # Deploying
 
-- [Installing guillotina](./installation/installation.html)
-  is simply done with pip but if you need to run with docker,
+- [Installing Guillotina](./installation/installation.html)
+  is done with pip but if you need to run with docker,
   [we also have you covered](https://hub.docker.com/r/guillotina/guillotina/).
 - Guillotina has an quite a few
   [configuration options](./installation/configuration.html)
