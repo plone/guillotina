@@ -4,7 +4,8 @@ CHANGELOG
 5.3.25 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix storages integration with some asyncpg pool settings
+  [vangheem]
 
 
 5.3.24 (2020-02-06)
