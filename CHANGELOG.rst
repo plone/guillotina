@@ -4,7 +4,8 @@ CHANGELOG
 6.0.0a12 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Some asyncpg settings do not work with storages
+  [vangheem]
 
 
 6.0.0a11 (2020-02-09)
