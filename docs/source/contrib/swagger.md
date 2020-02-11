@@ -1,7 +1,6 @@
 # Swagger
 
-Guillotina provides out of the box swagger support.
-
+Guillotina provides out of the box OpenAPI (Swagger) support.
 
 ## Configuration
 
@@ -11,7 +10,6 @@ applications:
 ```
 
 ## Usage
-
 
 Once activated, visit `http://localhost:8080/@docs` to view swagger documentation.
 
