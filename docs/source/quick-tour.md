@@ -1,9 +1,11 @@
 # Quick tour of Guillotina
 
-Guillotina is powerful datastore, capable of storing and indexing milions of objects.
+Guillotina is powerful datastore, capable of storing and indexing millions of objects.
 
 It is a high performance web server based on many of the technologies and lessons learned
-from Plone, Pyramid, Django and others all while utilizing Python's great AsyncIO library.
+from [Plone](https://plone.org "Link to Plone"), [Pyramid](https://trypyramid.com/ "Link to Pyramid"),
+[Django](https://www.djangoproject.com/ "Link to Django") and others all while utilizing
+Python's great [AsyncIO](https://docs.python.org/3/library/asyncio.html "Link to AsyncIO") library.
 
 Using Python's AsyncIO, it works well with micro-service oriented environments.
 
@@ -17,7 +19,7 @@ Features:
  - Content types, dynamic behaviors, based on python interfaces and json schemas.
  - Built-in CORS support
  - Serialitzation/Validiation library integrated.
- - Elastic search integration throught guillotina_elasticsearch, or fallback to postgres
+ - Elastic search integration through guillotina_elasticsearch, or fallback to [PostgreSQL](https://www.postgresql.org/ "Link to PostgreSQL")
    json indexing.
  - Declarative configuration using decorators.
  - Integrated cloud storage file uploads.
@@ -25,11 +27,10 @@ Features:
  - Built-in command system to run jobs.
  - Rich ecosystem of additional packages for adding additional features: Integration with
    rabbitmq, batching of queries, redis cache layer.
- - Powerful  addon architecture based on Zope Component Architecture.
+ - Powerful  addon architecture based on [Zope](https://www.zope.org/ "Link to Zope") Component Architecture.
 
 
-What is Guillotina like?
-========================
+## What is Guillotina like?
 
 ### Example configuration:
 
@@ -209,18 +210,19 @@ See [instructions below](#playing-with-those-examples) to play with.
 
 ### Playing with those examples
 
-In order to play with those examples you should install guillotina and cookiecutter, let's do that in a python venv:
+To play with those examples you should install Guillotina and [Cookiecutter](https://cookiecutter.readthedocs.io "Link to cookiecutter"),
+let's do that in a python venv:
 
-```
-$ python3.7 -m venv .
-$ source ./bin/activate
-$ pip install guillotina cookiecutter
+```shell
+python3.7 -m venv .
+source ./bin/activate
+pip install guillotina cookiecutter
 ```
 
-Then use guillotina templates to create an application:
+Use Guillotina templates to create an application:
 
-```
-$ ./bin/g create --template=application
+```shell
+./bin/g create --template=application
 full_name []: My App
 email []: guillotina@myapp.io
 package_name [guillotina_myproject]: myapp
@@ -257,16 +259,16 @@ Add `configure.scan('myapp.content')` to `myapp/myapp/__init__.py` `includeme` f
 
 Then install `myapp`:
 
-```
-$ pip install -e myapp
+```shell
+pip install -e myapp
 ```
 
 Edit `myapp/config.yaml` to fit your needs, especially in term of db configuration.
 
 And run guillotina with:
 
-```
-$ g serve -c myapp/config.yaml
+```shell
+g serve -c myapp/config.yaml
 ```
 
 Now create a container:
