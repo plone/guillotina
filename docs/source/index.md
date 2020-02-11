@@ -12,7 +12,7 @@ pip install guillotina
 g serve --port=8080
 ```
 
-Then use curl, Postman or build something with it::
+Then use curl, [Postman](https://www.postman.com/ "Link to Postman) or build something with it::
 
 ```
 curl -XPOST --user root:root http://localhost:8080/db -d '{
