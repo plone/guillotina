@@ -140,6 +140,10 @@ class PostgresqlDatabaseManager:
 
     async def get_connection(self, name: str = None) -> asyncpg.connection.Connection:
         connection_options = _get_connection_options(self.config)
+        for key in ("max_inactive_connection_lifetime", "max_queries"):
+            # these are not valid for raw connections
+            if key in connection_options:
+                del connection_options[key]
         dsn = self.get_dsn(name)
         return await asyncpg.connect(dsn=dsn, **connection_options)
 
