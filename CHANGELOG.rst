@@ -4,7 +4,8 @@ CHANGELOG
 5.3.26 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Improve performance of bucket dict field
+  [vangheem]
 
 
 5.3.25 (2020-02-11)

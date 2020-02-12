@@ -5,9 +5,11 @@ from guillotina.interfaces import IAnnotations
 from guillotina.tests.utils import login
 from guillotina.transactions import transaction
 from guillotina.utils import get_database
+from uuid import uuid4
 
 import os
 import pytest
+import time
 
 
 pytest.mark.skipif(os.environ.get("DATABASE") == "cockroachdb", reason="Flaky cockroachdb test")
@@ -94,3 +96,17 @@ async def test_bucket_dict_value(db, guillotina_main):
         assert [k async for k in bucket.iter_keys(ob)] == [str(i) for i in _range]
         assert [v async for v in bucket.iter_values(ob)] == [i for i in _range]
         assert [(k, v) async for k, v in bucket.iter_items(ob)] == [(str(i), i) for i in _range]
+
+
+async def _test_bucket_dict_value_many_values(dummy_guillotina):  # pragma: no cover
+    db = await get_database("db")
+    login()
+    bucket = BucketDictValue(bucket_len=20000)
+
+    async with transaction(db=db):
+        container = await create_content_in_container(db, "Container", "container", title="Container")
+        ob = await create_content_in_container(container, "Item", "foobar")
+        start = time.time()
+        for index in range(61000):
+            await bucket.assign(ob, str(uuid4()), index)
+        print(f"done in {time.time() - start}")
