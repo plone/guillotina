@@ -98,7 +98,7 @@ async def test_bucket_dict_value(db, guillotina_main):
         assert [(k, v) async for k, v in bucket.iter_items(ob)] == [(str(i), i) for i in _range]
 
 
-async def _test_bucket_dict_value_many_values(dummy_guillotina):
+async def _test_bucket_dict_value_many_values(dummy_guillotina):  # pragma: no cover
     db = await get_database("db")
     login()
     bucket = BucketDictValue(bucket_len=20000)
