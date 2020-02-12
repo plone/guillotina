@@ -277,12 +277,11 @@ class BucketDictValue:
             # get annotation for this key again as it might be the new annotation
             annotation = await self.get_annotation(context, key)
 
-        if key in annotation["keys"]:
+        insert_idx = bisect.bisect_left(annotation["keys"], key)
+        if len(annotation["keys"]) < insert_idx and annotation["keys"][insert_idx] == key:
             # change existing value
-            idx = annotation["keys"].index(key)
-            annotation["values"][idx] = value
+            annotation["values"][insert_idx] = value
         else:
-            insert_idx = bisect.bisect_left(annotation["keys"], key)
             annotation["keys"].insert(insert_idx, key)
             annotation["values"].insert(insert_idx, value)
             _, bucket = self._find_bucket(key)
@@ -290,12 +289,21 @@ class BucketDictValue:
 
         annotation.register()
 
+    def __index(self, annotation, key):
+        idx = bisect.bisect_left(annotation["keys"], key)
+        try:
+            if annotation["keys"][idx] == key:
+                return idx
+        except IndexError:
+            pass
+        raise ValueError(key)
+
     async def get(self, context, key):
         annotation = await self.get_annotation(context, key, create=False)
         if annotation is None:
             return None
         try:
-            idx = annotation["keys"].index(key)
+            idx = self.__index(annotation, key)
         except ValueError:
             return None
         return annotation["values"][idx]
@@ -306,7 +314,7 @@ class BucketDictValue:
             return
 
         try:
-            idx = annotation["keys"].index(key)
+            idx = self.__index(annotation, key)
         except ValueError:
             return None
         del annotation["keys"][idx]
