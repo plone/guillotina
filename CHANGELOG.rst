@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.26 (unreleased)
+5.3.26 (2020-02-12)
 -------------------
 
 - Improve performance of bucket dict field
