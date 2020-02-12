@@ -4,7 +4,7 @@ CHANGELOG
 6.0.0a12 (unreleased)
 ---------------------
 
-- Some asyncpg settings do not work with storages
+- Improve performance of bucket dict field
   [vangheem]
 
 
