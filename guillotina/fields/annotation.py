@@ -278,7 +278,7 @@ class BucketDictValue:
             annotation = await self.get_annotation(context, key)
 
         insert_idx = bisect.bisect_left(annotation["keys"], key)
-        if len(annotation["keys"]) < insert_idx and annotation["keys"][insert_idx] == key:
+        if len(annotation["keys"]) > insert_idx and annotation["keys"][insert_idx] == key:
             # change existing value
             annotation["values"][insert_idx] = value
         else:
