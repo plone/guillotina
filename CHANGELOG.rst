@@ -4,7 +4,11 @@ CHANGELOG
 5.3.27 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Add `max_ops` property to `PatchField`, `BucketListField` and `BucketDictField`
+  [vangheem]
+
+- Add clear action to list, dict and annotation patch fields
+  [vangheem]
 
 
 5.3.26 (2020-02-12)
