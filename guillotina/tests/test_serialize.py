@@ -910,7 +910,7 @@ async def test_bucket_dict_field_clear(dummy_request, mock_txn):
             [],
         )
     assert len(content.bucket_dict) == 100
-    assert len(content.bucket_dict.buckets) == 14
+    assert len(content.bucket_dict.buckets) >= 10
 
     await deserializer.set_schema(ITestSchema, content, {"bucket_dict": {"op": "clear"}}, [])
     assert len(content.bucket_dict) == 0
