@@ -10,6 +10,9 @@ CHANGELOG
 - Some asyncpg settings do not work with storages
   [vangheem]
 
+- Improve performance of bucket dict field
+  [vangheem]
+
 
 6.0.0a11 (2020-02-09)
 ---------------------

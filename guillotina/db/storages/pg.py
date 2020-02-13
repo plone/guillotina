@@ -1,4 +1,5 @@
 from asyncio import shield
+from guillotina import glogging
 from guillotina._settings import app_settings
 from guillotina.const import TRASHED_ID
 from guillotina.db.events import StorageCreatedEvent
@@ -20,12 +21,11 @@ import asyncio
 import asyncpg
 import asyncpg.connection
 import concurrent
-import logging
 import time
 import ujson
 
 
-log = logging.getLogger("guillotina.storage")
+log = glogging.getLogger("guillotina.storage")
 
 
 # we can not use FOR UPDATE or FOR SHARE unfortunately because
