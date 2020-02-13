@@ -4,6 +4,12 @@ CHANGELOG
 6.0.0a12 (unreleased)
 ---------------------
 
+- Import aiohttp only when recaptcha is configured
+  [masipcat]
+
+- Some asyncpg settings do not work with storages
+  [vangheem]
+
 - Improve performance of bucket dict field
   [vangheem]
 
