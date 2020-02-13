@@ -103,8 +103,7 @@ if __name__ == '__main__':
 
 # Training / Tutorial
 
-To learn more, go to the [training section](./training/index.html).
-You can learn basics and find topics about Guillotina:
+Learn how to use Guillotina by following the [training](./training/index.html "Link to Guillotina trining docs").
 
 ```eval_rst
 .. toctree::
@@ -141,7 +140,7 @@ The endpoints available around these objects are detailed below:
    rest/folder
 ```
 
-# Narrative Developer Documentation
+# Developer Documentation
 
 After reading quick tour or training section,
 Now you can start hands-on style guide to learn how to use it.
