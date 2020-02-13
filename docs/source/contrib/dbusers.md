@@ -1,11 +1,10 @@
 # Guillotina dbusers
 
-Store users/groups as content in the database for guillotina.
-
+Store users/groups as content in the database for Guillotina.
 
 ## Installation
 
-- add `guillotina.contrib.dbusers` to list of applications in your guillotina configuration
+- add `guillotina.contrib.dbusers` to list of applications in your Guillotina configuration
 - install into your container using the `@addons` endpoint using `dbusers` as id.
 
 Available content types:
@@ -19,7 +18,7 @@ After installation, you will now have a `users` and `groups` folder
 inside your container.
 
 Guillotina users holding `guillotina.ContainerAdmin` or
-`guillotina.Manager` permissions can add new users like::
+`guillotina.Manager` permissions can add new users like
 
 ```json
 POST /db/container/users {
@@ -35,7 +34,8 @@ POST /db/container/users {
 
 You can now login to the container with the `foobar` user.
 
-New groups are added likewise::
+New groups are added likewise
+
 ```json
 POST /db/container/groups {
     "@type": "Group",
@@ -49,7 +49,7 @@ POST /db/container/groups {
 
 ### Management
 
-dbusers follows the same implementation as plone_restapi for managing users
+dbusers follows the same implementation as [plone.restapi](https://plonerestapi.readthedocs.io/en/latest/) for managing users
 
-- [Plone restapi Users](https://plonerestapi.readthedocs.io/en/latest/users.html)
-- [Plone restapi Groups](https://plonerestapi.readthedocs.io/en/latest/groups.html)
+- [Plone REST API Users](https://plonerestapi.readthedocs.io/en/latest/users.html)
+- [Plone Rest API Groups](https://plonerestapi.readthedocs.io/en/latest/groups.html)
