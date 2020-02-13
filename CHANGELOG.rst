@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.27 (unreleased)
+5.3.27 (2020-02-13)
 -------------------
 
 - Add `max_ops` property to `PatchField`, `BucketListField` and `BucketDictField`
