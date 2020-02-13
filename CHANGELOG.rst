@@ -4,6 +4,12 @@ CHANGELOG
 6.0.0a12 (unreleased)
 ---------------------
 
+- Add `max_ops` property to `PatchField`, `BucketListField` and `BucketDictField`
+  [vangheem]
+
+- Add clear action to list, dict and annotation patch fields
+  [vangheem]
+
 - Import aiohttp only when recaptcha is configured
   [masipcat]
 
