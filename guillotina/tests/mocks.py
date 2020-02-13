@@ -62,16 +62,16 @@ class MockTransaction:  # type: ignore
     def delete(self, ob):
         self.deleted[ob.__uuid__] = ob
 
-    def tpc_cleanup(self):
+    def tpc_cleanup(self):  # pragma: no cover
         pass
 
-    async def del_blob(self, bid):
+    async def del_blob(self, bid):  # pragma: no cover
         pass
 
-    async def write_blob_chunk(self, bid, zoid, chunk_number, data):
+    async def write_blob_chunk(self, bid, zoid, chunk_number, data):  # pragma: no cover
         pass
 
-    async def get_annotation(self, ob, key, reader=None):
+    async def get_annotation(self, ob, key, reader=None):  # pragma: no cover
         pass
 
     def __enter__(self):

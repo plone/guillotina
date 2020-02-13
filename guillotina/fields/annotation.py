@@ -108,7 +108,7 @@ class BucketListValue:
         for index in sorted(self.annotations_metadata.keys()):
             annotation_name = self.get_annotation_name(index)
             annotation = annotations_container.get(annotation_name, _default)
-            if annotation is _default:
+            if annotation is _default:  # pragma: no cover
                 annotation = await annotations_container.async_get(annotation_name, _default)
                 if annotation is _default:
                     continue
@@ -491,7 +491,7 @@ def field_converter(field, value, context):
     operation = query_adapter(field, IPatchFieldOperation, name=operation_name)
     if operation is None:
         raise ValueDeserializationError(field, value, f'"{operation_name}" not a valid operation')
-    if "value" not in value and operation_name not in ("clear",):
+    if "value" not in value and operation_name not in ("clear",):  # pragma: no cover
         raise ValueDeserializationError(field, value, f"Missing value")
     return value
 

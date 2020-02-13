@@ -1040,6 +1040,15 @@ async def test_bucket_list_invalid_op(dummy_guillotina, mock_txn):
         await field.set(content, {"op": "foobar", "value": ["foobar"]})
 
 
+async def test_patch_dict_validation(dummy_guillotina):
+    field = fields.PatchField(schema.Dict(key_type=schema.Text(), value_type=schema.Text()), max_ops=1)
+    field.__name__ = field.field.__name__ = "foobar"
+    op = patch.PatchDictUpdate(field.field)
+    content = create_content()
+    with pytest.raises(ValueDeserializationError):
+        op(content, [{"foo": "bar"}])
+
+
 async def test_bucket_list_max_ops(dummy_guillotina, mock_txn):
     field = fields.BucketListField(bucket_len=10, required=False, max_ops=1, value_type=schema.Text())
     field.__name__ = "foobar"

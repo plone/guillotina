@@ -171,7 +171,7 @@ class PatchListExtend(PatchListAppend):
         existing = getattr(context, self.field.__name__, None)
         if existing is None:
             existing = self.field.missing_value or []
-        if not isinstance(value, list):
+        if not isinstance(value, list):  # pragma: no cover
             raise ValueDeserializationError(self.field, value, "Not valid list")
 
         if self.field.max_ops and len(value) > self.field.max_ops:
@@ -215,7 +215,7 @@ class PatchListDel(PatchListAppend):
     def do_operation(self, existing, value):
         try:
             del existing[value]
-        except (IndexError, TypeError):
+        except (IndexError, TypeError):  # pragma: no cover
             raise ValueDeserializationError(self.field, value, "Not valid index value")
         return existing
 
