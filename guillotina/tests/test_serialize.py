@@ -4,6 +4,7 @@ from guillotina import schema
 from guillotina.component import get_adapter
 from guillotina.component import get_multi_adapter
 from guillotina.exceptions import ValueDeserializationError
+from guillotina.fields import patch
 from guillotina.files.dbfile import DBFile
 from guillotina.interfaces import IJSONToValue
 from guillotina.interfaces import IResourceDeserializeFromJson
@@ -310,6 +311,9 @@ async def test_patch_list_field(dummy_request, mock_txn):
     await deserializer.set_schema(ITestSchema, content, {"patch_list": {"op": "del", "value": 3}}, [])
     assert len(content.patch_list) == 3
 
+    await deserializer.set_schema(ITestSchema, content, {"patch_list": {"op": "clear"}}, [])
+    assert len(content.patch_list) == 0
+
 
 async def test_patch_tuple_field(dummy_request, mock_txn):
     login()
@@ -351,6 +355,9 @@ async def test_patch_tuple_field(dummy_request, mock_txn):
 
     await deserializer.set_schema(ITestSchema, content, {"patch_tuple": {"op": "del", "value": 1}}, [])
     assert len(content.patch_tuple) == 1
+
+    await deserializer.set_schema(ITestSchema, content, {"patch_tuple": {"op": "clear"}}, [])
+    assert len(content.patch_tuple) == 0
 
 
 async def test_patch_list_field_invalid_type(dummy_request, mock_txn):
@@ -395,6 +402,10 @@ async def test_patch_dict_field(dummy_request, mock_txn):
 
     assert len(content.patch_dict) == 1
     assert "foo2" not in content.patch_dict
+
+    await deserializer.set_schema(ITestSchema, content, {"patch_dict": {"op": "clear"}}, [])
+
+    assert len(content.patch_dict) == 0
 
 
 async def test_patch_dict_field_invalid_type(dummy_request, mock_txn):
@@ -526,6 +537,26 @@ async def test_bucket_list_field(dummy_request, mock_txn):
     assert len([i async for i in content.bucket_list.iter_items(content)]) == 101
 
     assert "bucketlist-bucket_list0" in content.__gannotations__
+
+
+async def test_bucket_list_field_clear(dummy_request, mock_txn):
+    login()
+    content = create_content()
+    deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
+
+    for _ in range(100):
+        await deserializer.set_schema(
+            ITestSchema,
+            content,
+            {"bucket_list": {"op": "append", "value": {"key": "foo", "value": "bar"}}},
+            [],
+        )
+    assert len(content.bucket_list) == 100
+    assert len(content.bucket_list.annotations_metadata) == 10
+
+    await deserializer.set_schema(ITestSchema, content, {"bucket_list": {"op": "clear"}}, [])
+    assert len(content.bucket_list) == 0
+    assert len(content.bucket_list.annotations_metadata) == 0
 
 
 async def test_patch_multi(dummy_request):
@@ -863,6 +894,29 @@ async def test_bucket_dict_field_splitting(dummy_request, mock_txn):
     assert len(mock_txn.added) == 2  # should write to existing bucket and new one
 
 
+async def test_bucket_dict_field_clear(dummy_request, mock_txn):
+    login()
+    content = create_content()
+    deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
+
+    inserted = {"foo": "bar"}
+    for idx in range(100):
+        key = uuid.uuid4().hex
+        inserted[key] = str(idx)
+        await deserializer.set_schema(
+            ITestSchema,
+            content,
+            {"bucket_dict": {"op": "assign", "value": {"key": key, "value": str(idx)}}},
+            [],
+        )
+    assert len(content.bucket_dict) == 100
+    assert len(content.bucket_dict.buckets) == 14
+
+    await deserializer.set_schema(ITestSchema, content, {"bucket_dict": {"op": "clear"}}, [])
+    assert len(content.bucket_dict) == 0
+    assert len(content.bucket_dict.buckets) == 1
+
+
 class ITestValidation(Interface):
 
     foo = schema.Text(required=False)
@@ -925,3 +979,84 @@ async def test_validator_error(dummy_request, mock_txn):
     content = create_content()
     await deserializer.set_schema(ITestValidation, content, {"validated_text": "foo"}, errors)
     assert len(errors) == 0
+
+
+async def test_patch_list_mutli_patch_validation(dummy_guillotina):
+    field = fields.PatchField(schema.List(), max_ops=2)
+    multi = patch.MultiPatch(field)
+    content = create_content()
+    with pytest.raises(ValueDeserializationError):
+        multi(content, [[]])
+    with pytest.raises(ValueDeserializationError):
+        multi(content, [""])
+
+
+async def test_patch_list_mutli_patch_max_ops(dummy_guillotina):
+    field = fields.PatchField(schema.List(), max_ops=1)
+    multi = patch.MultiPatch(field)
+    content = create_content()
+    multi(content, [{"op": "append", "value": "foobar"}])
+    with pytest.raises(ValueDeserializationError):
+        multi(content, [{"op": "append", "value": "foobar"}, {"op": "append", "value": "foobar"}])
+
+
+async def test_patch_dict_mutli_patch_max_ops(dummy_guillotina):
+    field = fields.PatchField(schema.Dict(), max_ops=1)
+    multi = patch.MultiPatch(field)
+    content = create_content()
+    multi(content, [{"op": "update", "value": [{"key": "foo", "value": "bar"}]}])
+    with pytest.raises(ValueDeserializationError):
+        multi(
+            content,
+            [
+                {"op": "update", "value": [{"key": "foo", "value": "bar"}]},
+                {"op": "update", "value": [{"key": "foo", "value": "bar"}]},
+            ],
+        )
+
+
+async def test_patch_list_extend_max_ops(dummy_guillotina):
+    field = fields.PatchField(schema.List(), max_ops=1)
+    op = patch.PatchListExtend(field.field)
+    content = create_content()
+    op(content, ["foobar"])
+    with pytest.raises(ValueDeserializationError):
+        op(content, ["foo", "bar"])
+
+
+async def test_patch_dict_update_max_ops(dummy_guillotina):
+    field = fields.PatchField(schema.Dict(key_type=schema.Text(), value_type=schema.Text()), max_ops=1)
+    field.__name__ = field.field.__name__ = "foobar"
+    op = patch.PatchDictUpdate(field.field)
+    content = create_content()
+    op(content, [{"key": "foo", "value": "bar"}])
+    with pytest.raises(ValueDeserializationError):
+        op(content, [{"key": "foo", "value": "bar"}, {"key": "foo", "value": "bar"}])
+
+
+async def test_bucket_list_invalid_op(dummy_guillotina, mock_txn):
+    field = fields.BucketListField(bucket_len=10, required=False, value_type=schema.Text())
+    content = create_content()
+    with pytest.raises(ValueDeserializationError):
+        await field.set(content, {"op": "foobar", "value": ["foobar"]})
+
+
+async def test_bucket_list_max_ops(dummy_guillotina, mock_txn):
+    field = fields.BucketListField(bucket_len=10, required=False, max_ops=1, value_type=schema.Text())
+    field.__name__ = "foobar"
+    content = create_content()
+    await field.set(content, {"op": "extend", "value": ["foobar"]})
+    with pytest.raises(ValueDeserializationError):
+        await field.set(content, {"op": "extend", "value": ["foo", "bar"]})
+
+
+async def test_bucket_dict_max_ops(dummy_guillotina, mock_txn):
+    field = fields.BucketDictField(bucket_len=10, required=False, max_ops=1, value_type=schema.Text())
+    field.__name__ = "foobar"
+    content = create_content()
+    await field.set(content, {"op": "update", "value": [{"key": "foo", "value": "bar"}]})
+    with pytest.raises(ValueDeserializationError):
+        await field.set(
+            content,
+            {"op": "update", "value": [{"key": "foo", "value": "bar"}, {"key": "foo", "value": "bar"}]},
+        )

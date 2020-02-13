@@ -20,11 +20,12 @@ class PatchField(schema.Field):
 
     operation_type = IPatchFieldOperation
 
-    def __init__(self, field, *args, **kwargs):
+    def __init__(self, field, max_ops=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.field = field
         self._bound_field = kwargs.pop("bound_field", None)
-        super().__init__(*args, **kwargs)
         self.required = field.required
+        self.max_ops = self.field.max_ops = max_ops
 
     @property
     def bound_field(self):
@@ -80,9 +81,16 @@ class MultiPatch:
         self.field = field
 
     def __call__(self, context, value):
+        if self.field.max_ops and len(value) > self.field.max_ops:
+            raise ValueDeserializationError(
+                self.field, value, f"Exceeded max allowed operations for field: {self.field.max_ops}"
+            )
+
         bound_field = self.field.field.bind(context)
         resulting_value = None
         for op in value:
+            if not isinstance(op, dict) or "op" not in op:
+                raise ValueDeserializationError(self.field, value, f"{op} not a valid operation")
             resulting_value = field_converter(self.field, op, context)
             bound_field.set(context, resulting_value)
         return resulting_value
@@ -129,6 +137,12 @@ class PatchListAppendUnique(PatchListAppend):
         return existing
 
 
+@configure.adapter(for_=IList, provides=IPatchFieldOperation, name="clear")
+class PatchListClear(PatchListAppend):
+    def __call__(self, context, value):
+        return []
+
+
 @configure.adapter(for_=ITuple, provides=IPatchFieldOperation, name="append")
 class PatchTupleAppend(PatchListAppend):
     def do_operation(self, existing, value):
@@ -139,6 +153,12 @@ class PatchTupleAppend(PatchListAppend):
 class PatchTupleAppendUnique(PatchListAppendUnique):
     def do_operation(self, existing, value):
         return tuple(super().do_operation(list(existing), value))
+
+
+@configure.adapter(for_=ITuple, provides=IPatchFieldOperation, name="clear")
+class PatchTupleClear(PatchListClear):
+    def __call__(self, context, value):
+        return ()
 
 
 @configure.adapter(for_=IList, provides=IPatchFieldOperation, name="extend")
@@ -153,6 +173,11 @@ class PatchListExtend(PatchListAppend):
             existing = self.field.missing_value or []
         if not isinstance(value, list):
             raise ValueDeserializationError(self.field, value, "Not valid list")
+
+        if self.field.max_ops and len(value) > self.field.max_ops:
+            raise ValueDeserializationError(
+                self.field, value, f"Exceeded max allowed operations for field: {self.field.max_ops}"
+            )
 
         values = []
         for item in value:
@@ -287,6 +312,11 @@ class PatchDictUpdate(PatchListAppend):
         if existing is None:
             existing = self.field.missing_value or {}
 
+        if self.field.max_ops and len(value) > self.field.max_ops:
+            raise ValueDeserializationError(
+                self.field, value, f"Exceeded max allowed operations for field: {self.field.max_ops}"
+            )
+
         for item in value:
             if "key" not in item or "value" not in item:
                 raise ValueDeserializationError(self.field, value, "Not valid patch value")
@@ -314,6 +344,12 @@ class PatchDictDel(PatchListAppend):
         except (IndexError, KeyError, TypeError):
             raise ValueDeserializationError(self.field, value, "Not valid index value")
         return existing
+
+
+@configure.adapter(for_=IDict, provides=IPatchFieldOperation, name="clear")
+class PatchDictClear(PatchListAppend):
+    def __call__(self, context, value):
+        return {}
 
 
 class BasePatchIntOperation:

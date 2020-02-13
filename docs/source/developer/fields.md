@@ -131,6 +131,16 @@ Update:
 }
 ```
 
+Clear:
+
+```json
+{
+    "field": {
+        "op": "clear"
+    }
+}
+```
+
 Multiple operations:
 
 ```json
@@ -205,6 +215,16 @@ Update:
             "key": "foo2",
             "value": "bar2"
         }]
+    }
+}
+```
+
+Clear:
+
+```json
+{
+    "field": {
+        "op": "clear"
     }
 }
 ```
@@ -355,6 +375,35 @@ Delete:
 }
 ```
 
+Clear:
+
+```json
+{
+    "field": {
+        "op": "clear"
+    }
+}
+```
+
+Multi:
+
+Group multiple operations into one
+
+```json
+{
+    "field": {
+        "op": "multi",
+        "value": [{
+            "op": "assign",
+            "value": {
+                "key": "foo",
+                "value": "bar"
+            }
+        }]
+    }
+}
+```
+
 
 ## Bucket dict field
 
@@ -410,6 +459,16 @@ Delete:
     "field": {
         "op": "del",
         "value": "foo"
+    }
+}
+```
+
+Clear:
+
+```json
+{
+    "field": {
+        "op": "clear"
     }
 }
 ```

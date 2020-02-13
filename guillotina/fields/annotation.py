@@ -104,9 +104,9 @@ class BucketListValue:
             annotation.register()
 
     async def iter_buckets(self, context) -> AsyncIterator[AnnotationData]:
+        annotations_container = IAnnotations(context)
         for index in sorted(self.annotations_metadata.keys()):
             annotation_name = self.get_annotation_name(index)
-            annotations_container = IAnnotations(context)
             annotation = annotations_container.get(annotation_name, _default)
             if annotation is _default:
                 annotation = await annotations_container.async_get(annotation_name, _default)
@@ -119,15 +119,25 @@ class BucketListValue:
             for item in bucket["items"]:
                 yield item
 
+    async def clear(self, context):
+        annotations_container = IAnnotations(context)
+        for index in sorted(self.annotations_metadata.keys()):
+            annotation_name = self.get_annotation_name(index)
+            await annotations_container.async_del(annotation_name)
+        self.annotations_metadata = {}
+
 
 @implementer(IBucketListField)
 class BucketListField(schema.Field):
     value_type = None
 
-    def __init__(self, *args, value_type=None, bucket_len=5000, annotation_prefix="bucketlist-", **kwargs):
+    def __init__(
+        self, *args, value_type=None, bucket_len=5000, annotation_prefix="bucketlist-", max_ops=None, **kwargs
+    ):
         self.bucket_len = bucket_len
         self.value_type = value_type
         self.annotation_prefix = annotation_prefix
+        self.max_ops = max_ops
         super().__init__(*args, **kwargs)
 
     async def set(self, obj, value):
@@ -143,7 +153,9 @@ class BucketListField(schema.Field):
             operation_name = value["op"]
             bound_field = self.bind(obj)
             operation = query_adapter(bound_field, IPatchFieldOperation, name=operation_name)
-            await operation(obj, anno_context, value["value"])
+            if operation is None:
+                raise ValueDeserializationError(self, value, f'"{operation_name}" not a valid operation')
+            await operation(obj, anno_context, value.get("value"))
         except Exception:
             logger.warning("Unhandled error setting value", exc_info=True)
             raise ValueDeserializationError(self, value, "Unhandled error")
@@ -178,6 +190,11 @@ class PatchBucketListExtend(PatchBucketListAppend):
         if not isinstance(value, list):
             raise ValueDeserializationError(self.field, value, "Not valid list")
 
+        if self.field.max_ops and len(value) > self.field.max_ops:
+            raise ValueDeserializationError(
+                self.field, value, f"Exceeded max allowed operations for field: {self.field.max_ops}"
+            )
+
         values = []
         for item in value:
             if self.field.value_type:
@@ -198,6 +215,13 @@ class PatchBucketListRemove(PatchBucketListAppend):
             await existing.remove(context, value["bucket_index"], value["item_index"])
         except IndexError:
             raise ValueDeserializationError(self.field, value, "Not valid index value")
+
+
+@configure.adapter(for_=IBucketListField, provides=IPatchFieldOperation, name="clear")
+class PatchBucketListClear(PatchBucketListAppend):
+    async def __call__(self, field_context, context, value):
+        existing = self.get_existing_value(field_context)
+        await existing.clear(context)
 
 
 class BucketDictValue:
@@ -415,6 +439,11 @@ class PatchBucketDictExtend(PatchBucketDictSet):
                 self.field, value, f"Invalid type patch data, must be list of updates"
             )
 
+        if self.field.max_ops and len(value) > self.field.max_ops:
+            raise ValueDeserializationError(
+                self.field, value, f"Exceeded max allowed operations for field: {self.field.max_ops}"
+            )
+
         existing = self.get_existing_value(field_context)
 
         for item in value:
@@ -446,6 +475,13 @@ class PatchBucketDictDel(PatchBucketDictSet):
             raise ValueDeserializationError(self.field, value, "Not valid index value")
 
 
+@configure.adapter(for_=IBucketDictField, provides=IPatchFieldOperation, name="clear")
+class PatchBucketDictClear(PatchBucketDictSet):
+    async def __call__(self, field_context, context, value):
+        existing = self.get_existing_value(field_context)
+        await existing.clear(context)
+
+
 @configure.value_deserializer(IBucketListField)
 @configure.value_deserializer(IBucketDictField)
 def field_converter(field, value, context):
@@ -455,7 +491,7 @@ def field_converter(field, value, context):
     operation = query_adapter(field, IPatchFieldOperation, name=operation_name)
     if operation is None:
         raise ValueDeserializationError(field, value, f'"{operation_name}" not a valid operation')
-    if "value" not in value:
+    if "value" not in value and operation_name not in ("clear",):
         raise ValueDeserializationError(field, value, f"Missing value")
     return value
 

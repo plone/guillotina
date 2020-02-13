@@ -32,6 +32,7 @@ class MockTransaction:  # type: ignore
         self._tid = 1
         self.modified = OrderedDict()
         self.added = OrderedDict()
+        self.deleted = OrderedDict()
         self.request = None
         self._strategy = query_adapter(
             self, ITransactionStrategy, name=manager._storage._transaction_strategy
@@ -57,6 +58,9 @@ class MockTransaction:  # type: ignore
             self.added[oid] = ob
         else:
             self.modified[oid] = ob
+
+    def delete(self, ob):
+        self.deleted[ob.__uuid__] = ob
 
     def tpc_cleanup(self):
         pass
