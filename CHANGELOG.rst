@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a12 (unreleased)
 ---------------------
 
+- Set content type to response in renderers
+  [masipcat]
+
 - Import aiohttp only when recaptcha is configured
   [masipcat]
 

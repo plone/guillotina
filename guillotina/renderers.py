@@ -57,7 +57,7 @@ class Renderer:
         if IResponse.providedBy(value):
             resp = cast(Response, value)
             if resp.content is not None:
-                resp.set_body(self.get_body(resp.content))
+                resp.set_body(self.get_body(resp.content), self.content_type)
             return resp
 
         return Response(body=self.get_body(value) or b"", status=200, content_type=self.content_type)
