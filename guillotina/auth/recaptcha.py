@@ -1,7 +1,6 @@
 from guillotina import app_settings
 from guillotina.utils import get_current_request
 
-import aiohttp
 import logging
 
 
@@ -24,6 +23,9 @@ class RecaptchaValidator:
         if app_settings.get("recaptcha") is None or app_settings["recaptcha"].get("private") is None:
             logger.warning("Validating with recaptcha and no configuration found")
             return True
+
+        import aiohttp
+
         async with aiohttp.ClientSession() as session:
             async with await session.post(
                 RECAPTCHA_VALIDATION_URL,

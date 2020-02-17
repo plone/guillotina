@@ -103,7 +103,7 @@ Using pip (requires Python > 3.7)
     python3.7 -m venv .
     ./bin/pip install -r requirements.txt
     ./bin/pip install -r contrib-requirements.txt
-    ./bin/pip install -e .[test]
+    ./bin/pip install -e '.[test]'
     ./bin/pre-commit install
 
 

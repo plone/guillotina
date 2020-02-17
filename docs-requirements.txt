@@ -1,5 +1,4 @@
 recommonmark
-# sphinxcontrib-httpexample
 sphinx==1.8.2
 sphinx-guillotina-theme==1.0.7
 sphinxcontrib.httpdomain==1.7.0
