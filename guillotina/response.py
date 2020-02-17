@@ -76,9 +76,11 @@ class Response(Exception):
     def eof_sent(self):
         return self._eof_sent
 
-    def set_body(self, body):
+    def set_body(self, body, content_type=None):
         self.content = None
         self.body = body
+        if content_type is not None:
+            self.content_type = content_type
 
     @property
     def prepared(self) -> bool:
