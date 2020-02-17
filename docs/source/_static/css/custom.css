@@ -1,0 +1,98 @@
+.wy-side-nav-search {
+    display: block;
+    width: 300px;
+    padding: .809em;
+    margin-bottom: .809em;
+    z-index: 200;
+    background-color: #F5F5F6;
+    text-align: center;
+    padding: .809em;
+    display: block;
+    color: #fcfcfc;
+    margin-bottom: .809em;
+}
+
+.wy-side-nav-search input[type="text"] {
+    width: 100%;
+    border-radius: 50px;
+    padding: 6px 12px;
+    border-color: #00B5AD;
+}
+
+.wy-nav-side {
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	padding-bottom: 2em;
+	width: 300px;
+	overflow-x: hidden;
+	overflow-y: hidden;
+	min-height: 100%;
+	color: #9b9b9b;
+	background: #F5F5F6;
+	z-index: 200;
+}
+
+.wy-nav-content {
+    padding: 1.618em 3.236em;
+    height: 100%;
+    max-width: 1000px;
+    margin: auto;
+}
+
+.wy-nav-content-wrap {
+    background: #FFFFFF;
+}
+
+.wy-nav-content {
+    margin: 0;
+    background: #FFFFFF;
+}
+
+.wy-menu-vertical a {
+    display: inline-block;
+    line-height: 18px;
+    padding: .4045em 1.618em;
+    display: block;
+    position: relative;
+    font-size: 90%;
+    color: #444444;
+}
+
+.wy-menu-vertical a:hover {
+    background-color: #FFFFFF;
+    cursor: pointer;
+}
+
+a {
+    color: #00B5AD;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+input[type="text"], input[type="password"], input[type="email"], input[type="url"], input[type="date"], input[type="month"], input[type="time"], input[type="datetime"], input[type="datetime-local"], input[type="week"], input[type="number"], input[type="search"], input[type="tel"], input[type="color"] {
+    -webkit-appearance: none;
+    padding: 6px;
+    display: inline-block;
+    border: 2px solid #ccc;
+    font-size: 80%;
+    font-family: "Lato","proxima-nova","Helvetica Neue",Arial,sans-serif;
+    box-shadow: inset 0 1px 3px #ddd;
+    border-radius: 0;
+    -webkit-transition: border .3s linear;
+    -moz-transition: border .3s linear;
+    transition: border .3s linear;
+}
+
+.wy-nav-top {
+    display: none;
+    background: #F5F5F6;
+    color: #fff;
+    padding: .4045em .809em;
+    position: relative;
+    line-height: 50px;
+    text-align: center;
+    font-size: 100%;
+    *zoom: 1;
+}
