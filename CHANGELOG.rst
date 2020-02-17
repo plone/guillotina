@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a12 (unreleased)
 ---------------------
 
+- Fix validation authorization in case token is expired
+  [bloodbare]
+
 - Set content type to response in renderers
   [masipcat]
 
