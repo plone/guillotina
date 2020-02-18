@@ -250,13 +250,13 @@ configure.json_schema_definition(
         "type": "object",
         "title": "Search results",
         "properties": {
-            "member": {
+            "items": {
                 "type": "array",
                 "items": {"type": "object", "$ref": "#/components/schemas/SearchResult"},
             },
-            "items_count": {"type": "integer"},
+            "items_total": {"type": "integer"},
         },
-        "required": ["member"],
+        "required": ["items"],
     },
 )
 

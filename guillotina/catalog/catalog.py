@@ -43,27 +43,27 @@ class DefaultSearchUtility:
         initialization
         """
 
-    async def search(self, container: IContainer, query: typing.Any):
-        """
-        Search parsed query
-        """
-        return {"member": [], "items_count": 0}
-
-    async def query(self, context: IBaseObject, query: typing.Any):
+    async def search(self, context: IBaseObject, query: typing.Any):
         """
         Raw search query, uses parser to transform query
         """
         parsed_query = parse_query(context, query, self)
         container = find_container(context)
         if container is not None:
-            return await self.search(container, parsed_query)
+            return await self.query(container, parsed_query)
         raise ContainerNotFound()
+
+    async def query(self, container: IContainer, query: typing.Any):
+        """
+        Search parsed query        
+        """
+        return {"items": [], "items_total": 0}
 
     async def aggregation(self, container: IContainer, parsed_query: typing.Any):
         """
         Search aggregation
         """
-        return {"member": [], "items_count": 0}
+        return {"items": [], "items_total": 0}
 
     async def query_aggregation(self, context: IBaseObject, query: typing.Any):
         """
