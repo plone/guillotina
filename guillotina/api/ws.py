@@ -189,4 +189,4 @@ class WebsocketsView(Service):
                     await tm.abort(txn=txn)
 
         logger.debug("websocket connection closed")
-        return {}
+        await ws.close()

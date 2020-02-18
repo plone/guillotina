@@ -4,7 +4,8 @@ CHANGELOG
 6.0.0a13 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Fixing WS bugs and redis unsubscription
+  [bloodbare]
 
 
 6.0.0a12 (2020-02-18)
