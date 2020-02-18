@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.0a12 (unreleased)
+6.0.0a13 (unreleased)
 ---------------------
 
 - Add `max_ops` property to `PatchField`, `BucketListField` and `BucketDictField`
@@ -9,6 +9,16 @@ CHANGELOG
 
 - Add clear action to list, dict and annotation patch fields
   [vangheem]
+
+
+6.0.0a12 (2020-02-18)
+---------------------
+
+- Fix validation authorization in case token is expired
+  [bloodbare]
+
+- Set content type to response in renderers
+  [masipcat]
 
 - Import aiohttp only when recaptcha is configured
   [masipcat]
