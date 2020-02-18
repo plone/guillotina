@@ -102,9 +102,10 @@ class PubSubUtility:
                 del self._subscribers[channel_name][req_id]
 
             if len(self._subscribers[channel_name]) == 0:
-                if not self._tasks[channel_name].done():
-                    self._tasks[channel_name].cancel()
-                del self._tasks[channel_name]
+                if channel_name in self._tasks:
+                    if not self._tasks[channel_name].done():
+                        self._tasks[channel_name].cancel()
+                    del self._tasks[channel_name]
 
                 await self._driver.unsubscribe(channel_name)
                 del self._subscribers[channel_name]

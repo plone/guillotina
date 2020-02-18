@@ -176,7 +176,7 @@ class WebsocketsView(Service):
                 continue
 
             if message["op"].lower() == "close":
-                await ws.close()
+                break
             elif message["op"].lower() == "get":
                 txn = await tm.begin()
                 try:
@@ -189,4 +189,4 @@ class WebsocketsView(Service):
                     await tm.abort(txn=txn)
 
         logger.debug("websocket connection closed")
-        return {}
+        await ws.close()

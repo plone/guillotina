@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a13 (unreleased)
 ---------------------
 
+- Fixing WS bugs and redis unsubscription
+  [bloodbare]
+
 - Add `max_ops` property to `PatchField`, `BucketListField` and `BucketDictField`
   [vangheem]
 
