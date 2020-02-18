@@ -1,12 +1,12 @@
 # AsyncIO
 
-Python’s asyncio library allows you to run single threaded "concurrent"
+Python’s [asyncio](https://docs.python.org/3/library/asyncio.html "Link to AsyncIO docs") library allows you to run single threaded "concurrent"
 code using coroutines inside an event loop.
 
 The event loop is designed for I/O over sockets and other resources,
 it is especially good for working with client/server network connections.
 
-Python >= 3.4(best features and performance in 3.6).
+Python >= 3.4 (best features and performance in 3.6).
 
 This guide will assume you're on Python 3.7.
 
@@ -22,7 +22,8 @@ impact (HTML5 sockets for example).
 
 ### How web servers are typically designed
 
-- (Pyramid, Flask, Plone, etc)
+(Pyramid, Flask, Plone, etc)
+
 - Processes X Threads = Total number of concurrent connections that can be handled at once.
 - Client makes a request to web server, request is assigned thread, thread handle request and sends response
 - If no threads available, request is blocked, waiting for an open thread
@@ -34,23 +35,23 @@ impact (HTML5 sockets for example).
 - All requests are thrown on thread loop
 - Since we don’t block on network traffic, we can juggle many requests at the same time
 - Modern web application servers connect with many different services that can
-  potentially block on network traffic — BAD
-- Limiting factor is maxed out CPU, not costly thread switching between requests — GOOD
+  potentially block on network traffic — **BAD**
+- Limiting factor is maxed out CPU, not costly thread switching between requests — **GOOD**
 
 
 ### Where is network traffic used?
 
 - Web Client/App Server
 - App Server/Database
-- App Server/Caching(redis)
+- App Server/Caching(Redis)
 - App Server/OAUTH
 - App Server/Cloud storage
-- App Server/APIs(gdrive, m$, slack, etc)
+- App Server/APIs(Google Drive, Microsoft, Slack, etc)
 
 
 ### Implementation details
 
-In order to benefit, the whole stack needs to be asyncio-aware.
+To benefit, the whole stack needs to be asyncio-aware.
 
 Anywhere in your application server that is not and does network traffic
 WILL BLOCK all other connections while it is doing its network traffic
@@ -113,7 +114,7 @@ You can also schedule long running tasks on the event loop.
 
 The tasks can run forever…
 
-“Task” objects are the same as “Future” objects(well, close)
+“Task” objects are the same as “Future” objects (well, close)
 
 ```python
 import asyncio
@@ -145,7 +146,7 @@ if __name__ == '__main__':
 
 **gotcha**
 
-If you want part of your code to be async(say a function), the complete stack of
+If you want part of your code to be async (say a function), the complete stack of
 the caller must be async and running on the event loop.
 
 
@@ -210,7 +211,7 @@ if __name__ == '__main__':
 ```
 
 
-## asyncio loops
+## AsyncIO loops
 
 Using `yield` with loops allows you to "give up" execution on every iteration of the loop.
 
