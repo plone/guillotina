@@ -5,11 +5,9 @@ Before we start using the Guillotina API, let's get us some test data to play wi
 Using the `testdata` command, we'll populate our database with some data from
 wikipedia.
 
-
-```
+```shell
 g testdata --per-node=5 --depth=2 --container=container
 ```
-
 
 ## Interacting with the API
 
@@ -20,7 +18,6 @@ with the username `root` and password `root` for basic auth.
 
 We can not necessarily go over every single API but will touch on a few and
 give a general understanding of how to explore and use the API.
-
 
 ## Creating content
 
@@ -48,7 +45,6 @@ To create content, do a `POST` request on a container or folder object.
         }
 ```
 
-
 ## Adding behaviors
 
 To add a dynamic behavior, we use the `@behavior` endpoint.
@@ -63,7 +59,6 @@ To add a dynamic behavior, we use the `@behavior` endpoint.
           "behavior": "guillotina.behaviors.attachment.IAttachment"
         }
 ```
-
 
 ## Uploading files
 
@@ -90,7 +85,7 @@ Then, to download the file, use the `@download` endpoint.
 
 ## Uploading files with TUS
 
-Guillotina also supports the TUS protocol using the `@tusupload` endpoint. The
+Guillotina also supports the [TUS](https://tus.io/ "Link to TUS website") protocol using the `@tusupload` endpoint. The
 TUS protocol allows you to upload large files in chunks and allows you to have
 resumable uploads.
 
@@ -142,7 +137,6 @@ upload. You are then not required to provide the `UPLOAD-LENGTH` header.
 Then, before or on your last chunk, provide a `UPLOAD-LENGTH` value to let
 TUS know the upload can not finish.
 
-
 ### Simultaneous TUS uploads
 
 Guillotina's TUS implementation also attempts to prevent simultaneous uploaders.
@@ -153,7 +147,6 @@ If there is no activity detected for 15 seconds with an unfinished TUS upload,
 no error is thrown.
 
 To override this, send the `TUS-OVERRIDE-UPLOAD: 1` header.
-
 
 ## Modifying permissions
 
@@ -167,7 +160,6 @@ The `@sharing` endpoint is available to inspect and modify permissions on an obj
 ```
 
 To modify, we use the same endpoint but with a `POST`.
-
 
 ```eval_rst
 .. http:gapi::
@@ -199,7 +191,6 @@ Each change can use the following settings:
 - AllowSingle : you set in on the resource and the children will not inherit
 - Unset : you remove the setting
 
-
 ## Exploring the API with OpenAPI
 
 In the previous step, we installed `guillotina.contrib.swagger`. With OpenAPI, we can
@@ -218,8 +209,6 @@ The top URL setting is what the current context is that you're exploring the API
 on. If you create content at `/db/container/foobar` and want to explore that
 content's API, you should change the URL. Different content types will have
 different services available.
-
-
 
 **References**
 

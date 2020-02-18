@@ -7,6 +7,12 @@ CHANGELOG
 - Fixing WS bugs and redis unsubscription
   [bloodbare]
 
+- Add `max_ops` property to `PatchField`, `BucketListField` and `BucketDictField`
+  [vangheem]
+
+- Add clear action to list, dict and annotation patch fields
+  [vangheem]
+
 
 6.0.0a12 (2020-02-18)
 ---------------------

@@ -32,6 +32,7 @@ class MockTransaction:  # type: ignore
         self._tid = 1
         self.modified = OrderedDict()
         self.added = OrderedDict()
+        self.deleted = OrderedDict()
         self.request = None
         self._strategy = query_adapter(
             self, ITransactionStrategy, name=manager._storage._transaction_strategy
@@ -58,16 +59,19 @@ class MockTransaction:  # type: ignore
         else:
             self.modified[oid] = ob
 
-    def tpc_cleanup(self):
+    def delete(self, ob):
+        self.deleted[ob.__uuid__] = ob
+
+    def tpc_cleanup(self):  # pragma: no cover
         pass
 
-    async def del_blob(self, bid):
+    async def del_blob(self, bid):  # pragma: no cover
         pass
 
-    async def write_blob_chunk(self, bid, zoid, chunk_number, data):
+    async def write_blob_chunk(self, bid, zoid, chunk_number, data):  # pragma: no cover
         pass
 
-    async def get_annotation(self, ob, key, reader=None):
+    async def get_annotation(self, ob, key, reader=None):  # pragma: no cover
         pass
 
     def __enter__(self):

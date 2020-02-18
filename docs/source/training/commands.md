@@ -15,8 +15,7 @@ The `shell` command allows you to get an interactive prompt into guillotina.
 
 From here, you can connect to the database, accees objects and commit new data.
 
-
-```
+```shell
 g -c config.yml shell
 ```
 
@@ -40,16 +39,16 @@ await conversations.async_keys()
 
 The `run` command allows you to run a python script directly.
 
-```
+```shell
 g -c config.yaml run --script=path/to/script.py
 ```
 
-In order for you to utilize this, the script must have an async function named
+To utilize this, the script must have an async function named
 `run` inside it.
 
+### Example
 
 In this example, we are going through all the conversations and adding a user to them.
-
 
 ```python
 from guillotina.transactions import transaction
