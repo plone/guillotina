@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.0a12 (unreleased)
+6.0.0a12 (2020-02-18)
 ---------------------
 
 - Fix validation authorization in case token is expired
