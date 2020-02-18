@@ -16,7 +16,7 @@ async def run(token_data, payload):
 
     data = {}
 
-    valid_data = ['username', 'email', 'name', 'password', 'properties']
+    valid_data = ["username", "email", "name", "password", "properties"]
 
     for key in valid_data:
         if key in token_data:
