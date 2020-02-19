@@ -4,6 +4,11 @@ CHANGELOG
 6.0.0a13 (unreleased)
 ---------------------
 
+- Changed error handling logic: Guillotina (asgi app) catches all errors and returns a
+  response for the ones that implements the handler IErrorResponseException. Otherwise
+  raises the exception and is handled by ErrorsMiddleware
+  [masipcat]
+
 - Add "endpoint" in scope to let sentry know the view associated to the request
   [masipcat]
 
@@ -13,7 +18,7 @@ CHANGELOG
 - Replaced Response.content_{type,length} with Response.set_content_{type,length}
   [masipcat]
 
-- Breaking API change: Search GET 
+- Breaking API change: Search GET
   Search get responds a json with items and items_total like plone rest api
   [bloodbare]
 

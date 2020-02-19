@@ -1,16 +1,22 @@
 from guillotina import glogging
 from guillotina import task_vars
+from guillotina.browser import View
+from guillotina.component import query_adapter
 from guillotina.exc_resp import HTTPConflict
 from guillotina.exceptions import ConflictError
 from guillotina.exceptions import TIDConflictError
+from guillotina.interfaces import IErrorResponseException
 from guillotina.middlewares import ErrorsMiddleware
 from guillotina.request import Request
+from guillotina.response import Response
+from guillotina.traversal import apply_rendering
 from guillotina.utils import get_dotted_name
 from guillotina.utils import resolve_dotted_name
 
 import asyncio
 import enum
 import traceback
+import uuid
 
 
 logger = glogging.getLogger("guillotina")
@@ -145,15 +151,31 @@ class Guillotina:
         self.router = router
 
     async def __call__(self, scope, receive, send):
+        """
+        This method always returns a response object or raises a Exception for
+        unhandled errors
+        """
         request_settings = {
             k: v for k, v in self.asgi_app.server_settings.items() if k in ("client_max_size",)
         }
         request = Request.factory(scope, send, receive, **request_settings)
         task_vars.request.set(request)
 
-        resp = await self.request_handler(request)
+        try:
+            return await self.request_handler(request)
+        except Response as exc:
+            return exc
+        except Exception as exc:
+            # Try to render exception using IErrorResponseException
+            eid = uuid.uuid4().hex
+            view_result = query_adapter(
+                exc, IErrorResponseException, kwargs={"error": "ServiceError", "eid": eid}
+            )
+            if view_result is not None:
+                return await apply_rendering(View(None, request), request, view_result)
 
-        return resp
+            # Raise unhandled exceptions to ErrorMiddleware
+            raise
 
     async def request_handler(self, request, retries=0):
         try:
