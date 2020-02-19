@@ -1,4 +1,4 @@
-Developer documentation
+Developer Documentation
 =======================
 
 Contents:
@@ -30,3 +30,4 @@ Contents:
    component-architecture
    debugging
    advanced
+   testing

@@ -20,7 +20,7 @@ from recommonmark.transform import AutoStructify
 # -- Project information -----------------------------------------------------
 
 project = 'theme'
-copyright = '2020, svx'
+copyright = '2020, Ramon Navarro Bosch & Nathan Van Gheem'
 author = 'svx'
 
 # The full version, including alpha/beta/rc tags
@@ -32,7 +32,12 @@ release = '0.1'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['recommonmark']
+extensions = [
+    'recommonmark',
+    #'sphinxcontrib.httpexample',
+    'sphinxcontrib.httpdomain',
+
+]
 
 source_suffix = {
     '.rst': 'restructuredtext',
@@ -70,12 +75,15 @@ html_css_files = [
     'css/svx.css',
 ]
 
+html_show_sphinx = False
+
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
 html_logo = "_static/logo.svg"
+html_favicon = "_static/favicon.ico"
 
 
 # At the bottom of conf.py

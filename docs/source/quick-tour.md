@@ -1,4 +1,4 @@
-# Quick tour of Guillotina
+# Tour Of Guillotina
 
 Guillotina is powerful datastore, capable of storing and indexing millions of objects.
 

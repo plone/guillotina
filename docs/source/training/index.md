@@ -10,12 +10,12 @@ Please read the [about](../about.html) chapter for details about what
 Guillotina is and why you should use it.
 
 
-## Using the training materials
+## Prerequisites
 
-The training materials make use of Python 3.7, Docker and Postman so please
-have up-to-date versions of all these ready.
+The training materials make use of
 
+- [Python 3.7](https://python.org "Website of Python")
+- [Docker](https://docker.com "Website of Docker")
+- [Postman](https://www.postman.com/ "Website of Postman")
 
-**References**
-
-  - [About Guillotina](../about)
+please make sure you up to date versions.

@@ -44,10 +44,10 @@ docker run \
 
 
 ```eval_rst
-.. note::
+.. warning::
    This particular docker run command produces a volatile database.
 
-   Stopping and starting it again will cause you to lose any data you pushed into it.
+   Stopping and starting it again will cause you to **lose any data** you pushed into it.
 ```
 
 ## Configuration file

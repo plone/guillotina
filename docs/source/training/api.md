@@ -5,8 +5,7 @@ Before we start using the Guillotina API, let's get us some test data to play wi
 Using the `testdata` command, we'll populate our database with some data from
 wikipedia.
 
-
-```
+```shell
 g testdata --per-node=5 --depth=2 --container=container
 ```
 
@@ -90,7 +89,7 @@ Then, to download the file, use the `@download` endpoint.
 
 ## Uploading files with TUS
 
-Guillotina also supports the TUS protocol using the `@tusupload` endpoint. The
+Guillotina also supports the [TUS](https://tus.io/ "Link to TUS website") protocol using the `@tusupload` endpoint. The
 TUS protocol allows you to upload large files in chunks and allows you to have
 resumable uploads.
 
@@ -207,11 +206,12 @@ inspect any context and explore the API.
 
 Visit `http://localhost:8080/@docs`
 
-![alt text](../../_static/img/swagger.png "Swagger")
+ADD HERE EVAL RST
+![alt text](_static/swagger.png "Swagger")
 
 click the `Authorize` button
 
-![alt text](../../_static/img/auth-swagger.png "Swagger Auth")
+![alt text](../../_static/auth-swagger.png "Swagger Auth")
 
 
 The top URL setting is what the current context is that you're exploring the API
