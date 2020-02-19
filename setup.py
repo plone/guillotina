@@ -87,6 +87,9 @@ setup(
             "openapi-spec-validator",
             "aiohttp>=3.0.0,<4.0.0",
         ],
+        "dev": [
+            "cookiecutter",
+        ],
         "docs": [
             "aiohttp>=3.0.0,<4.0.0",
             "sphinx",
