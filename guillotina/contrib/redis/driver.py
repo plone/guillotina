@@ -123,7 +123,11 @@ class RedisDriver:
     async def unsubscribe(self, channel_name: str):
         if self._pubsub_subscriptor is None:
             raise NoRedisConfigured()
-        await self._pubsub_subscriptor.unsubscribe(channel_name)
+        try:
+            await self._pubsub_subscriptor.unsubscribe(channel_name)
+        except aioredis.errors.ConnectionClosedError:
+            if self.initialized:
+                raise
 
     async def subscribe(self, channel_name: str):
         if self._pubsub_subscriptor is None:

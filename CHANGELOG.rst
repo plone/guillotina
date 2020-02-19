@@ -13,6 +13,9 @@ CHANGELOG
 - Replaced Response.content_{type,length} with Response.set_content_{type,length}
   [masipcat]
 
+- Fixing WS bugs and redis unsubscription
+  [bloodbare]
+
 - Add `max_ops` property to `PatchField`, `BucketListField` and `BucketDictField`
   [vangheem]
 

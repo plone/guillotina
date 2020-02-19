@@ -111,12 +111,13 @@ class AsgiApp:
         resp = await self.next_app(scope, receive, send)
         request = task_vars.request.get()
 
-        if not resp.prepared:
-            await resp.prepare(request)
-            await resp.send_body()
+        if scope["type"] != "websocket":
+            if not resp.prepared:
+                await resp.prepare(request)
+                await resp.send_body()
 
-        if not resp.eof_sent:
-            await resp.write(eof=True)
+            if not resp.eof_sent:
+                await resp.write(eof=True)
 
         self._cleanup(request, resp)
 
