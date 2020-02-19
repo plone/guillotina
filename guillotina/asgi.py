@@ -6,6 +6,7 @@ from guillotina.exceptions import TIDConflictError
 from guillotina.middlewares import ErrorsMiddleware
 from guillotina.request import Request
 from guillotina.utils import resolve_dotted_name
+from guillotina.utils import get_dotted_name
 
 import asyncio
 import enum
@@ -156,6 +157,9 @@ class Guillotina:
     async def request_handler(self, request, retries=0):
         try:
             route = await self.router.resolve(request)
+            # The key 'endpoint' in scope is used by sentry-sdk to display
+            # the name of the failed view
+            request.scope["endpoint"] = Endpoint(route.view)
             resp = await route.handler(request)
             return resp
 
@@ -188,3 +192,9 @@ class Guillotina:
                     )
                 )
                 raise HTTPConflict()
+
+
+class Endpoint:
+    def __init__(self, view):
+        self.__module__ = view.__module__
+        self.__qualname__ = get_dotted_name(view).split(".")[-1]

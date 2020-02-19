@@ -14,6 +14,7 @@ from typing import Dict
 from typing import Iterator
 from typing import List
 from typing import Optional
+from typing import Union
 from zope.interface import implementer
 
 import asyncio
@@ -508,18 +509,17 @@ class Request(object):
         """Return True if request's HTTP BODY can be read, False otherwise."""
         return not self._stream_reader.eof
 
-    async def read(self) -> bytes:
+    async def read(self) -> Union[bytes, bytearray]:
         """Read request body if present.
 
         Returns bytes object with full request content.
         """
         if self._read_bytes is None:
-            chunk = await self._stream_reader.readany()
+            chunk: bytes = await self._stream_reader.readany()
             if self._stream_reader.eof:
                 self._read_bytes = chunk
             else:
-                body = bytearray()
-                body.extend(chunk)
+                body = bytearray(chunk)
                 while True:
                     chunk = await self._stream_reader.readany()
                     body.extend(chunk)
@@ -533,7 +533,7 @@ class Request(object):
                             )
                     if not chunk:
                         break
-                self._read_bytes = bytes(body)
+                self._read_bytes = body
         return self._read_bytes
 
     async def text(self) -> str:

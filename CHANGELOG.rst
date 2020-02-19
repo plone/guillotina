@@ -4,6 +4,12 @@ CHANGELOG
 6.0.0a13 (unreleased)
 ---------------------
 
+- Request.read() can return bytes or bytesarray
+  [masipcat]
+
+- Replaced Response.content_{type,length} with Response.set_content_{type,length}
+  [masipcat]
+
 - Add `max_ops` property to `PatchField`, `BucketListField` and `BucketDictField`
   [vangheem]
 
