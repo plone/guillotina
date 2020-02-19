@@ -55,7 +55,7 @@ class DefaultSearchUtility:
 
     async def query(self, container: IContainer, query: typing.Any):
         """
-        Search parsed query        
+        Search parsed query
         """
         return {"items": [], "items_total": 0}
 

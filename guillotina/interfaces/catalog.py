@@ -11,12 +11,12 @@ class ICatalogUtility(Interface):
         initialization
         """
 
-    async def search(container: IContainer, query: typing.Any):
+    async def search(context: IBaseObject, query: typing.Any):
         """
         Search parsed query
         """
 
-    async def query(context: IBaseObject, query: typing.Any):
+    async def query(container: IContainer, query: typing.Any):
         """
         Raw search query, uses parser to transform query
         """
