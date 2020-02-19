@@ -42,9 +42,9 @@ class ListGroupsOrUsersService(Service):
             raise NoCatalogException()
 
         container: Container = self.context
-        result = await catalog.query(container, {"portal_type": self.type_name})
+        result = await catalog.search(container, {"portal_type": self.type_name})
         final: t.List = []
-        for obj in result["member"]:
+        for obj in result["items"]:
             processed: dict = await self.process_catalog_obj(obj)
             final.append(processed)
         return final

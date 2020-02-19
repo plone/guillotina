@@ -73,9 +73,9 @@ QUERY_PARAMETERS = [
 async def _search(context, request, query):
     search = query_utility(ICatalogUtility)
     if search is None:
-        return {"items_count": 0, "member": []}
+        return {"items_total": 0, "items": []}
 
-    return await search.query(context, query)
+    return await search.search(context, query)
 
 
 @configure.service(

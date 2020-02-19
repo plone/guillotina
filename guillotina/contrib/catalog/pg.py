@@ -593,9 +593,9 @@ class PGSearchUtility(DefaultSearchUtility):
             async with txn.lock:
                 records = await conn.fetch(sql, *arguments)
             total = records[0]["count"]
-        return {"member": results, "items_count": total}
+        return {"items": results, "items_total": total}
 
-    async def search(self, container: IContainer, query: ParsedQueryInfo):  # type: ignore
+    async def query(self, container: IContainer, query: ParsedQueryInfo):  # type: ignore
         sql, arguments = self.build_query(container, query, ["id", "zoid", "json"])
         txn = get_current_transaction()
         conn = await txn.get_connection()
@@ -634,7 +634,7 @@ class PGSearchUtility(DefaultSearchUtility):
             async with txn.lock:
                 records = await conn.fetch(sql, *arguments)
             total = records[0]["count"]
-        return {"member": results, "items_count": total}
+        return {"items": results, "items_total": total}
 
     async def index(self, container, datas):
         """
