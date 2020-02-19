@@ -1,5 +1,6 @@
 from guillotina.exceptions import DeserializationError
 from guillotina.exceptions import ValueDeserializationError
+from guillotina.response import Response
 from unittest import mock
 
 import asyncio
@@ -60,3 +61,27 @@ async def test_unhandle_exception_in_view(container_requester):
             handle_mock.side_effect = Exception()
             _, status = await requester("GET", "/db")
             assert status == 500
+
+
+@pytest.mark.asyncio
+async def test_raise_response(container_requester):
+    async with container_requester as requester:
+        with mock.patch("guillotina.asgi.Guillotina.request_handler") as handle_mock:  # noqa
+            f = asyncio.Future()
+            f.set_result(None)
+            handle_mock.return_value = f
+            handle_mock.side_effect = Response(status=200)
+            _, status = await requester("GET", "/db")
+            assert status == 200
+
+
+@pytest.mark.asyncio
+async def test_handled_exception(container_requester):
+    async with container_requester as requester:
+        with mock.patch("guillotina.asgi.Guillotina.request_handler") as handle_mock:  # noqa
+            f = asyncio.Future()
+            f.set_result(None)
+            handle_mock.return_value = f
+            handle_mock.side_effect = DeserializationError([{"err": "bad error"}])
+            _, status = await requester("GET", "/db")
+            assert status == 412
