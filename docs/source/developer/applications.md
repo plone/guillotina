@@ -1,9 +1,9 @@
 # Applications
 
-Applications are used to provide additional functionality to guillotina.
+Applications are used to provide additional functionality to Guillotina.
 
 
-## Core addons
+## Core Addons
 
 - `guillotina.contrib.swagger`: Activate swagger support at `/@docs`.
 - `guillotina.contrib.catalog.pg`: Provide search functionality with postgresql queries.
@@ -23,7 +23,7 @@ Some useful addons to use in your own development:
 
 ## Creating
 
-An application is a Python package that implements an entry point to tell guillotina
+An application is a Python package that implements an entry point to tell Guillotina
 to load it.
 
 If you're not familiar with how to build Python applications, please
@@ -48,14 +48,14 @@ applications:
 
 ## Configuration
 
-Once you create a `guillotina` application, there are two primary ways for it
-to hook into `guillotina`.
+Once you create a Guillotina application, there are two primary ways for it
+to hook into Guillotina.
 
 
 ### Call the `includeme` function
 
 Your application can provide an `includeme` function at the root of the module
-and `guillotina` will call it with the instance of the `root` object.
+and Guillotina will call it with the instance of the `root` object.
 
 ```python
 
@@ -67,5 +67,5 @@ def includeme(root):
 ### Load `app_settings`
 
 If an `app_settings` dict is provided at the module root, it will automatically
-merge the global `guillotina` `app_settings` with the module's. This allows you
+merge the global Guillotina `app_settings` with the module's. This allows you
 to provide custom configuration.
