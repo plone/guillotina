@@ -4,7 +4,12 @@ CHANGELOG
 6.0.0a13 (unreleased)
 ---------------------
 
-- Breaking API change: Search GET 
+- Changed error handling logic: Guillotina (asgi app) catches all errors and returns a
+  response for the ones that implements the handler IErrorResponseException. Otherwise
+  raises the exception and is handled by ErrorsMiddleware
+  [masipcat]
+
+- Breaking API change: Search GET
   Search get responds a json with items and items_total like plone rest api
   [bloodbare]
 
