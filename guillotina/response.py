@@ -61,8 +61,11 @@ class Response(Exception):
 
         self.status_code = status
         self.headers: CIMultiDict = headers
-        self.content_type = content_type
-        self.content_length = content_length
+
+        if content_type:
+            self.set_content_type(content_type)
+        if content_length:
+            self.set_content_length(content_length)
 
         self._prepared = False
         self._start_body = False
@@ -80,7 +83,13 @@ class Response(Exception):
         self.content = None
         self.body = body
         if content_type is not None:
-            self.content_type = content_type
+            self.set_content_type(content_type)
+
+    def set_content_type(self, content_type):
+        self.headers[istr("Content-Type")] = content_type
+
+    def set_content_length(self, content_length):
+        self.headers[istr("Content-Length")] = str(content_length)
 
     @property
     def prepared(self) -> bool:
@@ -97,14 +106,7 @@ class Response(Exception):
         self._prepared = True
 
         headers = self.headers
-        if self.content_type:
-            headers.setdefault(istr("Content-Type"), self.content_type)
-        else:
-            headers.setdefault(istr("Content-Type"), "application/octet-stream")
-
-        if self.content_length:
-            headers.setdefault(istr("Content-Length"), str(self.content_length))
-
+        headers.setdefault(istr("Content-Type"), "application/octet-stream")
         await request.send(
             {
                 "type": "http.response.start",
