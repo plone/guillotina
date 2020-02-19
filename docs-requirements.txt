@@ -6,5 +6,5 @@ sphinxcontrib-httpexample==0.9.0
 sphinx-autodoc-typehints==1.5.2
 docutils==0.13.1
 readme-renderer==22.0
-aiohttp==aiohttp>=3.6.0,<4.0.0
+aiohttp>=3.6.0,<4.0.0
 
