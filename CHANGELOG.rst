@@ -4,6 +4,15 @@ CHANGELOG
 6.0.0a13 (unreleased)
 ---------------------
 
+- Add "endpoint" in scope to let sentry know the view associated to the request
+  [masipcat]
+
+- Request.read() can return bytes or bytesarray
+  [masipcat]
+
+- Replaced Response.content_{type,length} with Response.set_content_{type,length}
+  [masipcat]
+
 - Breaking API change: Search GET 
   Search get responds a json with items and items_total like plone rest api
   [bloodbare]
