@@ -196,14 +196,19 @@ Each change can use the following settings:
 In the previous step, we installed `guillotina.contrib.swagger`. With OpenAPI, we can
 inspect any context and explore the API.
 
-Visit `http://localhost:8080/@docs`
+```eval_rst
+.. figure:: ../_static/img/swagger.png
+   :alt: Swagger
 
-![alt text](../../_static/img/swagger.png "Swagger")
+   Visit ``http://localhost:8080/@docs``
+```
 
-click the `Authorize` button
+```eval_rst
+.. figure:: ../_static/img/auth-swagger.png
+   :alt: Authentication
 
-![alt text](../../_static/img/auth-swagger.png "Swagger Auth")
-
+   Click the ``Authorize`` button
+```
 
 The top URL setting is what the current context is that you're exploring the API
 on. If you create content at `/db/container/foobar` and want to explore that
@@ -212,6 +217,6 @@ different services available.
 
 **References**
 
-  - [REST API](../../rest/index)
-  - [Behaviors](../../developer/behavior)
-  - [Security](../../developer/security)
+- [REST API](../../rest/index)
+- [Behaviors](../../developer/behavior)
+- [Security](../../developer/security)
