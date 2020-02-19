@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a13 (unreleased)
 ---------------------
 
+- Add "endpoint" in scope to let sentry know the view associated to the request
+  [masipcat]
+
 - Request.read() can return bytes or bytesarray
   [masipcat]
 
