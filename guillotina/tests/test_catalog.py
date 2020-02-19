@@ -192,7 +192,7 @@ async def test_search_endpoint(container_requester):
         await requester("POST", "/db/guillotina", data=json.dumps({"@type": "Item"}))
         response, status = await requester("GET", "/db/guillotina/@search")
         assert status == 200
-        assert len(response["member"]) == 1
+        assert len(response["items"]) == 1
 
 
 @pytest.mark.skipif(not NOT_POSTGRES, reason="Only not PG")
@@ -200,7 +200,7 @@ async def test_search_endpoint_no_pg(container_requester):
     async with container_requester as requester:
         response, status = await requester("GET", "/db/guillotina/@search")
         assert status == 200
-        assert len(response["member"]) == 0
+        assert len(response["items"]) == 0
 
 
 async def test_search_post_endpoint(container_requester):
@@ -285,21 +285,21 @@ async def test_query_pg_catalog(container_requester):
 
             util = PGSearchUtility()
             await util.initialize()
-            results = await util.query(container, {"id": "item1"})
-            assert len(results["member"]) == 1
+            results = await util.search(container, {"id": "item1"})
+            assert len(results["items"]) == 1
 
-            results = await util.query(container, {"_size": "1"})
-            assert len(results["member"]) == 1
-            results = await util.query(container, {"_size": "1", "_from": "1"})
-            assert len(results["member"]) == 1
+            results = await util.search(container, {"_size": "1"})
+            assert len(results["items"]) == 1
+            results = await util.search(container, {"_size": "1", "_from": "1"})
+            assert len(results["items"]) == 1
 
             results = await util.query_aggregation(container, {"_metadata": "title"})
-            assert len(results["member"]) == 2
-            assert results["member"][0][0] == "Item1"
+            assert len(results["items"]) == 2
+            assert results["items"][0][0] == "Item1"
 
             results = await util.query_aggregation(container, {"_metadata": ["title", "creators"]})
-            assert len(results["member"]) == 2
-            assert results["member"][0][1][0] == "root"
+            assert len(results["items"]) == 2
+            assert results["items"][0][1][0] == "root"
 
 
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)
@@ -326,10 +326,10 @@ async def test_fulltext_query_pg_catalog(container_requester):
 
             util = PGSearchUtility()
             await util.initialize()
-            results = await util.query(container, {"title": "something"})
-            assert len(results["member"]) == 2
-            results = await util.query(container, {"title": "interesting"})
-            assert len(results["member"]) == 1
+            results = await util.search(container, {"title": "something"})
+            assert len(results["items"]) == 2
+            results = await util.search(container, {"title": "interesting"})
+            assert len(results["items"]) == 1
 
 
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)

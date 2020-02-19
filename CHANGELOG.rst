@@ -13,6 +13,15 @@ CHANGELOG
 - Replaced Response.content_{type,length} with Response.set_content_{type,length}
   [masipcat]
 
+- Breaking API change: Search GET 
+  Search get responds a json with items and items_total like plone rest api
+  [bloodbare]
+
+- Breaking Internal API change: Search
+  Catalog utility search is the public search operation that is parsed and query
+  the internal implementation
+  [bloodbare]
+
 - Fixing WS bugs and redis unsubscription
   [bloodbare]
 
