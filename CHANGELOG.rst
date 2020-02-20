@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.28 (unreleased)
+5.3.28 (2020-02-20)
 -------------------
 
 - Handle connection reset errors when downloading files
