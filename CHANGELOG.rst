@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.0a13 (unreleased)
+6.0.0a13 (2020-02-20)
 ---------------------
 
 - Changed error handling logic: Guillotina (asgi app) catches all errors and returns a
