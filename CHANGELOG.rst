@@ -4,7 +4,8 @@ CHANGELOG
 6.0.0a14 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Handle connection reset errors on file download
+  [vangheem]
 
 
 6.0.0a13 (2020-02-20)
