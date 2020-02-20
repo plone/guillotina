@@ -4,7 +4,8 @@ CHANGELOG
 5.3.28 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Handle connection reset errors when downloading files
+  [vangheem]
 
 
 5.3.27 (2020-02-13)
