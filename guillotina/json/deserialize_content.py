@@ -46,7 +46,7 @@ class DeserializeFromJson(object):
         # do behavior first in case they modify context values
         for behavior_schema, behavior in await get_all_behaviors(self.context, load=False):
             dotted_name = behavior_schema.__identifier__
-            if dotted_name not in data:
+            if not data.get(dotted_name):
                 # syntax {"namespace.IBehavior": {"foo": "bar"}}
                 # we're not even patching this behavior if no iface found in payload
                 if create:
@@ -108,7 +108,7 @@ class DeserializeFromJson(object):
                 except ValueError as e:
                     errors.append({"message": "Value error", "field": name, "error": e})
                 except ValidationError as e:
-                    errors.append({"message": e.doc(), "field": name, "error": e})
+                    errors.append(e.json())
                 except ValueDeserializationError as e:
                     errors.append({"message": e.message, "field": name, "error": e})
                 except Invalid as e:
@@ -119,7 +119,7 @@ class DeserializeFromJson(object):
                         await apply_coroutine(field.set, obj, value)
                         changed = True
                     except ValidationError as e:
-                        errors.append({"message": e.doc(), "field": name, "error": e})
+                        errors.append(e.json())
                     except ValueDeserializationError as e:
                         errors.append({"message": e.message, "field": name, "error": e})
                     except AttributeError:
