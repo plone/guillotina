@@ -4,7 +4,8 @@ CHANGELOG
 5.3.29 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Handle error when "None" value provided for behavior data
+  [vangheem]
 
 
 5.3.28 (2020-02-20)

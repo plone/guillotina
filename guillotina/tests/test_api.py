@@ -1387,3 +1387,21 @@ async def test_json_schema_query_params(container_requester):
 
         resp, status = await requester("GET", "/@json-schema-validation?foo=5.5")
         assert status == 200
+
+
+async def test_handle_none_value_for_behavior(container_requester):
+    async with container_requester as requester:
+        _, status = await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps(
+                {
+                    "@type": "Item",
+                    "title": "Item1",
+                    "id": "item1",
+                    "@behaviors": [IDublinCore.__identifier__],
+                    IDublinCore.__identifier__: None,
+                }
+            ),
+        )
+        assert status == 201

@@ -46,7 +46,7 @@ class DeserializeFromJson(object):
         # do behavior first in case they modify context values
         for behavior_schema, behavior in await get_all_behaviors(self.context, load=False):
             dotted_name = behavior_schema.__identifier__
-            if dotted_name not in data:
+            if not data.get(dotted_name):
                 # syntax {"namespace.IBehavior": {"foo": "bar"}}
                 # we're not even patching this behavior if no iface found in payload
                 if create:
