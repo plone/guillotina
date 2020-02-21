@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.29 (unreleased)
+5.3.29 (2020-02-21)
 -------------------
 
 - Handle error when "None" value provided for behavior data
