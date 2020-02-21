@@ -10,8 +10,6 @@ docker-compose.yml
 CODEOWNERS
 docker_push
 Makefile
-README.rst
-CHANGELOG.rst
 performance-data.md
 .travis.yml
 .gitignore
