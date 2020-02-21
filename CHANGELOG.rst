@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a14 (unreleased)
 ---------------------
 
+- Handle error when "None" value provided for behavior data
+  [vangheem]
+
 - Handle connection reset errors on file download
   [vangheem]
 
