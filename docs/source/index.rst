@@ -12,6 +12,9 @@ Server designed for high-performance, horizontally scaling solutions.
    :maxdepth: 1
 
    about
+   design
+   component-architecture
+   quick-tour
 
 ========
 Features
@@ -43,7 +46,6 @@ Features
    :maxdepth: 1
 
    quick-start
-   quick-tour
 
 =====================
 Understand The Basics
