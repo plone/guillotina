@@ -26,6 +26,10 @@ Introduction
    :target: https://gitter.im/plone/guillotina
    :alt: Chat
 
+.. image:: https://img.shields.io/docker/cloud/build/plone/guillotina
+   :target: https://hub.docker.com/r/guillotina/guillotina
+   :alt: Docker Cloud Build Status
+
 Please `read the detailed docs <http://guillotina.readthedocs.io/en/latest/>`_
 
 
