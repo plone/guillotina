@@ -8,6 +8,12 @@ CHANGELOG
   Using setter to avoid breaking `Response.content_{type,length} = ...`
   [masipcat]
 
+- Handle error when "None" value provided for behavior data
+  [vangheem]
+
+- Handle connection reset errors on file download
+  [vangheem]
+
 
 6.0.0a13 (2020-02-20)
 ---------------------

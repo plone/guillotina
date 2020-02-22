@@ -90,7 +90,7 @@ class DeserializeFromJson(object):
 
             if behavior:
                 found = False
-                if schema.__identifier__ in data:
+                if data.get(schema.__identifier__):
                     sdata = data[schema.__identifier__]
                     data_value = sdata[name] if name in sdata else None
                     found = True if name in sdata else False
