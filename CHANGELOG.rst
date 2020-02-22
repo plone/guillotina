@@ -4,7 +4,9 @@ CHANGELOG
 6.0.0a14 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Reverted "Replaced Response.content_{type,length} with Response.set_content_{type,length}".
+  Using setter to avoid breaking `Response.content_{type,length} = ...`
+  [masipcat]
 
 
 6.0.0a13 (2020-02-20)

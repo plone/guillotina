@@ -63,9 +63,9 @@ class Response(Exception):
         self.headers: CIMultiDict = headers
 
         if content_type:
-            self.set_content_type(content_type)
+            self.content_type = content_type
         if content_length:
-            self.set_content_length(content_length)
+            self.content_length = content_length
 
         self._prepared = False
         self._start_body = False
@@ -83,12 +83,22 @@ class Response(Exception):
         self.content = None
         self.body = body
         if content_type is not None:
-            self.set_content_type(content_type)
+            self.content_type = content_type
 
-    def set_content_type(self, content_type):
+    @property
+    def content_type(self):
+        self.headers.get(istr("Content-Type"))
+
+    @property
+    def content_length(self):
+        self.headers.get(istr("Content-Length"))
+
+    @content_type.setter
+    def content_type(self, content_type):
         self.headers[istr("Content-Type")] = content_type
 
-    def set_content_length(self, content_length):
+    @content_length.setter
+    def content_length(self, content_length):
         self.headers[istr("Content-Length")] = str(content_length)
 
     @property
