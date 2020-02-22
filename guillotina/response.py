@@ -87,7 +87,7 @@ class Response(Exception):
 
     @property
     def content_type(self):
-        self.headers.get(istr("Content-Type"))
+        return self.headers.get(istr("Content-Type"))
 
     @content_type.setter
     def content_type(self, content_type):
@@ -95,7 +95,7 @@ class Response(Exception):
 
     @property
     def content_length(self):
-        self.headers.get(istr("Content-Length"))
+        return self.headers.get(istr("Content-Length"))
 
     @content_length.setter
     def content_length(self, content_length):
