@@ -14,9 +14,10 @@ async def test_get_static_folder(dummy_guillotina):
 
 async def test_render_static_file(container_requester):
     async with container_requester as requester:
-        response, status = await requester("GET", "/static/tests/teststatic.txt")
+        response, status, headers = await requester.make_request("GET", "/static/tests/teststatic.txt")
         assert status == 200
         assert response.decode("utf8").strip() == "foobar"
+        assert headers["Content-Type"] == "text/plain"
 
 
 async def test_render_javascript_app(container_requester):

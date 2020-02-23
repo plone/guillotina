@@ -4,6 +4,10 @@ CHANGELOG
 6.0.0a14 (unreleased)
 ---------------------
 
+- Reverted "Replaced Response.content_{type,length} with Response.set_content_{type,length}".
+  Using setter to avoid breaking `Response.content_{type,length} = ...`
+  [masipcat]
+
 - Handle error when "None" value provided for behavior data
   [vangheem]
 
