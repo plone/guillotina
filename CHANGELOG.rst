@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.30 (unreleased)
+5.3.30 (2020-02-24)
 -------------------
 
 - Provide better validation for json schema field
