@@ -4,7 +4,8 @@ CHANGELOG
 5.3.30 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Provide better validation for json schema field
+  [vangheem]
 
 
 5.3.29 (2020-02-21)
