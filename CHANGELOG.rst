@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a15 (unreleased)
 ---------------------
 
+- Handle http.disconnect (and other types of messages) while reading the request body
+  [masipcat]
+
 - Provide better validation for json schema field
   [vangheem]
 
