@@ -700,7 +700,9 @@ class JSONField(Field):
         try:
             self.schema_validator.validate(value)
         except jsonschema.ValidationError as e:
-            raise WrongContainedType(e.message, self.__name__, value=value)
+            raise WrongContainedType(
+                f"Failed to validate {'.'.join(e.absolute_schema_path)} with {e.validator_value}"
+            )
 
 
 @implementer(IUnionField)
