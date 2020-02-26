@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.0a14 (unreleased)
+6.0.0a14 (2020-02-26)
 ---------------------
 
 - Change AttributeError to HTTPPreconditionFailed in FileManager
