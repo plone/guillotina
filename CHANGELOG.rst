@@ -1,11 +1,18 @@
 CHANGELOG
 =========
 
-6.0.0a14 (unreleased)
+6.0.0a15 (unreleased)
 ---------------------
 
 - Provide better validation for json schema field
   [vangheem]
+
+
+6.0.0a14 (2020-02-26)
+---------------------
+
+- Change AttributeError to HTTPPreconditionFailed in FileManager
+  [masipcat]
 
 - Reverted "Replaced Response.content_{type,length} with Response.set_content_{type,length}".
   Using setter to avoid breaking `Response.content_{type,length} = ...`
