@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a15 (unreleased)
 ---------------------
 
+- Changes in ICatalogUtility, DefaultSearchUtility and @search endpoints
+  [masipcat]
+
 - Provide better validation for json schema field
   [vangheem]
 
