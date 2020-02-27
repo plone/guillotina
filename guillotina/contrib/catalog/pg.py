@@ -28,6 +28,7 @@ from guillotina.interfaces import IResource
 from guillotina.interfaces import ISearchParser
 from guillotina.interfaces.catalog import ICatalogUtility
 from guillotina.interfaces.content import IApplication
+from guillotina.response import HTTPNotImplemented
 from guillotina.transactions import get_transaction
 from guillotina.utils import find_container
 from guillotina.utils import get_authenticated_user
@@ -599,6 +600,12 @@ class PGSearchUtility(DefaultSearchUtility):
             total = records[0]["count"]
         return {"items": results, "items_total": total}
 
+    async def search_raw(self, container: IContainer, query: typing.Any):
+        """
+        Search raw query
+        """
+        raise HTTPNotImplemented()
+
     async def search(self, context: IBaseObject, query: typing.Any):
         """
         Search query, uses parser to transform query
@@ -606,10 +613,10 @@ class PGSearchUtility(DefaultSearchUtility):
         parsed_query = parse_query(context, query, self)
         container = find_container(context)
         if container is not None:
-            return await self.query(container, parsed_query)
+            return await self._query(container, parsed_query)  # type: ignore
         raise ContainerNotFound()
 
-    async def query(self, container: IContainer, query: ParsedQueryInfo):  # type: ignore
+    async def _query(self, container: IContainer, query: ParsedQueryInfo):
         sql, arguments = self.build_query(container, query, ["id", "zoid", "json"])
         txn = get_current_transaction()
         conn = await txn.get_connection()
