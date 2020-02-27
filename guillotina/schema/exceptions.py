@@ -28,7 +28,7 @@ class ValidationError(zope.interface.Invalid):
         return self.__class__.__doc__
 
     def json(self):
-        d = {"message": self.doc(), "error": str(self)}
+        d = {"message": self.doc(), "error": self}
         if self.field_name:
             d["field"] = self.field_name
         if self.value:
