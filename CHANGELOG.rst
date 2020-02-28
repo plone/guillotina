@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.31 (unreleased)
+5.3.31 (2020-02-28)
 -------------------
 
 - Be able to have async schema invariants
