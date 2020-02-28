@@ -6,6 +6,7 @@ from guillotina.component import get_adapter
 from guillotina.component import query_utility
 from guillotina.content import get_all_behaviors
 from guillotina.content import get_cached_factory
+from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.db.transaction import _EMPTY
 from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import write_permission
@@ -19,11 +20,17 @@ from guillotina.interfaces import IPermission
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceDeserializeFromJson
 from guillotina.interfaces import RESERVED_ATTRS
+from guillotina.interfaces.misc import IRequest
 from guillotina.json.utils import validate_invariants
 from guillotina.schema import get_fields
 from guillotina.schema.exceptions import ValidationError
+from guillotina.schema.interfaces import IField
 from guillotina.utils import apply_coroutine
 from guillotina.utils import get_security_policy
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Type
 from zope.interface import Interface
 
 import asyncio
@@ -35,14 +42,20 @@ _missing = object()
 
 @configure.adapter(for_=(IResource, Interface), provides=IResourceDeserializeFromJson)
 class DeserializeFromJson(object):
-    def __init__(self, context, request):
+    def __init__(self, context: IBaseObject, request: IRequest):
         self.context = context
         self.request = request
 
-        self.permission_cache = {}
+        self.permission_cache: Dict[str, bool] = {}
 
-    async def __call__(self, data, validate_all=False, ignore_errors=False, create=False):
-        errors = []
+    async def __call__(
+        self,
+        data: Dict[str, Any],
+        validate_all: bool = False,
+        ignore_errors: bool = False,
+        create: bool = False,
+    ) -> IBaseObject:
+        errors: List[Dict[str, Any]] = []
 
         # do behavior first in case they modify context values
         for behavior_schema, behavior in await get_all_behaviors(self.context, load=False):
@@ -78,7 +91,15 @@ class DeserializeFromJson(object):
 
         return self.context
 
-    async def set_schema(self, schema, obj, data, errors, validate_all=False, behavior=False):
+    async def set_schema(
+        self,
+        schema: Type[Interface],
+        obj: IBaseObject,
+        data: Dict[str, Any],
+        errors: List[Dict[str, Any]],
+        validate_all: bool = False,
+        behavior: bool = False,
+    ):
         write_permissions = merged_tagged_value_dict(schema, write_permission.key)
         changed = False
         for name, field in get_fields(schema).items():
@@ -166,7 +187,7 @@ class DeserializeFromJson(object):
         if changed:
             obj.register()
 
-    async def get_value(self, field, obj, value):
+    async def get_value(self, field: IField, obj: IBaseObject, value: Any) -> Any:
         try:
             if value is not None:
                 value = get_adapter(field, IJSONToValue, args=[value, obj])
@@ -177,7 +198,7 @@ class DeserializeFromJson(object):
         except ComponentLookupError:
             raise ValueDeserializationError(field, value, "Deserializer not found for field")
 
-    def check_permission(self, permission_name):
+    def check_permission(self, permission_name: str) -> bool:
         if permission_name is None:
             return True
 
