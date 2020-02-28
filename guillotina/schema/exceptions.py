@@ -14,6 +14,17 @@ class StopValidation(Exception):
 class ValidationError(zope.interface.Invalid):
     """Raised if the Validation process fails."""
 
+    def __init__(self, value=None, type=None, field_name="", errors=None, constraint=None):
+        """
+        Follow guillotina 6 api but not fully support.
+        """
+        super().__init__(value)
+        self.value = value
+        self.type = type
+        self.field_name = field_name
+        self.errors = errors
+        self.constraint = constraint
+
     def doc(self):
         return self.__class__.__doc__
 

@@ -12,15 +12,16 @@ from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.json import deserialize_value
 from guillotina.json.deserialize_value import schema_compatible
 from guillotina.json.serialize_value import json_compatible
+from guillotina.json.utils import validate_invariants
 from guillotina.schema.exceptions import WrongType
 from guillotina.tests.utils import create_content
 from guillotina.tests.utils import login
 from zope.interface import Interface
 from zope.interface import Invalid
+from zope.interface.interface import invariant
 
 import pytest
 import uuid
-import zope.interface
 
 
 async def test_serialize_resource(dummy_request, mock_txn):
@@ -925,7 +926,7 @@ class ITestValidation(Interface):
 
     validated_text = schema.Text(required=False)
 
-    @zope.interface.invariant  # type: ignore
+    @invariant
     def text_should_not_be_foobar(ob):
         if getattr(ob, "foo", None) == "foo" and getattr(ob, "bar", None) == "bar":
             raise Invalid(ob)
@@ -1068,3 +1069,39 @@ async def test_bucket_dict_max_ops(dummy_guillotina, mock_txn):
             content,
             {"op": "update", "value": [{"key": "foo", "value": "bar"}, {"key": "foo", "value": "bar"}]},
         )
+
+
+class ITestSchemaWithInvariant(Interface):
+    foobar = schema.Text()
+
+    @invariant
+    async def validate_obj(obj):
+        if obj.foobar == "foobar":
+            raise Invalid("Value is foobar")
+        else:
+            raise schema.ValidationError(value=obj.foobar, field_name="foobar", errors=["Wrong value"])
+
+
+async def test_async_invariant():
+    content = create_content()
+    content.foobar = "foobar"
+    assert len(await validate_invariants(ITestSchemaWithInvariant, content)) == 1
+
+    content = create_content()
+    content.foobar = "not foobar"
+    assert len(await validate_invariants(ITestSchemaWithInvariant, content)) == 1
+
+
+async def test_async_invariant_deserializer(dummy_guillotina, mock_txn, dummy_request):
+    login()
+    content = create_content()
+    deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
+    errors = []
+    await deserializer.set_schema(ITestSchemaWithInvariant, content, {"foobar": "foobar"}, errors)
+    assert len(errors) == 1
+    assert errors[0]["message"] == "Value is foobar"
+
+    errors = []
+    await deserializer.set_schema(ITestSchemaWithInvariant, content, {"foobar": "not foobar"}, errors)
+    assert len(errors) == 1
+    assert errors[0]["error"][0] == "Wrong value"
