@@ -6,7 +6,7 @@ from guillotina.utils import get_current_request
 from typing import Any
 from typing import Dict
 from typing import List
-from typing import Optional
+from typing import Type
 from zope.interface import Interface
 from zope.interface import Invalid
 
@@ -17,7 +17,7 @@ import logging
 logger = logging.getLogger("guillotina")
 
 
-def convert_interfaces_to_schema(interfaces: List[Interface]) -> Dict[str, Any]:
+def convert_interfaces_to_schema(interfaces: List[Type[Interface]]) -> Dict[str, Any]:
     properties = {}
     try:
         request = get_current_request()
@@ -32,7 +32,7 @@ def convert_interfaces_to_schema(interfaces: List[Interface]) -> Dict[str, Any]:
     return properties
 
 
-async def validate_invariants(schema: Interface, obj: IBaseObject) -> List[Invalid]:
+async def validate_invariants(schema: Type[Interface], obj: IBaseObject) -> List[Invalid]:
     """
     Validate invariants on a schema with async invariant support.
     """

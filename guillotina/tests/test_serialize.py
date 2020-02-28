@@ -18,11 +18,10 @@ from guillotina.tests.utils import create_content
 from guillotina.tests.utils import login
 from zope.interface import Interface
 from zope.interface import Invalid
-from zope.interface import invariant
+from zope.interface.interface import invariant
 
 import pytest
 import uuid
-import zope.interface
 
 
 async def test_serialize_resource(dummy_request, mock_txn):
@@ -927,7 +926,7 @@ class ITestValidation(Interface):
 
     validated_text = schema.Text(required=False)
 
-    @zope.interface.invariant  # type: ignore
+    @invariant
     def text_should_not_be_foobar(ob):
         if getattr(ob, "foo", None) == "foo" and getattr(ob, "bar", None) == "bar":
             raise Invalid(ob)
