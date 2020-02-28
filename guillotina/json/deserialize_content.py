@@ -19,6 +19,7 @@ from guillotina.interfaces import IPermission
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceDeserializeFromJson
 from guillotina.interfaces import RESERVED_ATTRS
+from guillotina.json.utils import validate_invariants
 from guillotina.schema import get_fields
 from guillotina.schema.exceptions import ValidationError
 from guillotina.utils import apply_coroutine
@@ -145,18 +146,22 @@ class DeserializeFromJson(object):
                         }
                     )
 
-        invariant_errors = []  # type: ignore
-        try:
-            schema.validateInvariants(obj, invariant_errors)
-        except Invalid:
-            # Just collect errors
-            pass
-        for error in invariant_errors:
-            if len(getattr(error, "args", [])) > 0 and isinstance(error.args[0], str):
-                message = error.args[0]
+        for error in await validate_invariants(schema, obj):
+            if isinstance(error, ValidationError):
+                errors.append(
+                    {
+                        "message": error.doc(),
+                        "value": error.value,
+                        "field": error.field_name,
+                        "error": error.errors,
+                    }
+                )
             else:
-                message = error.__doc__
-            errors.append({"message": message, "error": error})
+                if len(getattr(error, "args", [])) > 0 and isinstance(error.args[0], str):
+                    message = error.args[0]
+                else:
+                    message = error.__doc__
+                errors.append({"message": message, "error": error})
 
         if changed:
             obj.register()

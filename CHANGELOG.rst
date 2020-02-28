@@ -4,7 +4,8 @@ CHANGELOG
 5.3.31 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Be able to have async schema invariants
+  [vangheem]
 
 
 5.3.30 (2020-02-24)
