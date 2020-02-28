@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a15 (unreleased)
 ---------------------
 
+- Be able to have async schema invariants
+  [vangheem]
+
 - Provide better validation for json schema field
   [vangheem]
 
