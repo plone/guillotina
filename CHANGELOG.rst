@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.0a15 (unreleased)
+6.0.0a15 (2020-03-02)
 ---------------------
 
 - Handle http.disconnect (and other types of messages) while reading the request body
