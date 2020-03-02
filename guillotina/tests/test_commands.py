@@ -14,7 +14,7 @@ import pytest
 
 
 DATABASE = os.environ.get("DATABASE", "DUMMY")
-DB_SCHEMA = os.environ.get("DB_SCHEMA", "public")
+DB_SCHEMA = os.environ.get("DB_SCHEMA") or "public"
 
 
 def test_run_command(command_arguments):

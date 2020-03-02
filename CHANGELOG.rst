@@ -4,6 +4,8 @@ CHANGELOG
 6.0.0a15 (unreleased)
 ---------------------
 
+- Replace travis with github actions [lferran]
+
 - Be able to have async schema invariants
   [vangheem]
 

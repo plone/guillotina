@@ -1,0 +1,81 @@
+name: guillotina
+
+on: [push]
+
+jobs:
+
+  # Job to run pre-checks
+  pre-checks:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7, 3.8]
+      fail-fast: true
+
+    steps:
+      # Checkout the repository first
+      - uses: actions/checkout@v2
+
+      # Setup the python version
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # Install the package
+      - name: Install
+        run: |
+          pip install $(grep "Cython" requirements.txt)
+          pip install -r requirements.txt
+          pip install -r contrib-requirements.txt
+          pip install -e .[test]
+          pip install -e .[testdata]
+
+      # Linters and typing
+      - name: Pre-checks
+        run: |
+          flake8 guillotina --config=setup.cfg
+          mypy guillotina/
+          isort -c -rc guillotina/
+          black --check --verbose guillotina
+
+  # Job to run tests
+  tests:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: [3.7, 3.8]
+        database: [DUMMY, postgres, cockroachdb]
+        # db_schema: [public, custom]
+
+    # Set environment variables
+    env:
+      DATABASE: ${{ matrix.database }}
+      # DB_SCHEMA: ${{ matrix.db_schema }}
+
+    steps:
+      # Checkout the repository first
+      - uses: actions/checkout@v2
+
+      # Setup the python version
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # Install the package
+      - name: Install
+        run: |
+          pip install $(grep "Cython" requirements.txt)
+          pip install -r requirements.txt
+          pip install -r contrib-requirements.txt
+          pip install -e .[test]
+          pip install -e .[testdata]
+
+      # Run tests
+      - name: Run tests python=${{matrix.python-version}} DATABASE=${{matrix.database}} db_schema=${{matrix.db_schema}}
+        run: |
+          pytest -rfE --reruns 2 --cov=guillotina -s --tb=native -v --cov-report term-missing --cov-append guillotina
+        # db_schema = custom is not supported for DUMMY and cockroachdb
+        # if: ! (contains(["DUMMY, cockroachdb"], matrix.database) && matrix.db_schema == "custom")
