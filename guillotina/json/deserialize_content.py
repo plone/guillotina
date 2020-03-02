@@ -16,13 +16,20 @@ from guillotina.exceptions import ValueDeserializationError
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IJSONToValue
 from guillotina.interfaces import IPermission
+from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceDeserializeFromJson
 from guillotina.interfaces import RESERVED_ATTRS
+from guillotina.json.utils import validate_invariants
 from guillotina.schema import get_fields
 from guillotina.schema.exceptions import ValidationError
+from guillotina.schema.interfaces import IField
 from guillotina.utils import apply_coroutine
 from guillotina.utils import get_security_policy
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Type
 from zope.interface import Interface
 
 import asyncio
@@ -33,15 +40,21 @@ _missing = object()
 
 
 @configure.adapter(for_=(IResource, Interface), provides=IResourceDeserializeFromJson)
-class DeserializeFromJson(object):
-    def __init__(self, context, request):
+class DeserializeFromJson:
+    def __init__(self, context: IResource, request: IRequest):
         self.context = context
         self.request = request
 
-        self.permission_cache = {}
+        self.permission_cache: Dict[str, bool] = {}
 
-    async def __call__(self, data, validate_all=False, ignore_errors=False, create=False):
-        errors = []
+    async def __call__(
+        self,
+        data: Dict[str, Any],
+        validate_all: bool = False,
+        ignore_errors: bool = False,
+        create: bool = False,
+    ) -> IResource:
+        errors: List[Dict[str, Any]] = []
 
         # do behavior first in case they modify context values
         for behavior_schema, behavior in await get_all_behaviors(self.context, load=False):
@@ -77,7 +90,15 @@ class DeserializeFromJson(object):
 
         return self.context
 
-    async def set_schema(self, schema, obj, data, errors, validate_all=False, behavior=False):
+    async def set_schema(
+        self,
+        schema: Type[Interface],
+        obj: IResource,
+        data: Dict[str, Any],
+        errors: List[Dict[str, Any]],
+        validate_all: bool = False,
+        behavior: bool = False,
+    ):
         write_permissions = merged_tagged_value_dict(schema, write_permission.key)
         changed = False
         for name, field in get_fields(schema).items():
@@ -145,23 +166,27 @@ class DeserializeFromJson(object):
                         }
                     )
 
-        invariant_errors = []  # type: ignore
-        try:
-            schema.validateInvariants(obj, invariant_errors)
-        except Invalid:
-            # Just collect errors
-            pass
-        for error in invariant_errors:
-            if len(getattr(error, "args", [])) > 0 and isinstance(error.args[0], str):
-                message = error.args[0]
+        for error in await validate_invariants(schema, obj):
+            if isinstance(error, ValidationError):
+                errors.append(
+                    {
+                        "message": error.doc(),
+                        "value": error.value,
+                        "field": error.field_name,
+                        "error": error.errors,
+                    }
+                )
             else:
-                message = error.__doc__
-            errors.append({"message": message, "error": error})
+                if len(getattr(error, "args", [])) > 0 and isinstance(error.args[0], str):
+                    message = error.args[0]
+                else:
+                    message = error.__doc__
+                errors.append({"message": message, "error": error})
 
         if changed:
             obj.register()
 
-    async def get_value(self, field, obj, value):
+    async def get_value(self, field: IField, obj: IResource, value: Any) -> Any:
         try:
             if value is not None:
                 value = get_adapter(field, IJSONToValue, args=[value, obj])
@@ -172,7 +197,7 @@ class DeserializeFromJson(object):
         except ComponentLookupError:
             raise ValueDeserializationError(field, value, "Deserializer not found for field")
 
-    def check_permission(self, permission_name):
+    def check_permission(self, permission_name: str) -> bool:
         if permission_name is None:
             return True
 
