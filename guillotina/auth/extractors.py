@@ -75,7 +75,12 @@ class BasicAuthPolicy(BasePolicy):
         if header_auth is not None:
             schema, _, encoded_token = header_auth.partition(" ")
             if schema.lower() == "basic":
-                token = base64.b64decode(encoded_token).decode("utf-8")
+                try:
+                    token = base64.b64decode(encoded_token).decode("utf-8")
+                except Exception:  # pragma: no cover
+                    # could be unicode, could be binascii generic,
+                    # should just be ignored if we can't decode
+                    return
                 userid, _, password = token.partition(":")
                 return {"type": "basic", "id": userid.strip(), "token": password.strip()}
 
