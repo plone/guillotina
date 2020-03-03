@@ -19,20 +19,23 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install tools
+      - name: Install package
         run: |
-          pip install isort mypy-zope flake8 mypy black
+          pip install $(grep "Cython" requirements.txt)
+          pip install -r requirements.txt
+          pip install -r contrib-requirements.txt
+          pip install -e .[test]
+          pip install -e .[testdata]
 
       - name: Run pre-checks
         run: |
           flake8 guillotina --config=setup.cfg
-          mypy guillotina/  --ignore-missing-imports
+          mypy guillotina/ --ignore-missing-imports
           isort -c -rc guillotina/
           black --check --verbose guillotina
 
   # Job to run tests
   tests:
-#    needs: pre-checks
     runs-on: ubuntu-latest
 
     strategy:
@@ -49,16 +52,16 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v2
-        if: matrix.database == 'public' || matrix.db_schema == 'postgres'
+        if: (env.DATABASE == 'public' || env.DB_SCHEMA == 'postgres') == 'true'
 
       - name: Setup Python
-        if: matrix.database == 'public' || matrix.db_schema == 'postgres'
+        if: (env.DATABASE == 'public' || env.DB_SCHEMA == 'postgres') == 'true'
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Install the package
-        if: matrix.database == 'public' || matrix.db_schema == 'postgres'
+        if: (env.DATABASE == 'public' || env.DB_SCHEMA == 'postgres') == 'true'
         run: |
           pip install $(grep "Cython" requirements.txt)
           pip install -r requirements.txt
@@ -67,6 +70,6 @@ jobs:
           pip install -e .[testdata]
 
       - name: Run tests
-        if: matrix.database == 'public' || matrix.db_schema == 'postgres'
+        if: (env.DATABASE == 'public' || env.DB_SCHEMA == 'postgres') == 'true'
         run: |
           pytest -rfE --reruns 2 --cov=guillotina -s --tb=native -v --cov-report term-missing --cov-append guillotina
