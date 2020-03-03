@@ -39,6 +39,9 @@ jobs:
 
   # Job to run tests
   tests:
+    # db_schema = custom is not supported for DUMMY and cockroachdb
+    if: matrix.db_schema == 'public' || matrix.database == 'postgres'
+
 #    needs: pre-checks
     runs-on: ubuntu-latest
 
@@ -74,7 +77,5 @@ jobs:
 
       # Run tests
       - name: Run tests python=${{matrix.python-version}} DATABASE=${{matrix.database}} db_schema=${{matrix.db_schema}}
-        # db_schema = custom is not supported for DUMMY and cockroachdb
-        if: matrix.db_schema == 'public' || matrix.database == 'postgres'
         run: |
           pytest -rfE --reruns 2 --cov=guillotina -s --tb=native -v --cov-report term-missing --cov-append guillotina
