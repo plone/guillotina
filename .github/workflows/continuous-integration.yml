@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
 
-  Job to run pre-checks
+  # Job to run pre-checks
   pre-checks:
     runs-on: ubuntu-latest
     strategy:
