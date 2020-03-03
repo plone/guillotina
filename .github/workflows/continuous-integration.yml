@@ -70,7 +70,7 @@ jobs:
 
       # Run tests
       - name: Run tests python=${{matrix.python-version}} DATABASE=${{matrix.database}} db_schema=${{matrix.db_schema}}
-        if: contains("DUMMY, cockroachdb", ${{ matrix.database }})
+        if: ! ( contains("DUMMY, cockroachdb", ${{ matrix.database }}) )
         run: |
           pytest -rfE --reruns 2 --cov=guillotina -s --tb=native -v --cov-report term-missing --cov-append guillotina
         # db_schema = custom is not supported for DUMMY and cockroachdb
