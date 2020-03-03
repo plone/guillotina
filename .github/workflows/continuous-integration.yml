@@ -50,6 +50,12 @@ jobs:
       DB_SCHEMA: ${{ matrix.db_schema }}
 
     steps:
+      - name: Check supported matrix combinations
+        if: ! (env.DATABASE == 'postgres' || env.DB_SCHEMA == 'public')
+        run: |
+          # Exit as success
+          exit 0
+
       - name: Checkout the repository
         if: env.DATABASE == 'postgres' || env.DB_SCHEMA == 'public'
         uses: actions/checkout@v2
