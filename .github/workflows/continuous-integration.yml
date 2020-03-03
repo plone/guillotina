@@ -11,29 +11,22 @@ jobs:
       matrix:
         python-version: [3.7, 3.8]
     steps:
-      # Checkout the repository first
-      - uses: actions/checkout@v2
+      - name: Checkout the repository
+        uses: actions/checkout@v2
 
-      # Setup the python version
       - name: Setup Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
 
-      # Install the package
-      - name: Install
+      - name: Install tools
         run: |
-          pip install $(grep "isort" contrib-requirements.txt)
-          pip install $(grep "mypy-zope" contrib-requirements.txt)
-          pip install $(grep "flake8" contrib-requirements.txt)
-          pip install $(grep "mypy" contrib-requirements.txt)
-          pip install $(grep "black" contrib-requirements.txt)
+          pip install isort mypy-zope flake8 mypy black
 
-      # Linters and typing
-      - name: Pre-checks
+      - name: Run pre-checks
         run: |
           flake8 guillotina --config=setup.cfg
-          mypy guillotina/ --ignore-missing-imports
+          mypy guillotina/
           isort -c -rc guillotina/
           black --check --verbose guillotina
 
@@ -53,20 +46,19 @@ jobs:
       DATABASE: ${{ matrix.database }}
       DB_SCHEMA: ${{ matrix.db_schema }}
 
-    if: env.DATABASE == 'public' || env.DB_SCHEMA == 'postgres'
-
     steps:
-      # Checkout the repository first
-      - uses: actions/checkout@v2
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+        if: env.DATABASE == 'public' || env.DB_SCHEMA == 'postgres'
 
-      # Setup the python version
       - name: Setup Python ${{ matrix.python-version }}
+        if: env.DATABASE == 'public' || env.DB_SCHEMA == 'postgres'
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
 
-      # Install the package
-      - name: Install
+      - name: Install the package
+        if: env.DATABASE == 'public' || env.DB_SCHEMA == 'postgres'
         run: |
           pip install $(grep "Cython" requirements.txt)
           pip install -r requirements.txt
@@ -74,7 +66,7 @@ jobs:
           pip install -e .[test]
           pip install -e .[testdata]
 
-      # Run tests
       - name: Run tests python=${{matrix.python-version}} DATABASE=${{matrix.database}} db_schema=${{matrix.db_schema}}
+        if: env.DATABASE == 'public' || env.DB_SCHEMA == 'postgres'
         run: |
           pytest -rfE --reruns 2 --cov=guillotina -s --tb=native -v --cov-report term-missing --cov-append guillotina
