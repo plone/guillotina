@@ -51,7 +51,7 @@ jobs:
 
     steps:
       - name: Display ${{ matrix.database }} ${{ env.DATABASE }}
-        if: env.DATABASE == 'postgres' || env.DB_SCHEMA == "public"
+        if: env.DATABASE == 'postgres' || env.DB_SCHEMA == 'public'
         run: |
           echo "HOLA"
 
