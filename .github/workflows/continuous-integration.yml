@@ -53,8 +53,7 @@ jobs:
       DATABASE: ${{ matrix.database }}
       DB_SCHEMA: ${{ matrix.db_schema }}
 
-    # db_schema = custom is not supported for DUMMY and cockroachdb
-    if: ${{ matrix.db_schema == 'public' || matrix.database == 'postgres' }}
+    if: ${{ matrix.db_schema }} == 'public' || ${{ matrix.database }} == 'postgres'
 
     steps:
       # Checkout the repository first
