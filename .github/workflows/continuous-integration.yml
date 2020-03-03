@@ -4,35 +4,35 @@ on: [push]
 
 jobs:
 
-  # Job to run pre-checks
-  # pre-checks:
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       python-version: [3.7, 3.8]
-  #   steps:
-  #     - name: Checkout the repository
-  #       uses: actions/checkout@v2
+  Job to run pre-checks
+  pre-checks:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7, 3.8]
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
 
-  #     - name: Setup Python ${{ matrix.python-version }}
-  #       uses: actions/setup-python@v1
-  #       with:
-  #         python-version: ${{ matrix.python-version }}
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
 
-  #     - name: Install package
-  #       run: |
-  #         pip install $(grep "Cython" requirements.txt)
-  #         pip install -r requirements.txt
-  #         pip install -r contrib-requirements.txt
-  #         pip install -e .[test]
-  #         pip install -e .[testdata]
+      - name: Install package
+        run: |
+          pip install $(grep "Cython" requirements.txt)
+          pip install -r requirements.txt
+          pip install -r contrib-requirements.txt
+          pip install -e .[test]
+          pip install -e .[testdata]
 
-  #     - name: Run pre-checks
-  #       run: |
-  #         flake8 guillotina --config=setup.cfg
-  #         mypy guillotina/ --ignore-missing-imports
-  #         isort -c -rc guillotina/
-  #         black --check --verbose guillotina
+      - name: Run pre-checks
+        run: |
+          flake8 guillotina --config=setup.cfg
+          mypy guillotina/ --ignore-missing-imports
+          isort -c -rc guillotina/
+          black --check --verbose guillotina
 
   # Job to run tests
   tests:
@@ -50,31 +50,27 @@ jobs:
       DB_SCHEMA: ${{ matrix.db_schema }}
 
     steps:
-      - name: Display ${{ matrix.database }} ${{ env.DATABASE }}
+      - name: Checkout the repository
+        if: env.DATABASE == 'postgres' || env.DB_SCHEMA == 'public'
+        uses: actions/checkout@v2
+
+
+      - name: Setup Python
+        if: env.DATABASE == 'postgres' || env.DB_SCHEMA == 'public'
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install the package
         if: env.DATABASE == 'postgres' || env.DB_SCHEMA == 'public'
         run: |
-          echo "HOLA"
+          pip install $(grep "Cython" requirements.txt)
+          pip install -r requirements.txt
+          pip install -r contrib-requirements.txt
+          pip install -e .[test]
+          pip install -e .[testdata]
 
-      # - name: Checkout the repository
-      #   uses: actions/checkout@v2
-      #   if: (env.database == 'public' || env.db_schema == 'postgres')
-
-      # - name: Setup Python
-      #   if: (env.database == 'public' || env.db_schema == 'postgres')
-      #   uses: actions/setup-python@v1
-      #   with:
-      #     python-version: ${{ matrix.python-version }}
-
-      # - name: Install the package
-      #   if: (env.database == 'public' || env.db_schema == 'postgres')
-      #   run: |
-      #     pip install $(grep "Cython" requirements.txt)
-      #     pip install -r requirements.txt
-      #     pip install -r contrib-requirements.txt
-      #     pip install -e .[test]
-      #     pip install -e .[testdata]
-
-      # - name: Run tests
-      #   if: (env.DATABASE == public || env.DB_SCHEMA == postgres)
-      #   run: |
-      #     pytest -rfE --reruns 2 --cov=guillotina -s --tb=native -v --cov-report term-missing --cov-append guillotina
+      - name: Run tests
+        if: env.DATABASE == 'postgres' || env.DB_SCHEMA == 'public'
+        run: |
+          pytest -rfE --reruns 2 --cov=guillotina -s --tb=native -v --cov-report term-missing --cov-append guillotina
