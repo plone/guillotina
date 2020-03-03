@@ -42,7 +42,7 @@ jobs:
       matrix:
         python-version: [3.7, 3.8]
         database: ["DUMMY", "postgres", "cockroachdb"]
-        db_schema: ["custom"]
+        db_schema: ["custom", "public"]
 
     # Set environment variables
     env:
@@ -51,7 +51,7 @@ jobs:
 
     steps:
       - name: Display ${{ matrix.database }} ${{ env.DATABASE }}
-        if: env.DATABASE == 'DUMMY'
+        if: env.DATABASE == 'postgres' || env.DB_SCHEMA == "public"
         run: |
           echo "HOLA"
 
