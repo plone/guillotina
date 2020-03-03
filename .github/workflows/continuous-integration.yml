@@ -50,12 +50,10 @@ jobs:
       DB_SCHEMA: ${{ matrix.db_schema }}
 
     steps:
-      - name: Display
+      - name: Display ${{ matrix.database }} ${{ env.DATABASE }}
+        if: env.DATABASE == 'DUMMY'
         run: |
-          env.DATABASE
-          ${{ env.DATABASE }}
-          matrix.database
-          ${{ matrix.database }}
+          echo "HOLA"
 
       # - name: Checkout the repository
       #   uses: actions/checkout@v2
