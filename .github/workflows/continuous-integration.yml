@@ -14,7 +14,7 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v2
 
-      - name: Setup Python ${{ matrix.python-version }}
+      - name: Setup Python
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
@@ -53,12 +53,11 @@ jobs:
       - name: Check supported matrix combinations
         if: (env.DATABASE == 'postgres' || env.DB_SCHEMA == 'public') != true
         run: |
-          # Exit as success
-          exit 0
+          echo "This matrix combination is skipped"
 
       - name: Checkout the repository
+        if: env.DATABASE == 'postgres' || env.DB_SCHEMA == 'public'
         uses: actions/checkout@v2
-
 
       - name: Setup Python
         if: env.DATABASE == 'postgres' || env.DB_SCHEMA == 'public'
