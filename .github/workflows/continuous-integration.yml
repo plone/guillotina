@@ -53,7 +53,7 @@ jobs:
       DATABASE: ${{ matrix.database }}
       DB_SCHEMA: ${{ matrix.db_schema }}
 
-    if: ${{ matrix.db_schema }} == 'public' || ${{ matrix.database }} == 'postgres'
+    if: jobs.test.env.DATABASE == 'public' || jobs.test.env.DB_SCHEMA == 'postgres'
 
     steps:
       # Checkout the repository first
