@@ -23,19 +23,23 @@ jobs:
       # Install the package
       - name: Install
         run: |
-          pip install flake8 black isort mypy mypy_zope
+          pip install $(grep "isort" contrib-requirements.txt)
+          pip install $(grep "mypy-zope" contrib-requirements.txt)
+          pip install $(grep "flake8" contrib-requirements.txt)
+          pip install $(grep "mypy" contrib-requirements.txt)
+          pip install $(grep "black" contrib-requirements.txt)
 
       # Linters and typing
       - name: Pre-checks
         run: |
           flake8 guillotina --config=setup.cfg
-          mypy guillotina/ --ignore-missing-imports
+          mypy guillotina/
           isort -c -rc guillotina/
           black --check --verbose guillotina
 
   # Job to run tests
   tests:
-    needs: pre-checks
+#    needs: pre-checks
     runs-on: ubuntu-latest
 
     strategy:
