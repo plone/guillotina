@@ -39,9 +39,6 @@ jobs:
 
   # Job to run tests
   tests:
-    # db_schema = custom is not supported for DUMMY and cockroachdb
-    if: matrix.db_schema == 'public' || matrix.database == 'postgres'
-
 #    needs: pre-checks
     runs-on: ubuntu-latest
 
@@ -55,6 +52,9 @@ jobs:
     env:
       DATABASE: ${{ matrix.database }}
       DB_SCHEMA: ${{ matrix.db_schema }}
+
+    # db_schema = custom is not supported for DUMMY and cockroachdb
+    if: matrix.db_schema == 'public' || matrix.database == 'postgres'
 
     steps:
       # Checkout the repository first
