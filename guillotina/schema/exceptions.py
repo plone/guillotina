@@ -18,7 +18,7 @@ class ValidationError(zope.interface.Invalid):
         """
         Follow guillotina 6 api but not fully support.
         """
-        super().__init__(value, type, field_name)
+        super().__init__(value)
         self.value = value
         self.type = type
         self.field_name = field_name
