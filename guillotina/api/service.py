@@ -94,7 +94,7 @@ class Service(View):
                 try:
                     if parameter["schema"].get("type") == "array":
                         value = data.getall(name)
-                        if parameter["schema"].get("items", {}).get("type") == ("number", "integer"):
+                        if parameter["schema"].get("items", {}).get("type") in ("number", "integer"):
                             value = [_safe_int_or_float_cast(v) for v in value]
                     else:
                         value = data[name]
