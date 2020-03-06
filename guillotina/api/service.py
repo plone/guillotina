@@ -50,13 +50,18 @@ class DictFieldProxy:
 _sentinal = object()
 
 
-def _safe_int_or_float_cast(value: Any) -> Union[int, float]:
+def _safe_int_or_float_cast(value: Any) -> Union[int, float, Any]:
+    if type(value) in (float, int):
+        # No need to cast
+        return value
     try:
-        value = int(value)
-    except ValueError:
+        return int(value)
+    except (ValueError, TypeError):
+        # Could not cast to int
         try:
-            value = float(value)
-        except ValueError:
+            return float(value)
+        except (ValueError, TypeError):
+            # Could not cast to float
             pass
     return value
 
@@ -70,6 +75,7 @@ class Service(View):
             for parameter in self.__config__["parameters"]:
                 if parameter["in"] != "query" or "schema" not in parameter or "name" not in parameter:
                     continue
+
                 name = parameter["name"]
                 if parameter.get("required") and name not in data:
                     raise HTTPPreconditionFailed(
@@ -88,12 +94,13 @@ class Service(View):
                 try:
                     if parameter["schema"].get("type") == "array":
                         value = data.getall(name)
-                        if parameter["schema"].get("items", {}).get("type") == "number":
+                        if parameter["schema"].get("items", {}).get("type") == ("number", "integer"):
                             value = [_safe_int_or_float_cast(v) for v in value]
                     else:
                         value = data[name]
-                        if parameter["schema"].get("type") == "number":
+                        if parameter["schema"].get("type") in ("number", "integer"):
                             value = _safe_int_or_float_cast(value)
+
                     jsonschema.validate(instance=value, schema=parameter["schema"])
                 except jsonschema.exceptions.ValidationError as e:
                     raise HTTPPreconditionFailed(
