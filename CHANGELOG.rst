@@ -4,7 +4,7 @@ CHANGELOG
 6.0.0a16 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Fix integer query param validation [lferran]
 
 
 6.0.0a15 (2020-03-02)
