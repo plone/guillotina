@@ -1914,7 +1914,8 @@ class ObjectTests(unittest.TestCase):
         self.assertEqual(err.args, ("foo",))
         err = errors[1]
         self.assertTrue(isinstance(err, WrongType))
-        self.assertEqual(err.args, (1, str, "bar"))
+        # exception type changed
+        self.assertEqual(err.args, (1,))
 
     def test__validate_w_value_providing_schema(self):
         from zope.interface import implementer
