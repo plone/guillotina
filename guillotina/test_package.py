@@ -279,22 +279,14 @@ async def matching_service(context, request):
             "required": False,
             "in": "query",
             "name": "oranges",
-            "schema": {
-                "type": "integer",
-                "minimum": 2,
-                "maximum": 10,
-            }
+            "schema": {"type": "integer", "minimum": 2, "maximum": 10},
         },
         {
             "required": False,
             "in": "query",
             "name": "kilograms",
-            "schema": {
-                "type": "number",
-                "minimum": 50,
-                "maximum": 100,
-            }
-        }
+            "schema": {"type": "number", "minimum": 50, "maximum": 100},
+        },
     ],
     validate=True,
 )

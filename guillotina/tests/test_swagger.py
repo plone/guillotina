@@ -1,10 +1,10 @@
-from openapi_spec_validator import validate_v3_spec
 from guillotina.api.service import _safe_int_or_float_cast
+from openapi_spec_validator import validate_v3_spec
 
-import unittest
 import json
 import os
 import pytest
+import unittest
 
 
 SWAGGER_SETTINGS = {"applications": ["guillotina.contrib.swagger"]}
