@@ -1911,7 +1911,7 @@ class ObjectTests(unittest.TestCase):
         errors = sorted(errors, key=lambda x: type(x).__name__)
         err = errors[0]
         self.assertTrue(isinstance(err, RequiredMissing))
-        self.assertEqual(err.args, ("foo",))
+        self.assertEqual(err.args, ("foo", None, ""))
         err = errors[1]
         self.assertTrue(isinstance(err, WrongType))
         self.assertEqual(err.args, (1, str, "bar"))
