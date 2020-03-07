@@ -4,6 +4,8 @@ CHANGELOG
 6.0.0a16 (unreleased)
 ---------------------
 
+- Fix more antipatterns [lferran]
+
 - Fix integer query param validation [lferran]
 
 
