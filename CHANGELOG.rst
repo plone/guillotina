@@ -7,6 +7,9 @@ CHANGELOG
 - Update react-gmi v 0.4.0
   [jordic]
 
+- Fix more antipatterns [lferran]
+
+- Fix integer query param validation [lferran]
 
 
 6.0.0a15 (2020-03-02)
