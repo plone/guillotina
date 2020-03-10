@@ -164,7 +164,7 @@ def make_mocked_request(
     q: asyncio.Queue[Dict] = asyncio.Queue()
     chunks = [payload[i : i + 1024] for i in range(0, len(payload), 1024)] or [b""]
     for i, chunk in enumerate(chunks):
-        q.put_nowait({"body": chunk, "more_body": i < len(chunks) - 1})
+        q.put_nowait({"type": "http.request", "body": chunk, "more_body": i < len(chunks) - 1})
 
     return Request(
         "http", method, path, query_string, raw_hdrs, client_max_size=client_max_size, receive=q.get

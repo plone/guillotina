@@ -254,8 +254,15 @@ class AsgiStreamReader:
 
     async def receive(self) -> bytes:
         payload = await self._asgi_receive()
-        self._eof = not payload.get("more_body", False)
-        return payload["body"]
+        if payload["type"] == "http.request":
+            self._eof = not payload.get("more_body", False)
+            return payload["body"]
+        elif payload["type"] == "http.disconnect":
+            from guillotina.response import HTTPClientClosedRequest
+
+            raise HTTPClientClosedRequest()
+        else:
+            raise RuntimeError(str(payload))
 
     @property
     def eof(self):

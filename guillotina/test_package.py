@@ -275,6 +275,18 @@ async def matching_service(context, request):
             "name": "numbers",
             "schema": {"type": "array", "items": {"type": "number"}},
         },
+        {
+            "required": False,
+            "in": "query",
+            "name": "oranges",
+            "schema": {"type": "integer", "minimum": 2, "maximum": 10},
+        },
+        {
+            "required": False,
+            "in": "query",
+            "name": "kilograms",
+            "schema": {"type": "number", "minimum": 50, "maximum": 100},
+        },
     ],
     validate=True,
 )
