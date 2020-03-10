@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a16 (unreleased)
 ---------------------
 
+- travis: run tests with Python 3.8.2 instead of 3.8.0
+  [masipcat]
+
 - Update react-gmi v 0.4.0
   [jordic]
 
