@@ -13,12 +13,12 @@ class ICatalogUtility(Interface):
 
     async def search(context: IBaseObject, query: typing.Any):
         """
-        Search parsed query
+        Search query, uses parser to transform query
         """
 
-    async def query(container: IContainer, query: typing.Any):
+    async def search_raw(container: IContainer, query: typing.Any):
         """
-        Raw search query, uses parser to transform query
+        Search raw query
         """
 
     async def index(container: IContainer, datas):

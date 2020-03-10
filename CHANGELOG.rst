@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0a16 (unreleased)
 ---------------------
 
+- Changes in ICatalogUtility, DefaultSearchUtility and @search endpoints
+  [masipcat]
+
 - Update react-gmi v 0.4.0
   [jordic]
 

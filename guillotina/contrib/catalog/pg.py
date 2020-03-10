@@ -8,13 +8,16 @@ from guillotina.catalog.parser import to_list
 from guillotina.catalog.types import BasicParsedQueryInfo
 from guillotina.catalog.utils import get_index_definition
 from guillotina.catalog.utils import iter_indexes
+from guillotina.catalog.utils import parse_query
 from guillotina.component import get_utility
 from guillotina.const import TRASHED_ID
 from guillotina.db.interfaces import IPostgresStorage
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import IWriter
+from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.db.storages.utils import register_sql
 from guillotina.db.uid import MAX_UID_LENGTH
+from guillotina.exceptions import ContainerNotFound
 from guillotina.exceptions import RequestNotFound
 from guillotina.exceptions import TransactionNotFound
 from guillotina.interfaces import IContainer
@@ -25,7 +28,9 @@ from guillotina.interfaces import IResource
 from guillotina.interfaces import ISearchParser
 from guillotina.interfaces.catalog import ICatalogUtility
 from guillotina.interfaces.content import IApplication
+from guillotina.response import HTTPNotImplemented
 from guillotina.transactions import get_transaction
+from guillotina.utils import find_container
 from guillotina.utils import get_authenticated_user
 from guillotina.utils import get_content_path
 from guillotina.utils import get_current_request
@@ -595,7 +600,23 @@ class PGSearchUtility(DefaultSearchUtility):
             total = records[0]["count"]
         return {"items": results, "items_total": total}
 
-    async def query(self, container: IContainer, query: ParsedQueryInfo):  # type: ignore
+    async def search_raw(self, container: IContainer, query: typing.Any):
+        """
+        Search raw query
+        """
+        raise HTTPNotImplemented()
+
+    async def search(self, context: IBaseObject, query: typing.Any):
+        """
+        Search query, uses parser to transform query
+        """
+        parsed_query = parse_query(context, query, self)
+        container = find_container(context)
+        if container is not None:
+            return await self._query(container, parsed_query)  # type: ignore
+        raise ContainerNotFound()
+
+    async def _query(self, container: IContainer, query: ParsedQueryInfo):
         sql, arguments = self.build_query(container, query, ["id", "zoid", "json"])
         txn = get_current_transaction()
         conn = await txn.get_connection()
