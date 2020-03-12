@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.0a16 (unreleased)
+6.0.0a16 (2020-03-12)
 ---------------------
 
 - Changes in ICatalogUtility, DefaultSearchUtility and @search endpoints
