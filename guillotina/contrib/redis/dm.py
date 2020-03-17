@@ -3,7 +3,7 @@ from guillotina.contrib.redis import get_driver
 from guillotina.files.adapter import DBDataManager
 from guillotina.interfaces import IExternalFileStorageManager
 from guillotina.interfaces import IUploadDataManager
-from guillotina.renderers import GuillotinaJSONEncoder
+from guillotina.renderers import guillotina_json_default
 from guillotina.transactions import get_transaction
 
 import json
@@ -42,7 +42,8 @@ class RedisFileDataManager(DBDataManager):
         redis = await self.get_redis()
         key = self.get_key()
         self._data["last_activity"] = time.time()
-        await redis.set(key, json.dumps(self._data, cls=GuillotinaJSONEncoder), expire=self._ttl)
+        data: bytes = json.dumps(self._data, default=guillotina_json_default)
+        await redis.set(key, data.decode("utf-8"), expire=self._ttl)
 
     async def get_redis(self):
         if self._redis is None:
