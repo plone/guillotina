@@ -19,9 +19,8 @@ from zope.interface import implementer
 
 import asyncio
 import enum
-import json
-import orjson
 import multidict
+import orjson
 import time
 import urllib.parse
 import uuid
