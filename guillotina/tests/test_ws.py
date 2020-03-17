@@ -18,7 +18,7 @@ async def test_hello(guillotina, container_requester):
 
             await ws.send_str(json.dumps(sending))
             message = await ws.receive_json()
-            assert message == {"data": '{"value": []}', "id": "0"}
+            assert message == {"data": '{"value":[]}', "id": "0"}
 
 
 async def test_send_close(guillotina, container_requester):

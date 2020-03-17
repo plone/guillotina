@@ -7,6 +7,9 @@ CHANGELOG
 - Use orjson instead of json/ujson
   [masipcat]
 
+- AsgiStreamReader.read() can return bytes or bytearray
+  [masipcat]
+
 
 6.0.0a16 (2020-03-12)
 ---------------------

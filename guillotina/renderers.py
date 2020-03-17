@@ -12,6 +12,9 @@ import orjson
 
 
 def guillotina_json_default(obj):
+    if isinstance(obj, str):
+        if type(obj) != str:  # e.g, i18n.Message()
+            return str(obj)
     if isinstance(obj, complex):
         return [obj.real, obj.imag]
     elif isinstance(obj, datetime):
