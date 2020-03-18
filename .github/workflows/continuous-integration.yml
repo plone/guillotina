@@ -77,8 +77,10 @@ jobs:
       - name: Run tests
         if: env.DATABASE == 'postgres' || env.DB_SCHEMA == 'public'
         run: |
-          pytest -rfE --reruns 2 --cov=guillotina -s --tb=native -v --cov-report term-missing --cov-append guillotina
+          pytest -rfE --reruns 2 --cov=guillotina -s --tb=native -v --cov-report xml --cov-append guillotina
 
       - name: Upload coverage to Codecov
         if: env.DATABASE == 'postgres' || env.DB_SCHEMA == 'public'
         uses: codecov/codecov-action@v1
+        with:
+          file: ./coverage.xml
