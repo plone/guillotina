@@ -10,6 +10,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.7, 3.8]
+
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v2
@@ -21,11 +22,11 @@ jobs:
 
       - name: Install package
         run: |
-          pip install $(grep "Cython" requirements.txt)
-          pip install -r requirements.txt
-          pip install -r contrib-requirements.txt
-          pip install -e .[test]
-          pip install -e .[testdata]
+          pip install flake8==3.7.7
+          pip install mypy==0.720
+          pip install mypy-zope==0.2.0
+          pip install black==19.10b0
+          pip install isort==4.3.21
       - name: Run pre-checks
         run: |
           flake8 guillotina --config=setup.cfg
@@ -41,6 +42,11 @@ jobs:
         python-version: [3.7, 3.8]
         database: ["DUMMY", "postgres", "cockroachdb"]
         db_schema: ["custom", "public"]
+        exclude:
+          - database: "DUMMY"
+            db_schema: "custom"
+          - database: "cockroachdb"
+            db_schema: "custom"
 
     # Set environment variables
     env:
@@ -48,22 +54,15 @@ jobs:
       DB_SCHEMA: ${{ matrix.db_schema }}
 
     steps:
-      - name: Check supported matrix combinations
-        if: (env.DATABASE == 'postgres' || env.DB_SCHEMA == 'public') != true
-        run: |
-          echo "This matrix combination is skipped"
       - name: Checkout the repository
-        if: env.DATABASE == 'postgres' || env.DB_SCHEMA == 'public'
         uses: actions/checkout@v2
 
       - name: Setup Python
-        if: env.DATABASE == 'postgres' || env.DB_SCHEMA == 'public'
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Install the package
-        if: env.DATABASE == 'postgres' || env.DB_SCHEMA == 'public'
         run: |
           pip install $(grep "Cython" requirements.txt)
           pip install -r requirements.txt
@@ -72,12 +71,10 @@ jobs:
           pip install -e .[testdata]
 
       - name: Run tests
-        if: env.DATABASE == 'postgres' || env.DB_SCHEMA == 'public'
         run: |
           pytest -rfE --reruns 2 --cov=guillotina -s --tb=native -v --cov-report xml --cov-append guillotina
 
       - name: Upload coverage to Codecov
-        if: env.DATABASE == 'postgres' || env.DB_SCHEMA == 'public'
         uses: codecov/codecov-action@v1
         with:
           file: ./coverage.xml
