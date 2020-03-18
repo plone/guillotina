@@ -38,9 +38,12 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [3.7, 3.8]
-        database: ["DUMMY", "postgres", "cockroachdb"]
-        db_schema: ["custom", "public"]
+#        python-version: [3.7, 3.8]
+#        database: ["DUMMY", "postgres", "cockroachdb"]
+#        db_schema: ["custom", "public"]
+        python-version: [3.7]
+        database: ["DUMMY"]
+        db_schema: ["public"]
 
     # Set environment variables
     env:
@@ -79,5 +82,3 @@ jobs:
       - name: Upload coverage to Codecov
         if: env.DATABASE == 'postgres' || env.DB_SCHEMA == 'public'
         uses: codecov/codecov-action@v1
-        with:
-          file: ./coverage.xml
