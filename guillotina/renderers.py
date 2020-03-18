@@ -1,4 +1,3 @@
-from datetime import datetime
 from guillotina import configure
 from guillotina.interfaces import IResponse
 from guillotina.interfaces.security import PermissionSetting
