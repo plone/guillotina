@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-6.0.0a17 (unreleased)
----------------------
+6.0.0b1 (2020-03-18)
+--------------------
 
 - Use orjson instead of json/ujson
   [masipcat]
