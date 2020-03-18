@@ -4,7 +4,7 @@ from zope.interface import implementer
 from zope.interface.exceptions import Invalid  # noqa pylint: disable=W0611
 from zope.interface.interfaces import ComponentLookupError  # noqa pylint: disable=W0611
 
-import ujson
+import orjson
 
 
 class NoPermissionToAdd(Exception):
@@ -203,7 +203,7 @@ class DeserializationError(Exception):
         self.errors = errors
 
     def __str__(self):
-        return "{} ({})".format(self.msg, ujson.dumps(self.json_data()))  # pylint: disable=I1101
+        return "{} ({})".format(self.msg, orjson.dumps(self.json_data()))  # pylint: disable=I1101
 
     def json_data(self):
         return {"deserialization_errors": self.json_err_list(self.errors)}

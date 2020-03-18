@@ -1,11 +1,55 @@
 CHANGELOG
 =========
 
-6.0.0a14 (unreleased)
----------------------
+6.0.0b2 (unreleased)
+--------------------
 
 - Update README
   [psanlorenzo]
+
+
+6.0.0b1 (2020-03-18)
+--------------------
+
+- Use orjson instead of json/ujson
+  [masipcat]
+
+- AsgiStreamReader.read() can return bytes or bytearray
+  [masipcat]
+
+
+6.0.0a16 (2020-03-12)
+---------------------
+
+- Changes in ICatalogUtility, DefaultSearchUtility and @search endpoints
+  [masipcat]
+
+- Update react-gmi v 0.4.0
+  [jordic]
+
+- Fix more antipatterns [lferran]
+
+- Fix integer query param validation [lferran]
+
+
+6.0.0a15 (2020-03-02)
+---------------------
+
+- Handle http.disconnect (and other types of messages) while reading the request body
+  [masipcat]
+
+- Be able to have async schema invariants
+  [vangheem]
+
+- Provide better validation for json schema field
+  [vangheem]
+
+
+6.0.0a14 (2020-02-26)
+---------------------
+
+- Change AttributeError to HTTPPreconditionFailed in FileManager
+  [masipcat]
 
 - Reverted "Replaced Response.content_{type,length} with Response.set_content_{type,length}".
   Using setter to avoid breaking `Response.content_{type,length} = ...`

@@ -70,14 +70,6 @@ QUERY_PARAMETERS = [
 ]
 
 
-async def _search(context, request, query):
-    search = query_utility(ICatalogUtility)
-    if search is None:
-        return {"items_total": 0, "items": []}
-
-    return await search.search(context, query)
-
-
 @configure.service(
     context=IResource,
     method="GET",
@@ -98,8 +90,11 @@ async def _search(context, request, query):
     },
 )
 async def search_get(context, request):
-    q = dict(request.query)
-    return await _search(context, request, q)
+    search = query_utility(ICatalogUtility)
+    if search is None:
+        return {"items_total": 0, "items": []}
+
+    return await search.search(context, dict(request.query))
 
 
 @configure.service(
@@ -122,7 +117,11 @@ async def search_get(context, request):
 )
 async def search_post(context, request):
     q = await request.json()
-    return await _search(context, request, q)
+    search = query_utility(ICatalogUtility)
+    if search is None:
+        return {"items_total": 0, "items": []}
+
+    return await search.search_raw(context, q)
 
 
 @configure.service(

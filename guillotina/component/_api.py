@@ -18,6 +18,10 @@ from guillotina.component.hookable import hookable
 from guillotina.component.interfaces import ComponentLookupError
 from guillotina.component.interfaces import IComponentLookup
 from guillotina.component.interfaces import IFactory
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
 from zope.interface import Interface
 from zope.interface import providedBy
 
@@ -42,7 +46,14 @@ def get_component_registry(context=None):
             raise ComponentLookupError(*error.args)
 
 
-def get_adapter(object, interface=Interface, name=_BLANK, context=None, args=[], kwargs={}):
+def get_adapter(
+    object,
+    interface=Interface,
+    name=_BLANK,
+    context=None,
+    args: Optional[List[Any]] = None,
+    kwargs: Optional[Dict[str, Any]] = None,
+):
     """
     Get a registered adapter
 
@@ -53,6 +64,8 @@ def get_adapter(object, interface=Interface, name=_BLANK, context=None, args=[],
     :param kwargs: kwargs to provide the adapter constructor
     :raises ComponentLookupError:
     """
+    args = args or []
+    kwargs = kwargs or {}
     adapter_ = query_adapter(
         object, interface=interface, name=name, default=_MISSING, context=context, args=args, kwargs=kwargs
     )
@@ -62,7 +75,15 @@ def get_adapter(object, interface=Interface, name=_BLANK, context=None, args=[],
     return adapter_
 
 
-def query_adapter(object, interface=Interface, name=_BLANK, default=None, context=None, args=[], kwargs={}):
+def query_adapter(
+    object,
+    interface=Interface,
+    name=_BLANK,
+    default=None,
+    context=None,
+    args: Optional[List[Any]] = None,
+    kwargs: Optional[Dict[str, Any]] = None,
+):
     """
     Get a registered adapter
 
@@ -72,12 +93,21 @@ def query_adapter(object, interface=Interface, name=_BLANK, default=None, contex
     :param args: args to provide the adapter constructor
     :param kwargs: kwargs to provide the adapter constructor
     """
+    args = args or []
+    kwargs = kwargs or {}
     if context is None:
         return adapter_hook(interface, object, name=name, default=default, args=args, kwargs=kwargs)
     return get_component_registry(context).queryAdapter(object, interface, name, default)
 
 
-def get_multi_adapter(objects, interface=Interface, name=_BLANK, context=None, args=[], kwargs={}):
+def get_multi_adapter(
+    objects,
+    interface=Interface,
+    name=_BLANK,
+    context=None,
+    args: Optional[List[Any]] = None,
+    kwargs: Optional[Dict[str, Any]] = None,
+):
     """
     Get a registered multi adapter
 
@@ -88,6 +118,8 @@ def get_multi_adapter(objects, interface=Interface, name=_BLANK, context=None, a
     :param kwargs: kwargs to provide the adapter constructor
     :raises ComponentLookupError:
     """
+    args = args or []
+    kwargs = kwargs or {}
     adapter_ = query_multi_adapter(objects, interface, name, context=context, args=args, kwargs=kwargs)
     if adapter_ is None:
         raise ComponentLookupError(objects, interface, name)
@@ -95,7 +127,13 @@ def get_multi_adapter(objects, interface=Interface, name=_BLANK, context=None, a
 
 
 def query_multi_adapter(
-    objects, interface=Interface, name=_BLANK, default=None, context=None, args=[], kwargs={}
+    objects,
+    interface=Interface,
+    name=_BLANK,
+    default=None,
+    context=None,
+    args: Optional[List[Any]] = None,
+    kwargs: Optional[Dict[str, Any]] = None,
 ):
     """
     Get a registered multi adapter
@@ -106,6 +144,8 @@ def query_multi_adapter(
     :param args: args to provide the adapter constructor
     :param kwargs: kwargs to provide the adapter constructor
     """
+    args = args or []
+    kwargs = kwargs or {}
     try:
         registry = get_component_registry(context)
     except ComponentLookupError:

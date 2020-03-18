@@ -420,7 +420,9 @@ class FileManager(object):
             if "Content-Length" in self.request.headers:
                 size = int(self.request.headers["Content-Length"])
             else:  # pragma: no cover
-                raise AttributeError("x-upload-size or content-length header needed")
+                raise HTTPPreconditionFailed(
+                    content={"reason": "x-upload-size or content-length header needed"}
+                )
 
         if "X-UPLOAD-FILENAME" in self.request.headers:
             filename = self.request.headers["X-UPLOAD-FILENAME"]
