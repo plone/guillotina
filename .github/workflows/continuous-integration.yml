@@ -38,12 +38,9 @@ jobs:
 
     strategy:
       matrix:
-#        python-version: [3.7, 3.8]
-#        database: ["DUMMY", "postgres", "cockroachdb"]
-#        db_schema: ["custom", "public"]
-        python-version: [3.7]
-        database: ["DUMMY"]
-        db_schema: ["public"]
+        python-version: [3.7, 3.8]
+        database: ["DUMMY", "postgres", "cockroachdb"]
+        db_schema: ["custom", "public"]
 
     # Set environment variables
     env:
