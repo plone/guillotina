@@ -8,6 +8,7 @@ from typing import cast
 from typing import Optional
 from zope.interface.interface import InterfaceClass
 
+import json
 import orjson
 
 
@@ -15,14 +16,16 @@ def guillotina_json_default(obj):
     if isinstance(obj, str):
         if type(obj) != str:  # e.g, i18n.Message()
             return str(obj)
-    if isinstance(obj, complex):
+    elif isinstance(obj, complex):
         return [obj.real, obj.imag]
-    elif isinstance(obj, datetime):
-        return obj.isoformat()
     elif isinstance(obj, type):
         return obj.__module__ + "." + obj.__name__
     elif isinstance(obj, InterfaceClass):
         return [x.__module__ + "." + x.__name__ for x in obj.__iro__]  # noqa
+    elif isinstance(obj, dict):
+        if type(obj) != dict:  # e.g. collections.OrderedDict
+            return dict(obj)
+
     try:
         iterable = iter(obj)
     except TypeError:
@@ -37,6 +40,12 @@ def guillotina_json_default(obj):
 
     # Let the base class default method raise the TypeError
     raise TypeError("Unable to serialize %r (type: %s)" % (obj, type(obj)))
+
+
+# b/w compat
+class GuillotinaJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        return guillotina_json_default(obj)
 
 
 class Renderer:
