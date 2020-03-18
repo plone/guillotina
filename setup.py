@@ -83,7 +83,7 @@ setup(
             "coverage>=4.0.3",
             "pytest-docker-fixtures",
             "pytest-rerunfailures<=7.0",
-            "async-asgi-testclient~=1.2.0",
+            "async-asgi-testclient<2.0.0",
             "openapi-spec-validator",
             "aiohttp>=3.0.0,<4.0.0",
         ],

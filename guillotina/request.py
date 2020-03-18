@@ -140,9 +140,6 @@ class GuillotinaWebSocket:
     async def prepare(self, request=None):
         return await self.accept()
 
-    async def send_str(self, data):
-        return await self.send_text(data)
-
     def __aiter__(self):
         return self
 
@@ -208,8 +205,14 @@ class GuillotinaWebSocket:
             raise WebSocketDisconnect(msg["code"])
         return msg["text"]
 
+    async def send_bytes(self, data):
+        return await self.send({"type": "websocket.send", "bytes": data})
+
     async def send_text(self, data):
-        await self.send({"type": "websocket.send", "text": data})
+        return await self.send({"type": "websocket.send", "text": data})
+
+    async def send_str(self, data):
+        return await self.send_text(data)
 
     async def accept(self, subprotocol=None):
         # Wait for the connect message

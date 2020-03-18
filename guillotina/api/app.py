@@ -6,8 +6,6 @@ from guillotina.interfaces import IApplication
 from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.utils import get_dotted_name
 
-import orjson
-
 
 @configure.service(
     context=IApplication,
