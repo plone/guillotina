@@ -4,7 +4,8 @@ CHANGELOG
 6.0.0b2 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Update README
+  [psanlorenzo]
 
 
 6.0.0b1 (2020-03-18)
