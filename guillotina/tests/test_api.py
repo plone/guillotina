@@ -2,6 +2,7 @@ from datetime import datetime
 from guillotina import configure
 from guillotina import schema
 from guillotina.addons import Addon
+from guillotina.api.service import _safe_int_or_float_cast
 from guillotina.behaviors.attachment import IAttachment
 from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.configure import contenttype
@@ -20,6 +21,7 @@ from zope.interface import Interface
 import base64
 import json
 import pytest
+import unittest
 
 
 pytestmark = pytest.mark.asyncio
@@ -1532,3 +1534,32 @@ async def test_handle_none_value_for_behavior(container_requester):
             ),
         )
         assert status == 201
+
+
+class Test_SafeIntOrFloatCast(unittest.TestCase):
+    def _makeOne(self, value):
+        return _safe_int_or_float_cast(value)
+
+    def test_with_integers(self):
+        value = self._makeOne(2)
+        self.assertIsInstance(value, int)
+        self.assertEqual(2, value)
+
+    def test_with_integers_from_string(self):
+        value = self._makeOne("2")
+        self.assertIsInstance(value, int)
+        self.assertEqual(2, value)
+
+    def test_with_floats(self):
+        value = self._makeOne(3.3)
+        self.assertIsInstance(value, float)
+        self.assertEqual(3.3, value)
+
+    def test_with_floats_from_string(self):
+        value = self._makeOne("3.0")
+        self.assertIsInstance(value, float)
+        self.assertEqual(3.0, value)
+
+    def test_returns_input_if_cannot_cast(self):
+        for foo in ([], None, {}, set(), ""):
+            self.assertIs(foo, self._makeOne(foo))

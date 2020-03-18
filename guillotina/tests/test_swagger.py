@@ -1,9 +1,7 @@
-from guillotina.api.service import _safe_int_or_float_cast
 from openapi_spec_validator import validate_v3_spec
 
 import os
 import pytest
-import unittest
 
 
 pytestmark = pytest.mark.asyncio
@@ -86,32 +84,3 @@ async def test_validate_numbers_and_integers_in_query_params(container_requester
         resp, status = await requester("GET", "@queryParamsValidation?kilograms=3.2")
         assert status == 412
         assert resp["validator"] == "minimum"
-
-
-class Test_SafeIntOrFloatCast(unittest.TestCase):
-    def _makeOne(self, value):
-        return _safe_int_or_float_cast(value)
-
-    def _test_with_integers(self):
-        value = self._makeOne(2)
-        self.assertIsInstance(value, int)
-        self.assertEqual(2, value)
-
-    def _test_with_integers_from_string(self):
-        value = self._makeOne("2")
-        self.assertIsInstance(value, int)
-        self.assertEqual(2, value)
-
-    def _test_with_floats(self):
-        value = self._makeOne(3.3)
-        self.assertIsInstance(value, float)
-        self.assertEqual(3.3, value)
-
-    def _test_with_floats_from_string(self):
-        value = self._makeOne("3.0")
-        self.assertIsInstance(value, float)
-        self.assertEqual(3.0, value)
-
-    def _test_returns_input_if_cannot_cast(self):
-        for foo in ([], None, {}, set(), ""):
-            self.assertIs(foo, self._makeOne(foo))
