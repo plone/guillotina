@@ -19,10 +19,9 @@ from zope.interface import implementer
 
 import asyncio
 import enum
-import json
 import multidict
+import orjson
 import time
-import ujson
 import urllib.parse
 import uuid
 
@@ -109,9 +108,9 @@ class WebSocketMsg:
     def json(self):
         try:
             if self.type == WebSocketMsg.TEXT:
-                return ujson.loads(self.msg["text"])
+                return orjson.loads(self.msg["text"])
             else:
-                return ujson.loads(self.msg["bytes"])
+                return orjson.loads(self.msg["bytes"])
         except ValueError:
             raise WebSocketJsonDecodeError()
 
@@ -140,9 +139,6 @@ class GuillotinaWebSocket:
 
     async def prepare(self, request=None):
         return await self.accept()
-
-    async def send_str(self, data):
-        return await self.send_text(data)
 
     def __aiter__(self):
         return self
@@ -209,8 +205,14 @@ class GuillotinaWebSocket:
             raise WebSocketDisconnect(msg["code"])
         return msg["text"]
 
+    async def send_bytes(self, data):
+        return await self.send({"type": "websocket.send", "bytes": data})
+
     async def send_text(self, data):
-        await self.send({"type": "websocket.send", "text": data})
+        return await self.send({"type": "websocket.send", "text": data})
+
+    async def send_str(self, data):
+        return await self.send_text(data)
 
     async def accept(self, subprotocol=None):
         # Wait for the connect message
@@ -239,7 +241,7 @@ class AsgiStreamReader:
             raise asyncio.IncompleteReadError(data, n)
         return data
 
-    async def read(self, n: int = -1) -> bytes:
+    async def read(self, n: int = -1) -> Union[bytes, bytearray]:
         data = self._buffer
         while (n == -1 or len(data) < n) and not self._eof:
             chunk = await self.receive()
@@ -247,10 +249,10 @@ class AsgiStreamReader:
 
         if n == -1:
             self._buffer = bytearray()
-            return bytes(data)
+            return data
         else:
             self._buffer = data[n:]
-            return bytes(data[:n])
+            return data[:n]
 
     async def receive(self) -> bytes:
         payload = await self._asgi_receive()
@@ -548,9 +550,9 @@ class Request(object):
         bytes_body = await self.read()
         return bytes_body.decode("utf-8")
 
-    async def json(self, *, loads=json.loads) -> Any:  # type: ignore
+    async def json(self, *, loads=orjson.loads) -> Any:  # type: ignore
         """Return BODY as JSON."""
-        body = await self.text()
+        body = await self.read()
         return loads(body)
 
     @property

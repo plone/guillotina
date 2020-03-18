@@ -1,4 +1,5 @@
 from datetime import datetime
+from dateutil.tz import tzutc
 from guillotina import fields
 from guillotina import schema
 from guillotina.component import get_adapter
@@ -29,8 +30,10 @@ pytestmark = pytest.mark.asyncio
 
 async def test_serialize_resource(dummy_request, mock_txn):
     content = create_content()
+    content.creation_date = datetime(2020, 1, 1, 10, 10, 10, tzinfo=tzutc())
     serializer = get_multi_adapter((content, dummy_request), IResourceSerializeToJson)
     result = await serializer()
+    assert result["creation_date"] == "2020-01-01T10:10:10+00:00"
     assert "guillotina.behaviors.dublincore.IDublinCore" in result
 
 

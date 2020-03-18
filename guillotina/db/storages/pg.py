@@ -21,8 +21,8 @@ import asyncio
 import asyncpg
 import asyncpg.connection
 import concurrent
+import orjson
 import time
-import ujson
 
 
 log = glogging.getLogger("guillotina.storage")
@@ -823,7 +823,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
             log.info(f"Large object {obj.__class__}: {len(pickled)}")
         if self._store_json:
             json_dict = await writer.get_json()
-            json = ujson.dumps(json_dict)
+            json = orjson.dumps(json_dict).decode("utf-8")
         else:
             json = None
         part = writer.part
