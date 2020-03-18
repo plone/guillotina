@@ -10,7 +10,7 @@ pytestmark = pytest.mark.asyncio
 async def test_hello(guillotina, container_requester):
     async with container_requester as requester:
         headers = {"AUTHORIZATION": "Basic %s" % ADMIN_TOKEN}
-        async with requester.client.websocket_connect("db/guillotina/@ws", extra_headers=headers) as ws:
+        async with requester.client.websocket_connect("db/guillotina/@ws", headers=headers) as ws:
             sending = {
                 "op": "GET",
                 "value": "/@registry/guillotina.interfaces.registry.ILayers.active_layers",
@@ -24,7 +24,7 @@ async def test_hello(guillotina, container_requester):
 async def test_send_close(guillotina, container_requester):
     async with container_requester as requester:
         async with requester.client.websocket_connect(
-            "db/guillotina/@ws", extra_headers={"AUTHORIZATION": "Basic %s" % ADMIN_TOKEN}
+            "db/guillotina/@ws", headers={"AUTHORIZATION": "Basic %s" % ADMIN_TOKEN}
         ) as ws:
 
             await ws.send_str(json.dumps({"op": "close"}))
