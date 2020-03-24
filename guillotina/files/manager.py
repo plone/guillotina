@@ -91,15 +91,21 @@ class FileManager(object):
     async def head(
         self, disposition=None, filename=None, content_type=None, size=None, extra_headers=None, **kwargs
     ):
-        if hasattr(self.file_storage_manager, "exists"):
-            # does not need to implement but can be a way to verify
-            # file exists on cloud platform still
-            if not await apply_coroutine(self.file_storage_manager.exists):
-                raise HTTPNotFound(content={"message": "File object does not exist"})
-        download_resp = await self.prepare_download(
-            disposition, filename, content_type, size, extra_headers, **kwargs
-        )
-        await download_resp.write_eof()
+        try:
+            if hasattr(self.file_storage_manager, "exists"):
+                # does not need to implement but can be a way to verify
+                # file exists on cloud platform still
+                if not await apply_coroutine(self.file_storage_manager.exists):
+                    raise HTTPNotFound(content={"message": "File object does not exist"})
+            download_resp = await self.prepare_download(
+                disposition, filename, content_type, size, extra_headers, **kwargs
+            )
+            await download_resp.write_eof()
+        except (ConnectionRefusedError, ConnectionResetError):  # pragma: no cover
+            logger.info(f"Head cancelled: {self.request}")
+            # when supporting range headers, the browser will
+            # cancel downloads. This is fine.
+            raise HTTPClientClosedRequest()
         return download_resp
 
     async def _range_supported(self) -> bool:
@@ -195,7 +201,7 @@ class FileManager(object):
                     },
                     headers={"Content-Range": f"bytes */{file.size}"},
                 )
-        except (asyncio.CancelledError, ConnectionRefusedError):  # pragma: no cover
+        except (asyncio.CancelledError, ConnectionRefusedError, ConnectionResetError):  # pragma: no cover
             logger.info(f"Range cancelled: {range_request} {self.request}")
             # when supporting range headers, the browser will
             # cancel downloads. This is fine.

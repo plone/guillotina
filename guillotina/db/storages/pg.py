@@ -1022,16 +1022,16 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                 return await self.read_conn.fetch(sql, txn._tid)
 
     async def commit(self, transaction):
-        if transaction._db_txn is not None:
-            async with transaction._lock:
+        async with transaction._lock:
+            if transaction._db_txn is not None:
                 await transaction._db_txn.commit()
-        elif self._transaction_strategy not in ("none", "tidonly") and not transaction._skip_commit:
-            log.warning("Do not have db transaction to commit")
-        return transaction._tid
+            elif self._transaction_strategy not in ("none", "tidonly") and not transaction._skip_commit:
+                log.warning("Do not have db transaction to commit")
+            return transaction._tid
 
     async def abort(self, transaction):
-        if transaction._db_txn is not None:
-            async with transaction._lock:
+        async with transaction._lock:
+            if transaction._db_txn is not None:
                 try:
                     await transaction._db_txn.rollback()
                 except asyncpg.exceptions._base.InterfaceError:

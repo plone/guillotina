@@ -5,6 +5,7 @@ from guillotina.event import notify
 from guillotina.events import RegistryEditedEvent
 from guillotina.exceptions import ComponentLookupError
 from guillotina.exceptions import DeserializationError
+from guillotina.exceptions import ValueDeserializationError
 from guillotina.i18n import MessageFactory
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IJSONToValue
@@ -198,7 +199,7 @@ class Write(Service):
         try:
             registry = await get_registry()
             registry[self.key] = new_value
-        except DeserializationError as e:
+        except (DeserializationError, ValueDeserializationError) as e:
             return ErrorResponse("DeserializationError", str(e), exc=e, status=412)
 
         await notify(RegistryEditedEvent(self.context, registry, {iface_name: {name: value}}))
