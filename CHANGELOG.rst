@@ -4,7 +4,8 @@ CHANGELOG
 6.0.0b2 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Fix move(obj) fires IBeforeObjectMovedEvent after modifying the object
+  [masipcat]
 
 
 6.0.0b1 (2020-03-18)

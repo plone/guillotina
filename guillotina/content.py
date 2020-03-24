@@ -800,16 +800,14 @@ async def move(
         cache_keys = txn._cache.get_cache_keys(context, "deleted")
 
     old_id = context.id
-    if new_id is not None:
-        context.id = context.__name__ = new_id
-    else:
+    if new_id is None:
         new_id = context.id
 
     if check_permission:
         policy = get_security_policy()
         if not policy.check_permission("guillotina.AddContent", destination_ob):
             raise PreconditionFailed(
-                context, "You do not have permission to add content to the " "destination object"
+                context, "You do not have permission to add content to the destination object"
             )
 
     if await destination_ob.async_contains(new_id):
@@ -828,6 +826,8 @@ async def move(
         )
     )
 
+    if new_id != old_id:
+        context.id = context.__name__ = new_id
     context.__parent__ = destination_ob
     context.register()
 
