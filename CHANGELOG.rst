@@ -7,6 +7,21 @@ CHANGELOG
 - Fix move(obj) fires IBeforeObjectMovedEvent after modifying the object
   [masipcat]
 
+- Error handling: ValueDeserializationError editing registry value
+  [vangheem]
+
+- Handle db transaction closed while acquiring transaction lock
+  [vangheem]
+
+- Handle db transaction closed while acquiring lock
+  [vangheem]
+
+- Handle connection errors on file head requests
+  [vangheem]
+
+- Update README
+  [psanlorenzo]
+
 
 6.0.0b1 (2020-03-18)
 --------------------
