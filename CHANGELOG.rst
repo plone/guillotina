@@ -4,7 +4,17 @@ CHANGELOG
 5.3.33 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Error handling: ValueDeserializationError editing registry value
+  [vangheem]
+
+- Handle db transaction closed while acquiring transaction lock
+  [vangheem]
+
+- Handle db transaction closed while acquiring lock
+  [vangheem]
+
+- Handle connection errors on file head requests
+  [vangheem]
 
 
 5.3.32 (2020-03-06)
