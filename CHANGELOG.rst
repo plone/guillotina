@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.33 (unreleased)
+5.3.33 (2020-03-24)
 -------------------
 
 - Error handling: ValueDeserializationError editing registry value
