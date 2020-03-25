@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0b2 (unreleased)
 --------------------
 
+- Fix move(obj) fires IBeforeObjectMovedEvent after modifying the object
+  [masipcat]
+
 - Error handling: ValueDeserializationError editing registry value
   [vangheem]
 
