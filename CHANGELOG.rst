@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.0b2 (unreleased)
+6.0.0b2 (2020-03-25)
 --------------------
 
 - Fix move(obj) fires IBeforeObjectMovedEvent after modifying the object
