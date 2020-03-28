@@ -4,7 +4,8 @@ CHANGELOG
 6.0.0b3 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Restore task vars after usage of Content API
+  [bloodbare]
 
 
 6.0.0b2 (2020-03-25)

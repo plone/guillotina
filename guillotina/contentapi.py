@@ -2,6 +2,7 @@ from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.auth.users import RootUser
 from guillotina.auth.utils import set_authenticated_user
+from guillotina.utils import get_authenticated_user
 from guillotina.component import get_multi_adapter
 from guillotina.db.interfaces import ITransaction
 from guillotina.interfaces import ACTIVE_LAYERS_KEY
@@ -22,17 +23,25 @@ class ContentAPI:
         self.db = db
         self.tm = db.get_transaction_manager()
         self.request = get_mocked_request()
+        self.old_request = None
+        self.old_db = None
+        self.old_user = None
         self.user = user
         self._active_txn = None
 
     async def __aenter__(self):
+        self.old_request = task_vars.request.get()
+        self.old_db = task_vars.db.get()
+        self.old_user = get_authenticated_user()
         task_vars.request.set(self.request)
         task_vars.db.set(self.db)
         set_authenticated_user(self.user)
         return self
 
     async def __aexit__(self, *args):
-        set_authenticated_user(None)
+        task_vars.request.set(self.old_request)
+        task_vars.db.set(self.old_db)
+        set_authenticated_user(self.old_user)
         # make sure to close out connection
         await self.abort()
 
