@@ -4,6 +4,7 @@ CHANGELOG
 6.0.0b3 (unreleased)
 --------------------
 
+- Restore task vars after usage of Content API
 - Zope.interface 5.0.1 upgrade
   [bloodbare]
 
