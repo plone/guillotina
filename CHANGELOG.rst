@@ -4,7 +4,8 @@ CHANGELOG
 6.0.0b3 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Zope.interface 5.0.1 upgrade
+  [bloodbare]
 
 
 6.0.0b2 (2020-03-25)
