@@ -22,25 +22,30 @@ class ContentAPI:
     def __init__(self, db, user=RootUser("root")):
         self.db = db
         self.tm = db.get_transaction_manager()
-        self.request = get_mocked_request()
+        self.request = None
         self.old_request = None
         self.old_db = None
         self.old_user = None
+        self.old_tm = None
         self.user = user
         self._active_txn = None
 
     async def __aenter__(self):
         self.old_request = task_vars.request.get()
         self.old_db = task_vars.db.get()
+        self.old_tm = task_vars.tm.get()
         self.old_user = get_authenticated_user()
-        task_vars.request.set(self.request)
+        self.request = get_mocked_request()
         task_vars.db.set(self.db)
+        self.tm = db.get_transaction_manager()
+        task_vars.tm.set(self.tm)
         set_authenticated_user(self.user)
         return self
 
     async def __aexit__(self, *args):
         task_vars.request.set(self.old_request)
         task_vars.db.set(self.old_db)
+        task_vars.tm.set(self.old_tm)
         set_authenticated_user(self.old_user)
         # make sure to close out connection
         await self.abort()
