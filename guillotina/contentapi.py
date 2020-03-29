@@ -2,13 +2,13 @@ from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.auth.users import RootUser
 from guillotina.auth.utils import set_authenticated_user
-from guillotina.utils import get_authenticated_user
 from guillotina.component import get_multi_adapter
 from guillotina.db.interfaces import ITransaction
 from guillotina.interfaces import ACTIVE_LAYERS_KEY
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IResource
 from guillotina.tests.utils import get_mocked_request
+from guillotina.utils import get_authenticated_user
 from guillotina.utils import get_object_url
 from guillotina.utils import get_registry
 from guillotina.utils import import_class
