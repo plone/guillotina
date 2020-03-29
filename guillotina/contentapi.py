@@ -37,7 +37,7 @@ class ContentAPI:
         self.old_user = get_authenticated_user()
         self.request = get_mocked_request()
         task_vars.db.set(self.db)
-        self.tm = db.get_transaction_manager()
+        self.tm = self.db.get_transaction_manager()
         task_vars.tm.set(self.tm)
         set_authenticated_user(self.user)
         return self
