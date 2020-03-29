@@ -2,13 +2,13 @@ from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.auth.users import RootUser
 from guillotina.auth.utils import set_authenticated_user
-from guillotina.utils import get_authenticated_user
 from guillotina.component import get_multi_adapter
 from guillotina.db.interfaces import ITransaction
 from guillotina.interfaces import ACTIVE_LAYERS_KEY
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IResource
 from guillotina.tests.utils import get_mocked_request
+from guillotina.utils import get_authenticated_user
 from guillotina.utils import get_object_url
 from guillotina.utils import get_registry
 from guillotina.utils import import_class
@@ -21,26 +21,31 @@ import typing
 class ContentAPI:
     def __init__(self, db, user=RootUser("root")):
         self.db = db
-        self.tm = db.get_transaction_manager()
-        self.request = get_mocked_request()
+        self.tm = None
+        self.request = None
         self.old_request = None
         self.old_db = None
         self.old_user = None
+        self.old_tm = None
         self.user = user
         self._active_txn = None
 
     async def __aenter__(self):
         self.old_request = task_vars.request.get()
         self.old_db = task_vars.db.get()
+        self.old_tm = task_vars.tm.get()
         self.old_user = get_authenticated_user()
-        task_vars.request.set(self.request)
+        self.request = get_mocked_request()
         task_vars.db.set(self.db)
+        self.tm = self.db.get_transaction_manager()
+        task_vars.tm.set(self.tm)
         set_authenticated_user(self.user)
         return self
 
     async def __aexit__(self, *args):
         task_vars.request.set(self.old_request)
         task_vars.db.set(self.old_db)
+        task_vars.tm.set(self.old_tm)
         set_authenticated_user(self.old_user)
         # make sure to close out connection
         await self.abort()
