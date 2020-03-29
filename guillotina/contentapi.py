@@ -21,7 +21,7 @@ import typing
 class ContentAPI:
     def __init__(self, db, user=RootUser("root")):
         self.db = db
-        self.tm = db.get_transaction_manager()
+        self.tm = None
         self.request = None
         self.old_request = None
         self.old_db = None
