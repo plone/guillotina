@@ -1,16 +1,14 @@
 # Configuration
 
-`guillotina` and its addons define a global configuration that is used.
-All of these settings are configurable by providing a
-JSON configuration file or yaml to the start script.
+Gguillotina and its addons define a global configuration that is used.
+All of these settings are configurable by providing a JSON configuration file or yaml to the start script.
 
 By default, the startup script looks for a `config.yaml` file. You can use a different
 file by using the `-c` option for the script like this: `./bin/guillotina -c myconfig.yaml`.
 
-
 ## Applications
 
-To load guillotina applications into your application, use the `applications` setting:
+To load Guillotina applications into your application, use the `applications` setting:
 
 ```yaml
 applications:
@@ -38,8 +36,7 @@ databases:
     max_cached_statement_lifetime: 300
 ```
 
-In this configuration, the `db` key referenced in configuration here will be mapped
-to the url `http://localhost:8080/db`.
+In this configuration, the `db` key referenced in the configuration will be mapped to `http://localhost:8080/db`.
 
 Currently supported database drivers are:
 
@@ -47,7 +44,6 @@ Currently supported database drivers are:
 - `cockroach`
 - `DUMMY`: in-memory database, useful in testing
 - `DUMMY_FILE`: simple file storage, useful in testing
-
 
 ### Database configuration options
 
@@ -63,7 +59,7 @@ Currently supported database drivers are:
 ### Storages
 
 Guillotina also provides the ability to dynamically create databases with the `@storages` endpoint.
-But in order to utilitize this feature, you need to configure the databases connection settings.
+But in order to utilize this feature, you need to configure the databases connection settings.
 
 These are configured in much of the same way as databases.
 
@@ -90,12 +86,11 @@ These files will then be available on urls `/favicon.ico` and `/static_files`.
 
 ## JavaScript Applications
 
-We can also serve JS apps from guillotina. These will allow routing on your
-JS application without any extra configuration by returning the base directory
+We can also serve JS apps from Guillotina.
+These will allow routing on your JS application without any extra configuration by returning the base directory
 `index.html` for every sub directory in the url.
 
-Once there is SSR support in Python, guillotina will integrate with it through
-this as well.
+Once there is SSR support in Python, Guillotina will integrate with it through this as well.
 
 ```yaml
 jsapps:
@@ -132,24 +127,20 @@ cors:
 
 ## Applications
 
-To extend/override Guillotina, the `applications` configuration allows you to
-specify which to enable.
+To extend/override Guillotina, the `applications` configuration allows you to specify which to enable.
 
 ```yaml
 applications:
   - guillotina_elasticsearch
 ```
 
-
 ## Async utilities
 
-Guillotina has support for injecting dependencies from configuration with
-asynchronous utility.
+Guillotina has support for injecting dependencies from configuration with asynchronous utility.
 
 An async utility is a class that implements `initialize` and `finalize` method.
-The `initialize` method is run at application start as a task. This gives
-you the power to hook async tasks into guillotina.
-
+The `initialize` method is run at application start as a task.
+This gives you the power to hook async tasks into Guillotina.
 
 ```yaml
 load_utilities:
@@ -171,7 +162,6 @@ middlewares:
   - guillotina_myaddon.Middleware
 ```
 
-
 ## Server settings
 
 You can pass `server_settings` to configure the asgi server.
@@ -183,8 +173,7 @@ server_settings:
 
 ## JWT Settings
 
-If you want to enable JWT authentication, you'll need to configure the JWT
-secret in Guillotina.
+If you want to enable JWT authentication, you'll need to configure the JWT secret in Guillotina.
 
 ```yaml
 jwt:
@@ -214,23 +203,21 @@ jwk:
 - `oid_generator`: be able to customize the function used to generate oids on the system.
   defaults to `guillotina.db.oid.generate_oid`
 - `cors_renderer`: customize the cors renderer, defaults to `guillotina.cors.DefaultCorsRenderer`
-- `request_indexer`: customize the class used to index content, defaults to 
+- `request_indexer`: customize the class used to index content, defaults to
   `guillotina.catalog.index.RequestIndexer`
-
 
 ## Transaction strategy
 
-Guillotina provides a few different modes to operate in to customize the level
-of performance versus consistency. The setting used for this is `transaction_strategy`
-which defaults to `resolve`.
+Guillotina provides a few different modes to operate in to customize the level of performance versus consistency.
+The setting used for this is `transaction_strategy` which defaults to `resolve`.
 
 Even though we have different transaction strategies that provide different voting
 algorithms to decide if it's a safe write, all write operations STILL make sure that the
-object committed matches the transaction it was retrieved with. If not,
-a conflict error is detected and the request is retried. So even if you choose
-the transaction strategy with no database transactions, there is still a level
-of consistency so that you know you will only modify an object that is consistent
-with the one retrieved from the database.
+object committed matches the transaction it was retrieved with.
+
+If not, a conflict error is detected and the request is retried.
+Even if you choose the transaction strategy with no database transactions, there is still a level
+of consistency so that you know you will only modify an object that is consistent with the one retrieved from the database.
 
 Example configuration:
 
@@ -273,27 +260,22 @@ Available options:
   should provide better performance; however, you'll need to consider the side
   affects of this for reading data.
 
-
 Warning: not all storages are compatible with all transaction strategies.
-
 
 ## Connection class
 
-The default asyncpg connection class has some overhead. Guillotina provides
-a way to override it with a custom class or a provided lighter one:
+The default asyncpg connection class has some overhead.
+Guillotina provides a way to override it with a custom class or a provided lighter one:
 
 ```yaml
 pg_connection_class: guillotina.db.storages.pg.LightweightConnection
 ```
 
-
 ## Authentication and Authorization
-
 
 ### Extractors
 
-`auth_extractors` are what you can configure to decide how we extract potential
-credential information from a request.
+`auth_extractors` are what you can configure to decide how we extract potential credential information from a request.
 
 The default value is:
 
@@ -315,25 +297,21 @@ Available:
 
 ### Identifiers
 
-`auth_user_identifiers` is a mechanism to customize how we lookup and validate
-users against an extracted credential.
+`auth_user_identifiers` is a mechanism to customize how we lookup and validate users against an extracted credential.
 
-For example, this is the main part of what
-[guillotina_dbusers](https://github.com/guillotinaweb/guillotina_dbusers) does
+For example, this is the main part of what [guillotina_dbusers](https://github.com/guillotinaweb/guillotina_dbusers) does
 and the only configuration setting it needs/provides.
 
-By default, guillotina does not provide a user identifier plugin and only authenticates
+By default, Guillotina does not provide a user identifier plugin and only authenticates
 the root user/password.
 
 ### Validators
 
-`auth_token_validators` allows you to customize what kind of values we'll athorize extracted
-credentials and identified users against.
+`auth_token_validators` allows you to customize what kind of values we'll athorize extracted credentials and identified users against.
 
 - guillotina.auth.validators.JWTValidator: Validate extract jwt token
 - guillotina.auth.validators.SaltedHashPasswordValidator: Validate extracted password against
   stored salted and hashed password
-
 
 ## Configuration life cycle
 
@@ -343,8 +321,7 @@ but they might also override the default configuration of guillotina as well.
 Guillotina configuration is not considered fully loaded until the entire application has started up
 and finished loading all it's dependencies.
 
-Because of this, you can not reference global `app_settings` at module scope or in any application
-startup code.
+Because of this, you can not reference global `app_settings` at module scope or in any application startup code.
 
 The order of application configuration and override loading in order of more precedence to lower is:
 
