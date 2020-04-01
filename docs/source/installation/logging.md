@@ -1,14 +1,13 @@
 # Logging
 
-Logging configuration is built into `guillotina`'s configuration syntax.
+Logging configuration is built into Guillotina's configuration syntax.
 
 If the `logging` setting is provided, it is simply passed to Python's `dict` config
 method: https://docs.python.org/3.6/library/logging.config.html#logging-config-dictschema
 
-
 ## Example guillotina configuration
 
-To log errors for guillotina for example:
+To log errors for Guillotina for example:
 
 ```json
 {
@@ -43,7 +42,6 @@ To log errors for guillotina for example:
 }
 ```
 
-
 ## Request logging example
 
 ```json
@@ -74,7 +72,6 @@ To log errors for guillotina for example:
   }
 }
 ```
-
 
 ## Available Loggers
 
