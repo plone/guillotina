@@ -1,7 +1,6 @@
 # JSONb Catalog
 
-`guillotina` provides out of the box support for searching content via postgresql jsonb serialized data.
-
+Guillotina provides out of the box support for searching content via PostgreSQL jsonb serialized data.
 
 ## Configuration
 
