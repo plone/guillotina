@@ -4,7 +4,9 @@
         "cookiecutter",
         "gitter",
         "guillotina",
-        "venv"
+        "plone",
+        "venv",
+        "zope"
     ],
     "restructuredtext.linter.disabled": true
 }
