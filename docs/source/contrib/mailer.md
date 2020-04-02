@@ -1,7 +1,6 @@
 # Mailer
 
-`guillotina` provides out of the box mailer utilities
-
+Guillotina provides out of the box mailer utilities
 
 ## Configuration
 
@@ -22,7 +21,6 @@ Available utilities:
 - `guillotina.contrib.mailer.utility.MailerUtility`
 - `guillotina.contrib.mailer.utility.PrintingMailerUtility`
 - `guillotina.contrib.mailer.utility.TestMailerUtility`
-
 
 ## Usage
 
