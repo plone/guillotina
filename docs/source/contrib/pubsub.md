@@ -1,7 +1,6 @@
 # PubSub
 
-`guillotina` provides out of the box pubsub service with redis driver.
-
+Guillotina provides out of the box pubsub service with redis driver.
 
 ## Configuration
 
@@ -31,5 +30,4 @@ async def callback(*, data=None, sender=None):
 util = get_utility(IPubSubUtility)
 await util.subscribe('channel_name', MY_PROCESS_ID, callback)
 await util.publish('channel_name', MY_PROCESS_ID, 'mydata')
-
 ```
