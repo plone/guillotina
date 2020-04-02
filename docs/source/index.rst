@@ -96,8 +96,3 @@ Need help? Join our `Gitter channel <https://gitter.im/plone/guillotina>`_.
    :maxdepth: 1
 
    deploying
-
-
-
-
-

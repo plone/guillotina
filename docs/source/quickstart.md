@@ -41,18 +41,16 @@ You can also navigate in your Guillotina server with its built-in web admin inte
 
 Modify the configuration in `config.yaml` to customize server settings.
 
-
-### Postgresql installation instructions
+### PostgreSQL installation instructions
 
 If you do not have a PostgreSQL database server installed, you can use docker
 to get one running quickly.
 
 Example docker run command:
 
-```
+```shell
 docker run -e POSTGRES_DB=guillotina -e POSTGRES_USER=guillotina -p 127.0.0.1:5432:5432 postgres:9.6
 ```
-
 
 ## Creating a container
 

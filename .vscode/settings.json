@@ -1,3 +1,10 @@
 {
-    "restructuredtext.confPath": ""
+    "restructuredtext.confPath": "",
+    "cSpell.words": [
+        "cookiecutter",
+        "gitter",
+        "guillotina",
+        "venv"
+    ],
+    "restructuredtext.linter.disabled": true
 }

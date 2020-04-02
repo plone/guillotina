@@ -55,7 +55,7 @@ Need help? Join our [Gitter channel](https://gitter.im/plone/guillotina).
 
 You can even run Guillotina as a single page app if you so desire.
 
-Here is an example with content type and service::
+Here is an example with content type and service:
 
 ```python
 from aiohttp import web
