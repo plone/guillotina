@@ -1,14 +1,12 @@
 # Cache
 
-`guillotina` provides out of the box cache configuration, it support in-memory and network cache with redis.
+Guillotina provides out of the box cache configuration, it support in-memory and network cache with redis.
 
 By default it does not provide any cache, if you want to use it you need to add different configurations:
 
-
 ## In Memory Cache
 
-This option is recomendable when you have only one guillotina process running on the same DB.
-
+This option is recommendable when you have only one Guillotina process running on the same DB.
 
 ### Configuration
 
@@ -35,7 +33,7 @@ cache:
 
 ## Redis Storage Cache
 
-This option is the recommended one for more than one process running guillotina on the same DB.
+This option is the recommended one for more than one process running Guillotina on the same DB.
 
 Its needed to add `aioredis` as a dependency on your project
 
@@ -50,7 +48,6 @@ cache:
   driver: guillotina.contrib.redis
   updates_channel: guillotina
 ```
-
 
 ### In-memory with redis invalidations
 
