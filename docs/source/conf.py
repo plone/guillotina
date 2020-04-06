@@ -66,6 +66,8 @@ html_show_sourcelink = False
 html_theme_options = {
     'logo_only': True,
     'prev_next_buttons_location': 'both',
+    # Toc options
+    'collapse_navigation': False,
 }
 
 # Custom CSS

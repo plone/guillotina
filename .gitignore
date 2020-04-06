@@ -26,6 +26,7 @@ sdist
 /result
 /.installed.cfg
 *.so
+docs/source/_build/
 
 # Installer logs
 /pip-log.txt
