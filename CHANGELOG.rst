@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0b3 (unreleased)
 --------------------
 
+- Fix use of int32 sql interpolation when it should have been bigint for tid
+  [vangheem] 
+
 - Restore task vars after usage of Content API
 - Zope.interface 5.0.1 upgrade
   [bloodbare]
