@@ -4,7 +4,8 @@ CHANGELOG
 5.3.34 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Use bigint for statement replacement values
+  [vangheem]
 
 
 5.3.33 (2020-03-24)
