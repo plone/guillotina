@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.34 (unreleased)
+5.3.34 (2020-04-14)
 -------------------
 
 - Use bigint for statement replacement values
