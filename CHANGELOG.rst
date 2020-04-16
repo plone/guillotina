@@ -7,6 +7,9 @@ CHANGELOG
 - Fix security policy not taking into account IInheritPermissionMap for principals
   [masipcat,bloodbare]
 
+- Fix use of int32 sql interpolation when it should have been bigint for tid
+  [vangheem] 
+
 - Restore task vars after usage of Content API
 - Zope.interface 5.0.1 upgrade
   [bloodbare]
