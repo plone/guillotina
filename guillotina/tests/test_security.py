@@ -308,9 +308,12 @@ async def test_deny_inherit_accesscontent(container_requester):
         container = await utils.get_container(requester=requester)
         content = await container.async_get("testing")
 
-        assert get_authenticated_user() is None  # Anonymous
         policy = get_security_policy()
+        assert get_authenticated_user() is None  # Anonymous
+
+        # Anonymous user has access to container...
         assert policy.check_permission("guillotina.AccessContent", container)
+        # ...but doesn't has access to the item 'testing'
         assert not policy.check_permission("guillotina.AccessContent", content)
 
 
