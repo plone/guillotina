@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0b3 (unreleased)
 --------------------
 
+- Fix security policy not taking into account IInheritPermissionMap for principals
+  [masipcat,bloodbare]
+
 - Restore task vars after usage of Content API
 - Zope.interface 5.0.1 upgrade
   [bloodbare]
