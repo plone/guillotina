@@ -210,9 +210,10 @@ class Guillotina:
                     getattr(task_vars, var).set(None)
                 return await self.request_handler(request, retries + 1)
             else:
-                logger.error(
+                txn = task_vars.txn.get()
+                logger.warning(
                     "Exhausted retry attempts for conflict error on tid: {}".format(
-                        getattr(getattr(request, "_txn", None), "_tid", "not issued")
+                        getattr(txn, "_tid", "not issued")
                     )
                 )
                 raise HTTPConflict()

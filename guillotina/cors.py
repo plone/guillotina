@@ -26,7 +26,7 @@ class DefaultCorsRenderer:
             elif any([fnmatch.fnmatchcase(origin, o) for o in settings["allow_origin"]]):
                 headers["Access-Control-Allow-Origin"] = origin
             else:
-                logger.error("Origin %s not allowed" % origin, request=self.request)
+                logger.warning("Origin %s not allowed" % origin, request=self.request)
                 raise HTTPUnauthorized()
         if self.request.headers.get("Access-Control-Request-Method", None) != "OPTIONS":
             if settings["allow_credentials"]:
