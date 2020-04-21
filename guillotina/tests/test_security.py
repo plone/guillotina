@@ -9,6 +9,7 @@ from guillotina.security.utils import settings_for_object
 from guillotina.tests import utils
 from guillotina.tests.utils import get_db
 from guillotina.transactions import transaction
+from guillotina.utils import get_authenticated_user
 from guillotina.utils import get_security_policy
 
 import json
@@ -255,6 +256,65 @@ async def test_inherit(container_requester):
 
         response, status = await requester("GET", "/db/guillotina/testing")
         assert status == 200
+
+
+async def test_deny_inherit_accesscontent(container_requester):
+    async with container_requester as requester:
+        response, status = await requester(
+            "POST",
+            "/db/guillotina/@sharing",
+            data=json.dumps(
+                {
+                    "prinperm": [
+                        {
+                            "principal": "Anonymous User",
+                            "permission": "guillotina.AccessContent",
+                            "setting": "Allow",
+                        }
+                    ]
+                }
+            ),
+        )
+        assert status == 200
+
+        # The owner of item 'testing' is 'root'
+        response, status = await requester(
+            "POST", "/db/guillotina/", data=json.dumps({"@type": "Item", "id": "testing"}),
+        )
+        assert status == 201
+
+        # Only the owner of the object can do AccessContent
+        response, status = await requester(
+            "POST",
+            "/db/guillotina/testing/@sharing",
+            data=json.dumps(
+                {
+                    "perminhe": [{"permission": "guillotina.AccessContent", "setting": "Deny"}],
+                    "roleperm": [
+                        {
+                            "permission": "guillotina.AccessContent",
+                            "role": "guillotina.Owner",
+                            "setting": "Allow",
+                        }
+                    ],
+                }
+            ),
+        )
+        assert status == 200
+
+        response, status = await requester("GET", "/db/guillotina/testing/@all_permissions")
+        assert status == 200
+
+        container = await utils.get_container(requester=requester)
+        content = await container.async_get("testing")
+
+        policy = get_security_policy()
+        assert get_authenticated_user() is None  # Anonymous
+
+        # Anonymous user has access to container...
+        assert policy.check_permission("guillotina.AccessContent", container)
+        # ...but doesn't has access to the item 'testing'
+        assert not policy.check_permission("guillotina.AccessContent", content)
 
 
 async def test_allowsingle(container_requester):

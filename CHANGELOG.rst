@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0b3 (unreleased)
 --------------------
 
+- Fix security policy not taking into account IInheritPermissionMap for principals
+  [masipcat,bloodbare]
+
 - Fix use of int32 sql interpolation when it should have been bigint for tid
   [vangheem] 
 
