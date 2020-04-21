@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.35 (unreleased)
+5.3.35 (2020-04-21)
 -------------------
 
 - Change log level for conflict errors to warning and fix locating tid of conflict error
