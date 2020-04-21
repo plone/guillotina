@@ -4,7 +4,8 @@ CHANGELOG
 5.3.35 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Change log level for conflict errors to warning and fix locating tid of conflict error
+  [vangheem]
 
 
 5.3.34 (2020-04-14)
