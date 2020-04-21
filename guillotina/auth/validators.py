@@ -87,7 +87,7 @@ def check_password(token, password):
     algorithm = split[0]
     check_func = query_utility(IPasswordChecker, name=algorithm)
     if check_func is None:
-        logger.error(f"Could not find password checker for {algorithm}")
+        logger.warning(f"Could not find password checker for {algorithm}")
         return False
     decision = check_func(token, password)
     _pw_auth_validator[cache_key] = decision

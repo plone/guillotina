@@ -159,9 +159,10 @@ class GuillotinaAIOHTTPApplication(web.Application):
                 request._retry_attempt = retries + 1
                 request.clear_futures()
                 return await self._handle(request, retries + 1)
+            txn = task_vars.txn.get()
             logger.error(
                 "Exhausted retry attempts for conflict error on tid: {}".format(
-                    getattr(getattr(request, "_txn", None), "_tid", "not issued")
+                    getattr(txn, "_tid", "not issued")
                 )
             )
             return HTTPConflict(body=json.dumps({"summary": str(e)}), content_type="application/json")
