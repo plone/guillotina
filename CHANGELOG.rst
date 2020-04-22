@@ -4,7 +4,8 @@ CHANGELOG
 5.3.36 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Optimize extend operation for bucket list field
+  [vangheem]
 
 
 5.3.35 (2020-04-21)
