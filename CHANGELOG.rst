@@ -8,6 +8,9 @@ CHANGELOG
   with permission guillotina.Public
   [masipcat]
 
+- Fix Response object responding with 'default_content' when 'content' evaluates to False
+  [masipcat]
+
 - Change log level for conflict errors to warning and fix locating tid of conflict error
   [vangheem]
 
