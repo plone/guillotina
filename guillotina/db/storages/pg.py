@@ -686,6 +686,10 @@ class PostgresqlStorage(BaseStorage):
     def objects_table_name(self):
         return self._objects_table_name
 
+    @property
+    def blobs_table_name(self):
+        return self._blobs_table_name
+
     async def create(self, conn=None):
         if conn is None:
             conn = self.read_conn

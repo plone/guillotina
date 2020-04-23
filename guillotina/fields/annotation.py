@@ -17,7 +17,9 @@ from guillotina.response import HTTPGone
 from guillotina.response import HTTPPreconditionFailed
 from typing import Any
 from typing import AsyncIterator
+from typing import cast
 from typing import List
+from typing import Optional
 from typing import Tuple
 from zope.interface import implementer
 from zope.interface import Interface
@@ -47,7 +49,7 @@ class BucketListValue:
 
     async def get_annotation(
         self, context: IBaseObject, annotation_index: int, create: bool = True
-    ) -> IAnnotationData:
+    ) -> Optional[IAnnotationData]:
         annotation_name = self.get_annotation_name(annotation_index)
         annotations_container = IAnnotations(context)
         annotation = annotations_container.get(annotation_name, _default)
@@ -55,7 +57,7 @@ class BucketListValue:
             annotation = await annotations_container.async_get(annotation_name, _default)
         if annotation is _default:
             if not create:
-                return
+                return None
             # create
             annotation = AnnotationData()
             annotation.update({"items": []})
@@ -71,7 +73,9 @@ class BucketListValue:
                 # split here
                 self.current_annotation_index += 1
 
-        return await self.get_annotation(context, self.current_annotation_index)
+        return cast(
+            IAnnotationData, await self.get_annotation(context, self.current_annotation_index, create=True)
+        )
 
     async def append(self, context: IBaseObject, value: Any) -> None:
         annotation = await self._get_current_annotation(context)
@@ -552,7 +556,7 @@ class BucketListFieldRenderer:
             except ValueError:
                 raise HTTPPreconditionFailed(content={"reason": "Invalid bucket type", "cursor": cursor})
 
-        annotation = await val.get_annotation(self.context, bidx)
+        annotation = await val.get_annotation(self.context, bidx, create=False)
         if annotation is None:
             raise HTTPGone(content={"reason": "No data found for bucket", "bidx": bidx})
 
