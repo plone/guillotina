@@ -543,7 +543,7 @@ class BucketListFieldRenderer:
         """
         val = self.field.get(self.field.context)
         if val is None:
-            return {"values": {}, "total": 0, "cursor": None}
+            return {"values": [], "total": 0, "cursor": None}
         bidx = 0
         if "cursor" in self.request.url.query:
             cursor = self.request.url.query["cursor"]
@@ -552,15 +552,11 @@ class BucketListFieldRenderer:
             except ValueError:
                 raise HTTPPreconditionFailed(content={"reason": "Invalid bucket type", "cursor": cursor})
 
-        annotation = await val.get_annotation(self.field.context, bidx)
+        annotation = await val.get_annotation(self.context, bidx)
         if annotation is None:
             raise HTTPGone(content={"reason": "No data found for bucket", "bidx": bidx})
 
         cursor = bidx + 1
-        try:
-            val.buckets[cursor]
-        except IndexError:
-            cursor = None
         return {"values": annotation["items"], "total": len(val), "cursor": cursor}
 
 
