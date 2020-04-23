@@ -4,15 +4,18 @@ CHANGELOG
 6.0.0b3 (unreleased)
 --------------------
 
+- Fix Response object responding with 'default_content' when 'content' evaluates to False
+  [masipcat]
+
 - Change log level for conflict errors to warning and fix locating tid of conflict error
-  [vangheem] 
+  [vangheem]
 
 - Fix security policy not taking into account IInheritPermissionMap for principals
   [masipcat,bloodbare]
 
 
 - Fix use of int32 sql interpolation when it should have been bigint for tid
-  [vangheem] 
+  [vangheem]
 
 - Restore task vars after usage of Content API
 - Zope.interface 5.0.1 upgrade
