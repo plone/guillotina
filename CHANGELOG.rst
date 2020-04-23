@@ -4,7 +4,7 @@ CHANGELOG
 6.0.0b3 (unreleased)
 --------------------
 
-- Fix Response object responding with 'default_content' with 'content' is evaluates to False
+- Fix Response object responding with 'default_content' when 'content' evaluates to False
   [masipcat]
 
 - Change log level for conflict errors to warning and fix locating tid of conflict error
