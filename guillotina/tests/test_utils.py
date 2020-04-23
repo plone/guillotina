@@ -69,6 +69,8 @@ def test_valid_id():
     assert not utils.valid_id("FooBar-_-.,")
     assert not utils.valid_id("FooBar-_-.@#")
     assert not utils.valid_id("FooBar-_-.?")
+    assert not utils.valid_id("..")
+    assert not utils.valid_id(".")
 
 
 def test_get_owners(dummy_guillotina, mock_txn):
