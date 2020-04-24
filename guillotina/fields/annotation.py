@@ -597,7 +597,7 @@ class BucketDictFieldRenderer:
 
         cursor = bidx + 1
         try:
-            val.annotations_metadata[cursor]
+            val.buckets[cursor]
         except IndexError:
             cursor = None
         return {

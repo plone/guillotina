@@ -4,6 +4,10 @@ CHANGELOG
 5.3.36 (unreleased)
 -------------------
 
+- Provide patch operations for json field
+  [vangheem]
+
+
 - Optimize extend operation for bucket list field
   [vangheem]
 
