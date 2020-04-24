@@ -4,7 +4,9 @@ CHANGELOG
 5.3.36 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- `.` and `..` should be blocked as valid ids. The browser will auto translate them
+  to what current dir and parent dir respectively which gives unexpected results.
+  [vangheem]
 
 
 5.3.35 (2020-04-21)
