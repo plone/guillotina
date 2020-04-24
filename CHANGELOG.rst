@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.37 (unreleased)
+5.3.37 (2020-04-24)
 -------------------
 
 - swagger tags fixes
