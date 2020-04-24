@@ -4,6 +4,10 @@ CHANGELOG
 6.0.0b3 (unreleased)
 --------------------
 
+- Change in ISecurityPolicy that might improve performance during traversal for views
+  with permission guillotina.Public
+  [masipcat]
+
 - Fix Response object responding with 'default_content' when 'content' evaluates to False
   [masipcat]
 
