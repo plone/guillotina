@@ -38,6 +38,7 @@ from guillotina.schema.exceptions import ValidationError
 from guillotina.schema.exceptions import WrongContainedType
 from guillotina.schema.exceptions import WrongType
 from guillotina.schema.fieldproperty import FieldProperty
+from guillotina.schema.interfaces import IArrayJSONField
 from guillotina.schema.interfaces import IASCII
 from guillotina.schema.interfaces import IASCIILine
 from guillotina.schema.interfaces import IBaseVocabulary
@@ -62,6 +63,7 @@ from guillotina.schema.interfaces import IJSONField
 from guillotina.schema.interfaces import IList
 from guillotina.schema.interfaces import IMinMaxLen
 from guillotina.schema.interfaces import IObject
+from guillotina.schema.interfaces import IObjectJSONField
 from guillotina.schema.interfaces import IPassword
 from guillotina.schema.interfaces import ISet
 from guillotina.schema.interfaces import ISource
@@ -77,6 +79,7 @@ from guillotina.schema.utils import make_binary
 from guillotina.schema.vocabulary import getVocabularyRegistry
 from guillotina.schema.vocabulary import SimpleVocabulary
 from guillotina.schema.vocabulary import VocabularyRegistryError
+from zope.interface import alsoProvides
 from zope.interface import classImplements
 from zope.interface import implementer
 from zope.interface import Interface
@@ -692,6 +695,11 @@ class JSONField(Field):
         jsonschema_validator = jsonschema.validators.validator_for(self.json_schema)
         jsonschema_validator.check_schema(self.json_schema)
         self.schema_validator = jsonschema_validator(self.json_schema)
+        if self.json_schema.get("type") == "array":
+            alsoProvides(self, IArrayJSONField)
+        elif self.json_schema.get("type") == "object":
+            alsoProvides(self, IObjectJSONField)
+
         super(JSONField, self).__init__(**kw)
 
     def _validate(self, value):

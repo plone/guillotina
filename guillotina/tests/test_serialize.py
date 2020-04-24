@@ -6,6 +6,7 @@ from guillotina.component import get_adapter
 from guillotina.component import get_multi_adapter
 from guillotina.exceptions import ValueDeserializationError
 from guillotina.fields import patch
+from guillotina.fields.interfaces import IPatchFieldOperation
 from guillotina.files.dbfile import DBFile
 from guillotina.interfaces import IJSONToValue
 from guillotina.interfaces import IResourceDeserializeFromJson
@@ -1122,3 +1123,49 @@ async def test_async_invariant_deserializer(dummy_guillotina, mock_txn, dummy_re
     await deserializer.set_schema(ITestSchemaWithInvariant, content, {"foobar": "not foobar"}, errors)
     assert len(errors) == 1
     assert errors[0]["error"][0] == "Wrong value"
+
+
+async def test_patch_dict_json_field(dummy_request):
+    field = schema.JSONField(required=False, schema={"type": "object"})
+    field.__name__ = "foobar"
+    field.max_ops = 100
+
+    get_adapter(field, IPatchFieldOperation, name="assign")(
+        create_content(foobar={"foo": "bar", "bar": "foo"}), {"key": "foo", "value": "bar"}
+    ) == {"foo": "bar", "bar": "foo"}
+
+    get_adapter(field, IPatchFieldOperation, name="update")(
+        create_content(foobar={"foo": "bar", "bar": "foo"}),
+        [{"key": "foo", "value": "bar"}, {"key": "bar", "value": "FOO"}],
+    ) == {"foo": "bar", "bar": "FOO"}
+
+    get_adapter(field, IPatchFieldOperation, name="clear")(
+        create_content(foobar={"foo": "bar", "bar": "foo"}), None
+    ) == {}
+
+    get_adapter(field, IPatchFieldOperation, name="del")(
+        create_content(foobar={"foo": "bar", "bar": "foo"}), "foo"
+    ) == {"bar": "foo"}
+
+
+async def test_patch_list_json_field(dummy_request):
+    field = schema.JSONField(required=False, schema={"type": "array", "items": {"type": "string"}})
+    field.__name__ = "foobar"
+    field.max_ops = 100
+
+    get_adapter(field, IPatchFieldOperation, name="append")(create_content(foobar=["foo", "bar"]), "foo") == [
+        "foo",
+        "bar",
+        "foo",
+    ]
+    get_adapter(field, IPatchFieldOperation, name="extend")(
+        create_content(foobar=["foo", "bar"]), ["foo2", "bar2"]
+    ) == ["foo", "bar", "foo2", "bar2"]
+    get_adapter(field, IPatchFieldOperation, name="appendunique")(
+        create_content(foobar=["foo", "bar"]), "foo"
+    ) == ["foo", "bar", "foo"]
+    get_adapter(field, IPatchFieldOperation, name="clear")(create_content(foobar=["foo", "bar"]), None) == []
+    get_adapter(field, IPatchFieldOperation, name="assign")(
+        create_content(foobar=["foo", "bar"]), {"key": 0, "value": "FOO"}
+    ) == ["FOO", "bar"]
+    get_adapter(field, IPatchFieldOperation, name="del")(create_content(foobar=["foo", "bar"]), 0) == ["bar"]

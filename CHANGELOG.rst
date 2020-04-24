@@ -10,6 +10,12 @@ CHANGELOG
 6.0.0b3 (2020-04-24)
 --------------------
 
+- Provide patch operations for json field
+  [vangheem]
+
+- Optimize extend operation for bucket list field
+  [vangheem]
+
 - `.` and `..` should be blocked as valid ids. The browser will auto translate them
   to what current dir and parent dir respectively which gives unexpected results.
   [vangheem]
