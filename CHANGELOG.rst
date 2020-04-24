@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.36 (unreleased)
+5.3.36 (2020-04-24)
 -------------------
 
 - Provide patch operations for json field
