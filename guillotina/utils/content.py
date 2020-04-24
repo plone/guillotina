@@ -69,8 +69,8 @@ def iter_parents(content: IResource) -> typing.Iterator[IResource]:
 
 def valid_id(_id) -> bool:
     _id = _id.lower()
-    # can't start with _
-    if not _id or _id[0] in ("_", "@"):
+    # can't start with _ or be path explorers
+    if _id in (None, ".", "..") or _id[0] in ("_", "@"):
         return False
     return _id == "".join([l for l in _id if l in app_settings["valid_id_characters"]])
 

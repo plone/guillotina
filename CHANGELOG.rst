@@ -4,6 +4,10 @@ CHANGELOG
 6.0.0b3 (unreleased)
 --------------------
 
+- `.` and `..` should be blocked as valid ids. The browser will auto translate them
+  to what current dir and parent dir respectively which gives unexpected results.
+  [vangheem]
+
 - Change in ISecurityPolicy that might improve performance during traversal for views
   with permission guillotina.Public
   [masipcat]
