@@ -6,6 +6,7 @@ from guillotina.schema import TextLine
 from typing import TYPE_CHECKING
 from zope.interface import Attribute
 from zope.interface import Interface
+from zope.interface.common.mapping import IEnumerableMapping
 
 import guillotina.schema
 
@@ -265,7 +266,7 @@ class IAnnotations(Interface):
         """
 
 
-class IAnnotationData(Interface):
+class IAnnotationData(IBaseObject, IEnumerableMapping):
     """
     """
 

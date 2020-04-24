@@ -674,6 +674,19 @@ class IJSONField(IField):
     """A text field that stores A JSON."""
 
     json_schema = Attribute("json_schema", _("The JSON schema string serialization."))
+    schema_validator = Attribute("")
+
+
+class IArrayJSONField(IField):
+    """
+    if {"type": "array"}
+    """
+
+
+class IObjectJSONField(IField):
+    """
+    if {"type": "object"}
+    """
 
 
 class IUnionField(IField):
