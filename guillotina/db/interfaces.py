@@ -328,7 +328,6 @@ class IStorage(Interface):
 
 class IPostgresStorage(IStorage):
     objects_table_name = Attribute("")
-    blobs_table_name = Attribute("")
     sql = Attribute("")
     pool = Attribute("")
 
