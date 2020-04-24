@@ -4,7 +4,7 @@ CHANGELOG
 6.0.0b4 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- swagger tags fixes
 
 
 6.0.0b3 (2020-04-24)

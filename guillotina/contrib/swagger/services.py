@@ -77,7 +77,7 @@ class SwaggerDefinitionService(Service):
                     {"in": "path", "name": route_part, "schema": {"type": "string"}, "required": True}
                 )
         api_def[path or "/"][method.lower()] = {
-            "tags": swagger_conf.get("tags", [""]) or tags,
+            "tags": swagger_conf.get("tags", []) or tags,
             "parameters": parameters,
             "requestBody": request_body,
             "summary": self.get_data(service_def.get("summary", "")),
@@ -95,7 +95,7 @@ class SwaggerDefinitionService(Service):
                         iface_conf["endpoints"][name],
                         os.path.join(base_path, name),
                         api_def,
-                        tags=[name.strip("@")],
+                        tags=tags or [name.strip("@")],
                     )
             else:
                 if method.lower() == "options":
