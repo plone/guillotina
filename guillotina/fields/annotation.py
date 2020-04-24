@@ -2,11 +2,13 @@ from guillotina import configure
 from guillotina import schema
 from guillotina.annotations import AnnotationData
 from guillotina.component import query_adapter
+from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.exceptions import ValueDeserializationError
 from guillotina.fields import patch
 from guillotina.fields.interfaces import IBucketDictField
 from guillotina.fields.interfaces import IBucketListField
 from guillotina.fields.interfaces import IPatchFieldOperation
+from guillotina.interfaces import IAnnotationData
 from guillotina.interfaces import IAnnotations
 from guillotina.interfaces import IContentBehavior
 from guillotina.interfaces import IFieldValueRenderer
@@ -15,6 +17,9 @@ from guillotina.response import HTTPGone
 from guillotina.response import HTTPPreconditionFailed
 from typing import Any
 from typing import AsyncIterator
+from typing import cast
+from typing import List
+from typing import Optional
 from typing import Tuple
 from zope.interface import implementer
 from zope.interface import Interface
@@ -39,10 +44,12 @@ class BucketListValue:
         self.annotation_prefix = annotation_prefix
         self.bucket_len = bucket_len
 
-    def get_annotation_name(self, index):
+    def get_annotation_name(self, index: int) -> str:
         return f"{self.annotation_prefix}{index}"
 
-    async def get_annotation(self, context, annotation_index, create=True):
+    async def get_annotation(
+        self, context: IBaseObject, annotation_index: int, create: bool = True
+    ) -> Optional[IAnnotationData]:
         annotation_name = self.get_annotation_name(annotation_index)
         annotations_container = IAnnotations(context)
         annotation = annotations_container.get(annotation_name, _default)
@@ -50,7 +57,7 @@ class BucketListValue:
             annotation = await annotations_container.async_get(annotation_name, _default)
         if annotation is _default:
             if not create:
-                return
+                return None
             # create
             annotation = AnnotationData()
             annotation.update({"items": []})
@@ -59,30 +66,48 @@ class BucketListValue:
             self.annotations_metadata[annotation_index] = {}
         return annotation
 
-    async def append(self, context, value):
+    async def _get_current_annotation(self, context: IBaseObject) -> IAnnotationData:
         if self.current_annotation_index in self.annotations_metadata:
             metadata = self.annotations_metadata[self.current_annotation_index]
             if metadata.get("len", 0) >= self.bucket_len:
                 # split here
                 self.current_annotation_index += 1
 
-        annotation = await self.get_annotation(context, self.current_annotation_index)
+        return cast(
+            IAnnotationData, await self.get_annotation(context, self.current_annotation_index, create=True)
+        )
+
+    async def append(self, context: IBaseObject, value: Any) -> None:
+        annotation = await self._get_current_annotation(context)
         metadata = self.annotations_metadata[self.current_annotation_index]
         metadata["len"] = metadata.get("len", 0) + 1
         annotation["items"].append(value)
         annotation.register()
 
-    async def extend(self, context, value):
-        for item in value:
-            await self.append(context, item)
+    async def extend(self, context: IBaseObject, items: List[Any]) -> None:
+        annotation = await self._get_current_annotation(context)
+        metadata = self.annotations_metadata[self.current_annotation_index]
+        annotation.register()
 
-    def __len__(self):
+        while len(items) > 0:
+            size = self.bucket_len - metadata.get("len", 0)
+            toadd = items[:size]
+            items = items[size:]  # left overs
+            metadata["len"] = metadata.get("len", 0) + len(toadd)
+            annotation["items"].extend(toadd)
+
+            # will split and get next bucket
+            annotation = await self._get_current_annotation(context)
+            metadata = self.annotations_metadata[self.current_annotation_index]
+            annotation.register()
+
+    def __len__(self) -> int:
         total = 0
         for metadata in self.annotations_metadata.values():
             total += metadata.get("len", 0)
         return total
 
-    async def get(self, context, bucket_index, item_index):
+    async def get(self, context: IBaseObject, bucket_index: int, item_index: int) -> None:
         annotation = await self.get_annotation(context, bucket_index, create=False)
         if annotation is None:
             return
@@ -92,7 +117,7 @@ class BucketListValue:
         except IndexError:
             pass
 
-    async def remove(self, context, bucket_index, item_index):
+    async def remove(self, context: IBaseObject, bucket_index: int, item_index: int) -> None:
         annotation = await self.get_annotation(context, bucket_index, create=False)
         if annotation is None:
             return
@@ -103,7 +128,7 @@ class BucketListValue:
             metadata["len"] = metadata.get("len", 0) - 1
             annotation.register()
 
-    async def iter_buckets(self, context) -> AsyncIterator[AnnotationData]:
+    async def iter_buckets(self, context: IBaseObject) -> AsyncIterator[AnnotationData]:
         annotations_container = IAnnotations(context)
         for index in sorted(self.annotations_metadata.keys()):
             annotation_name = self.get_annotation_name(index)
@@ -114,17 +139,18 @@ class BucketListValue:
                     continue
             yield annotation
 
-    async def iter_items(self, context):
+    async def iter_items(self, context: IBaseObject) -> AsyncIterator[Any]:
         async for bucket in self.iter_buckets(context):
             for item in bucket["items"]:
                 yield item
 
-    async def clear(self, context):
+    async def clear(self, context: IBaseObject):
         annotations_container = IAnnotations(context)
         for index in sorted(self.annotations_metadata.keys()):
             annotation_name = self.get_annotation_name(index)
             await annotations_container.async_del(annotation_name)
         self.annotations_metadata = {}
+        self.current_annotation_index = 0
 
 
 @implementer(IBucketListField)
@@ -506,6 +532,36 @@ def value_converter(value):
 @configure.value_serializer(BucketDictValue)
 def value_dict_converter(value):
     return {"len": len(value), "buckets": len(value.buckets)}
+
+
+@configure.adapter(for_=(Interface, IRequest, IBucketListField), provides=IFieldValueRenderer)
+class BucketListFieldRenderer:
+    def __init__(self, context, request, field):
+        self.context = context
+        self.request = request
+        self.field = field
+
+    async def __call__(self):
+        """
+        Iterate values bucket by bucket
+        """
+        val = self.field.get(self.field.context)
+        if val is None:
+            return {"values": [], "total": 0, "cursor": None}
+        bidx = 0
+        if "cursor" in self.request.url.query:
+            cursor = self.request.url.query["cursor"]
+            try:
+                bidx = int(cursor)
+            except ValueError:
+                raise HTTPPreconditionFailed(content={"reason": "Invalid bucket type", "cursor": cursor})
+
+        annotation = await val.get_annotation(self.context, bidx, create=False)
+        if annotation is None:
+            raise HTTPGone(content={"reason": "No data found for bucket", "bidx": bidx})
+
+        cursor = bidx + 1
+        return {"values": annotation["items"], "total": len(val), "cursor": cursor}
 
 
 @configure.adapter(for_=(Interface, IRequest, IBucketDictField), provides=IFieldValueRenderer)

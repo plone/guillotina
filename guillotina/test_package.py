@@ -117,6 +117,10 @@ class ITestBehavior(Interface):
         bucket_len=10, required=False, default=None, key_type=schema.Text(), value_type=schema.Text()
     )
 
+    bucket_list = fields.BucketListField(
+        bucket_len=10, required=False, default=None, value_type=schema.Text()
+    )
+
     read_permission(no_read_field="example.MyPermission")
     no_read_field = schema.TextLine(required=False, default="")
 
