@@ -4,7 +4,7 @@ CHANGELOG
 5.3.37 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- swagger tags fixes
 
 
 5.3.36 (2020-04-24)
