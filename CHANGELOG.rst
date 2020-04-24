@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.0b3 (unreleased)
+6.0.0b3 (2020-04-24)
 --------------------
 
 - `.` and `..` should be blocked as valid ids. The browser will auto translate them
