@@ -8,6 +8,10 @@ CHANGELOG
   to what current dir and parent dir respectively which gives unexpected results.
   [vangheem]
 
+- Change in ISecurityPolicy that might improve performance during traversal for views
+  with permission guillotina.Public
+  [masipcat]
+
 - Fix Response object responding with 'default_content' when 'content' evaluates to False
   [masipcat]
 

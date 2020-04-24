@@ -62,7 +62,7 @@ class SecurityPolicy:
     @profilable
     def check_permission(self, permission, obj):
         # Always allow public attributes
-        if permission is Public:
+        if permission == Public:
             return True
 
         if IView.providedBy(obj):
