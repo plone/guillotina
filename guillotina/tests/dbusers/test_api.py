@@ -146,7 +146,7 @@ async def test_only_root_and_admins_can_create_users(dbusers_requester):
 
 
 @pytest.mark.app_settings(settings.DEFAULT_SETTINGS)
-@pytest.mark.skipif(DATABASE == "postgres" and DB_SCHEMA == "custom", reason="Pytest internal error on rerun")
+# @pytest.mark.skipif(DATABASE == "postgres" and DB_SCHEMA == "custom", reason="Pytest internal error on rerun")
 async def test_only_root_and_admins_can_manage_users_and_groups(dbusers_requester):
     async with dbusers_requester as requester:
         for method, url in [
