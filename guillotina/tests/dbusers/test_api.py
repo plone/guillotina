@@ -3,11 +3,15 @@ from guillotina.tests.utils import get_container
 
 import base64
 import json
+import os
 import pytest
 import random
 
 
 pytestmark = pytest.mark.asyncio
+
+DATABASE = os.environ.get("DATABASE")
+DB_SCHEMA = os.environ.get("DB_SCHEMA")
 
 
 @pytest.mark.app_settings(settings.DEFAULT_SETTINGS)
@@ -142,6 +146,7 @@ async def test_only_root_and_admins_can_create_users(dbusers_requester):
 
 
 @pytest.mark.app_settings(settings.DEFAULT_SETTINGS)
+@pytest.mark.skipif(DATABASE == "postgres" and DB_SCHEMA == "custom", reason="Pytest internal error on rerun")
 async def test_only_root_and_admins_can_manage_users_and_groups(dbusers_requester):
     async with dbusers_requester as requester:
         for method, url in [
