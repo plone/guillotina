@@ -12,7 +12,11 @@ from guillotina.response import HTTPNotFound
 from guillotina.utils import navigate_to
 from zope.interface import alsoProvides
 
+import logging
 import typing
+
+
+logger = logging.getLogger("guillotina.contrib.dbusers")
 
 
 @configure.service(
@@ -50,6 +54,9 @@ class BaseGroup(Service):
         try:
             group: typing.Optional[Group] = await navigate_to(self.context, "groups/{}".format(group_id))
         except KeyError:
+            group = None
+        except Exception:
+            logger.error("Error getting group", exc_info=True)
             group = None
         if not group:
             raise HTTPNotFound(content={"reason": f"Group {group} not found"})
