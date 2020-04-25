@@ -42,8 +42,8 @@ from zope.interface import implementer
 import asyncpg.exceptions
 import json
 import logging
+import orjson
 import typing
-import ujson
 
 
 logger = logging.getLogger("guillotina")
@@ -717,7 +717,7 @@ class PGSearchUtility(DefaultSearchUtility):
 
     async def _index(self, oid, writer, txn: ITransaction, table_name):
         json_dict = await writer.get_json()
-        json_value = ujson.dumps(json_dict)
+        json_value = orjson.dumps(json_dict).decode("utf-8")
 
         statement_sql = txn.storage._sql.get("JSONB_UPDATE", table_name)
         conn = await txn.get_connection()

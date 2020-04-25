@@ -21,8 +21,8 @@ import asyncio
 import asyncpg
 import asyncpg.connection
 import concurrent
+import orjson
 import time
-import ujson
 
 
 log = glogging.getLogger("guillotina.storage")
@@ -122,8 +122,8 @@ SELECT count(*) FROM rows""".format(
 NAIVE_UPSERT = f"""
 INSERT INTO {{table_name}}
 (zoid, tid, state_size, part, resource, of, otid, parent_id, id, type, json, state)
-VALUES ($1::varchar({MAX_UID_LENGTH}), $2::int, $3::int, $4::int, $5::boolean,
-        $6::varchar({MAX_UID_LENGTH}), $7::int, $8::varchar({MAX_UID_LENGTH}),
+VALUES ($1::varchar({MAX_UID_LENGTH}), $2::bigint, $3::int, $4::int, $5::boolean,
+        $6::varchar({MAX_UID_LENGTH}), $7::bigint, $8::varchar({MAX_UID_LENGTH}),
         $9::text, $10::text, $11::json, $12::bytea)
 ON CONFLICT (zoid)
 DO UPDATE SET
@@ -154,12 +154,12 @@ register_sql("NAIVE_UPSERT", _wrap_return_count(NAIVE_UPSERT))
 NAIVE_UPDATE = f"""
 UPDATE {{table_name}}
 SET
-    tid = $2::int,
+    tid = $2::bigint,
     state_size = $3::int,
     part = $4::int,
     resource = $5::boolean,
     of = $6::varchar({MAX_UID_LENGTH}),
-    otid = $7::int,
+    otid = $7::bigint,
     parent_id = $8::varchar({MAX_UID_LENGTH}),
     id = $9::text,
     type = $10::text,
@@ -167,7 +167,7 @@ SET
     state = $12::bytea
 WHERE
     zoid = $1::varchar({MAX_UID_LENGTH})"""
-register_sql("UPDATE", _wrap_return_count(NAIVE_UPDATE + """ AND tid = $7::int"""))
+register_sql("UPDATE", _wrap_return_count(NAIVE_UPDATE + """ AND tid = $7::bigint"""))
 register_sql("NAIVE_UPDATE", _wrap_return_count(NAIVE_UPDATE))
 
 
@@ -823,7 +823,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
             log.info(f"Large object {obj.__class__}: {len(pickled)}")
         if self._store_json:
             json_dict = await writer.get_json()
-            json = ujson.dumps(json_dict)
+            json = orjson.dumps(json_dict).decode("utf-8")
         else:
             json = None
         part = writer.part
@@ -1002,16 +1002,16 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                 return await self.read_conn.fetch(sql, txn._tid)
 
     async def commit(self, transaction):
-        if transaction._db_txn is not None:
-            async with transaction._lock:
+        async with transaction._lock:
+            if transaction._db_txn is not None:
                 await transaction._db_txn.commit()
-        elif self._transaction_strategy not in ("none", "tidonly") and not transaction._skip_commit:
-            log.warning("Do not have db transaction to commit")
-        return transaction._tid
+            elif self._transaction_strategy not in ("none", "tidonly") and not transaction._skip_commit:
+                log.warning("Do not have db transaction to commit")
+            return transaction._tid
 
     async def abort(self, transaction):
-        if transaction._db_txn is not None:
-            async with transaction._lock:
+        async with transaction._lock:
+            if transaction._db_txn is not None:
                 try:
                     await transaction._db_txn.rollback()
                 except asyncpg.exceptions._base.InterfaceError:

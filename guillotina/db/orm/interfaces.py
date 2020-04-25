@@ -62,3 +62,6 @@ class IBaseObject(Interface):
         The state should not include persistent attributes ("_p_name").
         The result must be picklable.
         """
+
+    def register():
+        ...

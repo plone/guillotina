@@ -1209,7 +1209,74 @@ class TestSchema(Item):
     __test__ = False  # prevent pytest.PytestCollectionWarning
 
 
-async def test_deserialization_errors(container_requester):
+async def test_field_values_list_bucket(container_requester):
+    async with container_requester as requester:
+        _, status = await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps({"@type": "Item", "id": "item1", "@behaviors": [ITestBehavior.__identifier__]}),
+        )
+        assert status == 201
+        resp, status = await requester(
+            "GET", "/db/guillotina/item1/@fieldvalue/{}.bucket_list".format(ITestBehavior.__identifier__)
+        )
+        assert status == 200
+        assert len(resp["values"]) == 0
+        assert resp["cursor"] is None
+        assert resp["total"] == 0
+
+        await requester(
+            "PATCH",
+            "/db/guillotina/item1",
+            data=json.dumps(
+                {
+                    "@behaviors": [ITestBehavior.__identifier__],
+                    ITestBehavior.__identifier__: {
+                        "foobar": "blah",
+                        "bucket_list": {"op": "extend", "value": [str(idx) for idx in range(20)]},
+                        "test_required_field": "foobar",
+                    },
+                }
+            ),
+        )
+        resp, status = await requester(
+            "GET", "/db/guillotina/item1/@fieldvalue/{}.bucket_list".format(ITestBehavior.__identifier__)
+        )
+        assert status == 200
+        assert len(resp["values"]) == 10
+        assert resp["total"] == 20
+        assert resp["cursor"] == 1
+
+        resp, status = await requester(
+            "GET",
+            "/db/guillotina/item1/@fieldvalue/{}.bucket_list?cursor=1".format(ITestBehavior.__identifier__),
+        )
+        assert status == 200
+        assert len(resp["values"]) == 10
+        assert resp["cursor"] == 2
+
+        resp, status = await requester(
+            "GET",
+            "/db/guillotina/item1/@fieldvalue/{}.bucket_list?cursor=4".format(ITestBehavior.__identifier__),
+        )
+        assert status == 410
+
+        _, status = await requester(
+            "GET",
+            "/db/guillotina/item1/@fieldvalue/{}.bucket_list?cursor=foobar".format(
+                ITestBehavior.__identifier__
+            ),
+        )
+        assert status == 412
+
+        _, status = await requester(
+            "GET",
+            "/db/guillotina/item1/@fieldvalue/{}.bucket_list?cursor=500".format(ITestBehavior.__identifier__),
+        )
+        assert status == 410
+
+
+async def test_patch_field_validation(container_requester):
     async with container_requester as requester:
         resp, status = await requester(
             "POST",

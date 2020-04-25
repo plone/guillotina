@@ -39,8 +39,10 @@ class Response(Exception):
                 raise ValueError("body and content cannot be set at the same time")
             elif body is not None:
                 self.body = body
+            elif content is not None:
+                self.content = content
             else:
-                self.content = content or self.default_content.copy()
+                self.content = self.default_content.copy()
 
         if headers is None:
             headers = CIMultiDict()

@@ -1,10 +1,12 @@
 from datetime import datetime
+from dateutil.tz import tzutc
 from guillotina import fields
 from guillotina import schema
 from guillotina.component import get_adapter
 from guillotina.component import get_multi_adapter
 from guillotina.exceptions import ValueDeserializationError
 from guillotina.fields import patch
+from guillotina.fields.interfaces import IPatchFieldOperation
 from guillotina.files.dbfile import DBFile
 from guillotina.interfaces import IJSONToValue
 from guillotina.interfaces import IResourceDeserializeFromJson
@@ -29,8 +31,10 @@ pytestmark = pytest.mark.asyncio
 
 async def test_serialize_resource(dummy_request, mock_txn):
     content = create_content()
+    content.creation_date = datetime(2020, 1, 1, 10, 10, 10, tzinfo=tzutc())
     serializer = get_multi_adapter((content, dummy_request), IResourceSerializeToJson)
     result = await serializer()
+    assert result["creation_date"] == "2020-01-01T10:10:10+00:00"
     assert "guillotina.behaviors.dublincore.IDublinCore" in result
 
 
@@ -1119,3 +1123,49 @@ async def test_async_invariant_deserializer(dummy_guillotina, mock_txn, dummy_re
     await deserializer.set_schema(ITestSchemaWithInvariant, content, {"foobar": "not foobar"}, errors)
     assert len(errors) == 1
     assert errors[0]["error"][0] == "Wrong value"
+
+
+async def test_patch_dict_json_field(dummy_request):
+    field = schema.JSONField(required=False, schema={"type": "object"})
+    field.__name__ = "foobar"
+    field.max_ops = 100
+
+    get_adapter(field, IPatchFieldOperation, name="assign")(
+        create_content(foobar={"foo": "bar", "bar": "foo"}), {"key": "foo", "value": "bar"}
+    ) == {"foo": "bar", "bar": "foo"}
+
+    get_adapter(field, IPatchFieldOperation, name="update")(
+        create_content(foobar={"foo": "bar", "bar": "foo"}),
+        [{"key": "foo", "value": "bar"}, {"key": "bar", "value": "FOO"}],
+    ) == {"foo": "bar", "bar": "FOO"}
+
+    get_adapter(field, IPatchFieldOperation, name="clear")(
+        create_content(foobar={"foo": "bar", "bar": "foo"}), None
+    ) == {}
+
+    get_adapter(field, IPatchFieldOperation, name="del")(
+        create_content(foobar={"foo": "bar", "bar": "foo"}), "foo"
+    ) == {"bar": "foo"}
+
+
+async def test_patch_list_json_field(dummy_request):
+    field = schema.JSONField(required=False, schema={"type": "array", "items": {"type": "string"}})
+    field.__name__ = "foobar"
+    field.max_ops = 100
+
+    get_adapter(field, IPatchFieldOperation, name="append")(create_content(foobar=["foo", "bar"]), "foo") == [
+        "foo",
+        "bar",
+        "foo",
+    ]
+    get_adapter(field, IPatchFieldOperation, name="extend")(
+        create_content(foobar=["foo", "bar"]), ["foo2", "bar2"]
+    ) == ["foo", "bar", "foo2", "bar2"]
+    get_adapter(field, IPatchFieldOperation, name="appendunique")(
+        create_content(foobar=["foo", "bar"]), "foo"
+    ) == ["foo", "bar", "foo"]
+    get_adapter(field, IPatchFieldOperation, name="clear")(create_content(foobar=["foo", "bar"]), None) == []
+    get_adapter(field, IPatchFieldOperation, name="assign")(
+        create_content(foobar=["foo", "bar"]), {"key": 0, "value": "FOO"}
+    ) == ["FOO", "bar"]
+    get_adapter(field, IPatchFieldOperation, name="del")(create_content(foobar=["foo", "bar"]), 0) == ["bar"]

@@ -7,9 +7,11 @@ from guillotina.exceptions import ValueDeserializationError
 from guillotina.fields.interfaces import IPatchField
 from guillotina.fields.interfaces import IPatchFieldOperation
 from guillotina.interfaces import IJSONToValue
+from guillotina.schema.interfaces import IArrayJSONField
 from guillotina.schema.interfaces import IDict
 from guillotina.schema.interfaces import IInt
 from guillotina.schema.interfaces import IList
+from guillotina.schema.interfaces import IObjectJSONField
 from guillotina.schema.interfaces import ITuple
 from guillotina.utils import apply_coroutine
 from zope.interface import implementer
@@ -123,7 +125,7 @@ class PatchListAppend:
         value = self.get_value(value, None)
         if self.field.value_type:
             self.field.value_type.validate(value)
-        existing = getattr(context, self.field.__name__, None)
+        existing = self.field.query(context)
         if existing is None:
             existing = self.field.missing_value or []
         return self.do_operation(existing, value)
@@ -168,7 +170,7 @@ class PatchListExtend(PatchListAppend):
         return existing
 
     def __call__(self, context, value):
-        existing = getattr(context, self.field.__name__, None)
+        existing = self.field.query(context)
         if existing is None:
             existing = self.field.missing_value or []
         if not isinstance(value, list):  # pragma: no cover
@@ -220,7 +222,7 @@ class PatchListDel(PatchListAppend):
         return existing
 
     def __call__(self, context, value):
-        existing = getattr(context, self.field.__name__, None) or {}
+        existing = self.field.query(context) or {}
         return self.do_operation(existing, value)
 
 
@@ -240,7 +242,7 @@ class PatchListRemove(PatchListAppend):
         return existing
 
     def __call__(self, context, value):
-        existing = getattr(context, self.field.__name__, None) or {}
+        existing = self.field.query(context) or {}
         return self.do_operation(existing, value)
 
 
@@ -260,7 +262,7 @@ class PatchListUpdate(PatchListAppend):
         if "index" not in value or "value" not in value:
             raise ValueDeserializationError(self.field, value, "Not valid patch value")
 
-        existing = getattr(context, self.field.__name__, None) or {}
+        existing = self.field.query(context) or {}
         try:
             existing_item = existing[value["index"]]
         except IndexError:
@@ -285,7 +287,7 @@ class PatchDictSet(PatchListAppend):
         if "key" not in value or "value" not in value:
             raise ValueDeserializationError(self.field, value, "Not valid patch value")
 
-        existing = getattr(context, self.field.__name__, None)
+        existing = self.field.query(context)
         if existing is None:
             existing = self.field.missing_value or {}
         existing_item = existing.get(value["key"])
@@ -308,7 +310,7 @@ class PatchDictUpdate(PatchListAppend):
                 self.field, value, f"Invalid type patch data, must be list of updates"
             )
 
-        existing = getattr(context, self.field.__name__, None)
+        existing = self.field.query(context)
         if existing is None:
             existing = self.field.missing_value or {}
 
@@ -338,7 +340,7 @@ class PatchDictDel(PatchListAppend):
     def __call__(self, context, value):
         if self.field.key_type:
             self.field.key_type.validate(value)
-        existing = getattr(context, self.field.__name__, None)
+        existing = self.field.query(context)
         try:
             del existing[value]
         except (IndexError, KeyError, TypeError):
@@ -365,7 +367,7 @@ class PatchIntIncrement(BasePatchIntOperation):
             self.field.validate(value)
         # Increment one by default
         to_increment = value or 1
-        existing = getattr(context, self.field.__name__, None)
+        existing = self.field.query(context)
         if existing is None:
             # Get default value or assume 0
             existing = self.field.default or 0
@@ -379,7 +381,7 @@ class PatchIntDecrement(BasePatchIntOperation):
             self.field.validate(value)
         # Decrement one by default
         to_decrement = value or 1
-        existing = getattr(context, self.field.__name__, None)
+        existing = self.field.query(context)
         if existing is None:
             # Get default value or assume 0
             existing = self.field.default or 0
@@ -394,3 +396,133 @@ class PatchIntReset(BasePatchIntOperation):
         if value:
             self.field.validate(value)
         return value or self.field.default or 0
+
+
+@configure.adapter(for_=IArrayJSONField, provides=IPatchFieldOperation, name="append")
+class PatchJSONArrayFieldAppend(PatchListAppend):
+    def do_operation(self, existing, value):
+        existing.append(value)
+        return existing
+
+    def __call__(self, context, value):
+        existing = self.field.query(context)
+        if existing is None:
+            existing = self.field.missing_value or []
+
+        return self.do_operation(existing, value)
+
+
+@configure.adapter(for_=IArrayJSONField, provides=IPatchFieldOperation, name="appendunique")
+class PatchJSONAppendUnique(PatchJSONArrayFieldAppend):
+    def do_operation(self, existing, value):
+        if value not in existing:
+            existing.append(value)
+        return existing
+
+
+@configure.adapter(for_=IArrayJSONField, provides=IPatchFieldOperation, name="clear")
+class PatchJSONArrayClear(PatchJSONArrayFieldAppend):
+    def __call__(self, context, value):
+        return []
+
+
+@configure.adapter(for_=IObjectJSONField, provides=IPatchFieldOperation, name="clear")
+class PatchJSONObjectClear(PatchJSONArrayFieldAppend):
+    def __call__(self, context, value):
+        return {}
+
+
+@configure.adapter(for_=IArrayJSONField, provides=IPatchFieldOperation, name="extend")
+class PatchJSONExtend(PatchJSONArrayFieldAppend):
+    def do_operation(self, existing, value):
+        existing.extend(value)
+        return existing
+
+    def __call__(self, context, value):
+        existing = self.field.query(context)
+        if existing is None:
+            existing = self.field.missing_value or []
+        if not isinstance(value, list):  # pragma: no cover
+            raise ValueDeserializationError(self.field, value, "Not valid list")
+
+        if self.field.max_ops and len(value) > self.field.max_ops:
+            raise ValueDeserializationError(
+                self.field, value, f"Exceeded max allowed operations for field: {self.field.max_ops}"
+            )
+
+        return self.do_operation(existing, value)
+
+
+@configure.adapter(for_=IArrayJSONField, provides=IPatchFieldOperation, name="assign")
+class PatchJSONAssign(PatchJSONArrayFieldAppend):
+    def __call__(self, context, value):
+        if "key" not in value or "value" not in value:
+            raise ValueDeserializationError(self.field, value, "Not valid patch value")
+
+        existing = self.field.query(context)
+        if existing is None:
+            existing = self.field.missing_value or {}
+
+        existing[value["key"]] = value["value"]
+        return existing
+
+
+@configure.adapter(for_=IObjectJSONField, provides=IPatchFieldOperation, name="assign")
+class PatchJSONObjetAssign(PatchJSONArrayFieldAppend):
+    def __call__(self, context, value):
+        if "key" not in value or "value" not in value:
+            raise ValueDeserializationError(self.field, value, "Not valid patch value")
+
+        existing = self.field.query(context)
+        if existing is None:
+            existing = self.field.missing_value or {}
+
+        existing[value["key"]] = value["value"]
+        return existing
+
+
+@configure.adapter(for_=IObjectJSONField, provides=IPatchFieldOperation, name="update")
+class PatchJSONObjetUpdate(PatchJSONObjetAssign):
+    def __call__(self, context, value):
+        if not isinstance(value, list):
+            raise ValueDeserializationError(
+                self.field, value, f"Invalid type patch data, must be list of updates"
+            )
+
+        existing = self.field.query(context)
+        if existing is None:
+            existing = self.field.missing_value or {}
+
+        if self.field.max_ops and len(value) > self.field.max_ops:
+            raise ValueDeserializationError(
+                self.field, value, f"Exceeded max allowed operations for field: {self.field.max_ops}"
+            )
+
+        for item in value:
+            if "key" not in item or "value" not in item:
+                raise ValueDeserializationError(self.field, value, "Not valid patch value")
+            existing[item["key"]] = item["value"]
+
+        return existing
+
+
+@configure.adapter(for_=IArrayJSONField, provides=IPatchFieldOperation, name="del")
+class PatchJSONArrayDel(PatchJSONArrayFieldAppend):
+    def __call__(self, context, value):
+        existing = self.field.query(context) or {}
+        try:
+            del existing[value]
+        except (IndexError, TypeError):  # pragma: no cover
+            raise ValueDeserializationError(self.field, value, "Not valid index value")
+        return existing
+
+
+@configure.adapter(for_=IObjectJSONField, provides=IPatchFieldOperation, name="del")
+class PatchJSONObjetDel(PatchJSONArrayFieldAppend):
+    def __call__(self, context, value):
+        existing = self.field.query(context) or {}
+        try:
+            del existing[value]
+        except (IndexError, KeyError, TypeError):
+            raise ValueDeserializationError(self.field, value, "Not valid index value")
+        return existing

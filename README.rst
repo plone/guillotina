@@ -168,7 +168,7 @@ Then, run Guillotina
 
     docker run --rm -it \
         --link=postgres -p 127.0.0.1:8080:8080 \
-        guillotina/guillotina:latest \
+        plone/guillotina:latest \
         g -c '{"databases": [{"db": {"storage": "postgresql", "dsn": "postgres://guillotina:@postgres/guillotina"}}], "root_user": {"password": "root"}}'
 
 

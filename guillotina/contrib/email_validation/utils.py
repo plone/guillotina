@@ -4,8 +4,8 @@ from jwcrypto import jwe
 from jwcrypto.common import json_encode
 
 import logging
+import orjson
 import time
-import ujson
 
 
 logger = logging.getLogger("guillotina.email_validation")
@@ -18,8 +18,8 @@ async def generate_validation_token(data, ttl=3660):
         "exp": int(time.time() + ttl),
     }
     claims.update(data)
-    payload = ujson.dumps(claims)
-    jwetoken = jwe.JWE(payload.encode("utf-8"), json_encode({"alg": "A256KW", "enc": "A256CBC-HS512"}))
+    payload = orjson.dumps(claims)
+    jwetoken = jwe.JWE(payload, json_encode({"alg": "A256KW", "enc": "A256CBC-HS512"}))
     jwetoken.add_recipient(get_jwk_key())
     token = jwetoken.serialize(compact=True)
 
@@ -40,7 +40,7 @@ async def extract_validation_token(jwt_token):
     except jwe.InvalidJWEData:
         logger.warn(f"Error decrypting JWT token", exc_info=True)
         return
-    json_payload = ujson.loads(payload)
+    json_payload = orjson.loads(payload)
     if json_payload["exp"] <= int(time.time()):
         logger.warning(f"Expired token {jwt_token}", exc_info=True)
         return

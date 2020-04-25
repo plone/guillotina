@@ -1,4 +1,3 @@
-from datetime import datetime
 from guillotina import configure
 from guillotina.interfaces import IResponse
 from guillotina.interfaces.security import PermissionSetting
@@ -9,32 +8,43 @@ from typing import Optional
 from zope.interface.interface import InterfaceClass
 
 import json
-import ujson
+import orjson
 
 
+def guillotina_json_default(obj):
+    if isinstance(obj, str):
+        if type(obj) != str:  # e.g, i18n.Message()
+            return str(obj)
+    elif isinstance(obj, complex):
+        return [obj.real, obj.imag]
+    elif isinstance(obj, type):
+        return obj.__module__ + "." + obj.__name__
+    elif isinstance(obj, InterfaceClass):
+        return [x.__module__ + "." + x.__name__ for x in obj.__iro__]  # noqa
+    elif isinstance(obj, dict):
+        if type(obj) != dict:  # e.g. collections.OrderedDict
+            return dict(obj)
+
+    try:
+        iterable = iter(obj)
+    except TypeError:
+        pass
+    else:
+        return list(iterable)
+
+    if isinstance(obj, PermissionSetting):
+        return obj.get_name()
+    if callable(obj):
+        return obj.__module__ + "." + obj.__name__
+
+    # Let the base class default method raise the TypeError
+    raise TypeError("Unable to serialize %r (type: %s)" % (obj, type(obj)))
+
+
+# b/w compat
 class GuillotinaJSONEncoder(json.JSONEncoder):
     def default(self, obj):
-        if isinstance(obj, complex):
-            return [obj.real, obj.imag]
-        elif isinstance(obj, datetime):
-            return obj.isoformat()
-        elif isinstance(obj, type):
-            return obj.__module__ + "." + obj.__name__
-        elif isinstance(obj, InterfaceClass):
-            return [x.__module__ + "." + x.__name__ for x in obj.__iro__]  # noqa
-        try:
-            iterable = iter(obj)
-        except TypeError:
-            pass
-        else:
-            return list(iterable)
-
-        if isinstance(obj, PermissionSetting):
-            return obj.get_name()
-        if callable(obj):
-            return obj.__module__ + "." + obj.__name__
-        # Let the base class default method raise the TypeError
-        return json.JSONEncoder.default(self, obj)
+        return guillotina_json_default(obj)
 
 
 class Renderer:
@@ -70,8 +80,7 @@ class RendererJson(Renderer):
 
     def get_body(self, value) -> Optional[bytes]:
         if value is not None:
-            value = json.dumps(value, cls=GuillotinaJSONEncoder)
-            return value.encode("utf-8")
+            return orjson.dumps(value, default=guillotina_json_default)
         return None
 
 
@@ -80,9 +89,10 @@ class StringRenderer(Renderer):
 
     def get_body(self, value) -> bytes:
         if not isinstance(value, bytes):
-            if not isinstance(value, str):
-                value = ujson.dumps(value)
-            value = value.encode("utf8")
+            if isinstance(value, str):
+                value = value.encode("utf8")
+            else:
+                value = orjson.dumps(value)
         return value
 
 

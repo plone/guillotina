@@ -60,7 +60,7 @@ setup(
         "pycryptodome",
         "jwcrypto",
         "setuptools",
-        "ujson",
+        "orjson",
         "zope.interface",
         "pyjwt",
         "asyncpg",
@@ -78,12 +78,12 @@ setup(
             "docker",
             "backoff",
             "psycopg2-binary",
-            "pytest-asyncio>=0.10.0",
+            "pytest-asyncio==0.10.0",
             "pytest-cov",
             "coverage>=4.0.3",
             "pytest-docker-fixtures",
             "pytest-rerunfailures<=7.0",
-            "async-asgi-testclient~=1.2.0",
+            "async-asgi-testclient<2.0.0",
             "openapi-spec-validator",
             "aiohttp>=3.0.0,<4.0.0",
         ],
@@ -102,7 +102,7 @@ setup(
         ],
         "redis": ['aioredis>=1.2.0;python_version<"3.8"', 'aioredis>=1.3.0;python_version>="3.8"'],
         "mailer": ["html2text>=2018.1.9", "aiosmtplib>=1.0.6"],
-        "recaptcha": ["aiohttp<4"]
+        "recaptcha": ["aiohttp<4"],
     },
     entry_points={
         "console_scripts": [

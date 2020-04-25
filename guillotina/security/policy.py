@@ -62,7 +62,7 @@ class SecurityPolicy:
     @profilable
     def check_permission(self, permission, obj):
         # Always allow public attributes
-        if permission is Public:
+        if permission == Public:
             return True
 
         if IView.providedBy(obj):
@@ -199,11 +199,14 @@ class SecurityPolicy:
             if prinper is not None:
                 return prinper
 
-        # Find the permission recursivelly set to a user
-        parent = getattr(parent, "__parent__", None)
-        prinper = self.cached_principal_permission(parent, principal, groups, permission, "p")
-        cache_prin_per[permission] = prinper
-        return prinper
+        perminhe = query_adapter(parent, IInheritPermissionMap)
+        if perminhe is None or perminhe.get_inheritance(permission) is Allow:
+            parent = getattr(parent, "__parent__", None)
+            prinper = self.cached_principal_permission(parent, principal, groups, permission, "p")
+            cache_prin_per[permission] = prinper
+            return prinper
+        else:
+            return None
 
     def global_principal_roles(self, principal, groups):
         roles = dict(
@@ -340,7 +343,7 @@ def cached_roles(parent: Optional[IBaseObject], permission: str, level: str) -> 
 def cached_principals(
     parent: Optional[IBaseObject], roles: List[str], permission: str, level: str
 ) -> Dict[str, int]:
-    """Get the roles for a specific permission.
+    """Get the principals for a specific permission.
 
     Global + Local + Code
     """
@@ -363,7 +366,15 @@ def cached_principals(
     except KeyError:
         pass
 
-    principals = cached_principals(getattr(parent, "__parent__", None), roles, permission, "p")
+    perminhe = query_adapter(parent, IInheritPermissionMap)
+
+    if perminhe is None or perminhe.get_inheritance(permission) is Allow:
+        principals = cached_principals(getattr(parent, "__parent__", None), roles, permission, "p")
+    else:
+        # We don't apply global permissions also
+        # Its dangerous as may lead to an object who nobody can see
+        principals = dict()
+
     prinperm = IPrincipalPermissionMap(parent, None)
     if prinperm:
         principals = principals.copy()

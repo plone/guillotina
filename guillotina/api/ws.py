@@ -20,8 +20,8 @@ from jwcrypto import jwe
 from jwcrypto.common import json_encode
 from urllib import parse
 
+import orjson
 import time
-import ujson
 
 
 @configure.service(
@@ -61,8 +61,8 @@ class WebsocketGetToken(Service):
             "token": real_token,
         }
         claims.update(data)
-        payload = ujson.dumps(claims)
-        jwetoken = jwe.JWE(payload.encode("utf-8"), json_encode({"alg": "A256KW", "enc": "A256CBC-HS512"}))
+        payload = orjson.dumps(claims)
+        jwetoken = jwe.JWE(payload, json_encode({"alg": "A256KW", "enc": "A256CBC-HS512"}))
         jwetoken.add_recipient(get_jwk_key())
         token = jwetoken.serialize(compact=True)
         return token
@@ -123,7 +123,7 @@ class WebsocketsView(Service):
         security = get_security_policy()
         allowed = security.check_permission(permission.id, obj)
         if not allowed:
-            return await ws.send_str(ujson.dumps({"error": "Not allowed"}))
+            return await ws.send_bytes(orjson.dumps({"error": "Not allowed"}))
 
         try:
             view = query_multi_adapter((obj, self.request), method, name=view_name)
@@ -136,12 +136,12 @@ class WebsocketsView(Service):
             view = None
 
         if view is None:
-            return await ws.send_str(ujson.dumps({"error": "Not found", "id": frame_id}))
+            return await ws.send_bytes(orjson.dumps({"error": "Not found", "id": frame_id}))
 
         ViewClass = view.__class__
         view_permission = get_view_permission(ViewClass)
         if not security.check_permission(view_permission, view):
-            return await ws.send_str(ujson.dumps({"error": "No view access", "id": frame_id}))
+            return await ws.send_bytes(orjson.dumps({"error": "No view access", "id": frame_id}))
 
         if hasattr(view, "prepare"):
             view = (await view.prepare()) or view
@@ -155,8 +155,8 @@ class WebsocketsView(Service):
             resp = await apply_rendering(view, self.request, view_result)
 
         # Return the value, body is always encoded
-        response_object = ujson.dumps({"data": resp.body.decode("utf-8"), "id": frame_id})
-        await ws.send_str(response_object)
+        response_object = orjson.dumps({"data": resp.body.decode("utf-8"), "id": frame_id})
+        await ws.send_bytes(response_object)
 
         # Wait for possible value
         self.request.execute_futures()

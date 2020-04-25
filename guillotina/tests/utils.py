@@ -131,7 +131,7 @@ class wrap_request:
             return await self.func.__aexit__(*args)
 
 
-def create_content(factory=Item, type_name="Item", id=None, parent=None, uid=None):
+def create_content(factory=Item, type_name="Item", id=None, parent=None, uid=None, **kw):
     obj = factory()
     obj.__parent__ = parent
     obj.type_name = type_name
@@ -142,6 +142,8 @@ def create_content(factory=Item, type_name="Item", id=None, parent=None, uid=Non
         id = f"foobar{uid}"
     obj.__name__ = obj.id = id
     apply_markers(obj)
+    for attr, val in kw.items():
+        setattr(obj, attr, val)
     return obj
 
 

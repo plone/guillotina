@@ -1,10 +1,79 @@
 CHANGELOG
 =========
 
-6.0.0a17 (unreleased)
----------------------
+6.0.0b4 (unreleased)
+--------------------
+
+- swagger tags fixes
 
 - Move from travis to github actions [lferran]
+
+
+6.0.0b3 (2020-04-24)
+--------------------
+
+- Provide patch operations for json field
+  [vangheem]
+
+- Optimize extend operation for bucket list field
+  [vangheem]
+
+- `.` and `..` should be blocked as valid ids. The browser will auto translate them
+  to what current dir and parent dir respectively which gives unexpected results.
+  [vangheem]
+
+- Change in ISecurityPolicy that might improve performance during traversal for views
+  with permission guillotina.Public
+  [masipcat]
+
+- Fix Response object responding with 'default_content' when 'content' evaluates to False
+  [masipcat]
+
+- Change log level for conflict errors to warning and fix locating tid of conflict error
+  [vangheem]
+
+- Fix security policy not taking into account IInheritPermissionMap for principals
+  [masipcat,bloodbare]
+
+
+- Fix use of int32 sql interpolation when it should have been bigint for tid
+  [vangheem]
+
+- Restore task vars after usage of Content API
+- Zope.interface 5.0.1 upgrade
+  [bloodbare]
+
+
+6.0.0b2 (2020-03-25)
+--------------------
+
+- Fix move(obj) fires IBeforeObjectMovedEvent after modifying the object
+  [masipcat]
+
+- Error handling: ValueDeserializationError editing registry value
+  [vangheem]
+
+- Handle db transaction closed while acquiring transaction lock
+  [vangheem]
+
+- Handle db transaction closed while acquiring lock
+  [vangheem]
+
+- Handle connection errors on file head requests
+  [vangheem]
+
+- Update README
+  [psanlorenzo]
+
+
+6.0.0b1 (2020-03-18)
+--------------------
+
+- Use orjson instead of json/ujson
+  [masipcat]
+
+- AsgiStreamReader.read() can return bytes or bytearray
+  [masipcat]
 
 
 6.0.0a16 (2020-03-12)
