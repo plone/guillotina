@@ -1,5 +1,6 @@
 from guillotina import configure
 from guillotina.addons import Addon
+from guillotina.auth.groups import MANAGER_ROLES
 from guillotina.content import create_content_in_container
 from guillotina.interfaces import ILayers
 from guillotina.utils import get_authenticated_user_id
@@ -19,8 +20,18 @@ class DBUsersAddon(Addon):
         await create_content_in_container(
             site, "UserManager", "users", creators=(user,), title="Users", check_constraints=False
         )
-        await create_content_in_container(
+        groups = await create_content_in_container(
             site, "GroupManager", "groups", creators=(user,), title="Groups", check_constraints=False
+        )
+        await create_content_in_container(
+            groups,
+            "Group",
+            "Managers",
+            creators=(user,),
+            title="Managers",
+            description="Container managers",
+            user_roles=MANAGER_ROLES,
+            users=[user],
         )
 
     @classmethod

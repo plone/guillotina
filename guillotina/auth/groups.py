@@ -6,6 +6,15 @@ from guillotina.interfaces import IPrincipal
 import typing
 
 
+MANAGER_ROLES = [
+    "guillotina.ContainerAdmin",
+    "guillotina.ContainerDeleter",
+    "guillotina.Owner",
+    "guillotina.Member",
+    "guillotina.Manager",
+]
+
+
 class GuillotinaGroup(GuillotinaUser):
     def __init__(self, ident):
         super(GuillotinaGroup, self).__init__(ident)
@@ -13,11 +22,8 @@ class GuillotinaGroup(GuillotinaUser):
 
         if ident == "Managers":
             # Special Case its a Root Manager user
-            self._roles["guillotina.ContainerAdmin"] = 1
-            self._roles["guillotina.ContainerDeleter"] = 1
-            self._roles["guillotina.Owner"] = 1
-            self._roles["guillotina.Member"] = 1
-            self._roles["guillotina.Manager"] = 1
+            for role in MANAGER_ROLES:
+                self._roles[role] = 1
 
 
 @configure.utility(provides=IGroups)
