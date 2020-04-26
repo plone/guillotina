@@ -8,6 +8,7 @@ CHANGELOG
 
 - Move from travis to github actions [lferran]
 
+- Install managers group by default [lferran]
 
 6.0.0b3 (2020-04-24)
 --------------------
