@@ -75,7 +75,7 @@ jobs:
           pytest -rfE --reruns 2 --cov=guillotina -s --tb=native -v --cov-report xml --cov-append guillotina
 
       - name: Upload coverage to Codecov
-        if: DATABASE == "postgres" && DB_SCHEMA == "public"
+        if: matrix.database == "postgres" && matrix.db_schema == "public"
         uses: codecov/codecov-action@v1
         with:
           file: ./coverage.xml
