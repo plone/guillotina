@@ -47,7 +47,6 @@ jobs:
             db_schema: "custom"
           - database: "cockroachdb"
             db_schema: "custom"
-      fail-fast: false
 
     # Set environment variables
     env:
