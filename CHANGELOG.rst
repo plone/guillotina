@@ -6,6 +6,8 @@ CHANGELOG
 
 - swagger tags fixes
 
+- Move from travis to github actions [lferran]
+
 
 6.0.0b3 (2020-04-24)
 --------------------

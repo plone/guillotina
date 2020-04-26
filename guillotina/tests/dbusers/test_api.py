@@ -123,6 +123,7 @@ async def _test_endpoint_access(requester, method, url, data=None, allowed_roles
 
         # Try creating a user now
         _, status_code = await requester(method, url, data=json.dumps(data), auth_type="Bearer", token=token)
+        assert status_code != 500
 
         if role in allowed_roles:
             assert status_code != 401
