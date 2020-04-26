@@ -91,15 +91,6 @@ async def create_user(requester, user_id, user_data=None):
     assert status_code == 201
 
 
-async def create_group(requester, group_id, user_data=None):
-    user_data = user_data or {}
-    user_data["id"] = group_id
-    data = {"@type": "Group"}
-    data.update(user_data)
-    _, status_code = await requester("POST", "/db/guillotina/groups", data=json.dumps(data))
-    assert status_code == 201
-
-
 async def login_user(requester, username, password):
     resp, status_code = await requester(
         "POST", "/db/guillotina/@login", data=json.dumps({"username": username, "password": password})
@@ -154,10 +145,6 @@ async def test_only_root_and_admins_can_create_users(dbusers_requester):
 @pytest.mark.app_settings(settings.DEFAULT_SETTINGS)
 async def test_only_root_and_admins_can_manage_users_and_groups(dbusers_requester):
     async with dbusers_requester as requester:
-        await create_user(
-            requester, "foo", user_data={"password": "foo", "user_roles": ["guillotina.Manager"]}
-        )
-        await create_group(requester, "foo")
         for method, url in [
             ("GET", "@users"),
             ("GET", "@users/foo"),
