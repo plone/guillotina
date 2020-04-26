@@ -23,6 +23,7 @@ class DBUsersAddon(Addon):
         groups = await create_content_in_container(
             site, "GroupManager", "groups", creators=(user,), title="Groups", check_constraints=False
         )
+        users = set({"root", user})
         await create_content_in_container(
             groups,
             "Group",
@@ -31,7 +32,7 @@ class DBUsersAddon(Addon):
             title="Managers",
             description="Container managers",
             user_roles=MANAGER_ROLES,
-            users=[user],
+            users=list(users),
         )
 
     @classmethod
