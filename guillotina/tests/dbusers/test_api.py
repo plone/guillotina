@@ -145,6 +145,9 @@ async def test_only_root_and_admins_can_create_users(dbusers_requester):
 @pytest.mark.app_settings(settings.DEFAULT_SETTINGS)
 async def test_only_root_and_admins_can_manage_users_and_groups(dbusers_requester):
     async with dbusers_requester as requester:
+        await create_user(
+            requester, "foo", user_data={"password": "foo", "user_roles": ["guillotina.Manager"]}
+        )
         for method, url in [
             ("GET", "@users"),
             ("GET", "@users/foo"),
