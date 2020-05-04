@@ -1472,3 +1472,12 @@ async def test_handle_none_value_for_behavior(container_requester):
             ),
         )
         assert status == 201
+
+
+async def test_default_post_and_patch_handles_wrong_json_payload(container_requester):
+    async with container_requester as requester:
+        _, status = await requester("POST", "/db/guillotina/", data=json.dumps("foobar"))
+        assert status == 412
+
+        _, status = await requester("PATCH", "/db/guillotina/", data=json.dumps("foobar"))
+        assert status == 412
