@@ -12,6 +12,8 @@ from guillotina.response import HTTPPreconditionFailed
 from guillotina.schema import Dict
 from guillotina.utils import get_schema_validator
 from typing import Any
+from typing import Dict as TDict
+from typing import List as TList
 from typing import Union
 
 import jsonschema
@@ -174,8 +176,12 @@ class Service(View):
     async def _call_original_func(self):
         return await self.__original__(self.context, self.request)
 
-    async def get_data(self):
-        return await self.request.json()
+    async def get_data(self) -> Union[TDict, TList]:
+        body = await self.request.json()
+        if not isinstance(body, list) and not isinstance(body, dict):
+            # Technically, strings are also valid json payload...
+            raise HTTPPreconditionFailed(content={"reason": "Invalid json payload"})
+        return body
 
 
 class DownloadService(Service):
