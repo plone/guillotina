@@ -1602,6 +1602,35 @@ async def test_handle_none_value_for_behavior(container_requester):
         assert status == 201
 
 
+async def test_safe_int_or_float_cast():
+    def _makeOne(value):
+        return _safe_int_or_float_cast(value)
+
+    # test with integers
+    value = _makeOne(2)
+    assert isinstance(value, int)
+    assert 2 == value
+
+    # test with integers from string
+    value = _makeOne("2")
+    assert isinstance(value, int)
+    assert 2 == value
+
+    # test with floats
+    value = _makeOne(3.3)
+    assert isinstance(value, float)
+    assert 3.3 == value
+
+    # test with floats from string
+    value = _makeOne("3.0")
+    assert isinstance(value, float)
+    assert 3.0 == value
+
+    # test returns input if cannot cast
+    for foo in ([], None, {}, set(), ""):
+        assert foo is _makeOne(foo)
+
+
 async def test_default_post_and_patch_handles_wrong_json_payload(container_requester):
     async with container_requester as requester:
         _, status = await requester("POST", "/db/guillotina/", data=json.dumps("foobar"))
