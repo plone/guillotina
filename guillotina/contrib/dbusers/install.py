@@ -30,6 +30,7 @@ class DBUsersAddon(Addon):
             "Managers",
             creators=(user,),
             title="Managers",
+            name="Managers",
             description="Container managers",
             user_roles=MANAGER_ROLES,
             users=list(users),

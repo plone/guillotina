@@ -25,7 +25,7 @@ async def test_ensure_crud_groups(dbusers_requester, user_data):
         resp, status_code = await requester("GET", "/db/guillotina/@groups")
         assert status_code == 200
         assert len(resp) == 2
-        assert resp[1]["groupname"] == "foo"
+        assert resp[1]["groupname"] == "foo" or resp[0]["groupname"] == "foo"
 
         data = {"roles": {"guillotina.Manager": True, "guillotina.Tester": True, "guillotina.Bad": False}}
 
