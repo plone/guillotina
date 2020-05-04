@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.38 (unreleased)
+5.3.38 (2020-05-04)
 -------------------
 
 - Bug fix: handle raw strings in json payload [lferran]
