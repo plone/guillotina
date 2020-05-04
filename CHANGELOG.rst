@@ -4,6 +4,8 @@ CHANGELOG
 6.0.0b4 (unreleased)
 --------------------
 
+- Bug fix: handle raw strings in json payload [lferran]
+
 - swagger tags fixes
 
 - Move from travis to github actions [lferran]

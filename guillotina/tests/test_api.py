@@ -1629,3 +1629,12 @@ async def test_safe_int_or_float_cast():
     # test returns input if cannot cast
     for foo in ([], None, {}, set(), ""):
         assert foo is _makeOne(foo)
+
+
+async def test_default_post_and_patch_handles_wrong_json_payload(container_requester):
+    async with container_requester as requester:
+        _, status = await requester("POST", "/db/guillotina/", data=json.dumps("foobar"))
+        assert status == 412
+
+        _, status = await requester("PATCH", "/db/guillotina/", data=json.dumps("foobar"))
+        assert status == 412
