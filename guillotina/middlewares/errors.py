@@ -35,6 +35,7 @@ class ErrorsMiddleware:
                 raise
         return resp
 
+    # TODO: move this to a util so that it can be used in guillotina_batch
     def generate_error_response(self, e, request, error, status=500):
         # We may need to check the roles of the users to show the real error
         eid = uuid.uuid4().hex

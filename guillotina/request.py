@@ -510,8 +510,14 @@ class Request(object):
 
     @reify
     def content_type(self):
-        """Return raw payload stream."""
         return self.headers.get("content-type")
+
+    @reify
+    def content_length(self) -> Optional[int]:
+        try:
+            return int(self.headers["content-length"])
+        except KeyError:
+            return None
 
     @property
     def can_read_body(self) -> bool:
