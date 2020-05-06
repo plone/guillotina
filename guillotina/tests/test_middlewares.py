@@ -64,6 +64,9 @@ async def test_guillotina_exceptions_bubbling(container_requester):
         # Bubble should return the same
         assert isinstance(_makeOne(exc, error="ViewError", bubble=True), HTTPPreconditionFailed)
 
+        # Generic exception with bubbling should still return HTTPInternalServerError
+        assert isinstance(_makeOne(Exception, bubble=True), HTTPInternalServerError)
+
         # Check that error responses are bubbled directly too
         exc = HTTPPreconditionFailed()
         assert _makeOne(exc, error="ViewError", bubble=True) is exc
