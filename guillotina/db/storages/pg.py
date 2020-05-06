@@ -684,6 +684,10 @@ class PostgresqlStorage(BaseStorage):
     def objects_table_name(self):
         return self._objects_table_name
 
+    @property
+    def blobs_table_name(self):
+        return self._blobs_table_name
+
     async def create(self, conn=None):
         if conn is None:
             conn = self.read_conn
@@ -697,24 +701,24 @@ class PostgresqlStorage(BaseStorage):
 
         statements.extend(
             [
-                get_table_definition(self._objects_table_name, self._object_schema),
+                get_table_definition(self.objects_table_name, self._object_schema),
                 get_table_definition(
-                    self._blobs_table_name, self._blob_schema, primary_keys=("bid", "zoid", "chunk_index")
+                    self.blobs_table_name, self._blob_schema, primary_keys=("bid", "zoid", "chunk_index")
                 ),
             ]
         )
         statements.extend(self._initialize_statements)
 
         for statement in statements:
-            otable_name = clear_table_name(self._objects_table_name)
+            otable_name = clear_table_name(self.objects_table_name)
             if otable_name == "objects":
                 otable_name = "object"
-            btable_name = clear_table_name(self._blobs_table_name)
+            btable_name = clear_table_name(self.blobs_table_name)
             if btable_name == "blobs":
                 btable_name = "blob"
             statement = statement.format(
-                objects_table_name=self._objects_table_name,
-                blobs_table_name=self._blobs_table_name,
+                objects_table_name=self.objects_table_name,
+                blobs_table_name=self.blobs_table_name,
                 # singular, index names
                 object_table_name=otable_name,
                 blob_table_name=btable_name,
@@ -733,7 +737,7 @@ class PostgresqlStorage(BaseStorage):
         raise ConflictError("Restarting connection to postgresql")
 
     async def has_unique_constraint(self, conn):
-        table_name = clear_table_name(self._objects_table_name)
+        table_name = clear_table_name(self.objects_table_name)
         result = await conn.fetch(
             """
 SELECT * FROM pg_indexes
@@ -762,7 +766,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
             if await self.has_unique_constraint(conn):
                 self._supports_unique_constraints = True
 
-            trash_sql = self._sql.get("CREATE_TRASH", self._objects_table_name)
+            trash_sql = self._sql.get("CREATE_TRASH", self.objects_table_name)
             try:
                 await conn.execute(trash_sql)
             except asyncpg.exceptions.ReadOnlySQLTransactionError:
@@ -775,8 +779,8 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                     for constraint in self._unique_constraints:
                         await conn.execute(
                             constraint.format(
-                                objects_table_name=self._objects_table_name,
-                                constraint_name=clear_table_name(self._objects_table_name),
+                                objects_table_name=self.objects_table_name,
+                                constraint_name=clear_table_name(self.objects_table_name),
                                 TRASHED_ID=TRASHED_ID,
                             ).replace("CONCURRENTLY", "")
                         )
@@ -789,8 +793,8 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def remove(self):
         """Reset the tables"""
         async with self.pool.acquire(timeout=self._conn_acquire_timeout) as conn:
-            await conn.execute("DROP TABLE IF EXISTS {} CASCADE;".format(self._blobs_table_name))
-            await conn.execute("DROP TABLE IF EXISTS {} CASCADE;".format(self._objects_table_name))
+            await conn.execute("DROP TABLE IF EXISTS {} CASCADE;".format(self.blobs_table_name))
+            await conn.execute("DROP TABLE IF EXISTS {} CASCADE;".format(self.objects_table_name))
 
     @restart_conn_on_exception
     async def open(self):
@@ -807,7 +811,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
         conn.terminate()
 
     async def load(self, txn, oid):
-        sql = self._sql.get("GET_OID", self._objects_table_name)
+        sql = self._sql.get("GET_OID", self.objects_table_name)
         async with txn._lock:
             objects = await self.get_one_row(txn, sql, oid)
         if objects is None:
@@ -831,10 +835,10 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
             part = 0
 
         update = False
-        statement_sql = self._sql.get("NAIVE_UPSERT", self._objects_table_name)
+        statement_sql = self._sql.get("NAIVE_UPSERT", self.objects_table_name)
         if not obj.__new_marker__ and obj.__serial__ is not None:
             # we should be confident this is an object update
-            statement_sql = self._sql.get("UPDATE", self._objects_table_name)
+            statement_sql = self._sql.get("UPDATE", self.objects_table_name)
             update = True
 
         conn = await txn.get_connection()
@@ -898,11 +902,11 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
     async def _txn_oid_commit_hook(self, status, oid):
         if self._connection_manager._vacuum is not None:
-            await self._connection_manager._vacuum.add_to_queue(oid, self._objects_table_name)
+            await self._connection_manager._vacuum.add_to_queue(oid, self.objects_table_name)
 
     async def delete(self, txn, oid):
         conn = await txn.get_connection()
-        sql = self._sql.get("TRASH_PARENT_ID", self._objects_table_name)
+        sql = self._sql.get("TRASH_PARENT_ID", self.objects_table_name)
         async with txn._lock:
             # for delete, we reassign the parent id and delete in the vacuum task
             await conn.execute(sql, oid)
@@ -995,10 +999,10 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
             if len(txn.modified) < 1000:
                 # if it's too large, we're not going to check on object ids
                 modified_oids = [k for k in txn.modified.keys()]
-                sql = self._sql.get("TXN_CONFLICTS_ON_OIDS", self._objects_table_name)
+                sql = self._sql.get("TXN_CONFLICTS_ON_OIDS", self.objects_table_name)
                 return await self.read_conn.fetch(sql, txn._tid, modified_oids)
             else:
-                sql = self._sql.get("TXN_CONFLICTS", self._objects_table_name)
+                sql = self._sql.get("TXN_CONFLICTS", self.objects_table_name)
                 return await self.read_conn.fetch(sql, txn._tid)
 
     async def commit(self, transaction):
@@ -1025,32 +1029,32 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def get_page_of_keys(self, txn, oid, page=1, page_size=1000):
         conn = await txn.get_connection()
         keys = []
-        sql = self._sql.get("BATCHED_GET_CHILDREN_KEYS", self._objects_table_name)
+        sql = self._sql.get("BATCHED_GET_CHILDREN_KEYS", self.objects_table_name)
         for record in await conn.fetch(sql, oid, page_size, (page - 1) * page_size):
             keys.append(record["id"])
         return keys
 
     async def keys(self, txn, oid):
         conn = await txn.get_connection()
-        sql = self._sql.get("GET_CHILDREN_KEYS", self._objects_table_name)
+        sql = self._sql.get("GET_CHILDREN_KEYS", self.objects_table_name)
         async with txn._lock:
             result = await conn.fetch(sql, oid)
         return result
 
     async def get_child(self, txn, parent_oid, id):
-        sql = self._sql.get("GET_CHILD", self._objects_table_name)
+        sql = self._sql.get("GET_CHILD", self.objects_table_name)
         async with txn._lock:
             result = await self.get_one_row(txn, sql, parent_oid, id)
         return result
 
     async def get_children(self, txn, parent_oid, ids):
         conn = await txn.get_connection()
-        sql = self._sql.get("GET_CHILDREN_BATCH", self._objects_table_name)
+        sql = self._sql.get("GET_CHILDREN_BATCH", self.objects_table_name)
         async with txn._lock:
             return await conn.fetch(sql, parent_oid, ids)
 
     async def has_key(self, txn, parent_oid, id):
-        sql = self._sql.get("EXIST_CHILD", self._objects_table_name)
+        sql = self._sql.get("EXIST_CHILD", self.objects_table_name)
         async with txn._lock:
             result = await self.get_one_row(txn, sql, parent_oid, id)
         if result is None:
@@ -1060,21 +1064,21 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
     async def len(self, txn, oid):
         conn = await txn.get_connection()
-        sql = self._sql.get("NUM_CHILDREN", self._objects_table_name)
+        sql = self._sql.get("NUM_CHILDREN", self.objects_table_name)
         async with txn._lock:
             result = await conn.fetchval(sql, oid)
         return result
 
     async def items(self, txn, oid):
         conn = await txn.get_connection()
-        sql = self._sql.get("GET_CHILDREN", self._objects_table_name)
+        sql = self._sql.get("GET_CHILDREN", self.objects_table_name)
         async for record in conn.cursor(sql, oid):
             # locks are dangerous in cursors since comsuming code might do
             # sub-queries and they you end up with a deadlock
             yield record
 
     async def get_annotation(self, txn, oid, id):
-        sql = self._sql.get("GET_ANNOTATION", self._objects_table_name)
+        sql = self._sql.get("GET_ANNOTATION", self.objects_table_name)
         async with txn._lock:
             result = await self.get_one_row(txn, sql, oid, id, prepare=True)
             if result is not None and result["parent_id"] == TRASHED_ID:
@@ -1083,7 +1087,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
     async def get_annotation_keys(self, txn, oid):
         conn = await txn.get_connection()
-        sql = self._sql.get("GET_ANNOTATIONS_KEYS", self._objects_table_name)
+        sql = self._sql.get("GET_ANNOTATIONS_KEYS", self.objects_table_name)
         async with txn._lock:
             result = await conn.fetch(sql, oid)
         items = []
@@ -1093,7 +1097,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
         return items
 
     async def write_blob_chunk(self, txn, bid, oid, chunk_index, data):
-        sql = self._sql.get("HAS_OBJECT", self._objects_table_name)
+        sql = self._sql.get("HAS_OBJECT", self.objects_table_name)
         async with txn._lock:
             result = await self.get_one_row(txn, sql, oid)
         if result is None:
@@ -1102,18 +1106,18 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
             conn = await txn.get_connection()
             async with txn._lock:
                 await conn.execute(
-                    f"""INSERT INTO {self._objects_table_name}
+                    f"""INSERT INTO {self.objects_table_name}
 (zoid, tid, state_size, part, resource, type)
 VALUES ($1::varchar({MAX_UID_LENGTH}), -1, 0, 0, TRUE, 'stub')""",
                     oid,
                 )
         conn = await txn.get_connection()
-        sql = self._sql.get("INSERT_BLOB_CHUNK", self._blobs_table_name)
+        sql = self._sql.get("INSERT_BLOB_CHUNK", self.blobs_table_name)
         async with txn._lock:
             return await conn.execute(sql, bid, oid, chunk_index, data)
 
     async def read_blob_chunk(self, txn, bid, chunk=0):
-        sql = self._sql.get("READ_BLOB_CHUNK", self._blobs_table_name)
+        sql = self._sql.get("READ_BLOB_CHUNK", self.blobs_table_name)
         async with txn._lock:
             return await self.get_one_row(txn, sql, bid, chunk)
 
@@ -1126,27 +1130,27 @@ VALUES ($1::varchar({MAX_UID_LENGTH}), -1, 0, 0, TRUE, 'stub')""",
 
     async def del_blob(self, txn, bid):
         conn = await txn.get_connection()
-        sql = self._sql.get("DELETE_BLOB", self._blobs_table_name)
+        sql = self._sql.get("DELETE_BLOB", self.blobs_table_name)
         async with txn._lock:
             await conn.execute(sql, bid)
 
     async def get_total_number_of_objects(self, txn):
         conn = await txn.get_connection()
-        sql = self._sql.get("NUM_ROWS", self._objects_table_name)
+        sql = self._sql.get("NUM_ROWS", self.objects_table_name)
         async with txn._lock:
             result = await conn.fetchval(sql)
         return result
 
     async def get_total_number_of_resources(self, txn):
         conn = await txn.get_connection()
-        sql = self._sql.get("NUM_RESOURCES", self._objects_table_name)
+        sql = self._sql.get("NUM_RESOURCES", self.objects_table_name)
         async with txn._lock:
             result = await conn.fetchval(sql)
         return result
 
     async def get_total_resources_of_type(self, txn, type_):
         conn = await txn.get_connection()
-        sql = self._sql.get("NUM_RESOURCES_BY_TYPE", self._objects_table_name)
+        sql = self._sql.get("NUM_RESOURCES_BY_TYPE", self.objects_table_name)
         async with txn._lock:
             result = await conn.fetchval(sql, type_)
         return result
@@ -1156,7 +1160,7 @@ VALUES ($1::varchar({MAX_UID_LENGTH}), -1, 0, 0, TRUE, 'stub')""",
         conn = await txn.get_connection()
         async with txn._lock:
             keys = []
-            sql = self._sql.get("RESOURCES_BY_TYPE", self._objects_table_name)
+            sql = self._sql.get("RESOURCES_BY_TYPE", self.objects_table_name)
             for record in await conn.fetch(sql, type_, page_size, (page - 1) * page_size):
                 keys.append(record)
             return keys
