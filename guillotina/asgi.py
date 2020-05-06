@@ -43,6 +43,7 @@ class AsgiApp:
         """
         ASGI callable compatible with versions 2 and 3
         """
+
         if receive is None or send is None:
 
             async def run_asgi2(receive, send):

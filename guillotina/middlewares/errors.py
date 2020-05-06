@@ -5,7 +5,9 @@ from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.browser import View
 from guillotina.i18n import default_message_factory as _
+from guillotina.interfaces import IRequest
 from guillotina.traversal import apply_rendering
+from typing import Optional
 
 import asyncio
 import traceback
@@ -28,29 +30,29 @@ class ErrorsMiddleware:
             resp = await self.next_app(scope, receive, _send)
         except Exception as exc:
             request = task_vars.request.get()
-            view_result = self.generate_error_response(exc, None, "ServiceError")
+            view_result = generate_error_response(exc, None)
             resp = await apply_rendering(View(None, request), request, view_result)
             if headers_sent:
                 # Too late to send status 500, headers already sent
                 raise
         return resp
 
-    # TODO: move this to a util so that it can be used in guillotina_batch
-    def generate_error_response(self, e, request, error, status=500):
-        # We may need to check the roles of the users to show the real error
-        eid = uuid.uuid4().hex
-        if isinstance(e, asyncio.CancelledError):  # pragma: no cover
-            message = _("Cancelled execution of view") + " " + eid
-            logger.warning(message, exc_info=e, eid=eid, request=request)
-        else:
-            message = _("Error on execution of view") + " " + eid
-            logger.error(message, exc_info=e, eid=eid, request=request)
-        data = {
-            "message": message,
-            "reason": error_reasons.UNKNOWN.name,
-            "details": error_reasons.UNKNOWN.details,
-            "eid": eid,
-        }
-        if app_settings.get("debug"):
-            data["traceback"] = traceback.format_exc()
-        return response.HTTPInternalServerError(content=data)
+
+def generate_error_response(e: Exception, request: Optional[IRequest]) -> response.HTTPInternalServerError:
+    # We may need to check the roles of the users to show the real error
+    eid = uuid.uuid4().hex
+    if isinstance(e, asyncio.CancelledError):  # pragma: no cover
+        message = _("Cancelled execution of view") + " " + eid
+        logger.warning(message, exc_info=e, eid=eid, request=request)
+    else:
+        message = _("Error on execution of view") + " " + eid
+        logger.error(message, exc_info=e, eid=eid, request=request)
+    data = {
+        "message": message,
+        "reason": error_reasons.UNKNOWN.name,
+        "details": error_reasons.UNKNOWN.details,
+        "eid": eid,
+    }
+    if app_settings.get("debug"):
+        data["traceback"] = traceback.format_exc()
+    return response.HTTPInternalServerError(content=data)
