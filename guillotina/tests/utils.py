@@ -77,9 +77,9 @@ def register(ob):
 
 
 class ContainerRequesterAsyncContextManager:
-    def __init__(self, guillotina, install=[]):
+    def __init__(self, guillotina, install=None):
         self.guillotina = guillotina
-        self.install = install
+        self.install = install or []
         self.requester = None
 
     async def get_requester(self):

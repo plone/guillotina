@@ -1,3 +1,4 @@
+from datetime import datetime
 from guillotina import configure
 from guillotina.interfaces import IResponse
 from guillotina.interfaces.security import PermissionSetting
@@ -17,6 +18,8 @@ def guillotina_json_default(obj):
             return str(obj)
     elif isinstance(obj, complex):
         return [obj.real, obj.imag]
+    elif isinstance(obj, datetime):
+        return obj.isoformat()
     elif isinstance(obj, type):
         return obj.__module__ + "." + obj.__name__
     elif isinstance(obj, InterfaceClass):
@@ -37,7 +40,6 @@ def guillotina_json_default(obj):
     if callable(obj):
         return obj.__module__ + "." + obj.__name__
 
-    # Let the base class default method raise the TypeError
     raise TypeError("Unable to serialize %r (type: %s)" % (obj, type(obj)))
 
 
