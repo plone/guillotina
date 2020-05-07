@@ -475,6 +475,14 @@ class Request(object):
         return self._raw_path
 
     @reify
+    def path_qs(self) -> str:
+        """The URL including PATH_INFO and the query string.
+
+        E.g, /app/blog?id=10
+        """
+        return f"{self.path}?{self.query_string}"
+
+    @reify
     def query(self) -> "multidict.CIMultiDict[str]":
         """A multidict with all the variables in the query string."""
         query = urllib.parse.parse_qsl(self.query_string, keep_blank_values=True)
