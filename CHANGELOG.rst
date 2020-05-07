@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0b4 (unreleased)
 --------------------
 
+- Allow to ovewrite object table name and blob table name
+  [bloodbare]
+
 - Bug fix: handle raw strings in json payload [lferran]
 
 - swagger tags fixes
