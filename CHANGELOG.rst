@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.39 (unreleased)
+5.3.39 (2020-05-11)
 -------------------
 
 - Handle ConnectionResetError when downloading files
