@@ -237,7 +237,7 @@ class FileManager(object):
                     )
                 await download_resp.write(chunk)
                 await download_resp.drain()
-        except (asyncio.CancelledError, ConnectionRefusedError):  # pragma: no cover
+        except (asyncio.CancelledError, ConnectionRefusedError, ConnectionResetError):  # pragma: no cover
             logger.info(f"Download cancelled: {self.request}")
             # when supporting range headers, the browser will
             # cancel downloads. This is fine.
