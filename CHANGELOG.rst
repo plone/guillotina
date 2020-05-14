@@ -9,7 +9,7 @@ CHANGELOG
 
 - Bug fix: handle raw strings in json payload [lferran]
 
-- swagger tags fixes
+- swagger tags fixes [ableeb]
 
 - Move from travis to github actions [lferran]
 

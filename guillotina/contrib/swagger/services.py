@@ -91,11 +91,12 @@ class SwaggerDefinitionService(Service):
         for method in iface_conf.keys():
             if method == "endpoints":
                 for name in iface_conf["endpoints"]:
+                    for http_method in iface_conf["endpoints"][name].keys():
+                        for key in iface_conf["endpoints"][name][http_method].keys():
+                            if key in "tags":
+                                tags = iface_conf["endpoints"][name][http_method][key]
                     self.get_endpoints(
-                        iface_conf["endpoints"][name],
-                        os.path.join(base_path, name),
-                        api_def,
-                        tags=tags or [name.strip("@")],
+                        iface_conf["endpoints"][name], os.path.join(base_path, name), api_def, tags=tags,
                     )
             else:
                 if method.lower() == "options":
