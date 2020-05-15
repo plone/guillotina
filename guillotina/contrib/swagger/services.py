@@ -94,6 +94,7 @@ class SwaggerDefinitionService(Service):
                     for http_method in iface_conf["endpoints"][name].keys():
                         if "tags" in iface_conf["endpoints"][name][http_method]:
                             tags = iface_conf["endpoints"][name][http_method]["tags"]
+                            break
                     self.get_endpoints(
                         iface_conf["endpoints"][name], os.path.join(base_path, name), api_def, tags=tags,
                     )
