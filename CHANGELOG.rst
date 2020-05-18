@@ -4,7 +4,7 @@ CHANGELOG
 5.3.40 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- swagger tags fixes backport [ableeb]
 
 
 5.3.39 (2020-05-11)
