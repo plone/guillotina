@@ -12,6 +12,7 @@ from guillotina.utils import get_current_request
 from zope.interface import implementer
 
 import asyncpg
+import uuid
 
 
 logger = glogging.getLogger("guillotina")
@@ -61,6 +62,18 @@ WHERE
     zoid = $1::varchar({MAX_UID_LENGTH})
     AND tid = $7::int
 RETURNING tid, otid""",
+)
+
+register_sql(
+    "CR_TRASH_PARENT_ID",
+    f"""
+UPDATE {{table_name}}
+SET
+    parent_id = '{TRASHED_ID}'
+    id = $2::varchar({MAX_UID_LENGTH})
+WHERE
+    zoid = $1::varchar({MAX_UID_LENGTH})
+""",
 )
 
 
@@ -183,6 +196,16 @@ class CockroachStorage(pg.PostgresqlStorage):
         except Exception:
             logger.warning("Unknown error attempting to detect constraints installed.", exc_info=True)
         return False
+
+    async def delete(self, txn, oid):
+        conn = await txn.get_connection()
+        sql = self._sql.get("CR_TRASH_PARENT_ID", self.objects_table_name)
+        deleted_id = uuid.uuid4().hex
+        async with txn._lock:
+            # for delete, we reassign the parent id and delete in the vacuum task
+            await conn.execute(sql, oid, deleted_id)
+        if self._autovacuum:
+            txn.add_after_commit_hook(self._txn_oid_commit_hook, oid)
 
     async def store(self, oid, old_serial, writer, obj, txn):
         assert oid is not None
