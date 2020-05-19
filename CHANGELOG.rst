@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.40 (unreleased)
+5.3.40 (2020-05-19)
 -------------------
 
 - swagger tags fixes [ableeb]
