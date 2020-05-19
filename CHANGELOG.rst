@@ -6,6 +6,8 @@ CHANGELOG
 
 - swagger tags fixes [ableeb]
 
+- Register aiohttp server object with app that it is serving(`._server`)
+  [vangheem]
 
 5.3.39 (2020-05-11)
 -------------------
