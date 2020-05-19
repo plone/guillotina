@@ -200,6 +200,8 @@ class CockroachStorage(pg.PostgresqlStorage):
     async def delete(self, txn, oid):
         conn = await txn.get_connection()
         sql = self._sql.get("CR_TRASH_PARENT_ID", self.objects_table_name)
+        # XXX since CR does not support WHERE clause in constraint, we have
+        # to do this trick here to be able to mark object as deleted
         deleted_id = uuid.uuid4().hex
         async with txn._lock:
             # for delete, we reassign the parent id and delete in the vacuum task
