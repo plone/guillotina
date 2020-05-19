@@ -1,6 +1,6 @@
 from aiohttp import web
-from aiohttp.helpers import AccessLogger
 from aiohttp.web_exceptions import HTTPConflict
+from aiohttp.web_log import AccessLogger
 from copy import deepcopy
 from guillotina import configure
 from guillotina import glogging
