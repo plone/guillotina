@@ -7,7 +7,7 @@ CHANGELOG
 - Allow to delete elements with the same id at cockroach
   [bloodbare]
 
-- Split blob and objects initsenteces
+- Split blob and objects initialization statements
   [bloodbare]
 
 - Allow to ovewrite object table name and blob table name
