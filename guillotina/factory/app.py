@@ -1,6 +1,5 @@
 from aiohttp import web
 from aiohttp.web_exceptions import HTTPConflict
-from aiohttp.web_log import AccessLogger
 from copy import deepcopy
 from guillotina import configure
 from guillotina import glogging
@@ -41,6 +40,12 @@ import asyncio
 import json
 import logging
 import logging.config
+
+
+try:
+    from aiohttp.web_log import AccessLogger  # type: ignore
+except ImportError:
+    from aiohttp.helpers import AccessLogger  # type: ignore
 
 
 app_logger = logging.getLogger("guillotina")

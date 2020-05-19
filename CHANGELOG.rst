@@ -4,7 +4,8 @@ CHANGELOG
 5.3.41 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix import
+  [vangheem]
 
 
 5.3.40 (2020-05-19)
