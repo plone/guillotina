@@ -1,4 +1,5 @@
 from aiohttp import web
+from aiohttp.helpers import AccessLogger
 from aiohttp.web_exceptions import HTTPConflict
 from copy import deepcopy
 from guillotina import configure
@@ -171,6 +172,13 @@ class GuillotinaAIOHTTPApplication(web.Application):
         return _cls(
             message, payload, protocol, writer, task, self._loop, client_max_size=self._client_max_size
         )
+
+    def _make_handler(self, *, loop=None, access_log_class=AccessLogger, **kwargs):
+        # allow us to register the server object that is running the app so that
+        # we can inspect active connections and requests
+        server = super()._make_handler(loop=loop, access_log_class=access_log_class, **kwargs)
+        self._server = server
+        return server
 
 
 def make_aiohttp_application():
