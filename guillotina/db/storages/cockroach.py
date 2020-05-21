@@ -9,6 +9,7 @@ from guillotina.exceptions import RequestNotFound
 from guillotina.exceptions import RestartCommit
 from guillotina.exceptions import TIDConflictError
 from guillotina.utils import get_current_request
+from guillotina.const import TRASHED_ID
 from zope.interface import implementer
 
 import asyncpg
