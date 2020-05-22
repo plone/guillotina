@@ -74,7 +74,12 @@ class SwaggerDefinitionService(Service):
             route_part = route_part.strip("{}")
             if route_part not in [p["name"] for p in parameters if p.get("in") == "path"]:
                 parameters.append(
-                    {"in": "path", "name": route_part, "schema": {"type": "string"}, "required": True}
+                    {
+                        "in": "path",
+                        "name": route_part.replace(":path", ""),
+                        "schema": {"type": "string"},
+                        "required": True,
+                    }
                 )
         api_def[path.replace(":path", "") or "/"][method.lower()] = {
             "tags": swagger_conf.get("tags", []) or tags,
