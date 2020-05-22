@@ -33,7 +33,7 @@ class SwaggerDefinitionService(Service):
     def load_swagger_info(self, api_def, path, method, tags, service_def):
         path = path.rstrip("/")
         if path not in api_def:
-            api_def[path or "/"] = {}
+            api_def[path.replace(":path", "") or "/"] = {}
         desc = self.get_data(service_def.get("description", ""))
         swagger_conf = service_def.get("swagger", {})
         try:
