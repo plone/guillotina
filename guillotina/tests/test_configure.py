@@ -260,7 +260,9 @@ async def test_register_service_with_path(container_requester):
             return {"path": path}
 
     configure.register_configuration(
-        TestService, dict(context=IContainer, name="@foobar/{path:path}", permission="guillotina.ViewContent"), "service"
+        TestService,
+        dict(context=IContainer, name="@foobar/{path:path}", permission="guillotina.ViewContent"),
+        "service",
     )
 
     assert len(configure.get_configurations("guillotina.tests", "service")) == cur_count + 1  # noqa
