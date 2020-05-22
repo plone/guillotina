@@ -32,3 +32,7 @@ def test_convert_path_to_view_name():
 
 def test_convert_non_route_path_to_view_name():
     assert routes.path_to_view_name("foobar/foo/bar") == "foobar//"
+
+
+def test_convert_path_route_to_view_name():
+    assert routes.Route("@foobar/{p:path}").view_name == "@foobar?"
