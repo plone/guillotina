@@ -446,11 +446,11 @@ class TraversalRouter:
                         }
                     )
 
-        if not view and len(tail) > 0:
+        if view is None and len(tail) > 0:
             # Try arbitrary "path" in the path
             view_name = tail[0] + "?"
             view = query_multi_adapter((resource, request), method, name=view_name)
-            if not view:
+            if view is None:
                 # we should have a view in this case because we are matching routes
                 await notify(TraversalViewMissEvent(request, tail))
                 raise HTTPNotFound(content={"reason": "object and/or route not found"})
