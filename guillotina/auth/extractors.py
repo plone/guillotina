@@ -93,3 +93,13 @@ class CookiePolicy(BasePolicy):
             token = self.request.cookies.get("auth_token")
             if token is not None:
                 return {"type": "cookie", "token": token.strip()}
+
+
+class NoopExtractor:
+    name = "noop"
+
+    def __init__(self, request):
+        self.request = request
+
+    async def extract_token(self):
+        return {"type": "noop", "token": "-"}

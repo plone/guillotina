@@ -174,3 +174,11 @@ class JWTSessionValidator:
             pass
 
         return
+
+
+class NoopValidator:
+    for_validators = ("noop",)
+
+    async def validate(self, token):
+        root = get_utility(IApplication, name="root")
+        return root.root_user
