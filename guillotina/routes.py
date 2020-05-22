@@ -92,7 +92,6 @@ class Route:
                     else:
                         self.route_parts.append(RoutePart(part))
 
-
     def matches(self, request, path_parts):
         matchdict = {"__parts": path_parts}
         for idx, route_part in enumerate(self.route_parts):
