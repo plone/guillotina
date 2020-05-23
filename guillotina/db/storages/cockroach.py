@@ -1,4 +1,5 @@
 from guillotina import glogging
+from guillotina.const import TRASHED_ID
 from guillotina.db.interfaces import ICockroachStorage
 from guillotina.db.storages import pg
 from guillotina.db.storages.utils import register_sql
@@ -9,7 +10,6 @@ from guillotina.exceptions import RequestNotFound
 from guillotina.exceptions import RestartCommit
 from guillotina.exceptions import TIDConflictError
 from guillotina.utils import get_current_request
-from guillotina.const import TRASHED_ID
 from zope.interface import implementer
 
 import asyncpg
@@ -70,7 +70,7 @@ register_sql(
     f"""
 UPDATE {{table_name}}
 SET
-    parent_id = '{TRASHED_ID}'
+    parent_id = '{TRASHED_ID}',
     id = $2::varchar({MAX_UID_LENGTH})
 WHERE
     zoid = $1::varchar({MAX_UID_LENGTH})
