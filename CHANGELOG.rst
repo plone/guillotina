@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.0b4 (unreleased)
+6.0.0b4 (2020-05-23)
 --------------------
 
 - Allow to delete elements with the same id at cockroach
