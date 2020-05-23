@@ -50,7 +50,9 @@ cov_html
 
 # Codeintel
 .codeintel
+.vscode
 .python-version
+pip-wheel-metadata
 /etc/
 /local/
 

@@ -594,16 +594,19 @@ class PostgresqlStorage(BaseStorage):
         "data": "BYTEA",
     }
 
-    _initialize_statements = [
+    _initialize_blobs_statements = [
+        "CREATE INDEX IF NOT EXISTS {blob_table_name}_bid ON {blobs_table_name} (bid);",
+        "CREATE INDEX IF NOT EXISTS {blob_table_name}_zoid ON {blobs_table_name} (zoid);",
+        "CREATE INDEX IF NOT EXISTS {blob_table_name}_chunk ON {blobs_table_name} (chunk_index);",
+    ]
+
+    _initialize_objects_statements = [
         "CREATE INDEX IF NOT EXISTS {object_table_name}_tid ON {objects_table_name} (tid);",
         "CREATE INDEX IF NOT EXISTS {object_table_name}_of ON {objects_table_name} (of);",
         "CREATE INDEX IF NOT EXISTS {object_table_name}_part ON {objects_table_name} (part);",
         "CREATE INDEX IF NOT EXISTS {object_table_name}_parent ON {objects_table_name} (parent_id);",
         "CREATE INDEX IF NOT EXISTS {object_table_name}_id ON {objects_table_name} (id);",
         "CREATE INDEX IF NOT EXISTS {object_table_name}_type ON {objects_table_name} (type);",
-        "CREATE INDEX IF NOT EXISTS {blob_table_name}_bid ON {blobs_table_name} (bid);",
-        "CREATE INDEX IF NOT EXISTS {blob_table_name}_zoid ON {blobs_table_name} (zoid);",
-        "CREATE INDEX IF NOT EXISTS {blob_table_name}_chunk ON {blobs_table_name} (chunk_index);",
         "ALTER TABLE {objects_table_name} ADD CONSTRAINT {object_table_name}_parent_id_zoid_check CHECK (parent_id != zoid) NOT VALID;",  # noqa
     ]
 
@@ -707,7 +710,8 @@ class PostgresqlStorage(BaseStorage):
                 ),
             ]
         )
-        statements.extend(self._initialize_statements)
+        statements.extend(self._initialize_objects_statements)
+        statements.extend(self._initialize_blobs_statements)
 
         for statement in statements:
             otable_name = clear_table_name(self.objects_table_name)
