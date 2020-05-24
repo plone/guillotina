@@ -256,12 +256,13 @@ async def test_register_service_with_path(container_requester):
 
     class TestService(Service):
         async def __call__(self):
-            path = self.request.matchdict["path"]
-            return {"path": path}
+            path = self.request.matchdict["filepath"]
+            component = self.request.matchdict["component"]
+            return {"filepath": path, "component": component}
 
     configure.register_configuration(
         TestService,
-        dict(context=IContainer, name="@foobar/{path:path}", permission="guillotina.ViewContent"),
+        dict(context=IContainer, name="@foobar/endpoint/{component}/{filepath:path}", permission="guillotina.ViewContent"),
         "service",
     )
 
@@ -272,5 +273,5 @@ async def test_register_service_with_path(container_requester):
         configure.load_configuration(config, "guillotina.tests", "service")
         config.execute_actions()
 
-        response, status = await requester("GET", "/db/guillotina/@foobar/root/folder/another")
-        assert response["path"] == "root/folder/another"
+        response, status = await requester("GET", "/db/guillotina/@foobar/endpoint/comp1/root/folder/another")
+        assert response["filepath"] == "root/folder/another"

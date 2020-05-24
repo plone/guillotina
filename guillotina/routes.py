@@ -81,7 +81,7 @@ class Route:
             self.route_parts.append(RoutePart(parts[0]))
             for part in parts[1:]:
                 if part.endswith(":path}"):
-                    self.view_name += "?"
+                    self.view_name = parts[0] + "?"
                     name = part.replace(":path", "").strip("{").strip("}")
                     self.route_parts.append(PathRoutePart(name))
                     break

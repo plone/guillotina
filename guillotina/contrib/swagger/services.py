@@ -18,7 +18,6 @@ import pkg_resources
 
 here = os.path.dirname(os.path.realpath(__file__))
 
-
 @configure.service(
     method="GET", context=Interface, name="@swagger", permission="guillotina.swagger.View", ignore=True
 )
@@ -31,9 +30,9 @@ class SwaggerDefinitionService(Service):
         return data
 
     def load_swagger_info(self, api_def, path, method, tags, service_def):
-        path = path.rstrip("/")
+        path = path.rstrip("/").replace(":path", "")
         if path not in api_def:
-            api_def[path.replace(":path", "") or "/"] = {}
+            api_def[path or "/"] = {}
         desc = self.get_data(service_def.get("description", ""))
         swagger_conf = service_def.get("swagger", {})
         try:
@@ -73,6 +72,7 @@ class SwaggerDefinitionService(Service):
         for route_part in [r for r in service_def["route"] if r[0] == "{"]:
             route_part = route_part.strip("{}")
             if route_part not in [p["name"] for p in parameters if p.get("in") == "path"]:
+
                 parameters.append(
                     {
                         "in": "path",
@@ -81,7 +81,7 @@ class SwaggerDefinitionService(Service):
                         "required": True,
                     }
                 )
-        api_def[path.replace(":path", "") or "/"][method.lower()] = {
+        api_def[path or "/"][method.lower()] = {
             "tags": swagger_conf.get("tags", []) or tags,
             "parameters": parameters,
             "requestBody": request_body,
