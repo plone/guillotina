@@ -4,7 +4,8 @@ CHANGELOG
 5.3.42 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Allow arbitrary path parameter within the path parameters
+  [dmanchon]
 
 
 5.3.41 (2020-05-19)
