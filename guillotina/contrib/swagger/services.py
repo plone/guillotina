@@ -18,6 +18,7 @@ import pkg_resources
 
 here = os.path.dirname(os.path.realpath(__file__))
 
+
 @configure.service(
     method="GET", context=Interface, name="@swagger", permission="guillotina.swagger.View", ignore=True
 )
