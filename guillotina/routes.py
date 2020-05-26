@@ -21,6 +21,14 @@ class RoutePart:
         return self.name
 
 
+class PathRoutePart(RoutePart):
+    def matches(self, other):
+        return True
+
+    def __str__(self):
+        return "{" + self.name + ":path}"
+
+
 class VariableRoutePart(RoutePart):
     def matches(self, other):
         return True
@@ -72,16 +80,24 @@ class Route:
             self.view_name = parts[0]
             self.route_parts.append(RoutePart(parts[0]))
             for part in parts[1:]:
-                self.view_name += "/"
-                if URL_MATCH_RE.match(part):
-                    self.route_parts.append(VariableRoutePart(part.strip("{").strip("}")))
+                if part.endswith(":path}"):
+                    self.view_name = parts[0] + "?"
+                    name = part.replace(":path", "").strip("{").strip("}")
+                    self.route_parts.append(PathRoutePart(name))
+                    break
                 else:
-                    self.route_parts.append(RoutePart(part))
+                    self.view_name += "/"
+                    if URL_MATCH_RE.match(part):
+                        self.route_parts.append(VariableRoutePart(part.strip("{").strip("}")))
+                    else:
+                        self.route_parts.append(RoutePart(part))
 
     def matches(self, request, path_parts):
         matchdict = {"__parts": path_parts}
         for idx, route_part in enumerate(self.route_parts):
-            if route_part.matches(path_parts[idx]):
+            if isinstance(route_part, PathRoutePart):
+                matchdict[route_part.name] = "/".join(path_parts[idx:])
+            elif route_part.matches(path_parts[idx]):
                 matchdict[route_part.name] = path_parts[idx]
             else:
                 raise KeyError(route_part.name)

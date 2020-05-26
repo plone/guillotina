@@ -249,3 +249,33 @@ async def test_app_settings_are_overwritten_by_pytest_marks(container_requester)
     assert app_settings["databases"]["db"]["read_only"] == "yo"
     # Check that other keys that were previously there are untouched
     assert "storage" in app_settings["databases"]["db"]
+
+
+async def test_register_service_with_path(container_requester):
+    cur_count = len(configure.get_configurations("guillotina.tests", "service"))
+
+    class TestService(Service):
+        async def __call__(self):
+            path = self.request.matchdict["filepath"]
+            component = self.request.matchdict["component"]
+            return {"filepath": path, "component": component}
+
+    configure.register_configuration(
+        TestService,
+        dict(
+            context=IContainer,
+            name="@foobar/endpoint/{component}/{filepath:path}",
+            permission="guillotina.ViewContent",
+        ),
+        "service",
+    )
+
+    assert len(configure.get_configurations("guillotina.tests", "service")) == cur_count + 1  # noqa
+
+    async with container_requester as requester:
+        config = requester.root.app.config
+        configure.load_configuration(config, "guillotina.tests", "service")
+        config.execute_actions()
+
+        response, status = await requester("GET", "/db/guillotina/@foobar/endpoint/comp1/root/folder/another")
+        assert response["filepath"] == "root/folder/another"
