@@ -262,7 +262,11 @@ async def test_register_service_with_path(container_requester):
 
     configure.register_configuration(
         TestService,
-        dict(context=IContainer, name="@foobar/endpoint/{component}/{filepath:path}", permission="guillotina.ViewContent"),
+        dict(
+            context=IContainer,
+            name="@foobar/endpoint/{component}/{filepath:path}",
+            permission="guillotina.ViewContent",
+        ),
         "service",
     )
 
