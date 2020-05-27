@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.42 (unreleased)
+5.3.42 (2020-05-26)
 -------------------
 
 - Allow arbitrary path parameter within the path parameters
