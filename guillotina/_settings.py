@@ -94,5 +94,6 @@ app_settings: Dict[str, Any] = {
     "thread_pool_workers": 32,
     "server_settings": {"uvicorn": {"timeout_keep_alive": 5, "http": "h11"}},
     "valid_id_characters": string.digits + string.ascii_lowercase + ".-_@$^()+ =",
+    "load_catalog": True,
 }
 default_settings = copy.deepcopy(app_settings)

@@ -220,8 +220,11 @@ async def startup_app(config_file=None, settings=None, loop=None, server_app=Non
     configure.scan("guillotina.permissions")
     configure.scan("guillotina.security.security_local")
     configure.scan("guillotina.security.policy")
-    configure.scan("guillotina.catalog.index")
-    configure.scan("guillotina.catalog.catalog")
+
+    if settings.get("load_catalog"):
+        configure.scan("guillotina.catalog.index")
+        configure.scan("guillotina.catalog.catalog")
+
     configure.scan("guillotina.files")
     configure.scan("guillotina.annotations")
     configure.scan("guillotina.constraintypes")
