@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0b5 (unreleased)
 --------------------
 
+- Catalog subscribers conditional loading
+  [bloodbre]
+
 - Allow arbitrary path parameter within the path parameters
   [dmanchon]
 
