@@ -27,6 +27,7 @@ from .misc import get_registry  # noqa
 from .misc import get_request_scheme  # noqa
 from .misc import get_schema_validator  # noqa
 from .misc import get_url  # noqa
+from .misc import JSONSchemaRefResolver  # noqa
 from .misc import lazy_apply  # noqa
 from .misc import list_or_dict_items  # noqa
 from .misc import load_task_vars  # noqa

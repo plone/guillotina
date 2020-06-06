@@ -4,7 +4,12 @@ CHANGELOG
 5.3.43 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Optimize json schema ref resolution to not make so copies of all json schema definition
+  for every validator instance
+  [vangheem]
+
+- Fix json schema ref resolution for nested objects
+  [vangheem]
 
 
 5.3.42 (2020-05-26)

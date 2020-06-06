@@ -11,6 +11,7 @@ from guillotina.response import HTTPNotFound
 from guillotina.response import HTTPPreconditionFailed
 from guillotina.schema import Dict
 from guillotina.utils import get_schema_validator
+from guillotina.utils import JSONSchemaRefResolver
 from typing import Any
 from typing import Dict as TDict
 from typing import List as TList
@@ -141,7 +142,9 @@ class Service(View):
                     try:
                         cls.__schema__ = schema
                         jsonschema_validator = jsonschema.validators.validator_for(cls.__schema__)
-                        cls.__validator__ = jsonschema_validator(cls.__schema__)
+                        cls.__validator__ = jsonschema_validator(
+                            cls.__schema__, resolver=JSONSchemaRefResolver.from_schema(schema)
+                        )
                     except jsonschema.exceptions.ValidationError:  # pragma: no cover
                         logger.warning("Could not validate schema", exc_info=True)
             else:
