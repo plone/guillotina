@@ -328,29 +328,15 @@ class JSONSchemaRefResolver(jsonschema.validators.RefResolver):
             return super().resolve_fragment(document, fragment)
 
     def _resolve_app_settings_fragment(self, fragment):
-        print(f"RESOLVING {fragment}")
-        fragment = fragment.lstrip("/")
-        parts = unquote(fragment).split("/") if fragment else []
+        if not fragment.startswith("/components/schemas/"):
+            # guillotina types are stored here
+            raise jsonschema.exceptions.RefResolutionError("Unresolvable JSON pointer: %r" % fragment)
 
-        document = {
-            "components": {"schemas": app_settings["json_schema_definitions"]},
-        }
-
-        for part in parts:
-            part = part.replace("~1", "/").replace("~0", "~")
-
-            if isinstance(document, Sequence):
-                # Array indexes should be turned into integers
-                try:
-                    part = int(part)
-                except ValueError:
-                    pass
-            try:
-                document = document[part]
-            except (TypeError, LookupError):
-                raise jsonschema.exceptions.RefResolutionError("Unresolvable JSON pointer: %r" % fragment)
-
-        return document
+        type_name = unquote(fragment.split("/components/schemas/")[-1])
+        try:
+            return app_settings["json_schema_definitions"][type_name]
+        except KeyError:
+            raise jsonschema.exceptions.RefResolutionError("Unresolvable JSON pointer: %r" % fragment)
 
     def resolve_remote(self, uri):
         raise NotImplementedError("We do not support remove json schema loading")

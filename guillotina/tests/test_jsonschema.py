@@ -162,6 +162,9 @@ async def test_resolve_json_schema_type(dummy_guillotina):
     resolver.resolve_fragment(None, "/components/schemas/Resource")
 
     with pytest.raises(jsonschema.exceptions.RefResolutionError):
+        resolver.resolve_fragment({}, "/foo/bar/Foobar")
+
+    with pytest.raises(jsonschema.exceptions.RefResolutionError):
         resolver.resolve_fragment({}, "/components/schemas/Foobar")
 
     with pytest.raises(NotImplementedError):
