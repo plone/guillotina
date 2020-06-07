@@ -7,6 +7,7 @@ from guillotina.interfaces import IResourceFactory
 from guillotina.interfaces import ISchemaFieldSerializeToJson
 from guillotina.json.utils import convert_interfaces_to_schema
 from guillotina.utils import get_schema_validator
+from guillotina.utils import JSONSchemaRefResolver
 from zope.interface import Interface
 
 import jsonschema
@@ -153,3 +154,18 @@ async def test_serialize_factory_to_json(dummy_guillotina, dummy_request):
     assert data["properties"]["guillotina.behaviors.dublincore.IDublinCore"] == {
         "$ref": "#/components/schemas/guillotina.behaviors.dublincore.IDublinCore"
     }
+
+
+async def test_resolve_json_schema_type(dummy_guillotina):
+    resolver = JSONSchemaRefResolver(base_uri="/", referrer=None)
+    resolver.resolve_fragment(None, "/components/schemas/Behavior")
+    resolver.resolve_fragment(None, "/components/schemas/Resource")
+
+    with pytest.raises(jsonschema.exceptions.RefResolutionError):
+        resolver.resolve_fragment({}, "/foo/bar/Foobar")
+
+    with pytest.raises(jsonschema.exceptions.RefResolutionError):
+        resolver.resolve_fragment({}, "/components/schemas/Foobar")
+
+    with pytest.raises(NotImplementedError):
+        resolver.resolve_remote("http://foobar.com")
