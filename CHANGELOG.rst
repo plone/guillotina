@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.43 (unreleased)
+5.3.43 (2020-06-07)
 -------------------
 
 - Optimize json schema ref resolution to not make so copies of all json schema definition
