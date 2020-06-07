@@ -4,6 +4,13 @@ CHANGELOG
 6.0.0b5 (unreleased)
 --------------------
 
+- Optimize json schema ref resolution to not make so copies of all json schema definition
+  for every validator instance
+  [vangheem]
+
+- Fix json schema ref resolution for nested objects
+  [vangheem]
+
 - Catalog subscribers conditional loading
   [bloodbre]
 

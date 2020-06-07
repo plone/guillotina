@@ -17,6 +17,7 @@ from guillotina.interfaces import IRegistry
 from guillotina.interfaces import IRequest
 from guillotina.profile import profilable
 from hashlib import sha256 as sha
+from urllib.parse import unquote
 
 import asyncio
 import inspect
@@ -326,6 +327,28 @@ def get_url(req, path):
 _cached_jsonschema_validators: typing.Dict[str, typing.Any] = {}
 
 
+class JSONSchemaRefResolver(jsonschema.validators.RefResolver):
+    def resolve_fragment(self, document, fragment):
+        try:
+            return self._resolve_app_settings_fragment(fragment)
+        except jsonschema.exceptions.RefResolutionError:
+            return super().resolve_fragment(document, fragment)
+
+    def _resolve_app_settings_fragment(self, fragment):
+        if not fragment.startswith("/components/schemas/"):
+            # guillotina types are stored here
+            raise jsonschema.exceptions.RefResolutionError("Unresolvable JSON pointer: %r" % fragment)
+
+        type_name = unquote(fragment.split("/components/schemas/")[-1])
+        try:
+            return app_settings["json_schema_definitions"][type_name]
+        except KeyError:
+            raise jsonschema.exceptions.RefResolutionError("Unresolvable JSON pointer: %r" % fragment)
+
+    def resolve_remote(self, uri):
+        raise NotImplementedError("We do not support remove json schema loading")
+
+
 def get_schema_validator(schema_name: str):
     """
     Get a json schema validator by the definition name
@@ -335,13 +358,10 @@ def get_schema_validator(schema_name: str):
     if schema_name in _cached_jsonschema_validators:
         return _cached_jsonschema_validators[schema_name]
 
-    schema = {
-        **app_settings["json_schema_definitions"][schema_name],
-        "components": {"schemas": app_settings["json_schema_definitions"]},
-    }
+    schema = app_settings["json_schema_definitions"][schema_name]
     jsonschema_validator = jsonschema.validators.validator_for(schema)
     jsonschema_validator.check_schema(schema)
-    val = jsonschema_validator(schema)
+    val = jsonschema_validator(schema, resolver=JSONSchemaRefResolver.from_schema(schema))
     _cached_jsonschema_validators[schema_name] = val
     return val
 
