@@ -4,6 +4,13 @@ CHANGELOG
 6.0.0b5 (unreleased)
 --------------------
 
+- Few fixes & improvements: [lferran]
+  - Fix JSONField validation error
+  - Add unit tests for middleware generate error response
+  - Add path_qs to Request object
+  - Add content_length to Request object
+  - Fix datetime objects renderization
+
 - Optimize json schema ref resolution to not make so copies of all json schema definition
   for every validator instance
   [vangheem]
