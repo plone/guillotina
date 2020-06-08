@@ -48,6 +48,7 @@ def register_handler_factory(ExceptionKlass, factory):
 
 
 register_handler_factory(json.decoder.JSONDecodeError, exception_handler_factory(error_reasons.JSON_DECODE))
+
 register_handler_factory(
     PreconditionFailed, exception_handler_factory(error_reasons.PRECONDITION_FAILED, serialize_exc=True)
 )

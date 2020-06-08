@@ -2108,6 +2108,23 @@ class DictTests(unittest.TestCase):
         self.assertEqual(field2.value_type.context, context)
 
 
+class JSONTests(unittest.TestCase):
+    def _getTargetClass(self):
+        from guillotina.schema._field import JSONField
+
+        return JSONField
+
+    def _makeOne(self, *args, **kw):
+        return self._getTargetClass()(*args, **kw)
+
+    def test_validate_invalid_value_type(self):
+        from guillotina.schema.exceptions import WrongContainedType
+
+        field = self._makeOne(schema={"type": "array", "items": {"type": "string"}})
+        field.validate(["a", "b"])
+        self.assertRaises(WrongContainedType, field.validate, [1, 2])
+
+
 class UnionFieldTests(unittest.TestCase):
     def _getTargetClass(self):
         from guillotina.schema._field import UnionField

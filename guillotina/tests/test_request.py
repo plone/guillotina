@@ -35,6 +35,18 @@ async def test_get_content_type():
     assert req.content_type == "application/json"
 
 
+async def test_get_content_length():
+    raw_headers = [("Content-Length", "10")]
+    headers = CIMultiDict(raw_headers)
+    req = make_mocked_request("GET", "/", headers=headers)
+    assert req.content_length == 10
+
+    with pytest.raises(ValueError):
+        headers = CIMultiDict([("Content-Length", "foobar")])
+        req = make_mocked_request("GET", "/", headers=headers)
+        assert req.content_length
+
+
 async def test_get_headers():
     raw_headers = [("a", "1"), ("a", "2"), ("b", "3")]
     headers = CIMultiDict(raw_headers)
@@ -56,6 +68,11 @@ async def test_get_query():
 async def test_get_path():
     req = make_mocked_request("GET", "/some/path", query_string=b"q=blabla")
     assert req.path == "/some/path"
+
+
+async def test_get_path_qs():
+    req = make_mocked_request("GET", "/some/path", query_string=b"q=blabla")
+    assert req.path_qs == "/some/path?q=blabla"
 
 
 async def test_get_content():
