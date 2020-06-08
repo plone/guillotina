@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.0b5 (unreleased)
+6.0.0b5 (2020-06-08)
 --------------------
 
 - Few fixes & improvements: [lferran]
