@@ -7,7 +7,7 @@ CHANGELOG
 - Undo datetime object renderization on
   guillotina_json_default. [lferran]
 
-- Fix: be able to define optional requestBody [lferran]
+- Be able to define optional requestBody [lferran]
 
 
 6.0.0b5 (2020-06-08)

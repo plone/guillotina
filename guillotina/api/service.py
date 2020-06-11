@@ -72,6 +72,7 @@ def _safe_int_or_float_cast(value: Any) -> Union[int, float, Any]:
 
 class Service(View):
     __validator__ = __schema__ = __original__ = None
+    __body_required__ = True
 
     def _validate_parameters(self):
         if "parameters" in self.__config__:
@@ -123,12 +124,11 @@ class Service(View):
 
     @classmethod
     def _get_validator(cls):
-        body_required = True
         if cls.__validator__ is None and cls.__validator__ != _sentinal:
             cls.__validator__ = _sentinal
             if "requestBody" in cls.__config__:
                 requestBody = cls.__config__["requestBody"]
-                body_required = requestBody.get("required", True)
+                cls.__body_required__ = requestBody.get("required", True)
                 try:
                     schema = requestBody["content"]["application/json"]["schema"]
                 except KeyError:
@@ -152,17 +152,17 @@ class Service(View):
                         logger.warning("Could not validate schema", exc_info=True)
             else:
                 pass  # can be used for query, path or header parameters
-        return cls.__schema__, cls.__validator__, body_required
+        return cls.__schema__, cls.__validator__, cls.__body_required__
 
     async def _call_validate(self):
         self._validate_parameters()
-        schema, validator, required = self.__class__._get_validator()
+        schema, validator, body_required = self.__class__._get_validator()
         if validator and validator != _sentinal:
             try:
                 data = await self.request.json()
                 validator.validate(data)
             except json.JSONDecodeError:
-                if required:
+                if body_required:
                     raise
             except jsonschema.exceptions.ValidationError as e:
                 raise HTTPPreconditionFailed(
