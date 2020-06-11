@@ -115,3 +115,20 @@ class Test_SafeIntOrFloatCast(unittest.TestCase):
     def test_returns_input_if_cannot_cast(self):
         for foo in ([], None, {}, set(), ""):
             self.assertIs(foo, self._makeOne(foo))
+
+
+@pytest.mark.app_settings(SWAGGER_SETTINGS)
+async def test_can_have_optional_request_body(container_requester):
+    async with container_requester as requester:
+        # Check that since it's optional, we can just not send it
+        _, status = await requester("POST", "@optionalRequestBody")
+        assert status == 200
+
+        # Check that if there is body in the request, it is validated
+        # against schema
+        for invalid_body in ({"foo": "bar"}, {}):
+            _, status = await requester("POST", "@optionalRequestBody", data=json.dumps(invalid_body))
+            assert status == 412
+
+        _, status = await requester("POST", "@optionalRequestBody", data=json.dumps({"valid": "body"}))
+        assert status == 200
