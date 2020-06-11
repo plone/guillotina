@@ -4,6 +4,9 @@ CHANGELOG
 6.0.0b6 (unreleased)
 --------------------
 
+- Undo datetime object renderization on
+  guillotina_json_default. [lferran]
+
 - Fix: be able to define optional requestBody [lferran]
 
 
