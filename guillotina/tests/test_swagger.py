@@ -90,15 +90,16 @@ async def test_validate_numbers_and_integers_in_query_params(container_requester
 @pytest.mark.app_settings(SWAGGER_SETTINGS)
 async def test_can_have_optional_request_body(container_requester):
     async with container_requester as requester:
-        # Check that since it's optional, we can just not send it
-        _, status = await requester("POST", "@optionalRequestBody")
-        assert status == 200
-
         # Check that if there is body in the request, it is validated
         # against schema
         for invalid_body in ({"foo": "bar"}, {}):
-            _, status = await requester("POST", "@optionalRequestBody", data=json.dumps(invalid_body))
+            resp, status = await requester("POST", "@optionalRequestBody", data=json.dumps(invalid_body))
+            assert resp["reason"] == "json schema validation error"
             assert status == 412
 
         _, status = await requester("POST", "@optionalRequestBody", data=json.dumps({"valid": "body"}))
+        assert status == 200
+
+        # Check that since it's optional, we can just not send it
+        _, status = await requester("POST", "@optionalRequestBody")
         assert status == 200
