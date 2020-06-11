@@ -96,8 +96,9 @@ async def test_can_have_optional_request_body(container_requester):
 
         # Check that if there is body in the request, it is validated
         # against schema
-        _, status = await requester("POST", "@optionalRequestBody", data=json.dumps({"invalid": "body"}))
-        assert status == 412
+        for invalid_body in ({"foo": "bar"}, {}):
+            _, status = await requester("POST", "@optionalRequestBody", data=json.dumps(invalid_body))
+            assert status == 412
 
         _, status = await requester("POST", "@optionalRequestBody", data=json.dumps({"valid": "body"}))
         assert status == 200

@@ -310,7 +310,7 @@ async def dummy_query_params_service(context, request):
                     "type": "object",
                     "additionalProperties": False,
                     "required": ["valid"],
-                    "properties": {"valid": {"type": "text"}},
+                    "properties": {"valid": {"type": "string"}},
                 }
             }
         },
