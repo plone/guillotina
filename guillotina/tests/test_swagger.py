@@ -84,3 +84,19 @@ async def test_validate_numbers_and_integers_in_query_params(container_requester
         resp, status = await requester("GET", "@queryParamsValidation?kilograms=3.2")
         assert status == 412
         assert resp["validator"] == "minimum"
+
+
+@pytest.mark.app_settings(SWAGGER_SETTINGS)
+async def test_can_have_optional_request_body(container_requester):
+    async with container_requester as requester:
+        # Check that since it's optional, we can just not send it
+        _, status = await requester("POST", "@optionalRequestBody")
+        assert status == 200
+
+        # Check that if there is body in the request, it is validated
+        # against schema
+        _, status = await requester("POST", "@optionalRequestBody", data=json.dumps({"invalid": "body"}))
+        assert status == 412
+
+        _, status = await requester("POST", "@optionalRequestBody", data=json.dumps({"valid": "body"}))
+        assert status == 200

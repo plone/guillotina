@@ -298,6 +298,29 @@ async def dummy_query_params_service(context, request):
     return {}
 
 
+@configure.service(
+    context=IApplication,
+    method="POST",
+    name="@optionalRequestBody",
+    requestBody={
+        "required": False,
+        "content": {
+            "application/json": {
+                "schema": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "required": ["valid"],
+                    "properties": {"valid": {"type": "text"}},
+                }
+            }
+        },
+    },
+    validate=True,
+)
+async def dummy_request_body_validator(context, request):
+    return {}
+
+
 @configure.adapter(for_=Interface, provides=IIDGenerator)
 class IDGenerator(object):
     """
