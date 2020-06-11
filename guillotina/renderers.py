@@ -18,8 +18,6 @@ def guillotina_json_default(obj):
             return str(obj)
     elif isinstance(obj, complex):
         return [obj.real, obj.imag]
-    elif isinstance(obj, datetime):
-        return obj.isoformat()
     elif isinstance(obj, type):
         return obj.__module__ + "." + obj.__name__
     elif isinstance(obj, InterfaceClass):

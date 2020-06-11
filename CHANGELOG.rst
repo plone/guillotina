@@ -4,7 +4,8 @@ CHANGELOG
 6.0.0b6 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Undo datetime object renderization on
+  guillotina_json_default. [lferran]
 
 
 6.0.0b5 (2020-06-08)
