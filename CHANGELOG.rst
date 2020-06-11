@@ -4,7 +4,7 @@ CHANGELOG
 6.0.0b6 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Fix: be able to define optional requestBody [lferran]
 
 
 6.0.0b5 (2020-06-08)
