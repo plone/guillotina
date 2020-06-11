@@ -17,6 +17,7 @@ from typing import Dict as TDict
 from typing import List as TList
 from typing import Union
 
+import json
 import jsonschema
 
 
@@ -122,10 +123,12 @@ class Service(View):
 
     @classmethod
     def _get_validator(cls):
+        body_required = True
         if cls.__validator__ is None and cls.__validator__ != _sentinal:
             cls.__validator__ = _sentinal
             if "requestBody" in cls.__config__:
                 requestBody = cls.__config__["requestBody"]
+                body_required = requestBody.get("required", True)
                 try:
                     schema = requestBody["content"]["application/json"]["schema"]
                 except KeyError:
@@ -149,15 +152,18 @@ class Service(View):
                         logger.warning("Could not validate schema", exc_info=True)
             else:
                 pass  # can be used for query, path or header parameters
-        return cls.__schema__, cls.__validator__
+        return cls.__schema__, cls.__validator__, body_required
 
     async def _call_validate(self):
         self._validate_parameters()
-        schema, validator = self.__class__._get_validator()
+        schema, validator, required = self.__class__._get_validator()
         if validator and validator != _sentinal:
             try:
                 data = await self.request.json()
                 validator.validate(data)
+            except json.JSONDecodeError:
+                if required:
+                    raise
             except jsonschema.exceptions.ValidationError as e:
                 raise HTTPPreconditionFailed(
                     content={
