@@ -1,13 +1,12 @@
 from datetime import datetime
 from guillotina.renderers import guillotina_json_default
 
-import unittest
+import pytest
 
 
-class Test_guillotina_json_default(unittest.TestCase):
-    def _makeOne(self, obj):
+def test_guillotina_json_default_doesnt_serialize_datetime():
+    def _makeOne(obj):
         return guillotina_json_default(obj)
 
-    def test_datetime(self):
-        date = datetime(2020, 1, 1)
-        self.assertEquals(self._makeOne(date), date.isoformat())
+    with pytest.raises(TypeError):
+        assert _makeOne(datetime(2020, 1, 1))

@@ -4,6 +4,11 @@ CHANGELOG
 6.0.0b6 (unreleased)
 --------------------
 
+- Undo datetime object renderization on
+  guillotina_json_default. [lferran]
+
+- Be able to define optional requestBody [lferran]
+
 - Fix registry update, when type provided mismatch with the one specified
   by the schema return an error HTTP status code instead of throwing an
   exception.
