@@ -9,6 +9,11 @@ CHANGELOG
 
 - Be able to define optional requestBody [lferran]
 
+- Fix registry update, when type provided mismatch with the one specified
+  by the schema return an error HTTP status code instead of throwing an
+  exception.
+  [pfreixes]
+
 
 6.0.0b5 (2020-06-08)
 --------------------

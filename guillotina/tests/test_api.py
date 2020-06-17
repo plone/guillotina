@@ -28,6 +28,7 @@ pytestmark = pytest.mark.asyncio
 
 class ITestingRegistry(Interface):  # pylint: disable=E0239
     enabled = schema.Bool(title="Example attribute")
+    test_type = schema.Int(title="Example attribute")
 
 
 class ITestingRegistryUpdated(Interface):  # pylint: disable=E0239
@@ -276,6 +277,15 @@ async def test_register_registry(container_requester):
             "/db/guillotina/@registry/guillotina.tests.test_api.ITestingRegistry.enabled",
             data=json.dumps({"v": False}),
         )
+        assert status == 412
+
+        # Type validation
+        response, status = await requester(
+            "PATCH",
+            "/db/guillotina/@registry/guillotina.tests.test_api.ITestingRegistry.test_type",
+            data=json.dumps({"value": ["Im not an integer"]}),
+        )
+        print(response)
         assert status == 412
 
         response, status = await requester(
