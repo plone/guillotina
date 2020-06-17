@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.0b6 (unreleased)
+6.0.0b6 (2020-06-17)
 --------------------
 
 - Undo datetime object renderization on
