@@ -4,7 +4,10 @@ CHANGELOG
 5.3.46 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix registry update, when type provided mismatch with the one specified
+  by the schema return an error HTTP status code instead of throwing an
+  exception.
+  [pfreixes]
 
 
 5.3.45 (2020-06-11)
