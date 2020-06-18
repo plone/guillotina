@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.46 (unreleased)
+5.3.46 (2020-06-17)
 -------------------
 
 - Fix registry update, when type provided mismatch with the one specified
