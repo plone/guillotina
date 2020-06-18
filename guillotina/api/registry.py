@@ -4,8 +4,6 @@ from guillotina.component import get_adapter
 from guillotina.event import notify
 from guillotina.events import RegistryEditedEvent
 from guillotina.exceptions import ComponentLookupError
-from guillotina.exceptions import DeserializationError
-from guillotina.exceptions import ValueDeserializationError
 from guillotina.i18n import MessageFactory
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IJSONToValue
@@ -14,6 +12,7 @@ from guillotina.response import ErrorResponse
 from guillotina.response import HTTPNotFound
 from guillotina.response import Response
 from guillotina.schema import get_fields
+from guillotina.schema.exceptions import ValidationError
 from guillotina.utils import get_registry
 from guillotina.utils import import_class
 from guillotina.utils import resolve_dotted_name
@@ -195,12 +194,11 @@ class Write(Service):
             return ErrorResponse(
                 "DeserializationError", "Cannot deserialize type {}".format(str(self.field)), status=412
             )
+        except ValidationError as e:
+            return ErrorResponse("ValidationError", "Invalid value type {}".format(str(e)), status=412)
 
-        try:
-            registry = await get_registry()
-            registry[self.key] = new_value
-        except (DeserializationError, ValueDeserializationError) as e:
-            return ErrorResponse("DeserializationError", str(e), exc=e, status=412)
+        registry = await get_registry()
+        registry[self.key] = new_value
 
         await notify(RegistryEditedEvent(self.context, registry, {iface_name: {name: value}}))
 

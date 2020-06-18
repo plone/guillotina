@@ -74,12 +74,12 @@ setup(
     ],
     extras_require={
         "test": [
-            "pytest>=3.8.0<=5.0.0",
+            "pytest>=3.8.0,<=5.0.0",
             "docker",
             "backoff",
             "psycopg2-binary",
             "pytest-asyncio==0.10.0",
-            "pytest-cov",
+            "pytest-cov>=2.0.0,<=2.9.0",
             "coverage>=4.0.3",
             "pytest-docker-fixtures",
             "pytest-rerunfailures<=7.0",
