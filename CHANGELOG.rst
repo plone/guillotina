@@ -4,7 +4,7 @@ CHANGELOG
 5.3.47 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Include bugfix version for aiohttp in setup.py [lferran]
 
 
 5.3.46 (2020-06-17)
