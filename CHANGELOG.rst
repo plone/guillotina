@@ -4,7 +4,7 @@ CHANGELOG
 6.0.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Cleanup travis logic from test fixtures [lferran]
 
 
 6.0.0 (2020-06-17)
