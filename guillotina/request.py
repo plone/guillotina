@@ -328,7 +328,7 @@ class Request(object):
         self._cache: Dict[Any, Any] = {}
         self._futures: dict = {}
         self._events = OrderedDict()
-        self._initialized = time.time()
+        self._initialized = self.__event_loop.time()
         #: Dictionary of matched path parameters on request
         self.matchdict: Dict[str, str] = {}
 
@@ -355,7 +355,7 @@ class Request(object):
 
         :param event_name: name of event
         """
-        self._events[event_name] = time.time()
+        self._events[event_name] = self.__event_loop.time()
 
     def add_future(self, *args, **kwargs):
         """
@@ -580,3 +580,7 @@ class Request(object):
 
     def __eq__(self, other: object) -> bool:
         return id(self) == id(other)
+
+    @reify
+    def __event_loop(self):
+        return asyncio.get_event_loop()

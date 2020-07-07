@@ -47,7 +47,7 @@ if os.environ.get("GDEBUG", "").lower() in ("true", "t", "1"):  # pragma: no cov
         start = time.time()
         result = await original_execute(self, query, *args, **kwargs)
         end = time.time()
-        _record(query, end - start)
+        _record(query.replace("\n", " "), end - start)
         return result
 
     asyncpg.connection.Connection._do_execute = _do_execute  # type: ignore
@@ -58,7 +58,7 @@ if os.environ.get("GDEBUG", "").lower() in ("true", "t", "1"):  # pragma: no cov
         start = time.time()
         result = await original_bind_execute(self, *args, **kwargs)
         end = time.time()
-        _record(self._query, end - start)
+        _record(self._query.replace("\n", " "), end - start)
         return result
 
     asyncpg.prepared_stmt.PreparedStatement._PreparedStatement__bind_execute = __bind_execute  # type: ignore

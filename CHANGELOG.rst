@@ -4,7 +4,7 @@ CHANGELOG
 6.0.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Use loop.time() instead of time.time() for measuring latency
 
 
 6.0.0 (2020-06-17)
