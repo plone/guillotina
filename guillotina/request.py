@@ -21,7 +21,6 @@ import asyncio
 import enum
 import multidict
 import orjson
-import time
 import urllib.parse
 import uuid
 

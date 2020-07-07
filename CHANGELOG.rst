@@ -5,6 +5,7 @@ CHANGELOG
 ------------------
 
 - Use loop.time() instead of time.time() for measuring latency
+- Fix request crashes when GDEBUG is enabled and sql query has new lines
 
 
 6.0.0 (2020-06-17)
