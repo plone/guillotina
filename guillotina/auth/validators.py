@@ -130,7 +130,7 @@ class JWTValidator:
             validated_jwt = jwt.decode(
                 token["token"], app_settings["jwt"]["secret"], algorithms=[app_settings["jwt"]["algorithm"]]
             )
-            token["id"] = validated_jwt["id"]
+            token["id"] = validated_jwt.get("id", validated_jwt.get("sub"))
             token["decoded"] = validated_jwt
             user = await find_user(token)
             if user is not None and user.id == token["id"]:
