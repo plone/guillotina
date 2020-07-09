@@ -54,7 +54,7 @@ def authenticate_user(userid, data=None, timeout=60 * 60 * 1):
     if data is None:
         data = {}
     data.update(
-        {"iat": datetime.utcnow(), "exp": datetime.utcnow() + timedelta(seconds=timeout), "id": userid}
+        {"iat": datetime.utcnow(), "exp": datetime.utcnow() + timedelta(seconds=timeout), "id": userid, "sub": userid}
     )
     jwt_token = jwt.encode(
         data, app_settings["jwt"]["secret"], algorithm=app_settings["jwt"]["algorithm"]

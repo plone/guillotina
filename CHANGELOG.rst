@@ -4,7 +4,8 @@ CHANGELOG
 6.0.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Also allow JWT sub claim for loginid
+  [allusa]
 
 
 6.0.0 (2020-06-17)
