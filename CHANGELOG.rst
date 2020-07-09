@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.1 (unreleased)
+6.0.1 (2020-07-09)
 ------------------
 
 - Also allow JWT sub claim for loginid
