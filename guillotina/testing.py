@@ -51,6 +51,7 @@ TESTING_SETTINGS: Dict[str, Any] = {
     },
     "pg_connection_class": "guillotina.db.storages.pg.LightweightConnection",
     "store_json": True,
+    "load_catalog": True,
 }
 
 
