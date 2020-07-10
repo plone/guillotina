@@ -4,7 +4,8 @@ CHANGELOG
 6.0.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Set load_catalog=true in test settings
+  [masipcat]
 
 
 6.0.1 (2020-07-09)
