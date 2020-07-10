@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.2 (unreleased)
+6.0.2 (2020-07-10)
 ------------------
 
 - Set load_catalog=true in test settings
