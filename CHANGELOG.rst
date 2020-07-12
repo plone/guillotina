@@ -4,8 +4,8 @@ CHANGELOG
 6.0.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
-
+- Make sure it does not fail on empty field
+  [bloodbare]
 
 6.0.2 (2020-07-10)
 ------------------
