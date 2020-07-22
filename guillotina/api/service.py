@@ -42,9 +42,10 @@ class DictFieldProxy:
     def __setattr__(self, name, value):
         if name.startswith("_DictFieldProxy"):
             return super().__setattr__(name, value)
-
         if name == self.__field_name:
             val = getattr(self.__context, name)
+            if val is None:
+                val = {}
             setattr(self.__context, name, val)
             val[self.__key] = value
         else:
