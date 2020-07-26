@@ -43,7 +43,7 @@ curl --user root:root http://localhost:8080/db/container
  - **Scale**: With integrations like Redis, ElasticSearch and Cockroach, you
    have the tools to scale.
 
-# Getting started
+## Getting started
 
 Are you new to Guillotina? This is the place to start!
 
@@ -51,57 +51,61 @@ The [quick tour](./quick-tour.html) gives an overview of the major features in G
 
 Need help? Join our [Gitter channel](https://gitter.im/plone/guillotina).
 
-# Build a Guillotina app
+## Build a Guillotina app
 
 You can even run Guillotina as a single page app if you so desire.
 
 Here is an example with content type and service::
 
 ```python
-from aiohttp import web
 from guillotina import configure
 from guillotina import content
 from guillotina import schema
 from guillotina.factory import make_app
 from zope import interface
+
 import uvicorn
+
 
 class IMyType(interface.Interface):
     foobar = schema.TextLine()
 
+
 @configure.contenttype(
     type_name="MyType",
     schema=IMyType,
-    behaviors=["guillotina.behaviors.dublincore.IDublinCore"])
-class MyType(content.Resource): pass
+    behaviors=["guillotina.behaviors.dublincore.IDublinCore"],
+)
+class MyType(content.Resource):
+    pass
+
 
 @configure.service(
-    context=IMyType, method='GET', permission='guillotina.ViewContent', name='@foobar')
+    context=IMyType,
+    method="GET",
+    permission="guillotina.ViewContent",
+    name="@foobar",
+)
 async def foobar_service(context, request):
-    return {
-        "foobar": context.foobar
-    }
+    return {"foobar": context.foobar}
 
-if __name__ == '__main__':
-    app = make_app(settings={
-        "applications": ["__main__"],
-        "root_user": {
-            "password": "root"
-        },
-        "databases": {
-            "db": {
-                "storage": "DUMMY_FILE",
-                "filename": "dummy_file.db",
-            }
-        },
-        "port": 8080
-    })
-    uvicorn.run(app, host='localhost', port=8080)
 
+if __name__ == "__main__":
+    app = make_app(
+        settings={
+            "applications": ["__main__"],
+            "root_user": {"password": "root"},
+            "databases": {
+                "db": {"storage": "DUMMY_FILE", "filename": "dummy_file.db",}
+            },
+            "port": 8080,
+        }
+    )
+    uvicorn.run(app, host="localhost", port=8080)
 ```
 
 
-# Training / Tutorial
+## Training / Tutorial
 
 Learn how to use Guillotina by following the [training](./training/index.html "Link to Guillotina trining docs").
 
@@ -112,7 +116,7 @@ Learn how to use Guillotina by following the [training](./training/index.html "L
    training/index
 ```
 
-# REST API
+## REST API
 
 After you're up and running, primarily, Guillotina provides a REST API to work with
 and it is what you should become the most familiar with.
@@ -140,7 +144,7 @@ The endpoints available around these objects are detailed below:
    rest/folder
 ```
 
-# Developer Documentation
+## Developer Documentation
 
 After reading quick tour or training section,
 Now you can start hands-on style guide to learn how to use it.
@@ -175,7 +179,7 @@ Now you can start hands-on style guide to learn how to use it.
 ```
 
 
-# Deploying
+## Deploying
 
 - [Installing Guillotina](./installation/installation.html)
   is done with pip but if you need to run with docker,
@@ -190,7 +194,7 @@ Now you can start hands-on style guide to learn how to use it.
   when you deploy it.
 
 
-# References
+## References
 
 ```eval_rst
 .. toctree::
@@ -220,7 +224,7 @@ Now you can start hands-on style guide to learn how to use it.
    contrib/index
 ```
 
-# About
+## About
 
 - [Read about](./about.html) the rich history of the project
 
