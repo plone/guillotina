@@ -4,6 +4,12 @@ CHANGELOG
 6.0.3 (unreleased)
 ------------------
 
+- doc: fix md headers (h1 -> h2) and other small fixes
+  [masipcat]
+
+- doc: fix example app
+  [masipcat]
+
 - Fix sphinx-build
   [masipcat]
 
