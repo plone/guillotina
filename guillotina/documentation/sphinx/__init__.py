@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-from aiohttp.test_utils import TestClient
-from aiohttp.test_utils import TestServer
+from async_asgi_testclient import TestClient
 from base64 import b64encode
 from docutils import nodes
 from docutils.parsers.rst import Directive  # type: ignore
@@ -47,24 +46,20 @@ def get_server():
     if _server is not None:
         return _server
 
-    loop = asyncio.new_event_loop()
-    aioapp = loop.run_until_complete(
-        make_app(
-            settings={
-                "applications": ["guillotina.documentation"],
-                "databases": {"db": {"storage": "DUMMY", "dsn": {}, "name": "db"}},
-                "root_user": {"password": "root"},
-                "jwt": {"secret": "foobar", "algorithm": "HS256"},
-            },
-            loop=loop,
-        )
+    loop = asyncio.get_event_loop()
+    aioapp = make_app(
+        settings={
+            "applications": ["guillotina.documentation"],
+            "databases": {"db": {"storage": "DUMMY", "dsn": {}, "name": "db"}},
+            "root_user": {"password": "root"},
+            "jwt": {"secret": "foobar", "algorithm": "HS256"},
+        },
+        loop=loop,
     )
-    aioapp.config.execute_actions()
     load_cached_schema()
 
-    server = TestServer(aioapp)
-    loop.run_until_complete(server.start_server(loop=loop))
-    _server = {"loop": loop, "server": server, "client": TestClient(server, loop=loop), "app": aioapp}
+    client = loop.run_until_complete(TestClient(aioapp).__aenter__())
+    _server = {"loop": loop, "client": client, "app": aioapp}
     return _server
 
 
@@ -192,10 +187,10 @@ class APICall(Directive):
 
         resp_body = None
         if resp.headers.get("content-type") == "application/json":
-            resp_body = loop.run_until_complete(resp.json())
+            resp_body = resp.json()
             resp_body = _fmt_body(resp_body, 8)
         else:
-            resp_body = loop.run_until_complete(resp.text())
+            resp_body = resp.text
 
         content = {
             "path_spec": (self.options.get("path_spec") or self.options.get("method", "GET").upper()),

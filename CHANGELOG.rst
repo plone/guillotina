@@ -4,6 +4,9 @@ CHANGELOG
 6.0.3 (unreleased)
 ------------------
 
+- Fix sphinx-build
+  [masipcat]
+
 - Make sure it does not fail on empty field
   [bloodbare]
 
