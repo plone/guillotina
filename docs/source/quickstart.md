@@ -9,26 +9,26 @@ You can use your own preferred tool for managing your python environment.
 
 Setup the environment:
 
-```
+```shell
 python3.7 -m venv .
 ```
 
 Install Guillotina:
 
-```
+```shell
 ./bin/pip install guillotina
 ```
 
 Generate configuration file (requires [cookiecutter](https://cookiecutter.readthedocs.io "Link to cookiecutter")):
 
-```
+```shell
 ./bin/pip install cookiecutter
 ./bin/g create --template=configuration
 ```
 
 Finally, run the server:
 
-```
+```shell
 ./bin/g
 ```
 
@@ -49,7 +49,7 @@ to get one running quickly.
 
 Example docker run command:
 
-```
+```shell
 docker run -e POSTGRES_DB=guillotina -e POSTGRES_USER=guillotina -p 127.0.0.1:5432:5432 postgres:9.6
 ```
 
