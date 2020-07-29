@@ -4,6 +4,12 @@ CHANGELOG
 6.0.3 (unreleased)
 ------------------
 
+- Cookiecutter: fix test_install.py
+  [masipcat]
+
+- test deps: unpin pytest-asyncio
+  [masipcat]
+
 - doc: fix md headers (h1 -> h2) and other small fixes
   [masipcat]
 
