@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.4 (unreleased)
+6.0.4 (2020-07-29)
 ------------------
 
 - fix release
