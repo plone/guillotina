@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.3 (unreleased)
+6.0.3 (2020-07-29)
 ------------------
 
 - Cookiecutter: fix test_install.py
