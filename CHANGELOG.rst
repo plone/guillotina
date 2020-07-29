@@ -4,7 +4,7 @@ CHANGELOG
 6.0.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- fix release
 
 
 6.0.3 (2020-07-29)
