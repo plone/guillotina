@@ -4,7 +4,8 @@ CHANGELOG
 6.0.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix async test without pytest mark
+  [masipcat]
 
 
 6.0.4 (2020-07-29)
