@@ -78,7 +78,7 @@ class IExample(IResource):
     text_field = schema.Text(required=False)
     dict_value = schema.Dict(key_type=schema.TextLine(), value_type=schema.TextLine(), required=False)
     datetime = schema.Datetime(required=False)
-
+    jsonfield_value = schema.JSONField(schema={"type": "array"}, required=False)
     write_permission(write_protected="example.MyPermission")
     write_protected = schema.TextLine(title="Write protected field", required=False)
 

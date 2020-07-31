@@ -28,6 +28,13 @@ async def test_non_existing_type(container_requester):
         assert status == 404
 
 
+@pytest.mark.asyncio
+async def test_non_(container_requester):
+    async with container_requester as requester:
+        response, status = await requester("GET", "/db/guillotina/@types/non")
+        assert status == 404
+
+
 def test_deserialization_error_formats_error():
     error = DeserializationError([{"error": "Foobar", "field": "foobar_field"}])
     assert "foobar_field" in str(error)
@@ -85,3 +92,26 @@ async def test_handled_exception(container_requester):
             handle_mock.side_effect = DeserializationError([{"err": "bad error"}])
             _, status = await requester("GET", "/db")
             assert status == 412
+
+
+@pytest.mark.asyncio
+async def test_jsonfield_json_schema_validation_error_is_deserialized(container_requester):
+    import json
+
+    async with container_requester as requester:
+        _, status = await requester(
+            "POST", "/db/guillotina", data=json.dumps({"@type": "Example", "id": "foobar"})
+        )
+        assert status == 201
+        response, status = await requester(
+            "PATCH",
+            "/db/guillotina/foobar",
+            data=json.dumps(
+                {
+                    # Send an invalid type
+                    "jsonfield_value": {}
+                }
+            ),
+        )
+        assert status == 412
+        assert "{} is not of type 'array'" in response["deserialization_errors"][0]["errors"][0]["error_str"]

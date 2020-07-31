@@ -221,10 +221,9 @@ class DeserializationError(Exception):
                         try:
                             inner_errors.append(e.json())
                         except AttributeError:
-                            # TODO:
                             # jsonschema.exceptions.ValidationError
                             # does not have json() method
-                            pass
+                            inner_errors.append({"error_str": str(e)})
                     error["errors"] = self.json_err_list(inner_errors)
             converted_errors.append(error)
         return converted_errors
