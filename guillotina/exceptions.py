@@ -216,7 +216,16 @@ class DeserializationError(Exception):
             if "error" in error:
                 exc = error.pop("error")
                 if hasattr(exc, "errors") and exc.errors:
-                    error["errors"] = self.json_err_list([e.json() for e in exc.errors])
+                    inner_errors = []
+                    for e in exc.errors:
+                        try:
+                            inner_errors.append(e.json())
+                        except AttributeError:
+                            # TODO:
+                            # jsonschema.exceptions.ValidationError
+                            # does not have json() method
+                            pass
+                    error["errors"] = self.json_err_list(inner_errors)
             converted_errors.append(error)
         return converted_errors
 
