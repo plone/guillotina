@@ -29,7 +29,7 @@ async def test_registration(container_install_requester):
             .split('" target="_blank"')[0]
         )
 
-        resp, status_code = await requester("POST", f"/db/guillotina/@validate/{token}", authenticated=False)
+        resp, status_code = await requester("POST", f"/db/guillotina/@validate/{token}", data=json.dumps({}), authenticated=False)
         assert "token" in resp
         assert status_code == 200
 
