@@ -7,17 +7,17 @@ class IValidationSettings(Interface):
     site_url = schema.Text(
         title="Public frontend site url",
         description="Full url without tailing /",
-        default="http://localhost:4200",
+        missing_value="http://localhost:4200",
     )
 
     validation_template = schema.Text(
-        title="Validation template", description="Template id or path to object", default="validate.html"
+        title="Validation template", description="Template id or path to object", missing_value="validate.html"
     )
 
     validation_url = schema.Text(
-        title="Validation frontend tail url", description="Tail url starting with /", default="/@@validation"
+        title="Validation frontend tail url", description="Tail url starting with /", missing_value="/@@validation"
     )
 
     site_mails_from = schema.Text(
-        title="Site mails from", description="Orig email to send mails", default="noreply@test.org"
+        title="Site mails from", description="Orig email to send mails", missing_value="noreply@test.org"
     )
