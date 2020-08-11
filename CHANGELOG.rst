@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.5 (unreleased)
+6.0.5 (2020-08-11)
 ------------------
 
 - Fix register schema
