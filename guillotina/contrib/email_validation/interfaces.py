@@ -11,11 +11,15 @@ class IValidationSettings(Interface):
     )
 
     validation_template = schema.Text(
-        title="Validation template", description="Template id or path to object", missing_value="validate.html"
+        title="Validation template",
+        description="Template id or path to object",
+        missing_value="validate.html",
     )
 
     validation_url = schema.Text(
-        title="Validation frontend tail url", description="Tail url starting with /", missing_value="/@@validation"
+        title="Validation frontend tail url",
+        description="Tail url starting with /",
+        missing_value="/@@validation",
     )
 
     site_mails_from = schema.Text(
