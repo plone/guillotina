@@ -1,0 +1,18 @@
+// python -m grpc_tools.protoc -I ./ --python_out=. test.proto
+
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+
+message DublinCore {
+  string title = 1;
+  string description = 2;
+  google.protobuf.Timestamp creation_date = 3;
+  google.protobuf.Timestamp modification_date = 4;
+  google.protobuf.Timestamp effective_date = 5;
+  google.protobuf.Timestamp expiration_date = 6;
+  repeated string creators = 7;
+  repeated string tags = 8;
+  string publisher = 9;
+  repeated string contributors = 10;
+}
+  
