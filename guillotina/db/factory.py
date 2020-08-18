@@ -36,6 +36,7 @@ def _get_connection_options(dbconfig):
         "max_cached_statement_lifetime",
         "max_cacheable_statement_size",
         "command_timeout",
+        "server_settings",
     ):
         if key in dbconfig:
             connection_options[key] = dbconfig[key]

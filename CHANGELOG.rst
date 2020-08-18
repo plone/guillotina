@@ -4,7 +4,8 @@ CHANGELOG
 6.0.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Pass 'server_settings' in 'connection_options' to asyncpg pool
+  [masipcat]
 
 
 6.0.5 (2020-08-11)
