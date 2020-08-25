@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.6 (unreleased)
+6.0.6 (2020-08-25)
 ------------------
 
 - Pass 'server_settings' in 'connection_options' to asyncpg pool
