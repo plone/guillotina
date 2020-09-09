@@ -158,6 +158,12 @@ class IFileCleanup(Interface):
         """
 
 
+class IFileNameGenerator(Interface):
+    """
+    Name generator for a file
+    """
+
+
 class IFile(Interface):
 
     content_type = schema.TextLine(
