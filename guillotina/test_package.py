@@ -6,6 +6,7 @@ from guillotina.async_util import IAsyncUtility
 from guillotina.behaviors.instance import AnnotationBehavior
 from guillotina.behaviors.instance import ContextBehavior
 from guillotina.behaviors.properties import ContextProperty
+from guillotina.component import get_multi_adapter
 from guillotina.content import Item
 from guillotina.content import Resource
 from guillotina.directives import index_field
@@ -16,12 +17,12 @@ from guillotina.exceptions import NoIndexField
 from guillotina.fields import CloudFileField
 from guillotina.files import BaseCloudFile
 from guillotina.files.exceptions import RangeNotFound
-from guillotina.files.utils import generate_key
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IExternalFileStorageManager
 from guillotina.interfaces import IFile
 from guillotina.interfaces import IFileField
+from guillotina.interfaces import IFileNameGenerator
 from guillotina.interfaces import IIDGenerator
 from guillotina.interfaces import IItem
 from guillotina.interfaces import IJSONToValue
@@ -31,6 +32,7 @@ from guillotina.interfaces import IResource
 from guillotina.response import HTTPUnprocessableEntity
 from guillotina.schema import Object
 from guillotina.schema.interfaces import IContextAwareDefaultFactory
+from guillotina.utils import apply_coroutine
 from shutil import copyfile
 from typing import AsyncIterator
 from zope.interface import implementer
@@ -402,7 +404,8 @@ class InMemoryFileManager:
         if upload_file_id is not None:
             await self.delete_upload(upload_file_id)
 
-        upload_file_id = generate_key(self.context)
+        generator = get_multi_adapter((self.context, self.field), IFileNameGenerator)
+        upload_file_id = await apply_coroutine(generator)
         _tmp_files[upload_file_id] = tempfile.mkstemp()[1]
         await dm.update(_chunks=0, upload_file_id=upload_file_id)
 
@@ -450,7 +453,8 @@ class InMemoryFileManager:
 
     async def copy(self, to_storage_manager, to_dm):
         file = self.field.get(self.field.context or self.context)
-        new_uri = generate_key(self.context)
+        generator = get_multi_adapter((self.context, self.field), IFileNameGenerator)
+        new_uri = await apply_coroutine(generator)
         _tmp_files[new_uri] = _tmp_files[file.uri]
         _tmp_files[new_uri] = tempfile.mkstemp()[1]
         copyfile(_tmp_files[file.uri], _tmp_files[new_uri])

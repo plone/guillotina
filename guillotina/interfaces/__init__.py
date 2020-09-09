@@ -78,6 +78,7 @@ from .files import IFile  # noqa
 from .files import IFileCleanup  # noqa
 from .files import IFileField  # noqa
 from .files import IFileManager  # noqa
+from .files import IFileNameGenerator  # noqa
 from .files import IFileStorageManager  # noqa
 from .files import IUploadDataManager  # noqa
 from .json import IFactorySerializeToJson  # noqa

@@ -8,9 +8,12 @@ from guillotina.events import FileBeforeUploadFinishedEvent
 from guillotina.events import FileUploadFinishedEvent
 from guillotina.events import FileUploadStartedEvent
 from guillotina.exceptions import BlobChunkNotFound
+from guillotina.files.utils import generate_key
 from guillotina.files.utils import guess_content_type
 from guillotina.interfaces import IDBFileField
 from guillotina.interfaces import IFileCleanup
+from guillotina.interfaces import IFileField
+from guillotina.interfaces import IFileNameGenerator
 from guillotina.interfaces import IFileStorageManager
 from guillotina.interfaces import IRequest
 from guillotina.interfaces import IResource
@@ -19,6 +22,16 @@ from guillotina.response import HTTPPreconditionFailed
 from typing import AsyncIterator
 
 import time
+
+
+@configure.adapter(for_=(IResource, IFileField), provides=IFileNameGenerator)
+class FileNameGenerator:
+    def __init__(self, context, field):
+        self.context = context
+        self.field = field
+
+    def __call__(self):
+        return generate_key(self.context)
 
 
 @configure.adapter(for_=IFileStorageManager, provides=IUploadDataManager, name="db")

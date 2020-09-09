@@ -87,6 +87,4 @@ def guess_content_type(content_type, filename):
 
 
 def generate_key(context):
-    return "{}{}/{}::{}".format(
-        task_vars.container.get().id, get_content_path(context), context.__uuid__, uuid.uuid4().hex
-    )
+    return "{}/{}::{}".format(task_vars.container.get().id, context.__uuid__, uuid.uuid4().hex)

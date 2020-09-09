@@ -4,7 +4,8 @@ CHANGELOG
 5.3.48 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Add IFileNameGenerator adapter
+  [qiwn]
 
 
 5.3.47 (2020-06-25)
