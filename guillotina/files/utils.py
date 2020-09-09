@@ -1,6 +1,7 @@
 from .const import MAX_REQUEST_CACHE_SIZE
 from guillotina import task_vars
 from guillotina.exceptions import UnRetryableRequestError
+from guillotina.utils import get_content_path
 from guillotina.utils import to_str
 
 import asyncio
@@ -86,4 +87,6 @@ def guess_content_type(content_type, filename):
 
 
 def generate_key(context):
-    return "{}/{}::{}".format(task_vars.container.get().id, context.__uuid__, uuid.uuid4().hex)
+    return "{}{}/{}::{}".format(
+        task_vars.container.get().id, get_content_path(context), context.__uuid__, uuid.uuid4().hex
+    )
