@@ -1,7 +1,6 @@
 from .const import MAX_REQUEST_CACHE_SIZE
 from guillotina import task_vars
 from guillotina.exceptions import UnRetryableRequestError
-from guillotina.utils import get_content_path
 from guillotina.utils import to_str
 
 import asyncio
