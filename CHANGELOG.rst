@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.48 (unreleased)
+5.3.48 (2020-09-09)
 -------------------
 
 - Add IFileNameGenerator adapter
