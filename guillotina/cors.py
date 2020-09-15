@@ -28,7 +28,7 @@ class DefaultCorsRenderer:
             else:
                 msg = "Origin %s not allowed" % origin
                 logger.warning(msg, request=self.request)
-                raise HTTPUnauthorized({"error": msg})
+                raise HTTPUnauthorized({"reason": msg})
         if self.request.headers.get("Access-Control-Request-Method", None) != "OPTIONS":
             if settings["allow_credentials"]:
                 headers["Access-Control-Allow-Credentials"] = "true"
