@@ -4,7 +4,8 @@ CHANGELOG
 6.0.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- settings: always convert 'pool_size' to int
+  [masipcat]
 
 
 6.0.7 (2020-09-09)
