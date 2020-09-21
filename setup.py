@@ -71,6 +71,7 @@ setup(
         "mypy_extensions",
         "argon2-cffi",
         "backoff",
+        "prometheus-client",
     ],
     extras_require={
         "test": [
