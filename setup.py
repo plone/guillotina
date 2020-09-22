@@ -84,6 +84,8 @@ setup(
             "pytest-docker-fixtures",
             "pytest-rerunfailures<=7.0",
             "openapi-spec-validator",
+            "asyncmock",
+            "prometheus-client",
         ],
         "docs": [
             "sphinx",

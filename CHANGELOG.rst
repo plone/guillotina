@@ -4,7 +4,8 @@ CHANGELOG
 5.3.49 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Add metrics to pg and redis operations
+  [vangheem]
 
 
 5.3.48 (2020-09-09)
