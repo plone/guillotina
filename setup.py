@@ -71,7 +71,6 @@ setup(
         "mypy_extensions",
         "argon2-cffi",
         "backoff",
-        "prometheus-client",
     ],
     extras_require={
         "test": [
@@ -86,6 +85,7 @@ setup(
             "pytest-rerunfailures<=7.0",
             "openapi-spec-validator",
             "asyncmock",
+            "prometheus-client",
         ],
         "docs": [
             "sphinx",
