@@ -33,7 +33,7 @@ try:
 
 
 except ImportError:
-    watch = metrics.watch
+    watch = metrics.watch  # type: ignore
 
 
 @configure.adapter(for_=IExternalFileStorageManager, provides=IUploadDataManager, name="redis")

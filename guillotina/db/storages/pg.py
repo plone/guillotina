@@ -58,7 +58,7 @@ try:
 
 
 except ImportError:
-    watch = metrics.watch
+    watch = metrics.watch  # type: ignore
 
 log = glogging.getLogger("guillotina.storage")
 
