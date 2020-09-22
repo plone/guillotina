@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.49 (unreleased)
+5.3.49 (2020-09-22)
 -------------------
 
 - Add metrics to pg and redis operations
