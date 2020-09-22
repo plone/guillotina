@@ -1,4 +1,3 @@
-from guillotina.tests.fixtures import annotations
 from guillotina.utils import resolve_dotted_name
 
 import asyncio

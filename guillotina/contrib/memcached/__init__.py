@@ -1,5 +1,4 @@
 from asyncio import get_running_loop
-from guillotina import configure
 from guillotina.contrib.memcached.driver import MemcachedDriver
 
 
