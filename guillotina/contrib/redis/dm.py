@@ -69,8 +69,9 @@ class RedisFileDataManager(DBDataManager):
         redis = await self.get_redis()
         key = self.get_key()
         self._data["last_activity"] = time.time()
+        value = json.dumps(self._data, cls=GuillotinaJSONEncoder)
         with watch("set"):
-            await redis.set(key, json.dumps(self._data, cls=GuillotinaJSONEncoder), expire=self._ttl)
+            await redis.set(key, value, expire=self._ttl)
 
     async def get_redis(self):
         if self._redis is None:
