@@ -30,6 +30,10 @@ class MemcachedDriver:
         self.initialized: bool = False
         self.init_lock = asyncio.Lock()
 
+    @property
+    def client(self):
+        return self._client
+
     async def initialize(self, loop):
         async with self.init_lock:
             if self.initialized is False:
@@ -44,14 +48,18 @@ class MemcachedDriver:
     @backoff.on_exception(backoff.expo, (OSError,), max_time=30, max_tries=4)
     async def _connect(self):
         settings = app_settings["memcached"]
-        hosts = [emcache.MemcachedHostAddress(host, port) for host, port in settings["hosts"]]
-        timeout = settings.get("timeout")
-        max_connections = settings.get("max_connections")
-        self._client = await emcache.create_client(hosts, timeout=timeout, max_connections=max_connections)
+        hosts = [emcache.MemcachedHostAddress(host, int(port)) for host, port in settings["hosts"]]
+        if len(hosts) == 0:
+            raise NoMemcachedConfigured()
+        kw = {}
+        for key in ("timeout", "max_connections"):
+            if settings.get(key) is not None:
+                kw[key] = settings[key]
+        self._client = await emcache.create_client(hosts, **kw)
 
     async def finalize(self):
         if self._client is not None:
-            self._client.close()
+            await self._client.close()
         self.initialized = False
 
     # VALUE API
@@ -66,13 +74,13 @@ class MemcachedDriver:
 
         await self._client.set(key.encode(), data.encode(), **kwargs)
 
-    async def get(self, key: str) -> Optional[str]:
+    async def get(self, key: str) -> Optional[bytes]:
         if self._client is None:
             raise NoMemcachedConfigured()
 
-        item: Optional[emcache.Item] = await self._client.get(key)
+        item: Optional[emcache.Item] = await self._client.get(key.encode())
         if item is not None:
-            return item.value.decode()
+            return item.value
         else:
             return None
 
@@ -98,5 +106,5 @@ class MemcachedDriver:
             raise NoMemcachedConfigured()
 
         # Flush all nodes
-        for node in self._client.cluster_managment.nodes():
-            await self._client.flush_all(node.memcached_host_address)
+        for node in self._client.cluster_managment().nodes():
+            await self._client.flush_all(node)

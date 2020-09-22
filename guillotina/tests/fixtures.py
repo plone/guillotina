@@ -39,7 +39,13 @@ IS_TRAVIS = "TRAVIS" in os.environ
 DATABASE = os.environ.get("DATABASE", "DUMMY")
 DB_SCHEMA = os.environ.get("DB_SCHEMA", "public")
 
-annotations = {"testdatabase": DATABASE, "test_dbschema": DB_SCHEMA, "redis": None, "travis": IS_TRAVIS}
+annotations = {
+    "testdatabase": DATABASE,
+    "test_dbschema": DB_SCHEMA,
+    "redis": None,
+    "travis": IS_TRAVIS,
+    "memcached": None,
+}
 
 
 def base_settings_configurator(settings):
@@ -110,10 +116,6 @@ def get_db_settings(pytest_node=None):
             settings["redis"] = {}
         settings["redis"]["host"] = annotations["redis"][0]
         settings["redis"]["port"] = annotations["redis"][1]
-
-    if annotations["testdatabase"] == "DUMMY":
-        return settings
-
     try:
         memcached_annotations = annotations["memcached"]
     except KeyError:
@@ -122,6 +124,9 @@ def get_db_settings(pytest_node=None):
         if "memcached" not in settings:
             settings["memcached"] = {}
         settings["memcached"]["hosts"] = [(memcached_annotations[0], memcached_annotations[1])]
+
+    if annotations["testdatabase"] == "DUMMY":
+        return settings
 
     settings["databases"]["db"]["storage"] = "postgresql"
     settings["databases"]["db"]["db_schema"] = annotations["test_dbschema"]
@@ -496,6 +501,17 @@ def redis_container():
     yield host, port  # provide the fixture value
     pytest_docker_fixtures.redis_image.stop()
     annotations["redis"] = None
+
+
+@pytest.fixture(scope="session")
+def memcached_container():
+    import pytest_docker_fixtures
+
+    host, port = pytest_docker_fixtures.memcached_image.run()
+    annotations["memcached"] = (host, port)
+    yield host, port  # provide the fixture value
+    pytest_docker_fixtures.memcached_image.stop()
+    annotations["memcached"] = None
 
 
 class DBUsersRequester(ContainerRequesterAsyncContextManager):
