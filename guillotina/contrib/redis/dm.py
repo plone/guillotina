@@ -8,27 +8,32 @@ from guillotina.renderers import GuillotinaJSONEncoder
 from guillotina.transactions import get_transaction
 
 import json
-import prometheus_client
 import time
 
 
-REDIS_OPS = prometheus_client.Counter(
-    "guillotina_dm_redis_ops_total",
-    "Total count of ops by type of operation and the error if there was.",
-    labelnames=["type", "error"],
-)
-REDIS_OPS_PROCESSING_TIME = prometheus_client.Histogram(
-    "guillotina_dm_redis_ops_processing_time_seconds",
-    "Histogram of operations processing time by type (in seconds)",
-    labelnames=["type"],
-)
+try:
+    import prometheus_client
+
+    REDIS_OPS = prometheus_client.Counter(
+        "guillotina_dm_redis_ops_total",
+        "Total count of ops by type of operation and the error if there was.",
+        labelnames=["type", "error"],
+    )
+    REDIS_OPS_PROCESSING_TIME = prometheus_client.Histogram(
+        "guillotina_dm_redis_ops_processing_time_seconds",
+        "Histogram of operations processing time by type (in seconds)",
+        labelnames=["type"],
+    )
+
+    class watch(metrics.watch):
+        def __init__(self, operation: str):
+            super().__init__(
+                counter=REDIS_OPS, histogram=REDIS_OPS_PROCESSING_TIME, labels={"type": operation},
+            )
 
 
-class watch(metrics.watch):
-    def __init__(self, operation: str):
-        super().__init__(
-            counter=REDIS_OPS, histogram=REDIS_OPS_PROCESSING_TIME, labels={"type": operation},
-        )
+except ImportError:
+    watch = metrics.watch
 
 
 @configure.adapter(for_=IExternalFileStorageManager, provides=IUploadDataManager, name="redis")

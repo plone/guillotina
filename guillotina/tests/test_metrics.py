@@ -1,6 +1,6 @@
+from asyncmock import AsyncMock
 from guillotina.contrib.redis.driver import RedisDriver
 from guillotina.db.storages.pg import PostgresqlStorage
-from unittest.mock import AsyncMock
 from unittest.mock import MagicMock
 
 

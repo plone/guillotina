@@ -15,26 +15,31 @@ from typing import Optional
 import asyncio
 import backoff
 import logging
-import prometheus_client
 
 
-REDIS_OPS = prometheus_client.Counter(
-    "guillotina_cache_redis_ops_total",
-    "Total count of ops by type of operation and the error if there was.",
-    labelnames=["type", "error"],
-)
-REDIS_OPS_PROCESSING_TIME = prometheus_client.Histogram(
-    "guillotina_cache_redis_ops_processing_time_seconds",
-    "Histogram of operations processing time by type (in seconds)",
-    labelnames=["type"],
-)
+try:
+    import prometheus_client
+
+    REDIS_OPS = prometheus_client.Counter(
+        "guillotina_cache_redis_ops_total",
+        "Total count of ops by type of operation and the error if there was.",
+        labelnames=["type", "error"],
+    )
+    REDIS_OPS_PROCESSING_TIME = prometheus_client.Histogram(
+        "guillotina_cache_redis_ops_processing_time_seconds",
+        "Histogram of operations processing time by type (in seconds)",
+        labelnames=["type"],
+    )
+
+    class watch(metrics.watch):
+        def __init__(self, operation: str):
+            super().__init__(
+                counter=REDIS_OPS, histogram=REDIS_OPS_PROCESSING_TIME, labels={"type": operation},
+            )
 
 
-class watch(metrics.watch):
-    def __init__(self, operation: str):
-        super().__init__(
-            counter=REDIS_OPS, histogram=REDIS_OPS_PROCESSING_TIME, labels={"type": operation},
-        )
+except ImportError:
+    watch = metrics.watch
 
 
 logger = logging.getLogger("guillotina.contrib.redis")

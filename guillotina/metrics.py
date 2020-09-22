@@ -1,5 +1,3 @@
-from prometheus_client import Counter
-from prometheus_client import Histogram
 from typing import Dict
 from typing import Optional
 from typing import Type
@@ -7,6 +5,12 @@ from typing import Type
 import time
 import traceback
 
+
+try:
+    from prometheus_client import Counter
+    from prometheus_client import Histogram
+except ImportError:
+    Counter = Histogram = None
 
 ERROR_NONE = "none"
 ERROR_GENERAL_EXCEPTION = "exception"
@@ -37,6 +41,9 @@ class watch:
         exc_value: Optional[Exception],
         exc_traceback: Optional[traceback.StackSummary],
     ):
+        if Counter is None:
+            return
+
         error = ERROR_NONE
         if self.histogram is not None:
             finished = time.time()
