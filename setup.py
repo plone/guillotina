@@ -86,6 +86,8 @@ setup(
             "async-asgi-testclient<2.0.0",
             "openapi-spec-validator",
             "aiohttp>=3.0.0,<4.0.0",
+            "asyncmock",
+            "prometheus-client",
         ],
         "docs": [
             "async-asgi-testclient<2.0.0",

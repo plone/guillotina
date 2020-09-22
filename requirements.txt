@@ -15,3 +15,4 @@ zope.interface==5.1.0
 uvicorn==0.10.8
 argon2-cffi==18.3.0
 backoff==1.10.0
+prometheus-client==0.8.0
