@@ -1,2 +1,2 @@
-class NoRedisConfigured(Exception):
+class NoMemcachedConfigured(Exception):
     pass

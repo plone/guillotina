@@ -114,6 +114,15 @@ def get_db_settings(pytest_node=None):
     if annotations["testdatabase"] == "DUMMY":
         return settings
 
+    try:
+        memcached_annotations = annotations["memcached"]
+    except KeyError:
+        memcached_annotations = None
+    if memcached_annotations is not None:
+        if "memcached" not in settings:
+            settings["memcached"] = {}
+        settings["memcached"]["hosts"] = [(memcached_annotations[0], memcached_annotations[1])]
+
     settings["databases"]["db"]["storage"] = "postgresql"
     settings["databases"]["db"]["db_schema"] = annotations["test_dbschema"]
 

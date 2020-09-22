@@ -6,7 +6,7 @@ except ImportError:
     raise
 
 from guillotina import app_settings
-from guillotina.contrib.emcache.exceptions import NoMemcachedConfigured
+from guillotina.contrib.memcached.exceptions import NoMemcachedConfigured
 from typing import Any
 from typing import Dict
 from typing import List
@@ -21,6 +21,10 @@ logger = logging.getLogger("guillotina.contrib.memcached")
 
 
 class MemcachedDriver:
+    """
+    Implements a cache driver using Memcached
+    """
+
     def __init__(self):
         self._client: Optional[emcache.Client] = None
         self.initialized: bool = False
