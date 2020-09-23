@@ -80,7 +80,7 @@ class CacheUtility:
             if self._obj_driver is not None:
                 val = await self._obj_driver.get(CACHE_PREFIX + key)
                 if val is not None:
-                    logger.debug("Retrieved {} from redis cache".format(key))
+                    logger.debug("Retrieved {} from cache".format(key))
                     val = serialize.loads(val)
                     size = self.get_size(val)
                     self._memory_cache.set(key, val, size)
