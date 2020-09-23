@@ -31,11 +31,10 @@ import pytest
 
 _dir = os.path.dirname(os.path.realpath(__file__))
 
-IS_TRAVIS = "TRAVIS" in os.environ
 DATABASE = os.environ.get("DATABASE", "DUMMY")
 DB_SCHEMA = os.environ.get("DB_SCHEMA", "public")
 
-annotations = {"testdatabase": DATABASE, "test_dbschema": DB_SCHEMA, "redis": None, "travis": IS_TRAVIS}
+annotations = {"testdatabase": DATABASE, "test_dbschema": DB_SCHEMA, "redis": None}
 
 
 def base_settings_configurator(settings):
@@ -157,9 +156,6 @@ def get_db_settings(pytest_node=None):
 
 @pytest.fixture(scope="session")
 def db():
-    """
-    detect travis, use travis's postgres; otherwise, use docker
-    """
     if annotations["testdatabase"] == "DUMMY":
         yield
     else:
@@ -168,11 +164,7 @@ def db():
         if annotations["testdatabase"] == "cockroachdb":
             host, port = pytest_docker_fixtures.cockroach_image.run()
         else:
-            if not annotations["travis"]:
-                host, port = pytest_docker_fixtures.pg_image.run()
-            else:
-                host = "localhost"
-                port = int(os.environ.get("PGPORT", 5432))
+            host, port = pytest_docker_fixtures.pg_image.run()
 
         annotations["pg_host"] = host
         annotations["pg_port"] = port
@@ -181,7 +173,7 @@ def db():
 
         if annotations["testdatabase"] == "cockroachdb":
             pytest_docker_fixtures.cockroach_image.stop()
-        elif not annotations["travis"]:
+        else:
             pytest_docker_fixtures.pg_image.stop()
 
 

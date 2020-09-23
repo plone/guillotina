@@ -7,6 +7,8 @@ CHANGELOG
 - mailer: import 'aiosmtplib' and 'html2text' lazily
   [masipcat]
 
+- Cleanup travis logic from test fixtures [lferran]
+
 - settings: always convert 'pool_size' to int
   [masipcat]
 
