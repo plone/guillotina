@@ -4,6 +4,9 @@ CHANGELOG
 6.0.8 (unreleased)
 ------------------
 
+- mailer: import 'aiosmtplib' and 'html2text' lazily
+  [masipcat]
+
 - settings: always convert 'pool_size' to int
   [masipcat]
 

@@ -10,10 +10,8 @@ from guillotina.contrib.mailer.exceptions import NoEndpointDefinedException
 from guillotina.interfaces import IMailEndpoint
 from guillotina.interfaces import IMailer
 from guillotina.utils import get_random_string
-from html2text import html2text
 from zope.interface import implementer
 
-import aiosmtplib
 import asyncio
 import logging
 import socket
@@ -35,6 +33,8 @@ class SMTPMailEndpoint(object):
         self.settings = settings
 
     async def connect(self):
+        import aiosmtplib
+
         try:
             self.conn = aiosmtplib.SMTP(self.settings["host"], self.settings["port"])
             await self.conn.connect()
@@ -127,6 +127,8 @@ class MailerUtility:
 
     def build_message(self, message, text=None, html=None):
         if not text and html and self.settings.get("use_html2text", True):
+            from html2text import html2text
+
             try:
                 text = html2text(html)
             except Exception:
