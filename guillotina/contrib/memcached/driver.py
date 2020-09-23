@@ -1,8 +1,7 @@
 try:
     import emcache
-    import emcache.client_errors
 except ImportError:
-    print("If you add guillotina.contrib.memcached you need to add pfreixes/emcache on your requirements")
+    print("If you add guillotina.contrib.memcached you need to add emcache on your requirements")
     raise
 
 from guillotina import app_settings
@@ -31,7 +30,12 @@ class MemcachedDriver:
         self.init_lock = asyncio.Lock()
 
     @property
-    def client(self):
+    def client(self) -> Optional[emcache.Client]:
+        return self._client
+
+    def _get_client(self) -> emcache.Client:
+        if self._client is None:
+            raise NoMemcachedConfigured()
         return self._client
 
     async def initialize(self, loop):
@@ -70,7 +74,6 @@ class MemcachedDriver:
             settings = app_settings["memcached"]
         except KeyError:
             raise NoMemcachedConfigured("Memcached settings not found")
-
         self._client = await self._create_client(settings)
 
     async def finalize(self):
@@ -85,46 +88,35 @@ class MemcachedDriver:
     # VALUE API
 
     async def set(self, key: str, data: str, *, expire: Optional[int] = None) -> None:
-        if self._client is None:
-            raise NoMemcachedConfigured()
-
+        client = self._get_client()
         kwargs: Dict[Any] = {}
         if expire is not None:
             kwargs["exptime"] = expire
-
-        await self._client.set(key.encode(), data.encode(), **kwargs)
+        await client.set(key.encode(), data.encode(), **kwargs)
 
     async def get(self, key: str) -> Optional[bytes]:
-        if self._client is None:
-            raise NoMemcachedConfigured()
-
-        item: Optional[emcache.Item] = await self._client.get(key.encode())
+        client = self._get_client()
+        item: Optional[emcache.Item] = await client.get(key.encode())
         if item is not None:
             return item.value
         else:
             return None
 
     async def delete(self, key: str) -> None:
-        if self._client is None:
-            raise NoMemcachedConfigured()
-
-        await self._client.delete(key.encode())
+        client = self._get_client()
+        await client.delete(key.encode())
 
     async def delete_all(self, keys: List[str]) -> None:
-        if self._client is None:
-            raise NoMemcachedConfigured()
-
+        client = self._get_client()
         for key in keys:
             try:
-                await self._client.delete(key.encode())
+                await client.delete(key.encode())
                 logger.debug("Deleted cache keys {}".format(keys))
             except Exception:
                 logger.warning("Error deleting cache keys {}".format(keys), exc_info=True)
 
     async def flushall(self) -> None:
-        if self._client is None:
-            raise NoMemcachedConfigured()
-
+        client = self._get_client()
         # Flush all nodes
-        for node in self._client.cluster_managment().nodes():
-            await self._client.flush_all(node)
+        for node in client.cluster_managment().nodes():
+            await client.flush_all(node)
