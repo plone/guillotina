@@ -4,7 +4,8 @@ CHANGELOG
 5.3.50 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Record redis cache misses
+  [vangheem]
 
 
 5.3.49 (2020-09-22)
