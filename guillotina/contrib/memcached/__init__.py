@@ -1,7 +1,7 @@
 from asyncio import get_running_loop
 from guillotina.contrib.memcached.driver import MemcachedDriver
-from typing import Dict
 from typing import Any
+from typing import Dict
 
 
 _driver = None
