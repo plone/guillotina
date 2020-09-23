@@ -4,6 +4,8 @@ CHANGELOG
 6.0.8 (unreleased)
 ------------------
 
+- Cleanup travis logic from test fixtures [lferran]
+
 - settings: always convert 'pool_size' to int
   [masipcat]
 
