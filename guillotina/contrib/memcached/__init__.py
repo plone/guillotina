@@ -1,10 +1,12 @@
 from asyncio import get_running_loop
 from guillotina.contrib.memcached.driver import MemcachedDriver
+from typing import Dict
+from typing import Any
 
 
 _driver = None
 
-app_settings = {"memcached": {"hosts": [], "timeout": None, "max_connections": None}}
+app_settings: Dict[str, Any] = {"memcached": {"hosts": [], "timeout": None, "max_connections": None}}
 
 
 def includeme(root, settings):

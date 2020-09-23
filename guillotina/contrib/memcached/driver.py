@@ -77,7 +77,7 @@ class MemcachedDriver:
 
     async def _create_client(self, settings: Dict[str, Any]) -> emcache.Client:
         hosts = settings.get("hosts")
-        if len(hosts or []) == 0:
+        if hosts is None or len(hosts) == 0:
             raise NoMemcachedConfigured("No hosts configured")
 
         servers = [emcache.MemcachedHostAddress(host, int(port)) for host, port in hosts]
@@ -116,7 +116,7 @@ class MemcachedDriver:
 
     async def set(self, key: str, data: str, *, expire: Optional[int] = None) -> None:
         client = self._get_client()
-        kwargs: Dict[Any] = {}
+        kwargs: Dict[str, int] = {}
         if expire is not None:
             kwargs["exptime"] = expire
         with watch("set"):
