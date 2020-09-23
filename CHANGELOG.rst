@@ -4,8 +4,7 @@ CHANGELOG
 5.3.55 (unreleased)
 -------------------
 
-- Nothing changed yet.
-
+- Add memcached support as cache driver [lferran]
 
 5.3.54 (2020-09-30)
 -------------------
@@ -28,7 +27,6 @@ CHANGELOG
   [lferran]
 - Add id checker for move
   [qiwn]
-
 
 5.3.51 (2020-09-24)
 -------------------
