@@ -4,6 +4,9 @@ CHANGELOG
 6.0.17 (unreleased)
 -------------------
 
+- Record redis cache misses
+  [vangheem]
+
 - Add metrics to pg and redis operations
   [vangheem]
 
