@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.50 (unreleased)
+5.3.50 (2020-09-23)
 -------------------
 
 - Record redis cache misses
