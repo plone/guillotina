@@ -34,7 +34,7 @@ try:
     class watch(metrics.watch):
         def __init__(self, operation: str):
             super().__init__(
-                counter=REDIS_OPS, histogram=REDIS_OPS_PROCESSING_TIME, labels={"type": operation},
+                counter=REDIS_OPS, histogram=REDIS_OPS_PROCESSING_TIME, labels={"type": operation}
             )
 
 
@@ -122,13 +122,14 @@ class RedisDriver:
     async def delete_all(self, keys: List[str]):
         if self._pool is None:
             raise NoRedisConfigured()
-        for key in keys:
-            try:
-                with watch("delete_many"):
+
+        with watch("delete_many"):
+            for key in keys:
+                try:
                     await self._pool.execute(b"DEL", key)
-                logger.debug("Deleted cache keys {}".format(keys))
-            except Exception:
-                logger.warning("Error deleting cache keys {}".format(keys), exc_info=True)
+                    logger.debug("Deleted cache keys {}".format(keys))
+                except Exception:
+                    logger.warning("Error deleting cache keys {}".format(keys), exc_info=True)
 
     async def flushall(self, *, async_op: Optional[bool] = False):
         if self._pool is None:
