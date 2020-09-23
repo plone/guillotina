@@ -1,4 +1,7 @@
-import asyncio
+import pytest
+
+
+pytestmark = [pytest.mark.asyncio]
 
 
 async def test_install({{cookiecutter.package_name}}_requester):  # noqa

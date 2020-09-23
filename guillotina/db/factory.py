@@ -36,6 +36,7 @@ def _get_connection_options(dbconfig):
         "max_cached_statement_lifetime",
         "max_cacheable_statement_size",
         "command_timeout",
+        "server_settings",
     ):
         if key in dbconfig:
             connection_options[key] = dbconfig[key]
@@ -60,7 +61,12 @@ async def _PGConfigurationFactory(key, dbconfig, loop=None, storage_factory=Post
         partition_object = resolve_dotted_name(dbconfig["partition"])
 
     dbconfig.update(
-        {"dsn": dsn, "name": key, "partition": partition_object, "pool_size": dbconfig.get("pool_size", 13)}
+        {
+            "dsn": dsn,
+            "name": key,
+            "partition": partition_object,
+            "pool_size": int(dbconfig.get("pool_size", 13)),
+        }
     )
 
     connection_options = _get_connection_options(dbconfig)

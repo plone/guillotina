@@ -1,10 +1,77 @@
 CHANGELOG
 =========
 
-6.0.1 (unreleased)
+6.0.8 (unreleased)
 ------------------
 
 - Cleanup travis logic from test fixtures [lferran]
+
+- settings: always convert 'pool_size' to int
+  [masipcat]
+
+
+6.0.7 (2020-09-09)
+------------------
+
+- Add IFileNameGenerator adapter
+  [qiwn]
+
+
+6.0.6 (2020-08-25)
+------------------
+
+- Pass 'server_settings' in 'connection_options' to asyncpg pool
+  [masipcat]
+
+
+6.0.5 (2020-08-11)
+------------------
+
+- Fix register schema
+  [bloodbare]
+
+- Fix async test without pytest mark
+  [masipcat]
+
+6.0.4 (2020-07-29)
+------------------
+
+- fix release
+
+
+6.0.3 (2020-07-29)
+------------------
+
+- Cookiecutter: fix test_install.py
+  [masipcat]
+
+- test deps: unpin pytest-asyncio
+  [masipcat]
+
+- doc: fix md headers (h1 -> h2) and other small fixes
+  [masipcat]
+
+- doc: fix example app
+  [masipcat]
+
+- Fix sphinx-build
+  [masipcat]
+
+- Make sure it does not fail on empty field
+  [bloodbare]
+
+6.0.2 (2020-07-10)
+------------------
+
+- Set load_catalog=true in test settings
+  [masipcat]
+
+
+6.0.1 (2020-07-09)
+------------------
+
+- Also allow JWT sub claim for loginid
+  [allusa]
 
 
 6.0.0 (2020-06-17)

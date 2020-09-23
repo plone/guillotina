@@ -29,7 +29,7 @@ def test_get_json_schema_validator_caches(dummy_guillotina):
     assert id(validator) == id(get_schema_validator("PrincipalRole"))
 
 
-async def test_resolve_json_schema_type(dummy_guillotina):
+def test_resolve_json_schema_type(dummy_guillotina):
     resolver = JSONSchemaRefResolver(base_uri="/", referrer=None)
     resolver.resolve_fragment(None, "/components/schemas/Behavior")
     resolver.resolve_fragment(None, "/components/schemas/Resource")
