@@ -1,10 +1,70 @@
+from guillotina.contrib.memcached.driver import MemcachedDriver
 from guillotina.utils import resolve_dotted_name
+from unittest import mock
 
 import asyncio
+import emcache
 import pytest
 
 
-@pytest.mark.app_settings({"applications": ["guillotina", "guillotina.contrib.memcached"]})
+pytestmark = pytest.mark.asyncio
+
+
+MEMCACHED_SETTINGS = {"applications": ["guillotina", "guillotina.contrib.memcached"]}
+
+
+@pytest.fixture(scope="function")
+def mocked_create_client(loop):
+    with mock.patch("guillotina.contrib.memcached.driver.emcache.create_client") as create_client:
+        f = asyncio.Future()
+        f.set_result(None)
+        create_client.return_value = f
+        yield create_client
+
+
+async def test_create_client_returns_emcache_client(memcached_container, guillotina_main, loop):
+    driver = MemcachedDriver()
+    assert driver.client is None
+    settings = {"hosts": [memcached_container]}
+    client = await driver._create_client(settings)
+    assert isinstance(client, emcache.Client)
+
+
+async def test_client_is_initialized_with_configured_hosts(mocked_create_client):
+    hosts = [("localhost", "11211")]
+    settings = {"hosts": hosts}
+    driver = MemcachedDriver()
+    await driver._create_client(settings)
+    assert len(mocked_create_client.call_args[0][0]) == 1
+
+
+async def test_create_client_ignores_invalid_params(mocked_create_client):
+    hosts = [("localhost", "11211")]
+    settings = {"hosts": hosts}
+    driver = MemcachedDriver()
+    await driver._create_client({"foo": "bar", **settings})
+    assert mocked_create_client.call_args[1] == {}
+
+
+@pytest.mark.parametrize(
+    "param,value",
+    [
+        ("timeout", 1.0),
+        ("max_connections", 20),
+        ("purge_unused_connections_after", 1),
+        ("connection_timeout", 20),
+        ("purge_unhealthy_nodes", True),
+    ],
+)
+async def test_create_client_sets_configured_params(mocked_create_client, param, value):
+    hosts = [("localhost", "11211")]
+    settings = {"hosts": hosts}
+    driver = MemcachedDriver()
+    await driver._create_client({**settings, **{param: value}})
+    assert mocked_create_client.call_args[1][param] == value
+
+
+@pytest.mark.app_settings(MEMCACHED_SETTINGS)
 async def test_memcached_ops(memcached_container, guillotina_main, loop):
     driver = await resolve_dotted_name("guillotina.contrib.memcached").get_driver()
     assert driver.initialized
@@ -34,6 +94,8 @@ async def test_memcached_ops(memcached_container, guillotina_main, loop):
     await driver.flushall()
     result = await driver.get("test5")
     assert result is None
+
+    await driver.info()
 
     await driver.finalize()
     assert driver.initialized is False

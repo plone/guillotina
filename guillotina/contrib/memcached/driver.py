@@ -45,6 +45,25 @@ class MemcachedDriver:
                     except Exception:  # pragma: no cover
                         logger.error("Error initializing memcached driver", exc_info=True)
 
+    async def _create_client(self, settings: Dict[str, Any]) -> emcache.Client:
+        hosts = settings.get("hosts")
+        if len(hosts or []) == 0:
+            raise NoMemcachedConfigured("No hosts configured")
+
+        servers = [emcache.MemcachedHostAddress(host, int(port)) for host, port in hosts]
+        # Configure client constructor from settings
+        client_params = {}
+        for param in [
+            "timeout",
+            "max_connections",
+            "purge_unused_connections_after",
+            "connection_timeout",
+            "purge_unhealthy_nodes",
+        ]:
+            if param in settings and settings[param] is not None:
+                client_params[param] = settings[param]
+        return await emcache.create_client(servers, **client_params)
+
     @backoff.on_exception(backoff.expo, (OSError,), max_time=30, max_tries=4)
     async def _connect(self):
         try:
@@ -52,29 +71,16 @@ class MemcachedDriver:
         except KeyError:
             raise NoMemcachedConfigured("Memcached settings not found")
 
-        hosts = settings.get("hosts")
-        if len(hosts or []) == 0:
-            raise NoMemcachedConfigured("No hosts configured")
-        servers = [emcache.MemcachedHostAddress(host, int(port)) for host, port in hosts]
-
-        # Configure client constructor from settings
-        client_params = {}
-        for param in [
-            "timeout",
-            "max_connections",
-            "purge_unused_connections_after",
-            "connetion_timeout",
-            "purge_unhealthy_nodes",
-        ]:
-            if param in settings and settings[param] is not None:
-                client_params[param] = settings[param]
-
-        self._client = await emcache.create_client(servers, **client_params)
+        self._client = await self._create_client(settings)
 
     async def finalize(self):
         if self._client is not None:
             await self._client.close()
         self.initialized = False
+
+    async def info(self):
+        # emcache client does not support getting stats yet
+        return None
 
     # VALUE API
 
