@@ -5,6 +5,7 @@ except ImportError:
     raise
 
 from guillotina import app_settings
+from guillotina import metrics
 from guillotina.contrib.memcached.exceptions import NoMemcachedConfigured
 from typing import Any
 from typing import Dict
@@ -14,6 +15,31 @@ from typing import Optional
 import asyncio
 import backoff
 import logging
+
+
+try:
+    import prometheus_client
+
+    MEMCACHED_OPS = prometheus_client.Counter(
+        "guillotina_cache_memcached_ops_total",
+        "Total count of ops by type of operation and the error if there was.",
+        labelnames=["type", "error"],
+    )
+    MEMCACHED_OPS_PROCESSING_TIME = prometheus_client.Histogram(
+        "guillotina_cache_memcached_ops_processing_time_seconds",
+        "Histogram of operations processing time by type (in seconds)",
+        labelnames=["type"],
+    )
+
+    class watch(metrics.watch):
+        def __init__(self, operation: str):
+            super().__init__(
+                counter=MEMCACHED_OPS, histogram=MEMCACHED_OPS_PROCESSING_TIME, labels={"type": operation}
+            )
+
+
+except ImportError:
+    watch = metrics.watch  # type: ignore
 
 
 logger = logging.getLogger("guillotina.contrib.memcached")
@@ -66,7 +92,8 @@ class MemcachedDriver:
         ]:
             if param in settings and settings[param] is not None:
                 client_params[param] = settings[param]
-        return await emcache.create_client(servers, **client_params)
+        with watch("connect"):
+            return await emcache.create_client(servers, **client_params)
 
     @backoff.on_exception(backoff.expo, (OSError,), max_time=30, max_tries=4)
     async def _connect(self):
@@ -92,11 +119,13 @@ class MemcachedDriver:
         kwargs: Dict[Any] = {}
         if expire is not None:
             kwargs["exptime"] = expire
-        await client.set(key.encode(), data.encode(), **kwargs)
+        with watch("set"):
+            await client.set(key.encode(), data.encode(), **kwargs)
 
     async def get(self, key: str) -> Optional[bytes]:
         client = self._get_client()
-        item: Optional[emcache.Item] = await client.get(key.encode())
+        with watch("get"):
+            item: Optional[emcache.Item] = await client.get(key.encode())
         if item is not None:
             return item.value
         else:
@@ -104,13 +133,15 @@ class MemcachedDriver:
 
     async def delete(self, key: str) -> None:
         client = self._get_client()
-        await client.delete(key.encode())
+        with watch("delete"):
+            await client.delete(key.encode())
 
     async def delete_all(self, keys: List[str]) -> None:
         client = self._get_client()
         for key in keys:
             try:
-                await client.delete(key.encode())
+                with watch("delete_many"):
+                    await client.delete(key.encode())
                 logger.debug("Deleted cache keys {}".format(keys))
             except Exception:
                 logger.warning("Error deleting cache keys {}".format(keys), exc_info=True)
@@ -119,4 +150,5 @@ class MemcachedDriver:
         client = self._get_client()
         # Flush all nodes
         for node in client.cluster_managment().nodes():
-            await client.flush_all(node)
+            with watch("flush"):
+                await client.flush_all(node)
