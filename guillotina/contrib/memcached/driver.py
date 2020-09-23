@@ -43,19 +43,33 @@ class MemcachedDriver:
                         self.initialized = True
                         break
                     except Exception:  # pragma: no cover
-                        logger.error("Error initializing pubsub", exc_info=True)
+                        logger.error("Error initializing memcached driver", exc_info=True)
 
     @backoff.on_exception(backoff.expo, (OSError,), max_time=30, max_tries=4)
     async def _connect(self):
-        settings = app_settings["memcached"]
-        hosts = [emcache.MemcachedHostAddress(host, int(port)) for host, port in settings["hosts"]]
-        if len(hosts) == 0:
-            raise NoMemcachedConfigured()
-        kw = {}
-        for key in ("timeout", "max_connections"):
-            if settings.get(key) is not None:
-                kw[key] = settings[key]
-        self._client = await emcache.create_client(hosts, **kw)
+        try:
+            settings = app_settings["memcached"]
+        except KeyError:
+            raise NoMemcachedConfigured("Memcached settings not found")
+
+        hosts = settings.get("hosts")
+        if len(hosts or []) == 0:
+            raise NoMemcachedConfigured("No hosts configured")
+        servers = [emcache.MemcachedHostAddress(host, int(port)) for host, port in hosts]
+
+        # Configure client constructor from settings
+        client_params = {}
+        for param in [
+            "timeout",
+            "max_connections",
+            "purge_unused_connections_after",
+            "connetion_timeout",
+            "purge_unhealthy_nodes",
+        ]:
+            if param in settings and settings[param] is not None:
+                client_params[param] = settings[param]
+
+        self._client = await emcache.create_client(servers, **client_params)
 
     async def finalize(self):
         if self._client is not None:

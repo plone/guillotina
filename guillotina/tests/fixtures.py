@@ -116,14 +116,17 @@ def get_db_settings(pytest_node=None):
             settings["redis"] = {}
         settings["redis"]["host"] = annotations["redis"][0]
         settings["redis"]["port"] = annotations["redis"][1]
+
+    # Inject memcached docker fixture config into settings
     try:
-        memcached_annotations = annotations["memcached"]
+        memcached = annotations["memcached"]
     except KeyError:
-        memcached_annotations = None
-    if memcached_annotations is not None:
+        memcached = None
+    if memcached is not None:
         if "memcached" not in settings:
             settings["memcached"] = {}
-        settings["memcached"]["hosts"] = [(memcached_annotations[0], memcached_annotations[1])]
+        host, port = memcached
+        settings["memcached"]["hosts"] = [(host, port)]
 
     if annotations["testdatabase"] == "DUMMY":
         return settings
