@@ -41,6 +41,24 @@ class TestRedisMetrics:
             > 0
         )
 
+    async def test_get_miss_redis_metric(self, metrics_registry):
+        driver = RedisDriver()
+        driver._pool = AsyncMock()
+        driver._pool.execute.return_value = None
+        await driver.get("foo")
+        assert (
+            metrics_registry.get_sample_value(
+                "guillotina_cache_redis_ops_total", {"type": "get_miss", "error": "none"}
+            )
+            == 1.0
+        )
+        assert (
+            metrics_registry.get_sample_value(
+                "guillotina_cache_redis_ops_processing_time_seconds_sum", {"type": "get_miss"}
+            )
+            > 0
+        )
+
     async def test_delete_redis_metric(self, metrics_registry):
         driver = RedisDriver()
         driver._pool = AsyncMock()

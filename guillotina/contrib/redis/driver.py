@@ -107,8 +107,11 @@ class RedisDriver:
     async def get(self, key: str) -> str:
         if self._pool is None:
             raise NoRedisConfigured()
-        with watch("get"):
-            return await self._pool.execute(b"GET", key)
+        with watch("get") as w:
+            val = await self._pool.execute(b"GET", key)
+            if not val:
+                w.labels["type"] = "get_miss"
+            return val
 
     async def delete(self, key: str):
         if self._pool is None:
