@@ -17,6 +17,17 @@ import logging
 import socket
 import time
 
+try:
+    import aiosmtplib
+except ImportError:
+    pass
+
+
+try:
+    from html2text import html2text
+except ImportError:
+    pass
+
 
 logger = logging.getLogger(__name__)
 
@@ -33,8 +44,6 @@ class SMTPMailEndpoint(object):
         self.settings = settings
 
     async def connect(self):
-        import aiosmtplib
-
         try:
             self.conn = aiosmtplib.SMTP(self.settings["host"], self.settings["port"])
             await self.conn.connect()
@@ -127,8 +136,6 @@ class MailerUtility:
 
     def build_message(self, message, text=None, html=None):
         if not text and html and self.settings.get("use_html2text", True):
-            from html2text import html2text
-
             try:
                 text = html2text(html)
             except Exception:
