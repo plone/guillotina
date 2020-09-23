@@ -138,13 +138,13 @@ class MemcachedDriver:
 
     async def delete_all(self, keys: List[str]) -> None:
         client = self._get_client()
-        for key in keys:
-            try:
-                with watch("delete_many"):
+        with watch("delete_many"):
+            for key in keys:
+                try:
                     await client.delete(key.encode())
-                logger.debug("Deleted cache keys {}".format(keys))
-            except Exception:
-                logger.warning("Error deleting cache keys {}".format(keys), exc_info=True)
+                    logger.debug("Deleted cache keys {}".format(keys))
+                except Exception:
+                    logger.warning("Error deleting cache keys {}".format(keys), exc_info=True)
 
     async def flushall(self) -> None:
         client = self._get_client()
