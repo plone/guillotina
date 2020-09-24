@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.8 (unreleased)
+6.0.8 (2020-09-24)
 ------------------
 
 - mailer: import 'aiosmtplib' and 'html2text' lazily
