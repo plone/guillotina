@@ -10,14 +10,24 @@ from guillotina.contrib.mailer.exceptions import NoEndpointDefinedException
 from guillotina.interfaces import IMailEndpoint
 from guillotina.interfaces import IMailer
 from guillotina.utils import get_random_string
-from html2text import html2text
 from zope.interface import implementer
 
-import aiosmtplib
 import asyncio
 import logging
 import socket
 import time
+
+
+try:
+    import aiosmtplib
+except ImportError:
+    pass
+
+
+try:
+    from html2text import html2text
+except ImportError:
+    pass
 
 
 logger = logging.getLogger(__name__)
