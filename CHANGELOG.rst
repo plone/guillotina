@@ -4,6 +4,12 @@ CHANGELOG
 6.0.17 (unreleased)
 -------------------
 
+- Record metrics on cache hit/misses
+  [vangheem]
+
+- Record metrics on time waiting for pg locks
+  [vangheem]
+
 - Record redis cache misses
   [vangheem]
 
