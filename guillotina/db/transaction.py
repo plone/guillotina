@@ -3,6 +3,9 @@ from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.component import get_adapter
 from guillotina.component import query_adapter
+from guillotina.const import ROOT_ID
+from guillotina.content import Container
+from guillotina.db.db import Root
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionCache
 from guillotina.db.interfaces import ITransactionStrategy
@@ -15,6 +18,7 @@ from guillotina.exceptions import TIDConflictError
 from guillotina.exceptions import TransactionClosedException
 from guillotina.exceptions import TransactionObjectRegistrationMismatchException
 from guillotina.profile import profilable
+from guillotina.registry import Registry
 from guillotina.utils import lazy_apply
 from typing import Any
 from typing import AsyncIterator
@@ -22,12 +26,51 @@ from typing import Callable
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing_extensions import TypedDict
 from zope.interface import implementer
 
 import asyncio
 import logging
 import sys
 import time
+
+
+class ObjectResultType(TypedDict, total=False):
+    state: bytes
+    zoid: str
+    tid: str
+    id: str
+    parent_id: Optional[str]
+
+
+try:
+    import prometheus_client
+
+    CACHE_HITS = prometheus_client.Counter(
+        "guillotina_cache_ops_total",
+        "Total count of ops by type of operation and the error if there was.",
+        labelnames=["type", "result"],
+    )
+
+    def record_cache_metric(
+        name: str, result_type: str, value: ObjectResultType, key_args: Dict[str, Any]
+    ) -> None:
+        if (
+            value["zoid"] == ROOT_ID
+            or value.get("parent_id") == ROOT_ID
+            or isinstance(key_args.get("container"), (Container, Registry, Root))
+        ):
+            # since these types of objects will always be in cache, let's tag these differently
+            result_type += "_roots"
+        CACHE_HITS.labels(type=name, result=result_type).inc()
+
+
+except ImportError:
+
+    def record_cache_metric(
+        name: str, result_type: str, value: ObjectResultType, key_args: Dict[str, Any]
+    ) -> None:
+        ...
 
 
 _EMPTY = "__<EMPTY VALUE>__"
@@ -62,9 +105,14 @@ class cache:
         async def _wrapper(self, *args, **kwargs):
             key_args = this.key_gen(*args, **kwargs)
             result = await self._cache.get(**key_args)
+
             if result is not None:
+                record_cache_metric(func.__name__, "hit", result, key_args)
                 return result
+
             result = await func(self, *args, **kwargs)
+
+            record_cache_metric(func.__name__, "miss", result, key_args)
 
             if result is not None:
                 if result == _EMPTY:
@@ -92,11 +140,13 @@ class Transaction:
     _skip_commit = False
     user = None
 
-    def __init__(self, manager, loop=None, read_only=False):
+    def __init__(
+        self, manager, loop=None, read_only: bool = False, cache=None, strategy=None,
+    ):
         # Transaction Manager
         self._manager = manager
 
-        self.initialize(read_only)
+        self.initialize(read_only, cache, strategy)
 
         logger.debug("new transaction")
 
@@ -110,7 +160,9 @@ class Transaction:
         # which would correspond with one connection
         self._lock = asyncio.Lock(loop=loop)
 
-    def initialize(self, read_only):
+    def initialize(
+        self, read_only, cache=None, strategy=None,
+    ):
         self._read_only = read_only
         self._txn_time = None
         self._tid = None
@@ -130,8 +182,8 @@ class Transaction:
         # List of (hook, args, kws) tuples added by addAfterCommitHook().
         self._after_commit = []
 
-        self._cache = query_adapter(self, ITransactionCache, name=app_settings["cache"]["strategy"])
-        self._strategy = get_adapter(
+        self._cache = cache or query_adapter(self, ITransactionCache, name=app_settings["cache"]["strategy"])
+        self._strategy = strategy or get_adapter(
             self, ITransactionStrategy, name=self._manager._storage._transaction_strategy
         )
         self._query_count_start = self._query_count_end = 0
@@ -338,7 +390,7 @@ class Transaction:
                     raise
                 else:
                     logger.warn(f"Restarting commit for tid: {self._tid}")
-                    await self._db_txn.restart()
+                    await self._db_txn.restart()  # type: ignore
 
     @profilable
     async def _commit(self):

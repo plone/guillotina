@@ -1,10 +1,16 @@
 from asyncmock import AsyncMock
 from guillotina import metrics
+from guillotina.const import ROOT_ID
+from guillotina.content import Container
 from guillotina.contrib.redis.driver import RedisDriver
 from guillotina.db.storages.pg import PostgresqlStorage
+from guillotina.db.transaction import Transaction
+from guillotina.db.transaction_manager import TransactionManager
+from guillotina.tests.utils import create_content
 from unittest.mock import MagicMock
 
 import asyncio
+import pickle
 import prometheus_client
 
 
@@ -171,12 +177,133 @@ class TestPGMetrics:
         )
 
 
-class TestLock:
-    async def test_lock_metric(self):
-        lock = asyncio.Lock()
-        metric = prometheus_client.Histogram("test_metric", "Test",)
-        assert metric.collect()[0].samples[0].value == 0
-        async with metrics.watch_lock(metric, lock):
-            assert lock.locked()
-        assert not lock.locked()
-        assert metric.collect()[0].samples[0].value == 1
+async def test_lock_metric():
+    lock = asyncio.Lock()
+    metric = prometheus_client.Histogram("test_metric", "Test",)
+    assert metric.collect()[0].samples[0].value == 0
+    async with metrics.watch_lock(metric, lock):
+        assert lock.locked()
+    assert not lock.locked()
+    assert metric.collect()[0].samples[0].value == 1
+
+
+class TestTransactionMetrics:
+    async def test_record_transaction_cache_hit(self, dummy_guillotina, metrics_registry):
+        storage = AsyncMock()
+        mng = TransactionManager(storage)
+        cache = AsyncMock()
+        cache.get.return_value = {
+            "state": pickle.dumps(create_content()),
+            "zoid": "foobar",
+            "tid": 1,
+            "id": "foobar",
+        }
+        strategy = AsyncMock()
+        txn = Transaction(mng, cache=cache, strategy=strategy)
+
+        await txn.get("foobar")
+
+        assert (
+            metrics_registry.get_sample_value("guillotina_cache_ops_total", {"type": "_get", "result": "hit"})
+            == 1.0
+        )
+
+    async def test_record_transaction_cache_hit_container(self, dummy_guillotina, metrics_registry):
+        storage = AsyncMock()
+        mng = TransactionManager(storage)
+        cache = AsyncMock()
+
+        cache.get.return_value = {
+            "state": pickle.dumps(create_content(Container)),
+            "zoid": ROOT_ID,
+            "tid": 1,
+            "id": "foobar",
+        }
+        strategy = AsyncMock()
+        txn = Transaction(mng, cache=cache, strategy=strategy)
+
+        await txn.get("foobar")
+
+        assert (
+            metrics_registry.get_sample_value("guillotina_cache_ops_total", {"type": "_get", "result": "hit"})
+            is None
+        )
+
+        assert (
+            metrics_registry.get_sample_value(
+                "guillotina_cache_ops_total", {"type": "_get", "result": "hit_roots"}
+            )
+            == 1.0
+        )
+
+    async def test_record_transaction_cache_miss(self, dummy_guillotina, metrics_registry):
+        storage = AsyncMock()
+        storage.load.return_value = {
+            "state": pickle.dumps(create_content()),
+            "zoid": "foobar",
+            "tid": 1,
+            "id": "foobar",
+        }
+        mng = TransactionManager(storage)
+        cache = AsyncMock()
+        cache.get.return_value = None
+
+        strategy = AsyncMock()
+        txn = Transaction(mng, cache=cache, strategy=strategy)
+
+        await txn.get("foobar")
+
+        assert (
+            metrics_registry.get_sample_value(
+                "guillotina_cache_ops_total", {"type": "_get", "result": "miss"}
+            )
+            == 1.0
+        )
+
+    async def test_record_transaction_cache_hit_get_child(self, dummy_guillotina, metrics_registry):
+        storage = AsyncMock()
+        mng = TransactionManager(storage)
+        cache = AsyncMock()
+
+        cache.get.return_value = {
+            "state": pickle.dumps(create_content()),
+            "zoid": "foobar",
+            "tid": 1,
+            "id": "foobar",
+        }
+        strategy = AsyncMock()
+        txn = Transaction(mng, cache=cache, strategy=strategy)
+
+        ob = create_content()
+        await txn.get_child(ob, "foobar")
+
+        assert (
+            metrics_registry.get_sample_value(
+                "guillotina_cache_ops_total", {"type": "_get_child", "result": "hit"}
+            )
+            == 1.0
+        )
+
+    async def test_record_transaction_cache_hit_get_child_root(self, dummy_guillotina, metrics_registry):
+        storage = AsyncMock()
+        mng = TransactionManager(storage)
+        cache = AsyncMock()
+
+        cache.get.return_value = {
+            "state": pickle.dumps(create_content()),
+            "zoid": "foobar",
+            "tid": 1,
+            "id": "foobar",
+        }
+        strategy = AsyncMock()
+        txn = Transaction(mng, cache=cache, strategy=strategy)
+
+        ob = create_content(Container)
+        await txn.get_child(ob, "foobar")
+
+        assert (
+            metrics_registry.get_sample_value(
+                "guillotina_cache_ops_total", {"type": "_get_child", "result": "hit_roots"}
+            )
+            == 1.0
+        )
