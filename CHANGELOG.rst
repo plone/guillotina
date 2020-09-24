@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.51 (unreleased)
+5.3.51 (2020-09-24)
 -------------------
 
 - Record metrics on cache hit/misses
