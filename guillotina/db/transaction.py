@@ -59,10 +59,9 @@ try:
     def record_cache_metric(
         name: str, result_type: str, value: Union[ObjectResultType, str], key_args: Dict[str, Any]
     ) -> None:
-        if isinstance(value, str):
-            if value == _EMPTY:
-                result_type += "_empty"
-        elif (
+        if value == _EMPTY:
+            result_type += "_empty"
+        elif isinstance(value, dict) and (
             value["zoid"] == ROOT_ID
             or value.get("parent_id") == ROOT_ID
             or isinstance(key_args.get("container"), (Container, Registry, Root))
