@@ -4,6 +4,9 @@ CHANGELOG
 5.3.51 (unreleased)
 -------------------
 
+- Record metrics on cache hit/misses
+  [vangheem]
+
 - Record metrics on time waiting for pg locks
   [vangheem]
 
