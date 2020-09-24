@@ -2,6 +2,7 @@ from typing import Dict
 from typing import Optional
 from typing import Type
 
+import asyncio
 import time
 import traceback
 
@@ -64,3 +65,24 @@ class watch:
                 else:
                     error = ERROR_GENERAL_EXCEPTION
             self.counter.labels(error=error, **self.labels).inc()
+
+
+class watch_lock:
+    def __init__(
+        self, histogram: Histogram, lock: asyncio.Lock, labels: Optional[Dict[str, str]] = None,
+    ):
+        self.histogram = histogram
+        self.lock = lock
+        self.labels = labels or {}
+
+    async def __aenter__(self) -> None:
+        start = time.time()
+        await self.lock.acquire()
+        finished = time.time()
+        if len(self.labels) > 0:
+            self.histogram.labels(**self.labels).observe(finished - start)
+        else:
+            self.histogram.observe(finished - start)
+
+    async def __aexit__(self, exc_type, exc, tb):
+        self.lock.release()

@@ -39,6 +39,11 @@ try:
         "Histogram of operations processing time by type (in seconds)",
         labelnames=["type"],
     )
+    PG_LOCK_ACQUIRE_TIME = prometheus_client.Histogram(
+        "guillotina_db_pg_lock_time_seconds",
+        "Histogram of time it takes to acquire locks (in seconds)",
+        labelnames=["type"],
+    )
 
     class watch(metrics.watch):
         def __init__(self, operation: str):
@@ -55,6 +60,10 @@ try:
                     "deadlock_error": asyncpg.exceptions.DeadlockDetectedError,
                 },
             )
+
+    class watch_lock(metrics.watch_lock):
+        def __init__(self, lock: asyncio.Lock, operation: str):
+            super().__init__(PG_LOCK_ACQUIRE_TIME, lock, labels={"type": operation})
 
 
 except ImportError:
@@ -505,7 +514,7 @@ class PGConnectionManager:
         return self._lock
 
     async def close(self):
-        async with self._lock:
+        async with watch_lock(self._lock, "shared_close_conn"):
             if self._pool is None:
                 # nothing to close
                 return
@@ -550,7 +559,7 @@ class PGConnectionManager:
             await self._initialize_tid_statements(True)
 
     async def initialize(self, loop=None, **kw):
-        async with self._lock:
+        async with watch_lock(self._lock, "shared_initialize"):
             if self._pool is not None:
                 # nothing to open
                 return
@@ -868,7 +877,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
     async def load(self, txn, oid):
         sql = self._sql.get("GET_OID", self._objects_table_name)
-        async with txn._lock:
+        async with watch_lock(txn._lock, "load_object_by_oid"):
             with watch("load_object_by_oid"):
                 objects = await self.get_one_row(txn, sql, oid)
         if objects is None:
@@ -899,7 +908,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
             update = True
 
         conn = await txn.get_connection()
-        async with txn._lock:
+        async with watch_lock(txn._lock, "store_object"):
             try:
                 with watch("store_object"):
                     result = await conn.fetch(
@@ -965,7 +974,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def delete(self, txn, oid):
         conn = await txn.get_connection()
         sql = self._sql.get("TRASH_PARENT_ID", self._objects_table_name)
-        async with txn._lock:
+        async with watch_lock(txn._lock, "delete_object"):
             # for delete, we reassign the parent id and delete in the vacuum task
             with watch("delete_object"):
                 await conn.execute(sql, oid)
@@ -979,18 +988,18 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
             if err in str(ex):
                 if (time.time() - self._connection_initialized_on) > BAD_CONNECTION_RESTART_DELAY:
                     # we need to make sure we aren't calling this over and over again
-                    async with self.lock:
+                    async with watch_lock(self.lock, "shared_restart_conn"):
                         return await self.restart_connection()
 
     @restart_conn_on_exception
     async def get_next_tid(self, txn):
-        async with self.lock:
+        async with watch_lock(self.lock, "shared_next_tid"):
             with watch("next_tid"):
                 return await self.stmt_next_tid.fetchval()
 
     @restart_conn_on_exception
     async def get_current_tid(self, txn):
-        async with self.lock:
+        async with watch_lock(self.lock, "shared_current_tid"):
             with watch("current_tid"):
                 return await self.stmt_max_tid.fetchval()
 
@@ -1017,7 +1026,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def start_transaction(self, txn, retries=0):
         error = None
         conn = await txn.get_connection()
-        async with txn._lock:
+        async with watch_lock(txn._lock, "start_txn"):
             txn._db_txn = await self._async_db_transaction_factory(txn)
 
             try:
@@ -1054,7 +1063,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                 return await self.start_transaction(txn, retries + 1)
 
     async def get_conflicts(self, txn):
-        async with self.lock:
+        async with watch_lock(self.lock, "shared_conflicts"):
             if len(txn.modified) == 0:
                 return []
             # use storage lock instead of transaction lock
@@ -1070,7 +1079,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                     return await self.read_conn.fetch(sql, txn._tid)
 
     async def commit(self, transaction):
-        async with transaction._lock:
+        async with watch_lock(transaction._lock, "commit_txn"):
             if transaction._db_txn is not None:
                 with watch("commit_txn"):
                     await transaction._db_txn.commit()
@@ -1079,7 +1088,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
             return transaction._tid
 
     async def abort(self, transaction):
-        async with transaction._lock:
+        async with watch_lock(transaction._lock, "rollback_txn"):
             if transaction._db_txn is not None:
                 try:
                     with watch("rollback_txn"):
@@ -1104,14 +1113,14 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def keys(self, txn, oid):
         conn = await txn.get_connection()
         sql = self._sql.get("GET_CHILDREN_KEYS", self._objects_table_name)
-        async with txn._lock:
+        async with watch_lock(txn._lock, "keys"):
             with watch("keys"):
                 result = await conn.fetch(sql, oid)
         return result
 
     async def get_child(self, txn, parent_oid, id):
         sql = self._sql.get("GET_CHILD", self._objects_table_name)
-        async with txn._lock:
+        async with watch_lock(txn._lock, "get_child"):
             with watch("get_child"):
                 result = await self.get_one_row(txn, sql, parent_oid, id)
         return result
@@ -1119,13 +1128,13 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def get_children(self, txn, parent_oid, ids):
         conn = await txn.get_connection()
         sql = self._sql.get("GET_CHILDREN_BATCH", self._objects_table_name)
-        async with txn._lock:
+        async with watch_lock(txn._lock, "get_children"):
             with watch("get_children"):
                 return await conn.fetch(sql, parent_oid, ids)
 
     async def has_key(self, txn, parent_oid, id):
         sql = self._sql.get("EXIST_CHILD", self._objects_table_name)
-        async with txn._lock:
+        async with watch_lock(txn._lock, "has_key"):
             with watch("has_key"):
                 result = await self.get_one_row(txn, sql, parent_oid, id)
         if result is None:
@@ -1136,7 +1145,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def len(self, txn, oid):
         conn = await txn.get_connection()
         sql = self._sql.get("NUM_CHILDREN", self._objects_table_name)
-        async with txn._lock:
+        async with watch_lock(txn._lock, "num_children"):
             with watch("num_children"):
                 result = await conn.fetchval(sql, oid)
         return result
@@ -1153,7 +1162,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
     async def get_annotation(self, txn, oid, id):
         sql = self._sql.get("GET_ANNOTATION", self._objects_table_name)
-        async with txn._lock:
+        async with watch_lock(txn._lock, "load_annotation"):
             with watch("load_annotation"):
                 result = await self.get_one_row(txn, sql, oid, id, prepare=True)
             if result is not None and result["parent_id"] == TRASHED_ID:
@@ -1163,7 +1172,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def get_annotation_keys(self, txn, oid):
         conn = await txn.get_connection()
         sql = self._sql.get("GET_ANNOTATIONS_KEYS", self._objects_table_name)
-        async with txn._lock:
+        async with watch_lock(txn._lock, "load_annotation_keys"):
             with watch("load_annotation_keys"):
                 result = await conn.fetch(sql, oid)
         items = []
@@ -1174,13 +1183,13 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
     async def write_blob_chunk(self, txn, bid, oid, chunk_index, data):
         sql = self._sql.get("HAS_OBJECT", self._objects_table_name)
-        async with txn._lock:
+        async with watch_lock(txn._lock, "has_object"):
             result = await self.get_one_row(txn, sql, oid)
         if result is None:
             # check if we have a referenced ob, could be new and not in db yet.
             # if so, create a stub for it here...
             conn = await txn.get_connection()
-            async with txn._lock:
+            async with watch_lock(txn._lock, "store_blob_stub"):
                 with watch("store_blob_stub"):
                     await conn.execute(
                         f"""INSERT INTO {self._objects_table_name}
@@ -1190,13 +1199,13 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                     )
         conn = await txn.get_connection()
         sql = self._sql.get("INSERT_BLOB_CHUNK", self._blobs_table_name)
-        async with txn._lock:
+        async with watch_lock(txn._lock, "store_blob_chunk"):
             with watch("store_blob_chunk"):
                 return await conn.execute(sql, bid, oid, chunk_index, data)
 
     async def read_blob_chunk(self, txn, bid, chunk=0):
         sql = self._sql.get("READ_BLOB_CHUNK", self._blobs_table_name)
-        async with txn._lock:
+        async with watch_lock(txn._lock, "load_blob_chunk"):
             with watch("load_blob_chunk"):
                 return await self.get_one_row(txn, sql, bid, chunk)
 
@@ -1212,14 +1221,14 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def del_blob(self, txn, bid):
         conn = await txn.get_connection()
         sql = self._sql.get("DELETE_BLOB", self._blobs_table_name)
-        async with txn._lock:
+        async with watch_lock(txn._lock, "delete_blob_chunk"):
             with watch("delete_blob_chunk"):
                 await conn.execute(sql, bid)
 
     async def get_total_number_of_objects(self, txn):
         conn = await txn.get_connection()
         sql = self._sql.get("NUM_ROWS", self._objects_table_name)
-        async with txn._lock:
+        async with watch_lock(txn._lock, "total_objects"):
             with watch("total_objects"):
                 result = await conn.fetchval(sql)
         return result
@@ -1227,7 +1236,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def get_total_number_of_resources(self, txn):
         conn = await txn.get_connection()
         sql = self._sql.get("NUM_RESOURCES", self._objects_table_name)
-        async with txn._lock:
+        async with watch_lock(txn._lock, "total_resources"):
             with watch("total_resources"):
                 result = await conn.fetchval(sql)
         return result
@@ -1235,7 +1244,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def get_total_resources_of_type(self, txn, type_):
         conn = await txn.get_connection()
         sql = self._sql.get("NUM_RESOURCES_BY_TYPE", self._objects_table_name)
-        async with txn._lock:
+        async with watch_lock(txn._lock, "total_objects_by_type"):
             with watch("total_objects_by_type"):
                 result = await conn.fetchval(sql, type_)
         return result
