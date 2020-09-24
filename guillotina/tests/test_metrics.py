@@ -3,6 +3,7 @@ from guillotina import metrics
 from guillotina.const import ROOT_ID
 from guillotina.content import Container
 from guillotina.contrib.redis.driver import RedisDriver
+from guillotina.db import transaction
 from guillotina.db.storages.pg import PostgresqlStorage
 from guillotina.db.transaction import Transaction
 from guillotina.db.transaction_manager import TransactionManager
@@ -12,6 +13,7 @@ from unittest.mock import MagicMock
 import asyncio
 import pickle
 import prometheus_client
+import pytest
 
 
 class TestRedisMetrics:
@@ -304,6 +306,26 @@ class TestTransactionMetrics:
         assert (
             metrics_registry.get_sample_value(
                 "guillotina_cache_ops_total", {"type": "_get_child", "result": "hit_roots"}
+            )
+            == 1.0
+        )
+
+    async def test_record_transaction_cache_empty(self, dummy_guillotina, metrics_registry):
+        storage = AsyncMock()
+        mng = TransactionManager(storage)
+        cache = AsyncMock()
+
+        cache.get.return_value = transaction._EMPTY
+        strategy = AsyncMock()
+        txn = Transaction(mng, cache=cache, strategy=strategy)
+
+        ob = create_content(Container)
+        with pytest.raises(KeyError):
+            await txn.get_annotation(ob, "foobar")
+
+        assert (
+            metrics_registry.get_sample_value(
+                "guillotina_cache_ops_total", {"type": "_get_annotation", "result": "hit_empty"}
             )
             == 1.0
         )

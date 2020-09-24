@@ -26,6 +26,7 @@ from typing import Callable
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Union
 from typing_extensions import TypedDict
 from zope.interface import implementer
 
@@ -33,6 +34,9 @@ import asyncio
 import logging
 import sys
 import time
+
+
+_EMPTY = "__<EMPTY VALUE>__"
 
 
 class ObjectResultType(TypedDict, total=False):
@@ -53,9 +57,12 @@ try:
     )
 
     def record_cache_metric(
-        name: str, result_type: str, value: ObjectResultType, key_args: Dict[str, Any]
+        name: str, result_type: str, value: Union[ObjectResultType, str], key_args: Dict[str, Any]
     ) -> None:
-        if (
+        if isinstance(value, str):
+            if value == _EMPTY:
+                result_type += "_empty"
+        elif (
             value["zoid"] == ROOT_ID
             or value.get("parent_id") == ROOT_ID
             or isinstance(key_args.get("container"), (Container, Registry, Root))
@@ -68,12 +75,9 @@ try:
 except ImportError:
 
     def record_cache_metric(
-        name: str, result_type: str, value: ObjectResultType, key_args: Dict[str, Any]
+        name: str, result_type: str, value: Union[ObjectResultType, str], key_args: Dict[str, Any]
     ) -> None:
         ...
-
-
-_EMPTY = "__<EMPTY VALUE>__"
 
 
 logger = logging.getLogger(__name__)
