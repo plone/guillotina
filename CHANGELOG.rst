@@ -4,7 +4,11 @@ CHANGELOG
 5.3.51 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Record metrics on cache hit/misses
+  [vangheem]
+
+- Record metrics on time waiting for pg locks
+  [vangheem]
 
 
 5.3.50 (2020-09-23)
