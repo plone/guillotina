@@ -80,7 +80,10 @@ class MemcachedDriver:
         if hosts is None or len(hosts) == 0:
             raise NoMemcachedConfigured("No hosts configured")
 
-        servers = [emcache.MemcachedHostAddress(host, int(port)) for host, port in hosts]
+        # expected hosts format: ["server1:11211", "server2:11211", ...]
+        servers = [
+            emcache.MemcachedHostAddress(host, int(port)) for host, port in map(lambda x: x.split(":"), hosts)
+        ]
         # Configure client constructor from settings
         client_params = {}
         for param in [
@@ -114,13 +117,13 @@ class MemcachedDriver:
 
     # VALUE API
 
-    async def set(self, key: str, data: str, *, expire: Optional[int] = None) -> None:
+    async def set(self, key: str, data: bytes, *, expire: Optional[int] = None) -> None:
         client = self._get_client()
         kwargs: Dict[str, int] = {}
         if expire is not None:
             kwargs["exptime"] = expire
         with watch("set"):
-            await client.set(key.encode(), data.encode(), **kwargs)
+            await client.set(key.encode(), data, **kwargs)
 
     async def get(self, key: str) -> Optional[bytes]:
         client = self._get_client()
