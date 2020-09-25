@@ -124,12 +124,15 @@ class MemcachedDriver:
 
     async def get(self, key: str) -> Optional[bytes]:
         client = self._get_client()
-        with watch("get"):
+        with watch("get") as w:
             item: Optional[emcache.Item] = await client.get(key.encode())
-        if item is not None:
-            return item.value
-        else:
-            return None
+            if item is None:
+                # cache miss
+                w.labels["type"] = "get_miss"
+                return None
+            else:
+                # cache hit
+                return item.value
 
     async def delete(self, key: str) -> None:
         client = self._get_client()
