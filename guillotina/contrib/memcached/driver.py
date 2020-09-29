@@ -34,7 +34,10 @@ try:
     class watch(metrics.watch):
         def __init__(self, operation: str):
             super().__init__(
-                counter=MEMCACHED_OPS, histogram=MEMCACHED_OPS_PROCESSING_TIME, labels={"type": operation}
+                counter=MEMCACHED_OPS,
+                histogram=MEMCACHED_OPS_PROCESSING_TIME,
+                labels={"type": operation},
+                error_mappings={"timeout": asyncio.TimeoutError},
             )
 
 
@@ -140,7 +143,7 @@ class MemcachedDriver:
     async def delete(self, key: str) -> None:
         client = self._get_client()
         with watch("delete"):
-            await client.delete(key.encode())
+            await client.delete(key.encode(), noreply=True)
 
     async def delete_all(self, keys: List[str]) -> None:
         client = self._get_client()
