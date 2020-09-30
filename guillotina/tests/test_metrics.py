@@ -2,6 +2,8 @@ from asyncmock import AsyncMock
 from guillotina import metrics
 from guillotina.const import ROOT_ID
 from guillotina.content import Container
+from guillotina.contrib.cache import memcache
+from guillotina.contrib.cache.utility import CacheUtility
 from guillotina.contrib.redis.driver import RedisDriver
 from guillotina.db import transaction
 from guillotina.db.storages.pg import PostgresqlStorage
@@ -326,6 +328,78 @@ class TestTransactionMetrics:
         assert (
             metrics_registry.get_sample_value(
                 "guillotina_cache_ops_total", {"type": "_get_annotation", "result": "hit_empty"}
+            )
+            == 1.0
+        )
+
+
+class TestInMemoryMetrics:
+    @pytest.fixture
+    async def cache_utility(self, dummy_guillotina):
+        memcache._lru = None
+        util = CacheUtility()
+        await util.initialize()
+        yield util
+        await util.finalize()
+
+    @pytest.mark.app_settings({"cache": {"memory_cache_size": 1024}})
+    async def test_record_cache_hit(self, cache_utility, metrics_registry):
+        cache_utility._memory_cache["foobar"] = "foobar"
+        assert await cache_utility.get("foobar") == "foobar"
+        assert (
+            metrics_registry.get_sample_value(
+                "guillotina_cache_memory_ops_total", {"type": "get", "result": "hit"}
+            )
+            == 1.0
+        )
+
+    @pytest.mark.app_settings({"cache": {"memory_cache_size": 1024}})
+    async def test_record_cache_miss(self, cache_utility, metrics_registry):
+        assert await cache_utility.get("foobar") is None
+        assert (
+            metrics_registry.get_sample_value(
+                "guillotina_cache_memory_ops_total", {"type": "get", "result": "miss"}
+            )
+            == 1.0
+        )
+
+    @pytest.mark.app_settings({"cache": {"memory_cache_size": 1024}})
+    async def test_record_cache_set(self, cache_utility, metrics_registry):
+        await cache_utility.set("foobar", "foobar")
+        assert (
+            metrics_registry.get_sample_value(
+                "guillotina_cache_memory_ops_total", {"type": "set", "result": "none"}
+            )
+            == 1.0
+        )
+
+    @pytest.mark.app_settings({"cache": {"memory_cache_size": 1024}})
+    async def test_record_cache_delete(self, cache_utility, metrics_registry):
+        await cache_utility.delete("foobar")
+        assert (
+            metrics_registry.get_sample_value(
+                "guillotina_cache_memory_ops_total", {"type": "delete", "result": "miss"}
+            )
+            == 1.0
+        )
+
+        cache_utility._memory_cache["foobar"] = "foobar"
+        await cache_utility.delete("foobar")
+        assert (
+            metrics_registry.get_sample_value(
+                "guillotina_cache_memory_ops_total", {"type": "delete", "result": "hit"}
+            )
+            == 1.0
+        )
+
+    @pytest.mark.app_settings({"cache": {"memory_cache_size": 1024}})
+    async def test_record_cache_evicted(self, cache_utility, metrics_registry):
+        cache = memcache.get_memory_cache()
+        cache.set("foobar", "X" * 1023, 1023)
+        cache.set("foobar2", "X" * 1023, 1023)
+        assert (
+            metrics_registry.get_sample_value(
+                "guillotina_cache_memory_ops_total", {"type": "evicted", "result": "none"}
             )
             == 1.0
         )

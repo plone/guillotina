@@ -1,3 +1,4 @@
+from .memcache import record_memory_op
 from guillotina import app_settings
 from guillotina.component import query_utility
 from guillotina.contrib.cache import CACHE_PREFIX
@@ -43,20 +44,20 @@ class CacheUtility:
     async def initialize(self, app=None):
         self._memory_cache = memcache.get_memory_cache()
         settings = app_settings["cache"]
-        if settings["driver"]:
+        if settings.get("driver"):
             klass = resolve_dotted_name(settings["driver"])
             if klass is not None:
                 self._obj_driver = await klass.get_driver()
         # We need to make sure that we have also PubSub
         self._subscriber = query_utility(IPubSubUtility)
-        if self._subscriber is None and settings["updates_channel"]:
+        if self._subscriber is None and settings.get("updates_channel"):
             raise NoPubSubUtility()
-        elif settings["updates_channel"] not in (None, ""):
+        elif settings.get("updates_channel") not in (None, ""):
             await self._subscriber.initialized()
             await self._subscriber.subscribe(settings["updates_channel"], self._uid, self.invalidate)
         self.initialized = True
 
-    async def finalize(self, app):
+    async def finalize(self, app=None):
         settings = app_settings["cache"]
         if self._subscriber is not None:
             try:
@@ -73,7 +74,9 @@ class CacheUtility:
         try:
             if key in self._memory_cache:
                 logger.debug("Retrieved {} from memory cache".format(key))
+                record_memory_op("get", "hit")
                 return self._memory_cache[key]
+            record_memory_op("get", "miss")
             if self._obj_driver is not None:
                 val = await self._obj_driver.get(CACHE_PREFIX + key)
                 if val is not None:
@@ -105,6 +108,7 @@ class CacheUtility:
         for key in keys:
             try:
                 self._memory_cache.set(key, value, size)
+                record_memory_op("set", "none")
                 if ttl is None:
                     ttl = self._settings.get("ttl", 3600)
                 if self._obj_driver is not None:
@@ -123,6 +127,7 @@ class CacheUtility:
             delete_keys.append(CACHE_PREFIX + key)
             if key in self._memory_cache:
                 del self._memory_cache[key]
+                record_memory_op("delete", "none")
         if len(delete_keys) > 0 and self._obj_driver is not None:
             await self._obj_driver.delete_all(delete_keys)
 
@@ -131,7 +136,11 @@ class CacheUtility:
         try:
             if key in self._memory_cache:
                 del self._memory_cache[key]
-            await self._obj_driver.delete(key)
+                record_memory_op("delete", "hit")
+            else:
+                record_memory_op("delete", "miss")
+            if self._obj_driver is not None:
+                await self._obj_driver.delete(key)
         except Exception:
             logger.warning("Error removing from cache", exc_info=True)
 
@@ -191,5 +200,5 @@ class CacheUtility:
     async def get_stats(self):
         result = {"in-memory": {"size": len(self._memory_cache), "stats": self._memory_cache.get_stats()}}
         if self._obj_driver is not None:
-            result["network"]: self.driver.info()
+            result["network"] = self.driver.info()
         return result

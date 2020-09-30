@@ -4,7 +4,8 @@ CHANGELOG
 5.3.53 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Add metrics for in-memory cache
+  [vangheem]
 
 
 5.3.52 (2020-09-30)
