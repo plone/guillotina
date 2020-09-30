@@ -64,19 +64,17 @@ class MemcachedDriver:
 
     def _get_client(self) -> emcache.Client:
         if self._client is None:
-            raise NoMemcachedConfigured()
+            raise NoMemcachedConfigured("Memcached client not initialized")
         return self._client
 
     async def initialize(self, loop):
         async with self.init_lock:
             if self.initialized is False:
-                while True:
-                    try:
-                        await self._connect()
-                        self.initialized = True
-                        break
-                    except Exception:  # pragma: no cover
-                        logger.error("Error initializing memcached driver", exc_info=True)
+                try:
+                    await self._connect()
+                    self.initialized = True
+                except Exception:  # pragma: no cover
+                    logger.error("Error initializing memcached driver", exc_info=True)
 
     async def _create_client(self, settings: Dict[str, Any]) -> emcache.Client:
         hosts = settings.get("hosts")
