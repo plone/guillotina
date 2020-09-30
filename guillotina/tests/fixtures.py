@@ -126,7 +126,7 @@ def get_db_settings(pytest_node=None):
         if "memcached" not in settings:
             settings["memcached"] = {}
         host, port = memcached
-        settings["memcached"]["hosts"] = [(host, port)]
+        settings["memcached"]["hosts"] = [f"{host}:{port}"]
 
     if annotations["testdatabase"] == "DUMMY":
         return settings

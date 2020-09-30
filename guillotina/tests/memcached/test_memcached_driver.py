@@ -12,6 +12,8 @@ pytestmark = pytest.mark.asyncio
 
 MEMCACHED_SETTINGS = {"applications": ["guillotina", "guillotina.contrib.memcached"]}
 
+MOCK_HOSTS = ["localhost:11211"]
+
 
 @pytest.fixture(scope="function")
 def mocked_create_client(loop):
@@ -25,22 +27,21 @@ def mocked_create_client(loop):
 async def test_create_client_returns_emcache_client(memcached_container, guillotina_main, loop):
     driver = MemcachedDriver()
     assert driver.client is None
-    settings = {"hosts": [memcached_container]}
+    host, port = memcached_container
+    settings = {"hosts": [f"{host}:{port}"]}
     client = await driver._create_client(settings)
     assert isinstance(client, emcache.Client)
 
 
 async def test_client_is_initialized_with_configured_hosts(mocked_create_client):
-    hosts = [("localhost", "11211")]
-    settings = {"hosts": hosts}
+    settings = {"hosts": MOCK_HOSTS}
     driver = MemcachedDriver()
     await driver._create_client(settings)
     assert len(mocked_create_client.call_args[0][0]) == 1
 
 
 async def test_create_client_ignores_invalid_params(mocked_create_client):
-    hosts = [("localhost", "11211")]
-    settings = {"hosts": hosts}
+    settings = {"hosts": MOCK_HOSTS}
     driver = MemcachedDriver()
     await driver._create_client({"foo": "bar", **settings})
     assert mocked_create_client.call_args[1] == {}
@@ -57,8 +58,7 @@ async def test_create_client_ignores_invalid_params(mocked_create_client):
     ],
 )
 async def test_create_client_sets_configured_params(mocked_create_client, param, value):
-    hosts = [("localhost", "11211")]
-    settings = {"hosts": hosts}
+    settings = {"hosts": MOCK_HOSTS}
     driver = MemcachedDriver()
     await driver._create_client({**settings, **{param: value}})
     assert mocked_create_client.call_args[1][param] == value
@@ -70,14 +70,14 @@ async def test_memcached_ops(memcached_container, guillotina_main, loop):
     assert driver.initialized
     assert driver.client is not None
 
-    await driver.set("test", "testdata", expire=10)
+    await driver.set("test", b"testdata", expire=10)
     result = await driver.get("test")
     assert result == b"testdata"
 
-    await driver.set("test2", "testdata", expire=10)
-    await driver.set("test3", "testdata", expire=10)
-    await driver.set("test4", "testdata", expire=1)
-    await driver.set("test5", "testdata", expire=20)
+    await driver.set("test2", b"testdata", expire=10)
+    await driver.set("test3", b"testdata", expire=10)
+    await driver.set("test4", b"testdata", expire=1)
+    await driver.set("test5", b"testdata", expire=20)
 
     await driver.delete("test")
     result = await driver.get("test")
