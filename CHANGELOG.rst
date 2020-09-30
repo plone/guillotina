@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.52 (unreleased)
+5.3.52 (2020-09-30)
 -------------------
 
 - Move to github actions
