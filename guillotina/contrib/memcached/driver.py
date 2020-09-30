@@ -148,7 +148,7 @@ class MemcachedDriver:
         with watch("delete_many"):
             for key in keys:
                 try:
-                    await client.delete(key.encode())
+                    await client.delete(key.encode(), noreply=True)
                     logger.debug("Deleted cache keys {}".format(keys))
                 except Exception:
                     logger.warning("Error deleting cache keys {}".format(keys), exc_info=True)
