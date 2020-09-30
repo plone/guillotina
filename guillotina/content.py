@@ -12,6 +12,7 @@ from guillotina.auth.users import ANONYMOUS_USER_ID
 from guillotina.auth.users import ROOT_USER_ID
 from guillotina.behaviors import apply_markers
 from guillotina.browser import get_physical_path
+from guillotina.component import get_adapter
 from guillotina.component import get_utilities_for
 from guillotina.component import get_utility
 from guillotina.component import query_utility
@@ -791,6 +792,9 @@ async def move(
 
     old_id = context.id
     if new_id is not None:
+        id_checker = get_adapter(context, IIDChecker)
+        if not isinstance(new_id, str) or not await id_checker(new_id, context.type_name):
+            raise PreconditionFailed(new_id, "Invalid id")
         context.id = context.__name__ = new_id
     else:
         new_id = context.id

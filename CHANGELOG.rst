@@ -4,7 +4,10 @@ CHANGELOG
 5.3.52 (unreleased)
 -------------------
 
-- Move to github actions [lferran]
+- Move to github actions
+  [lferran]
+- Add id checker for move
+  [qiwn]
 
 
 5.3.51 (2020-09-24)
