@@ -1409,6 +1409,21 @@ async def test_move_with_already_existing_id(container_requester):
         assert status == 409
 
 
+async def test_move_with_bad_id(container_requester):
+    async with container_requester as requester:
+        await requester("POST", "/db/guillotina/", data=json.dumps({"@type": "Folder", "id": "container1"}))
+        await requester("POST", "/db/guillotina/", data=json.dumps({"@type": "Folder", "id": "container2"}))
+        await requester(
+            "POST", "/db/guillotina/container1", data=json.dumps({"@type": "Item", "id": "foobar"})
+        )
+        _, status = await requester(
+            "POST",
+            "/db/guillotina/container1/foobar/@move",
+            data=json.dumps({"destination": "/container2", "new_id": "sdfkl*&%"}),
+        )
+        assert status == 412
+
+
 @pytest.mark.app_settings(DBUSERS_DEFAULT_SETTINGS)
 async def test_duplicate_with_reset_acl(dbusers_requester):
     async with dbusers_requester as requester:

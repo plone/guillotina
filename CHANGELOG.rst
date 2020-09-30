@@ -4,7 +4,7 @@ CHANGELOG
 6.0.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add id checker for move
 
 
 6.0.8 (2020-09-24)
