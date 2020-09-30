@@ -1,5 +1,5 @@
-from typing import Optional
 from typing import List
+from typing import Optional
 
 
 class Item:
@@ -25,7 +25,7 @@ class Client:
     async def set(self, key: bytes, value: bytes, exptime: Optional[int] = None):
         pass
 
-    async def delete(self, key: bytes):
+    async def delete(self, key: bytes, noreply: bool = False):
         pass
 
     async def flush_all(self, node: Node) -> None:
@@ -35,5 +35,12 @@ class Client:
         pass
 
 
-async def create_client(servers: List[MemcachedHostAddress], timeout: int, max_connections: int, purge_unused_connections_after: int, connection_timeout: int, purge_unhealthy_nodes: bool) -> Client:
+async def create_client(
+    servers: List[MemcachedHostAddress],
+    timeout: int,
+    max_connections: int,
+    purge_unused_connections_after: int,
+    connection_timeout: int,
+    purge_unhealthy_nodes: bool,
+) -> Client:
     pass
