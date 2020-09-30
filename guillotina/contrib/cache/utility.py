@@ -200,5 +200,5 @@ class CacheUtility:
     async def get_stats(self):
         result = {"in-memory": {"size": len(self._memory_cache), "stats": self._memory_cache.get_stats()}}
         if self._obj_driver is not None:
-            result["network"] = self.driver.info()
+            result["network"] = await self._obj_driver.info()
         return result
