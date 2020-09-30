@@ -4,7 +4,8 @@ CHANGELOG
 5.3.54 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- increase precision of lock metrics reporting
+  [vangheem]
 
 
 5.3.53 (2020-09-30)

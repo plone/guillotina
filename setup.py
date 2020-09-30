@@ -74,7 +74,7 @@ setup(
     ],
     extras_require={
         "test": [
-            "pytest>=3.8.0,<6.1.0",
+            "pytest>=4.3.0,<6.1.0",
             "docker",
             "backoff",
             "psycopg2-binary",
@@ -82,7 +82,7 @@ setup(
             "pytest-cov>=2.0.0,<=2.9.0",
             "coverage>=4.0.3",
             "pytest-docker-fixtures",
-            "pytest-rerunfailures<=7.0",
+            "pytest-rerunfailures<9.0.0",
             "openapi-spec-validator",
             "asyncmock",
             "prometheus-client",

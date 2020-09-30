@@ -28,6 +28,7 @@ import ujson
 
 try:
     import prometheus_client
+    from prometheus_client.utils import INF
 
     PG_OPS = prometheus_client.Counter(
         "guillotina_db_pg_ops_total",
@@ -43,6 +44,7 @@ try:
         "guillotina_db_pg_lock_time_seconds",
         "Histogram of time it takes to acquire locks (in seconds)",
         labelnames=["type"],
+        buckets=(0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0, 2.5, 5.0, INF,),
     )
 
     class watch(metrics.watch):
