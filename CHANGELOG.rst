@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.53 (unreleased)
+5.3.53 (2020-09-30)
 -------------------
 
 - Add metrics for in-memory cache
