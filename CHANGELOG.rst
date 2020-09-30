@@ -4,7 +4,7 @@ CHANGELOG
 5.3.52 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Move to github actions [lferran]
 
 
 5.3.51 (2020-09-24)
