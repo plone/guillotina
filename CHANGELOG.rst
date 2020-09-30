@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.54 (unreleased)
+5.3.54 (2020-09-30)
 -------------------
 
 - increase precision of lock metrics reporting
