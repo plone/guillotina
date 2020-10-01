@@ -42,43 +42,43 @@ try:
 
     MEMCACHED_CONNECTIONS_CREATED = prometheus_client.Counter(
         "guillotina_cache_memcached_node_connections_created",
-        "How many connections have been created",
+        "How many node connections have been created",
         labelnames=["node"],
     )
 
     MEMCACHED_CONNECTIONS_CREATED_WITH_ERROR = prometheus_client.Counter(
         "guillotina_cache_memcached_node_connections_created_with_error",
-        "How many connections have been created with error",
+        "How many node connections have been created with error",
         labelnames=["node"],
     )
 
     MEMCACHED_CONNECTIONS_PURGED = prometheus_client.Counter(
         "guillotina_cache_memcached_node_connections_purged",
-        "How many connections have been purged",
+        "How many node connections have been purged",
         labelnames=["node"],
     )
 
     MEMCACHED_CONNECTIONS_CLOSED = prometheus_client.Counter(
         "guillotina_cache_memcached_node_connections_closed",
-        "How many connections have been closed",
+        "How many node connections have been closed",
         labelnames=["node"],
     )
 
     MEMCACHED_NODE_OPS_EXECUTED = prometheus_client.Counter(
         "guillotina_cache_memcached_node_operations_executed",
-        "How many operations have been executed",
+        "How many node operations have been executed",
         labelnames=["node"],
     )
 
     MEMCACHED_NODE_OPS_EXECUTED_WITH_ERROR = prometheus_client.Counter(
         "guillotina_cache_memcached_node_operations_executed_with_error",
-        "How many operations have been executed with error",
+        "How many node operations have been executed with error",
         labelnames=["node"],
     )
 
     MEMCACHED_NODE_OPS_WAITED = prometheus_client.Counter(
         "guillotina_cache_memcached_node_operations_waited",
-        "How many operations have been waited",
+        "How many node operations have been waited",
         labelnames=["node"],
     )
 
