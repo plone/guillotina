@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.55 (unreleased)
+5.3.55 (2020-10-01)
 -------------------
 
 - Add memcached support as cache driver [lferran]
