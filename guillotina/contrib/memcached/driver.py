@@ -33,19 +33,19 @@ try:
     )
 
     MEMCACHED_CURRENT_CONNECTIONS = prometheus_client.Gauge(
-        "guillotina_cache_memcached_current_connections",
-        "Total number of opened connections",
+        "guillotina_cache_memcached_node_current_connections",
+        "Total number of opened connections per node",
         labelnames=["node"],
     )
 
     MEMCACHED_CONNECTION_POOL_CONNECTIONS = prometheus_client.Counter(
-        "guillotina_cache_memcached_connections_count",
+        "guillotina_cache_memcached_node_connections_count",
         "How many connections have been created, purged or closed",
         labelnames=["node", "type"],
     )
 
     MEMCACHED_CONNECTION_POOL_OPS = prometheus_client.Counter(
-        "guillotina_cache_memcached_operations_count",
+        "guillotina_cache_memcached_node_operations_count",
         "How many operations have been executed, errored or waited",
         labelnames=["node", "type"],
     )
