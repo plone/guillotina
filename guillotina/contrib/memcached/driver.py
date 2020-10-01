@@ -21,6 +21,8 @@ import logging
 try:
     import prometheus_client
 
+    _SEND_METRICS = True
+
     MEMCACHED_OPS = prometheus_client.Counter(
         "guillotina_cache_memcached_ops_total",
         "Total count of ops by type of operation and the error if there was.",
@@ -38,16 +40,46 @@ try:
         labelnames=["node"],
     )
 
-    MEMCACHED_CONNECTION_POOL_CONNECTIONS = prometheus_client.Counter(
-        "guillotina_cache_memcached_node_connections_count",
-        "How many connections have been created, purged or closed",
-        labelnames=["node", "type"],
+    MEMCACHED_CONNECTIONS_CREATED = prometheus_client.Counter(
+        "guillotina_cache_memcached_node_connections_created",
+        "How many connections have been created",
+        labelnames=["node"],
     )
 
-    MEMCACHED_CONNECTION_POOL_OPS = prometheus_client.Counter(
-        "guillotina_cache_memcached_node_operations_count",
-        "How many operations have been executed, errored or waited",
-        labelnames=["node", "type"],
+    MEMCACHED_CONNECTIONS_CREATED_WITH_ERROR = prometheus_client.Counter(
+        "guillotina_cache_memcached_node_connections_created_with_error",
+        "How many connections have been created with error",
+        labelnames=["node"],
+    )
+
+    MEMCACHED_CONNECTIONS_PURGED = prometheus_client.Counter(
+        "guillotina_cache_memcached_node_connections_purged",
+        "How many connections have been purged",
+        labelnames=["node"],
+    )
+
+    MEMCACHED_CONNECTIONS_CLOSED = prometheus_client.Counter(
+        "guillotina_cache_memcached_node_connections_closed",
+        "How many connections have been closed",
+        labelnames=["node"],
+    )
+
+    MEMCACHED_NODE_OPS_EXECUTED = prometheus_client.Counter(
+        "guillotina_cache_memcached_node_operations_executed",
+        "How many operations have been executed",
+        labelnames=["node"],
+    )
+
+    MEMCACHED_NODE_OPS_EXECUTED_WITH_ERROR = prometheus_client.Counter(
+        "guillotina_cache_memcached_node_operations_executed_with_error",
+        "How many operations have been executed with error",
+        labelnames=["node"],
+    )
+
+    MEMCACHED_NODE_OPS_WAITED = prometheus_client.Counter(
+        "guillotina_cache_memcached_node_operations_waited",
+        "How many operations have been waited",
+        labelnames=["node"],
     )
 
     class watch(metrics.watch):
@@ -61,9 +93,7 @@ try:
 
 
 except ImportError:
-    MEMCACHED_CURRENT_CONNECTIONS = (
-        MEMCACHED_CONNECTION_POOL_CONNECTIONS
-    ) = MEMCACHED_CONNECTION_POOL_OPS = None
+    _SEND_METRICS = False
     watch = metrics.watch  # type: ignore
 
 
@@ -99,7 +129,7 @@ class MemcachedDriver:
                 except Exception:  # pragma: no cover
                     logger.error("Error initializing memcached driver", exc_info=True)
 
-                if MEMCACHED_CURRENT_CONNECTIONS is not None:
+                if _SEND_METRICS:
                     self._metrics_task = loop.create_task(metrics_probe(self.client))
 
     async def _create_client(self, settings: Dict[str, Any]) -> emcache.Client:
@@ -190,9 +220,11 @@ class MemcachedDriver:
                 await client.flush_all(node)
 
 
-async def metrics_probe(client: emcache.Client, every: int = 10):
-    """
-    Periodically updates memcached cluster metrics
+async def metrics_probe(client: emcache.Client, every: int = 30):
+    """Periodically updates memcached cluster nodes metrics.
+
+    :param every: interval in seconds at which metrics are updated
+
     """
     state: Optional[emcache.ConnectionPoolMetrics] = None
     while True:
@@ -203,32 +235,31 @@ async def metrics_probe(client: emcache.Client, every: int = 10):
 async def update_connection_pool_metrics(
     client: emcache.Client, last_state: Optional[emcache.ConnectionPoolMetrics] = None
 ) -> emcache.ConnectionPoolMetrics:
+
     # Every node will have it's own label
     metrics = client.cluster_managment().connection_pool_metrics()
     for node, node_metrics in metrics.items():
-        MEMCACHED_CURRENT_CONNECTIONS.labels(node=node).set(node_metrics.cur_connections)
-
-        for counter, labels_to_attr in {
-            MEMCACHED_CONNECTION_POOL_CONNECTIONS: [
-                ("created", "connections_created"),
-                ("created_with_error", "connections_created_with_error"),
-                ("purged", "connections_purged"),
-                ("closed", "connections_closed"),
-            ],
-            MEMCACHED_CONNECTION_POOL_OPS: [
-                ("executed", "operations_executed"),
-                ("executed_with_error", "operations_executed_with_error"),
-                ("waited", "operations_waited"),
-            ],
+        if last_state is None:
+            # Wait until we have previous state
+            break
+        node_label = str(node)
+        MEMCACHED_CURRENT_CONNECTIONS.labels(node=node_label).set(node_metrics.cur_connections)
+        # Update counters
+        for counter, attr in {
+            MEMCACHED_CONNECTIONS_CREATED: "connections_created",
+            MEMCACHED_CONNECTIONS_CREATED_WITH_ERROR: "connections_created_with_error",
+            MEMCACHED_CONNECTIONS_PURGED: "connections_purged",
+            MEMCACHED_CONNECTIONS_CLOSED: "connections_closed",
+            MEMCACHED_NODE_OPS_EXECUTED: "operations_executed",
+            MEMCACHED_NODE_OPS_EXECUTED_WITH_ERROR: "operations_executed_with_error",
+            MEMCACHED_NODE_OPS_WAITED: "operations_waited",
         }.items():
-            for type_label, metrics_attr in labels_to_attr:
-                prev_value = 0
-                if last_state is not None:
-                    try:
-                        prev_value = getattr(last_state[node], metrics_attr)
-                    except KeyError:
-                        # No metrics for that node
-                        pass
-                current_value = getattr(node_metrics, metrics_attr)
-                counter.labels(node=node, type=type_label).inc(current_value - prev_value)
+            try:
+                prev_value = getattr(last_state[node], attr)
+            except KeyError:
+                # No previous metrics for that node
+                continue
+            current_value = getattr(node_metrics, attr)
+            counter.labels(node=node_label).inc(current_value - prev_value)
+
     return copy.deepcopy(metrics)
