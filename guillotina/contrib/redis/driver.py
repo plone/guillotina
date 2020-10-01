@@ -126,7 +126,8 @@ class RedisDriver:
         with watch("delete_many"):
             for key in keys:
                 try:
-                    await self._pool.execute(b"DEL", key)
+                    with watch("delete"):
+                        await self._pool.execute(b"DEL", key)
                     logger.debug("Deleted cache keys {}".format(keys))
                 except Exception:
                     logger.warning("Error deleting cache keys {}".format(keys), exc_info=True)
