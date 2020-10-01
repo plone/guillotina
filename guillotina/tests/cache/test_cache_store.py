@@ -105,3 +105,14 @@ async def test_set_multiple_cache_keys_size(redis_container, guillotina_main, lo
     await rcache.set({"state": "foobar"}, keyset=[{"oid": "foo"}, {"container": "foobar", "id": "foobar"}])
     assert util._memory_cache.get_memory() == 6
     await util.finalize(None)
+
+
+@pytest.mark.app_settings(DEFAULT_SETTINGS)
+async def test_get_stats(redis_container, guillotina_main, loop):
+    util = get_utility(ICacheUtility)
+    await util.initialize()
+    assert util.initialized
+    assert util._obj_driver is not None
+    stats = await util.get_stats()
+    assert len(stats["in-memory"])
+    assert len(stats["network"])

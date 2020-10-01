@@ -96,6 +96,7 @@ setup(
             "sphinx-autodoc-typehints",
         ],
         "redis": ['aioredis>=1.2.0;python_version<"3.8"', 'aioredis>=1.3.0;python_version>="3.8"'],
+        "memcached": ["emcache"],
         "mailer": ["html2text>=2018.1.9", "aiosmtplib>=1.0.6"],
     },
     entry_points={
