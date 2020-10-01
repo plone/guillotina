@@ -3,10 +3,10 @@ from guillotina.contrib.memcached.driver import MemcachedDriver
 
 
 class TestMemcachedMetrics:
-    async def test_connect_metric(self, metrics_registry):
+    async def test_connect_metric(self, metrics_registry, loop):
         driver = MemcachedDriver()
         driver._client = AsyncMock()
-        await driver.initialize(None)
+        await driver.initialize(loop)
         assert (
             metrics_registry.get_sample_value(
                 "guillotina_cache_memcached_ops_total", {"type": "connect", "error": "none"}

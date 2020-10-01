@@ -14,6 +14,7 @@ from typing import Optional
 
 import asyncio
 import backoff
+import copy
 import logging
 
 
@@ -31,6 +32,24 @@ try:
         labelnames=["type"],
     )
 
+    MEMCACHED_CURRENT_CONNECTIONS = prometheus_client.Gauge(
+        "guillotina_cache_memcached_current_connections",
+        "Total number of opened connections",
+        labelnames=["node"],
+    )
+
+    MEMCACHED_CONNECTION_POOL_CONNECTIONS = prometheus_client.Counter(
+        "guillotina_cache_memcached_connections_count",
+        "How many connections have been created, purged or closed",
+        labelnames=["node", "type"],
+    )
+
+    MEMCACHED_CONNECTION_POOL_OPS = prometheus_client.Counter(
+        "guillotina_cache_memcached_operations_count",
+        "How many operations have been executed, errored or waited",
+        labelnames=["node", "type"],
+    )
+
     class watch(metrics.watch):
         def __init__(self, operation: str):
             super().__init__(
@@ -42,6 +61,9 @@ try:
 
 
 except ImportError:
+    MEMCACHED_CURRENT_CONNECTIONS = (
+        MEMCACHED_CONNECTION_POOL_CONNECTIONS
+    ) = MEMCACHED_CONNECTION_POOL_OPS = None
     watch = metrics.watch  # type: ignore
 
 
@@ -57,6 +79,7 @@ class MemcachedDriver:
         self._client: Optional[emcache.Client] = None
         self.initialized: bool = False
         self.init_lock = asyncio.Lock()
+        self._metrics_task = None
 
     @property
     def client(self) -> Optional[emcache.Client]:
@@ -75,6 +98,9 @@ class MemcachedDriver:
                     self.initialized = True
                 except Exception:  # pragma: no cover
                     logger.error("Error initializing memcached driver", exc_info=True)
+
+                if MEMCACHED_CURRENT_CONNECTIONS is not None:
+                    self._metrics_task = loop.create_task(metrics_probe(self.client))
 
     async def _create_client(self, settings: Dict[str, Any]) -> emcache.Client:
         hosts = settings.get("hosts")
@@ -110,6 +136,8 @@ class MemcachedDriver:
     async def finalize(self):
         if self._client is not None:
             await self._client.close()
+        if self._metrics_task is not None and not self._metrics_task.cancelled():
+            self._metrics_task.cancel()
         self.initialized = False
 
     async def info(self):
@@ -160,3 +188,47 @@ class MemcachedDriver:
         for node in client.cluster_managment().nodes():
             with watch("flush"):
                 await client.flush_all(node)
+
+
+async def metrics_probe(client: emcache.Client, every: int = 10):
+    """
+    Periodically updates memcached cluster metrics
+    """
+    state: Optional[emcache.ConnectionPoolMetrics] = None
+    while True:
+        state = await update_connection_pool_metrics(client, state)
+        await asyncio.sleep(every)
+
+
+async def update_connection_pool_metrics(
+    client: emcache.Client, last_state: Optional[emcache.ConnectionPoolMetrics] = None
+) -> emcache.ConnectionPoolMetrics:
+    # Every node will have it's own label
+    metrics = client.cluster_managment().connection_pool_metrics()
+    for node, node_metrics in metrics.items():
+        MEMCACHED_CURRENT_CONNECTIONS.labels(node=node).set(node_metrics.cur_connections)
+
+        for counter, labels_to_attr in {
+            MEMCACHED_CONNECTION_POOL_CONNECTIONS: [
+                ("created", "connections_created"),
+                ("created_with_error", "connections_created_with_error"),
+                ("purged", "connections_purged"),
+                ("closed", "connections_closed"),
+            ],
+            MEMCACHED_CONNECTION_POOL_OPS: [
+                ("executed", "operations_executed"),
+                ("executed_with_error", "operations_executed_with_error"),
+                ("waited", "operations_waited"),
+            ],
+        }.items():
+            for type_label, metrics_attr in labels_to_attr:
+                prev_value = 0
+                if last_state is not None:
+                    try:
+                        prev_value = getattr(last_state[node], metrics_attr)
+                    except KeyError:
+                        # No metrics for that node
+                        pass
+                current_value = getattr(node_metrics, metrics_attr)
+                counter.labels(node=node, type=type_label).inc(current_value - prev_value)
+    return copy.deepcopy(metrics)
