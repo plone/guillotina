@@ -94,7 +94,12 @@ try:
 
 except ImportError:
     _SEND_METRICS = False
-    watch = metrics.watch  # type: ignore
+
+    class watch(metrics.watch):
+        def __init__(self, operation: str):
+            # Won't record any metrics if prometheus_client is not
+            # installed
+            super().__init__(counter=None, histogram=None)
 
 
 logger = logging.getLogger("guillotina.contrib.memcached")
