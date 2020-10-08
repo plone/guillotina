@@ -293,6 +293,21 @@ class TestTransactionMetrics:
             == 1.0
         )
 
+    async def test_record_size_metric(self, dummy_guillotina, metrics_registry):
+        storage = AsyncMock()
+        record = {"state": pickle.dumps(create_content()), "zoid": "foobar", "tid": 1, "id": "foobar"}
+        storage.load.return_value = record
+        mng = TransactionManager(storage)
+        cache = AsyncMock()
+        cache.get.return_value = None
+
+        strategy = AsyncMock()
+        txn = Transaction(mng, cache=cache, strategy=strategy)
+
+        await txn.get("foobar")
+
+        assert metrics_registry.get_sample_value("guillotina_cache_record_size_sum") == len(record["state"])
+
     async def test_record_transaction_cache_hit_get_child(self, dummy_guillotina, metrics_registry):
         storage = AsyncMock()
         mng = TransactionManager(storage)

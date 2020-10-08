@@ -49,11 +49,21 @@ class ObjectResultType(TypedDict, total=False):
 
 try:
     import prometheus_client
+    from prometheus_client.utils import INF
 
     CACHE_HITS = prometheus_client.Counter(
         "guillotina_cache_ops_total",
         "Total count of ops by type of operation and the error if there was.",
         labelnames=["type", "result"],
+    )
+
+    KB = 1000
+    MB = 1000 * KB
+
+    CACHE_RECORD_SIZE = prometheus_client.Histogram(
+        "guillotina_cache_record_size",
+        "Record size histogram of objects in cache",
+        buckets=(1 * KB, 10 * KB, 50 * KB, 100 * KB, 500 * KB, 2 * MB, 5 * MB, INF),
     )
 
     def record_cache_metric(
@@ -70,12 +80,22 @@ try:
             result_type += "_roots"
         CACHE_HITS.labels(type=name, result=result_type).inc()
 
+    def record_size_metric(value: Union[ObjectResultType, str]) -> None:
+        try:
+            size = len(value["state"])
+        except (ValueError, KeyError):
+            size = len(value)
+        CACHE_RECORD_SIZE.observe(size)
+
 
 except ImportError:
 
     def record_cache_metric(
         name: str, result_type: str, value: Union[ObjectResultType, str], key_args: Dict[str, Any]
     ) -> None:
+        ...
+
+    def record_size_metric(value: Union[ObjectResultType, str]) -> None:
         ...
 
 
@@ -118,6 +138,9 @@ class cache:
             record_cache_metric(func.__name__, "miss", result, key_args)
 
             if result is not None:
+
+                record_size_metric(result)
+
                 if result == _EMPTY:
                     await self._cache.set(result, keyset=[key_args])
                 else:
@@ -143,9 +166,7 @@ class Transaction:
     _skip_commit = False
     user = None
 
-    def __init__(
-        self, manager, loop=None, read_only: bool = False, cache=None, strategy=None,
-    ):
+    def __init__(self, manager, loop=None, read_only: bool = False, cache=None, strategy=None):
         # Transaction Manager
         self._manager = manager
 
@@ -163,9 +184,7 @@ class Transaction:
         # which would correspond with one connection
         self._lock = asyncio.Lock(loop=loop)
 
-    def initialize(
-        self, read_only, cache=None, strategy=None,
-    ):
+    def initialize(self, read_only, cache=None, strategy=None):
         self._read_only = read_only
         self._txn_time = None
         self._tid = None

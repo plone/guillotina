@@ -4,7 +4,7 @@ CHANGELOG
 5.3.57 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Add metric for object cache record size [lferran]
 
 
 5.3.56 (2020-10-14)
