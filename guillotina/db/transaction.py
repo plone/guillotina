@@ -57,7 +57,7 @@ try:
         labelnames=["type", "result"],
     )
 
-    KB = 1000
+    KB = 1024
     MB = 1000 * KB
 
     CACHE_RECORD_SIZE = prometheus_client.Histogram(
@@ -83,7 +83,7 @@ try:
     def record_size_metric(value: Union[ObjectResultType, str]) -> None:
         try:
             size = len(value["state"])  # type: ignore
-        except (ValueError, KeyError):
+        except (TypeError, KeyError):
             size = len(value)
         CACHE_RECORD_SIZE.observe(size)
 
