@@ -95,7 +95,7 @@ try:
 except ImportError:
     _SEND_METRICS = False
 
-    class watch(metrics.watch):
+    class watch(metrics.watch):  # type: ignore
         def __init__(self, operation: str):
             # Won't record any metrics if prometheus_client is not
             # installed

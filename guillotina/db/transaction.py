@@ -82,7 +82,7 @@ try:
 
     def record_size_metric(value: Union[ObjectResultType, str]) -> None:
         try:
-            size = len(value["state"])
+            size = len(value["state"])  # type: ignore
         except (ValueError, KeyError):
             size = len(value)
         CACHE_RECORD_SIZE.observe(size)
