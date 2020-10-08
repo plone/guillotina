@@ -58,7 +58,7 @@ try:
     )
 
     KB = 1024
-    MB = 1000 * KB
+    MB = 1024 * KB
 
     CACHE_RECORD_SIZE = prometheus_client.Histogram(
         "guillotina_cache_record_size",
