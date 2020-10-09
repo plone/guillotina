@@ -304,9 +304,13 @@ class TestTransactionMetrics:
         strategy = AsyncMock()
         txn = Transaction(mng, cache=cache, strategy=strategy)
 
+        previous_value = metrics_registry.get_sample_value("guillotina_cache_record_size_sum")
+
         await txn.get("foobar")
 
-        assert metrics_registry.get_sample_value("guillotina_cache_record_size_sum") == len(record["state"])
+        current_value = metrics_registry.get_sample_value("guillotina_cache_record_size_sum")
+
+        assert int(current_value - previous_value) == len(record["state"])
 
     async def test_record_transaction_cache_hit_get_child(self, dummy_guillotina, metrics_registry):
         storage = AsyncMock()
