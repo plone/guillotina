@@ -139,7 +139,8 @@ class cache:
 
             if result is not None:
 
-                record_size_metric(result)
+                if this.check_state_size:
+                    record_size_metric(result)
 
                 if result == _EMPTY:
                     await self._cache.set(result, keyset=[key_args])
