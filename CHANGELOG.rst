@@ -4,7 +4,8 @@ CHANGELOG
 5.3.56 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix BasicCache.fill_cache: do not exclude parent_id key for root
+  object [lferran]
 
 
 5.3.55 (2020-10-01)
