@@ -67,15 +67,27 @@ class watch:
             self.counter.labels(error=error, **self.labels).inc()
 
 
+class dummy_watch(watch):  # type: ignore
+    def __init__(self, operation: str):
+        # To use when prometheus_client is not installed
+        super().__init__(counter=None, histogram=None)
+
+
 class watch_lock:
     def __init__(
-        self, histogram: Histogram, lock: asyncio.Lock, labels: Optional[Dict[str, str]] = None,
+        self,
+        lock: asyncio.Lock,
+        histogram: Optional[Histogram] = None,
+        labels: Optional[Dict[str, str]] = None,
     ):
         self.histogram = histogram
         self.lock = lock
         self.labels = labels or {}
 
     async def __aenter__(self) -> None:
+        if self.histogram is None:
+            return
+
         start = time.time()
         await self.lock.acquire()
         finished = time.time()
@@ -85,4 +97,7 @@ class watch_lock:
             self.histogram.observe(finished - start)
 
     async def __aexit__(self, exc_type, exc, tb):
+        if self.histogram is None:
+            return
+
         self.lock.release()
