@@ -12,7 +12,6 @@ from guillotina.utils import resolve_dotted_name
 from sys import getsizeof
 from typing import List
 from typing import Optional
-from typing import Union
 
 import asyncio
 import asyncpg
