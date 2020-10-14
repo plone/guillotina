@@ -67,10 +67,14 @@ class watch:
             self.counter.labels(error=error, **self.labels).inc()
 
 
+class dummy_watch(watch):  # type: ignore
+    def __init__(self, operation: str):
+        # To use when prometheus_client is not installed
+        super().__init__(counter=None, histogram=None)
+
+
 class watch_lock:
-    def __init__(
-        self, histogram: Histogram, lock: asyncio.Lock, labels: Optional[Dict[str, str]] = None,
-    ):
+    def __init__(self, histogram: Histogram, lock: asyncio.Lock, labels: Optional[Dict[str, str]] = None):
         self.histogram = histogram
         self.lock = lock
         self.labels = labels or {}

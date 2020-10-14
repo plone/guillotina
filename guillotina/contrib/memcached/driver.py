@@ -94,7 +94,7 @@ try:
 
 except ImportError:
     _SEND_METRICS = False
-    watch = metrics.watch  # type: ignore
+    watch = metrics.dummy_watch  # type: ignore
 
 
 logger = logging.getLogger("guillotina.contrib.memcached")

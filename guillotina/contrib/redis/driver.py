@@ -39,7 +39,7 @@ try:
 
 
 except ImportError:
-    watch = metrics.watch  # type: ignore
+    watch = metrics.dummy_watch  # type: ignore
 
 
 logger = logging.getLogger("guillotina.contrib.redis")

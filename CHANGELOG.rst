@@ -4,8 +4,7 @@ CHANGELOG
 5.3.57 (unreleased)
 -------------------
 
-- Nothing changed yet.
-
+- Fix metrics context manager when prometheus not installed [lferran]
 
 5.3.56 (2020-10-14)
 -------------------

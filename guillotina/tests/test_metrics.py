@@ -220,6 +220,14 @@ async def test_lock_metric():
     assert metric.collect()[0].samples[0].value == 1
 
 
+async def test_dummy_watch():
+    watch = metrics.dummy_watch("operation")
+    assert watch.counter is None
+    assert watch.histogram is None
+    assert watch.labels == {}
+    assert watch.error_mappings == {}
+
+
 class TestTransactionMetrics:
     async def test_record_transaction_cache_hit(self, dummy_guillotina, metrics_registry):
         storage = AsyncMock()
