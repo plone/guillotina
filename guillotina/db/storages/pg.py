@@ -65,11 +65,16 @@ try:
 
     class watch_lock(metrics.watch_lock):
         def __init__(self, lock: asyncio.Lock, operation: str):
-            super().__init__(PG_LOCK_ACQUIRE_TIME, lock, labels={"type": operation})
+            super().__init__(lock, PG_LOCK_ACQUIRE_TIME, labels={"type": operation})
 
 
 except ImportError:
     watch = metrics.dummy_watch  # type: ignore
+
+    class watch_lock(metrics.watch_lock):  # type: ignore
+        def __init__(self, lock: asyncio.Lock, operation: str):
+            super().__init__(lock, histogram=None)
+
 
 log = glogging.getLogger("guillotina.storage")
 

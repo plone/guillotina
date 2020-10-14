@@ -74,12 +74,20 @@ class dummy_watch(watch):  # type: ignore
 
 
 class watch_lock:
-    def __init__(self, histogram: Histogram, lock: asyncio.Lock, labels: Optional[Dict[str, str]] = None):
+    def __init__(
+        self,
+        lock: asyncio.Lock,
+        histogram: Optional[Histogram] = None,
+        labels: Optional[Dict[str, str]] = None,
+    ):
         self.histogram = histogram
         self.lock = lock
         self.labels = labels or {}
 
     async def __aenter__(self) -> None:
+        if self.histogram is None:
+            return
+
         start = time.time()
         await self.lock.acquire()
         finished = time.time()
@@ -89,4 +97,7 @@ class watch_lock:
             self.histogram.observe(finished - start)
 
     async def __aexit__(self, exc_type, exc, tb):
+        if self.histogram is None:
+            return
+
         self.lock.release()

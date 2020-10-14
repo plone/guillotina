@@ -214,10 +214,14 @@ async def test_lock_metric():
     lock = asyncio.Lock()
     metric = prometheus_client.Histogram("test_metric", "Test")
     assert metric.collect()[0].samples[0].value == 0
-    async with metrics.watch_lock(metric, lock):
+    async with metrics.watch_lock(lock, metric):
         assert lock.locked()
     assert not lock.locked()
     assert metric.collect()[0].samples[0].value == 1
+
+    # Should not lock if there is no histogram to record to
+    async with metrics.watch_lock(lock, histogram=None):
+        assert not lock.locked()
 
 
 async def test_dummy_watch():
