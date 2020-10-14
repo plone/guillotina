@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.56 (unreleased)
+5.3.56 (2020-10-14)
 -------------------
 
 - Fix BasicCache.fill_cache: do not exclude parent_id key for root
