@@ -1,3 +1,4 @@
+from asyncmock import AsyncMock
 from guillotina import app_settings
 from guillotina.annotations import AnnotationData
 from guillotina.api.container import create_container
@@ -24,7 +25,6 @@ async def test_txn_uses_cached_hits_on_annotations(redis_container, guillotina_m
     async with transaction(db=await get_database("db")) as txn:
         root = await txn.manager.get_root()
         container = await create_container(root, "container")
-
         with pytest.raises(KeyError):
             # should set in cache as empty though
             await txn.get_annotation(container, "foobar")
@@ -133,3 +133,32 @@ async def test_txn_set_value_with_no_parent(redis_container, guillotina_main, lo
         root.register()
 
     assert len(util._subscriber.data) == 1
+
+
+class SetMock:
+    def __init__(self):
+        self.args = []
+        self.kwargs = []
+
+    async def __call__(self, *args, **kwargs):
+        self.args.append(args)
+        self.kwargs.append(kwargs)
+
+
+async def test_basic_cache_fill_cache_handles_objects_with_no_parent(loop):
+    from guillotina.contrib.cache.strategy import BasicCache
+
+    # Prepare mocks
+    txn = AsyncMock()
+    cache = BasicCache(txn)
+    cache.set = SetMock()
+    obj = AsyncMock()
+    obj.__uuid__ = "foo"
+    obj.__serial__ = "tid"
+    obj.__name__ = "name"
+    obj.__of__ = None
+    obj.__parent__ = None
+    cache._stored_objects = [(obj, "bar")]
+
+    await cache.fill_cache()
+    assert cache.set.args[0][0]["parent_id"] is None

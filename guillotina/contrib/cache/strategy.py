@@ -149,6 +149,9 @@ class BasicCache(BaseCache):
                 if obj.__parent__:
                     val["parent_id"] = obj.__parent__.__uuid__
                     keyset.append(dict(container=obj.__parent__, id=obj.__name__))
+                else:
+                    # root object does not have a parent
+                    val["parent_id"] = None
                 await self.set(val, keyset)
 
     @profilable
