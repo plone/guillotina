@@ -444,3 +444,15 @@ class TestInMemoryMetrics:
             )
             == 1.0
         )
+
+    @pytest.mark.app_settings({"cache": {"memory_cache_size": 1024}})
+    async def test_record_cache_size(self, cache_utility, metrics_registry):
+        value = "X" * 1023
+        keys = ["foo", "bar", "ba"]
+
+        previous_value = metrics_registry.get_sample_value("guillotina_cache_record_size_sum")
+
+        await cache_utility.set(keys, value)
+
+        current_value = metrics_registry.get_sample_value("guillotina_cache_record_size_sum")
+        assert int(current_value - previous_value) == cache_utility.get_size(value) * len(keys)

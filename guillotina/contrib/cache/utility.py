@@ -20,6 +20,29 @@ import pickle
 import uuid
 
 
+try:
+    import prometheus_client
+    from prometheus_client.utils import INF
+
+    KB = 1024
+    MB = 1024 * KB
+
+    CACHE_RECORD_SIZE = prometheus_client.Histogram(
+        "guillotina_cache_record_size",
+        "Record size histogram of objects in cache",
+        buckets=(1 * KB, 10 * KB, 50 * KB, 100 * KB, 500 * KB, 2 * MB, 5 * MB, INF),
+    )
+
+    def record_size_metric(size: int) -> None:
+        CACHE_RECORD_SIZE.observe(size)
+
+
+except ImportError:
+
+    def record_size_metric(size: int) -> None:
+        ...
+
+
 logger = logging.getLogger("guillotina.contrib.cache")
 _default_size = 1024
 _basic_types = (bytes, str, int, float)
@@ -104,10 +127,11 @@ class CacheUtility:
     async def set(self, keys, value, ttl=None):
         if not isinstance(keys, list):
             keys = [keys]
-        size = self.get_size(value)
+        in_memory_size = size = self.get_size(value)
         for key in keys:
+            record_size_metric(size)
             try:
-                self._memory_cache.set(key, value, size)
+                self._memory_cache.set(key, value, in_memory_size)
                 record_memory_op("set", "none")
                 if ttl is None:
                     ttl = self._settings.get("ttl", 3600)
@@ -117,7 +141,7 @@ class CacheUtility:
                 logger.debug("set {} in cache".format(key))
             except Exception:
                 logger.warning("Error setting cache value", exc_info=True)
-            size = 0  # additional keys to set have 0 size in cache
+            in_memory_size = 0  # additional keys to set have 0 size in in-memory cache
 
     @profilable
     # Delete a set of objects from cache
