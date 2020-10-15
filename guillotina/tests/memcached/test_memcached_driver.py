@@ -1,5 +1,4 @@
 from guillotina.contrib.memcached.driver import MemcachedDriver
-from guillotina.contrib.memcached.driver import safe_key
 from guillotina.utils import resolve_dotted_name
 from unittest import mock
 
