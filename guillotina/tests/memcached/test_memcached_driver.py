@@ -1,4 +1,5 @@
 from guillotina.contrib.memcached.driver import MemcachedDriver
+from guillotina.contrib.memcached.driver import safe_key
 from guillotina.utils import resolve_dotted_name
 from unittest import mock
 
@@ -99,3 +100,10 @@ async def test_memcached_ops(memcached_container, guillotina_main, loop):
 
     await driver.finalize()
     assert driver.initialized is False
+
+
+@pytest.mark.app_settings(MEMCACHED_SETTINGS)
+async def test_safe_key(memcached_container, guillotina_main, loop):
+    driver = await resolve_dotted_name("guillotina.contrib.memcached").get_driver()
+    for unsafe_key in ["a" * 255, "foo bar", "&a"]:
+        await driver.get(unsafe_key)
