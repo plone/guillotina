@@ -102,17 +102,20 @@ async def test_memcached_ops(memcached_container, guillotina_main, loop):
     assert driver.initialized is False
 
 
+unsafe_keys = ["a" * 255, "foo bar", b"\x130".decode()]
+
+
 @pytest.mark.app_settings(MEMCACHED_SETTINGS)
-async def test_memcached_ops_are_safe_key(memcached_container, guillotina_main, loop):
+@pytest.mark.parametrize("unsafe_key", unsafe_keys)
+async def test_memcached_ops_are_safe_key(memcached_container, guillotina_main, loop, unsafe_key):
     driver = await resolve_dotted_name("guillotina.contrib.memcached").get_driver()
-    for unsafe_key in ["a" * 255, "foo bar", "&a", b"\x130".decode()]:
-        await driver.get(unsafe_key)
-        await driver.set(unsafe_key, b"foo")
-        await driver.delete(unsafe_key)
-        await driver.delete_all([unsafe_key])
+    await driver.get(unsafe_key)
+    await driver.set(unsafe_key, b"foo")
+    await driver.delete(unsafe_key)
+    await driver.delete_all([unsafe_key])
 
 
-@pytest.mark.parametrize("unsafe_key", ["a" * 255, "foo bar", b"\x130".decode()])
+@pytest.mark.parametrize("unsafe_key", unsafe_keys)
 async def test_safe_key(unsafe_key):
     key = safe_key(unsafe_key)
     assert isinstance(key, bytes)
