@@ -15,6 +15,7 @@ from typing import Optional
 import asyncio
 import backoff
 import copy
+import hashlib
 import logging
 
 
@@ -88,7 +89,7 @@ try:
                 counter=MEMCACHED_OPS,
                 histogram=MEMCACHED_OPS_PROCESSING_TIME,
                 labels={"type": operation},
-                error_mappings={"timeout": asyncio.TimeoutError},
+                error_mappings={"timeout": asyncio.TimeoutError, "cancelled": asyncio.CancelledError},
             )
 
 
@@ -98,6 +99,14 @@ except ImportError:
 
 
 logger = logging.getLogger("guillotina.contrib.memcached")
+
+
+def safe_key(key: str) -> bytes:
+    """This is needed because memcached servers do not support keys longer
+    than 250 bytes, or keys with control characters or whitespaces.
+
+    """
+    return hashlib.sha224(key.encode()).hexdigest().encode()
 
 
 class MemcachedDriver:
@@ -182,12 +191,12 @@ class MemcachedDriver:
         if expire is not None:
             kwargs["exptime"] = expire
         with watch("set"):
-            await client.set(key.encode(), data, **kwargs)
+            await client.set(safe_key(key), data, **kwargs)
 
     async def get(self, key: str) -> Optional[bytes]:
         client = self._get_client()
         with watch("get") as w:
-            item: Optional[emcache.Item] = await client.get(key.encode())
+            item: Optional[emcache.Item] = await client.get(safe_key(key))
             if item is None:
                 # cache miss
                 w.labels["type"] = "get_miss"
@@ -199,7 +208,7 @@ class MemcachedDriver:
     async def delete(self, key: str) -> None:
         client = self._get_client()
         with watch("delete"):
-            await client.delete(key.encode(), noreply=True)
+            await client.delete(safe_key(key), noreply=True)
 
     async def delete_all(self, keys: List[str]) -> None:
         client = self._get_client()
@@ -207,7 +216,7 @@ class MemcachedDriver:
             for key in keys:
                 try:
                     with watch("delete"):
-                        await client.delete(key.encode(), noreply=True)
+                        await client.delete(safe_key(key), noreply=True)
                     logger.debug("Deleted cache keys {}".format(keys))
                 except Exception:
                     logger.warning("Error deleting cache keys {}".format(keys), exc_info=True)

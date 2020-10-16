@@ -4,7 +4,7 @@ CHANGELOG
 5.3.58 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Safer keys for memcached driver [lferran]
 
 
 5.3.57 (2020-10-14)
