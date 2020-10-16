@@ -89,7 +89,7 @@ try:
                 counter=MEMCACHED_OPS,
                 histogram=MEMCACHED_OPS_PROCESSING_TIME,
                 labels={"type": operation},
-                error_mappings={"timeout": asyncio.TimeoutError},
+                error_mappings={"timeout": asyncio.TimeoutError, "cancelled": asyncio.CancelledError},
             )
 
 
