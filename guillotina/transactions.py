@@ -131,7 +131,7 @@ class transaction:  # noqa: N801
                 self.txn.deleted = {**self.previous_txn.deleted, **self.txn.deleted}
                 self.txn.added = {**self.previous_txn.added, **self.txn.added}
 
-        if self.abort_when_done:
+        if self.abort_when_done or exc:
             await self.tm.abort(txn=self.txn)
         else:
             await self.tm.commit(txn=self.txn)
