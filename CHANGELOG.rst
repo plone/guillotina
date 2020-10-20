@@ -4,7 +4,11 @@ CHANGELOG
 6.0.9 (unreleased)
 ------------------
 
+- Fixed transaction strategy 'simple'
+  [masipcat]
+
 - Add id checker for move
+  [qiwn]
 
 
 6.0.8 (2020-09-24)
