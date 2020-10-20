@@ -386,7 +386,11 @@ class Transaction:
         if added:
             serial = None
         else:
-            serial = getattr(obj, "__serial__", None) or 0
+            serial = getattr(obj, "__serial__", None)
+
+        # We use the current tid as fallback.
+        # Otherwise two txn creating an object with same id would have the serial 0 and therefore wouldn't conflict
+        serial = serial or self._tid
 
         writer = IWriter(obj)
         await self._manager._storage.store(uid, serial, writer, obj, self)

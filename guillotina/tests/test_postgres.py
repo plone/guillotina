@@ -5,6 +5,7 @@ from guillotina.db.storages.cockroach import CockroachStorage
 from guillotina.db.storages.pg import PostgresqlStorage
 from guillotina.db.transaction_manager import TransactionManager
 from guillotina.exceptions import ConflictError
+from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.tests import mocks
 from guillotina.tests.utils import create_content
 from unittest.mock import Mock
@@ -351,6 +352,50 @@ async def test_should_not_resolve_conflict_error_with_simple_strat(db, dummy_gui
         txn2.register(ob2)
 
         # commit 2 before 1
+        await tm.commit(txn=txn2)
+        await tm.commit(txn=txn1)
+
+        await aps.remove()
+        await cleanup(aps)
+
+
+@pytest.mark.skipif(DATABASE in ("cockroachdb", "DUMMY"), reason="Cockroach not support simple...")
+async def test_should_raise_conflict_error_on_concurrent_insert(db, dummy_guillotina):
+    aps = await get_aps(db, "simple")
+    with TransactionManager(aps) as tm:
+        txn1 = await tm.begin()
+        txn2 = await tm.begin()
+
+        ob = create_content()
+        ob_bis = create_content(id=ob.id)
+        txn1.register(ob)
+        txn2.register(ob_bis)
+
+        await tm.commit(txn=txn2)
+        with pytest.raises(ConflictIdOnContainer):
+            await tm.commit(txn=txn1)
+
+        await aps.remove()
+        await cleanup(aps)
+
+
+@pytest.mark.skipif(DATABASE in ("cockroachdb", "DUMMY"), reason="Cockroach not support simple...")
+async def test_should_raise_conflict_error_on_concurrent_update(db, dummy_guillotina):
+    aps = await get_aps(db, "simple")
+    with TransactionManager(aps) as tm, await tm.begin() as txn:
+        ob = create_content()
+        txn.register(ob)
+        await tm.commit(txn=txn)
+
+        # 1 started before 2
+        txn1 = await tm.begin()
+        txn2 = await tm.begin()
+
+        ob1 = await txn1.get(ob.__uuid__)
+        ob2 = await txn1.get(ob.__uuid__)
+        txn1.register(ob1)
+        txn2.register(ob2)
+
         await tm.commit(txn=txn2)
         with pytest.raises(ConflictError):
             await tm.commit(txn=txn1)
