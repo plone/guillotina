@@ -4,7 +4,7 @@ CHANGELOG
 6.0.9 (unreleased)
 ------------------
 
-- Fix transaction context manager doesn't abort the txn when a exception is rised
+- Fix transaction context manager doesn't abort the txn when a exception is raised
   [masipcat]
 
 - Add id checker for move
