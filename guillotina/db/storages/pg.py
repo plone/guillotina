@@ -144,7 +144,7 @@ register_sql(
         NAIVE_UPSERT
         + """
 WHERE
-    tid = EXCLUDED.otid"""
+    {table_name}.tid = EXCLUDED.otid"""
     ),
 )
 register_sql("NAIVE_UPSERT", _wrap_return_count(NAIVE_UPSERT))
