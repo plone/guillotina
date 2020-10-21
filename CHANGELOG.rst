@@ -7,6 +7,9 @@ CHANGELOG
 - Fix transaction context manager doesn't abort the txn when a exception is raised
   [masipcat]
 
+- Fixed transaction strategy 'simple'
+  [masipcat]
+
 - Add id checker for move
   [qiwn]
 
