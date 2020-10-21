@@ -612,7 +612,8 @@ class PostgresqlStorage(BaseStorage):
 
     _unique_constraints = [
         """CREATE UNIQUE INDEX CONCURRENTLY {constraint_name}_parent_id_id_key
-           ON {objects_table_name} (id, coalesce(parent_id, '@@'))""",
+           ON {objects_table_name} (parent_id, id)
+           WHERE parent_id != '{TRASHED_ID}' """,
         """CREATE UNIQUE INDEX CONCURRENTLY {constraint_name}_annotations_unique ON {objects_table_name} (of, id);""",
     ]
 
@@ -838,7 +839,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
             part = 0
 
         update = False
-        statement_sql = self._sql.get("UPSERT", self.objects_table_name)
+        statement_sql = self._sql.get("NAIVE_UPSERT", self.objects_table_name)
         if not obj.__new_marker__ and obj.__serial__ is not None:
             # we should be confident this is an object update
             statement_sql = self._sql.get("UPDATE", self.objects_table_name)
@@ -863,7 +864,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                     pickled,  # Pickle state)
                 )
             except asyncpg.exceptions.UniqueViolationError as ex:
-                if "Key (id, COALESCE(parent_id, '@@'::character varying))" in ex.detail or "Key (of, id)" in ex.detail:
+                if "Key (parent_id, id)" in ex.detail or "Key (of, id)" in ex.detail:
                     raise ConflictIdOnContainer(ex)
                 raise
             except asyncpg.exceptions.ForeignKeyViolationError:

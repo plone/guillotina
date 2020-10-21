@@ -172,7 +172,6 @@ class Database:
         txn = await tm.begin()
 
         try:
-            await txn._strategy.retrieve_tid()
             root = await tm._storage.load(txn, ROOT_ID)
             if root is not None:
                 root = app_settings["object_reader"](root)

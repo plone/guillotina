@@ -21,4 +21,4 @@ class TIDOnlyStrategy(BaseStrategy):
     """
 
     async def tpc_commit(self):
-        await self.retrieve_tid()
+        pass

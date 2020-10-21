@@ -383,58 +383,6 @@ async def test_should_raise_conflict_error_on_concurrent_update(db, container_re
                 await tm.commit(txn=txn1)
 
 
-@pytest.mark.skipif(DATABASE in ("DUMMY",), reason="DUMMY not support simple...")
-async def test_should_raise_conflict_error_on_concurrent_insert(db, container_requester):
-    async with container_requester:
-        aps = await get_aps(db, "simple")
-        with TransactionManager(aps) as tm:
-            txn = await tm.begin()
-            root_ob = await tm.get_root()
-            container = await create_container(root_ob, "test-container")
-            container.register()
-            await tm.commit(txn=txn)
-
-            txn1 = await tm.begin()
-            txn2 = await tm.begin()
-
-            ob = create_content(parent=container)
-            ob_bis = create_content(id=ob.id, parent=container)
-            txn1.register(ob)
-            txn2.register(ob_bis)
-
-            await tm.commit(txn=txn2)
-            with pytest.raises(ConflictIdOnContainer):
-                await tm.commit(txn=txn1)
-
-
-@pytest.mark.skipif(DATABASE in ("DUMMY",), reason="DUMMY not support simple...")
-async def test_should_raise_conflict_error_on_concurrent_update(db, container_requester):
-    async with container_requester:
-        aps = await get_aps(db, "simple")
-        with TransactionManager(aps) as tm:
-            txn = await tm.begin()
-            root_ob = await tm.get_root()
-            container = await create_container(root_ob, "test-container")
-            container.register()
-
-            ob = create_content(parent=container)
-            txn.register(ob)
-            await tm.commit(txn=txn)
-
-            # 1 started before 2
-            txn1 = await tm.begin()
-            txn2 = await tm.begin()
-
-            ob1 = await txn1.get(ob.__uuid__)
-            ob2 = await txn1.get(ob.__uuid__)
-            txn1.register(ob1)
-            txn2.register(ob2)
-
-            await tm.commit(txn=txn2)
-            with pytest.raises(ConflictError):
-                await tm.commit(txn=txn1)
-
-
 @pytest.mark.skipif(DATABASE == "DUMMY", reason="Not for dummy db")
 async def test_none_strat_allows_trans_commits(db, dummy_guillotina):
     aps = await get_aps(db, "none")

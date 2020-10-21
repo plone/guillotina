@@ -12,7 +12,6 @@ logger = glogging.getLogger("guillotina")
 class SimpleStrategy(BaseStrategy):
 
     async def tpc_begin(self):
-        await self.retrieve_tid()
         if self._transaction._db_txn is None:
             await self._storage.start_transaction(self._transaction)
 
