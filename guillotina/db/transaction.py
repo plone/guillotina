@@ -384,17 +384,13 @@ class Transaction:
     async def _store_object(self, obj, uid, added=False):
         # There is no serial
         if added:
-            serial = None
+            serial = 0
         else:
-            serial = getattr(obj, "__serial__", None)
-
-        # We use the current tid as fallback.
-        # Otherwise two txn creating an object with same id would have the serial 0 and therefore wouldn't conflict
-        serial = serial or self._tid
+            serial = getattr(obj, "__serial__", None) or 0
 
         writer = IWriter(obj)
         await self._manager._storage.store(uid, serial, writer, obj, self)
-        obj.__serial__ = self._tid
+        obj.__serial__ = serial + 1
         obj.__uuid__ = uid
         if obj.__txn__ is None:
             obj.__txn__ = self

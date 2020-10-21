@@ -850,7 +850,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                 result = await conn.fetch(
                     statement_sql,
                     oid,  # The OID of the object
-                    txn._tid,  # Our TID
+                    old_serial + 1,  # Our TID
                     len(pickled),  # Len of the object
                     part,  # Partition indicator
                     writer.resource,  # Is a resource ?

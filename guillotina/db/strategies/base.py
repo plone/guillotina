@@ -21,6 +21,6 @@ class BaseStrategy:
 
     async def retrieve_tid(self):
         if self.writable_transaction:
-            tid = await self._storage.get_next_tid(self._transaction)
-            if tid is not None:
-                self._transaction._tid = tid
+            # tid = await self._storage.get_next_tid(self._transaction)
+            # if tid is not None:
+            self._transaction._tid = None
