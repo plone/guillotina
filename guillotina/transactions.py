@@ -131,24 +131,27 @@ class transaction:  # noqa: N801
                 self.txn.deleted = {**self.previous_txn.deleted, **self.txn.deleted}
                 self.txn.added = {**self.previous_txn.added, **self.txn.added}
 
-        if self.abort_when_done or exc:
+        if exc:
             await self.tm.abort(txn=self.txn)
         else:
-            await self.tm.commit(txn=self.txn)
+            if self.abort_when_done:
+                await self.tm.abort(txn=self.txn)
+            else:
+                await self.tm.commit(txn=self.txn)
 
-        if self.adopt_parent_txn and self.previous_txn is not None:
-            # restore transaction ownership of item from adoption done above
-            if self.previous_txn != self.txn:
-                # we adopted previously detetected transaction so now
-                # we need to clear changed objects and restore ownership
-                self.previous_txn.modified = {}
-                self.previous_txn.deleted = {}
-                self.previous_txn.added = {}
+            if self.adopt_parent_txn and self.previous_txn is not None:
+                # restore transaction ownership of item from adoption done above
+                if self.previous_txn != self.txn:
+                    # we adopted previously detetected transaction so now
+                    # we need to clear changed objects and restore ownership
+                    self.previous_txn.modified = {}
+                    self.previous_txn.deleted = {}
+                    self.previous_txn.added = {}
 
-        if self.execute_futures:
-            from guillotina.utils import execute
+            if self.execute_futures:
+                from guillotina.utils import execute
 
-            execute.execute_futures()
+                execute.execute_futures()
 
         if self.previous_txn is not None:
             task_vars.txn.set(self.previous_txn)
