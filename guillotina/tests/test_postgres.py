@@ -331,33 +331,56 @@ async def test_should_not_resolve_conflict_error_with_resolve(db, dummy_guilloti
         await cleanup(aps)
 
 
-@pytest.mark.skipif(DATABASE in ("cockroachdb", "DUMMY"), reason="Cockroach not support simple...")
-async def test_should_not_resolve_conflict_error_with_simple_strat(db, dummy_guillotina):
-    aps = await get_aps(db, "simple")
-    with TransactionManager(aps) as tm, await tm.begin() as txn:
-        ob1 = create_content()
-        ob2 = create_content()
-        txn.register(ob1)
-        txn.register(ob2)
+@pytest.mark.skipif(DATABASE in ("DUMMY",), reason="DUMMY not support simple...")
+async def test_should_raise_conflict_error_on_concurrent_insert(db, container_requester):
+    async with container_requester:
+        aps = await get_aps(db, "simple")
+        with TransactionManager(aps) as tm:
+            txn = await tm.begin()
+            root_ob = await tm.get_root()
+            container = await create_container(root_ob, "test-container")
+            container.register()
+            await tm.commit(txn=txn)
 
-        await tm.commit(txn=txn)
+            txn1 = await tm.begin()
+            txn2 = await tm.begin()
 
-        # 1 started before 2
-        txn1 = await tm.begin()
-        txn2 = await tm.begin()
+            ob = create_content(parent=container)
+            ob_bis = create_content(id=ob.id, parent=container)
+            txn1.register(ob)
+            txn2.register(ob_bis)
 
-        ob1 = await txn1.get(ob1.__uuid__)
-        ob2 = await txn2.get(ob2.__uuid__)
+            await tm.commit(txn=txn2)
+            with pytest.raises(ConflictIdOnContainer):
+                await tm.commit(txn=txn1)
 
-        txn1.register(ob1)
-        txn2.register(ob2)
 
-        # commit 2 before 1
-        await tm.commit(txn=txn2)
-        await tm.commit(txn=txn1)
+@pytest.mark.skipif(DATABASE in ("DUMMY",), reason="DUMMY not support simple...")
+async def test_should_raise_conflict_error_on_concurrent_update(db, container_requester):
+    async with container_requester:
+        aps = await get_aps(db, "simple")
+        with TransactionManager(aps) as tm:
+            txn = await tm.begin()
+            root_ob = await tm.get_root()
+            container = await create_container(root_ob, "test-container")
+            container.register()
 
-        await aps.remove()
-        await cleanup(aps)
+            ob = create_content(parent=container)
+            txn.register(ob)
+            await tm.commit(txn=txn)
+
+            # 1 started before 2
+            txn1 = await tm.begin()
+            txn2 = await tm.begin()
+
+            ob1 = await txn1.get(ob.__uuid__)
+            ob2 = await txn1.get(ob.__uuid__)
+            txn1.register(ob1)
+            txn2.register(ob2)
+
+            await tm.commit(txn=txn2)
+            with pytest.raises(ConflictError):
+                await tm.commit(txn=txn1)
 
 
 @pytest.mark.skipif(DATABASE in ("DUMMY",), reason="DUMMY not support simple...")
