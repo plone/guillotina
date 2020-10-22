@@ -31,6 +31,23 @@ async def test_tid_created_for_writes(dummy_request, event_loop):
     assert trns._tid == 1
 
 
+async def test_managed_transaction_aborted_on_exception(container_requester):
+    async with container_requester as requester:
+        with pytest.raises(Exception):
+            async with transaction(db=requester.db) as txn:
+                root = await txn.get(ROOT_ID)
+                container = await root.async_get("guillotina")
+                container.title = "changed title"
+                container.register()
+
+                raise Exception()
+
+        async with transaction(db=requester.db) as txn:
+            root = await txn.get(ROOT_ID)
+            container = await root.async_get("guillotina")
+            assert container.title == "Guillotina Container"
+
+
 async def test_managed_transaction_with_adoption(container_requester):
     async with container_requester as requester:
         async with transaction(db=requester.db, abort_when_done=True) as txn:

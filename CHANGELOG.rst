@@ -4,8 +4,11 @@ CHANGELOG
 6.0.9 (unreleased)
 ------------------
 
-- Add id checker for move
+- Fix transaction context manager doesn't abort the txn when a exception is raised
+  [masipcat]
 
+- Add id checker for move
+  [qiwn]
 
 6.0.8 (2020-09-24)
 ------------------
