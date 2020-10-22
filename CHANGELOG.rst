@@ -4,7 +4,7 @@ CHANGELOG
 6.0.9 (unreleased)
 ------------------
 
-- Fixed transaction strategy 'simple'
+- Change transaction strategy 'simple'
   [masipcat]
 
 - Add id checker for move
