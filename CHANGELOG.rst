@@ -4,6 +4,8 @@ CHANGELOG
 6.0.9 (unreleased)
 ------------------
 
+- Fix bug on error deserialization [lferran]
+
 - Fix transaction context manager doesn't abort the txn when a exception is raised
   [masipcat]
 
