@@ -4,6 +4,7 @@ from zope.interface import implementer
 from zope.interface.exceptions import Invalid  # noqa pylint: disable=W0611
 from zope.interface.interfaces import ComponentLookupError  # noqa pylint: disable=W0611
 
+import jsonschema
 import orjson
 
 
@@ -218,12 +219,10 @@ class DeserializationError(Exception):
                 if hasattr(exc, "errors") and exc.errors:
                     inner_errors = []
                     for e in exc.errors:
-                        try:
+                        if isinstance(e, jsonschema.exceptions.ValidationError):
+                            inner_errors.append({"message": e.message})
+                        else:
                             inner_errors.append(e.json())
-                        except AttributeError:
-                            # jsonschema.exceptions.ValidationError
-                            # does not have json() method
-                            inner_errors.append({"error_str": str(e)})
                     error["errors"] = self.json_err_list(inner_errors)
             converted_errors.append(error)
         return converted_errors
