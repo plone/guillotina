@@ -7,6 +7,8 @@ CHANGELOG
 - Change transaction strategy 'simple'
   [masipcat]
 
+- Fix bug on error deserialization
+
 - Fix transaction context manager doesn't abort the txn when a exception is raised
   [masipcat]
 
