@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.9 (unreleased)
+6.0.9 (2020-10-30)
 ------------------
 
 - Change transaction strategy 'simple'
