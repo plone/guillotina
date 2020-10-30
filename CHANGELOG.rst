@@ -4,6 +4,9 @@ CHANGELOG
 6.0.9 (unreleased)
 ------------------
 
+- Change transaction strategy 'simple'
+  [masipcat]
+
 - Fix bug on error deserialization
 
 - Fix transaction context manager doesn't abort the txn when a exception is raised
@@ -11,6 +14,7 @@ CHANGELOG
 
 - Add id checker for move
   [qiwn]
+
 
 6.0.8 (2020-09-24)
 ------------------
