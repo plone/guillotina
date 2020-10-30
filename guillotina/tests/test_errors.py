@@ -85,3 +85,26 @@ async def test_handled_exception(container_requester):
             handle_mock.side_effect = DeserializationError([{"err": "bad error"}])
             _, status = await requester("GET", "/db")
             assert status == 412
+
+
+@pytest.mark.asyncio
+async def test_jsonfield_json_schema_validation_error_is_deserialized(container_requester):
+    import json
+
+    async with container_requester as requester:
+        _, status = await requester(
+            "POST", "/db/guillotina", data=json.dumps({"@type": "Example", "id": "foobar"})
+        )
+        assert status == 201
+        response, status = await requester(
+            "PATCH",
+            "/db/guillotina/foobar",
+            data=json.dumps(
+                {
+                    # Send an invalid type
+                    "jsonfield_value": {}
+                }
+            ),
+        )
+        assert status == 412
+        assert "{} is not of type 'array'" in response["deserialization_errors"][0]["errors"][0]["message"]
