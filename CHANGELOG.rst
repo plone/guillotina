@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.10 (unreleased)
+6.0.10 (2020-11-01)
 -------------------
 
 - Fix conflict cors response.
