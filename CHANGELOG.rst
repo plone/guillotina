@@ -4,7 +4,8 @@ CHANGELOG
 6.0.10 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix conflict cors response.
+  [bloodbare]
 
 
 6.0.9 (2020-10-30)

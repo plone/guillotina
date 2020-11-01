@@ -10,6 +10,7 @@ from guillotina.middlewares import ErrorsMiddleware
 from guillotina.request import Request
 from guillotina.response import Response
 from guillotina.traversal import apply_rendering
+from guillotina.traversal import apply_cors
 from guillotina.utils import get_dotted_name
 from guillotina.utils import resolve_dotted_name
 
@@ -173,7 +174,8 @@ class Guillotina:
                 exc, IErrorResponseException, kwargs={"error": "ServiceError", "eid": eid}
             )
             if view_result is not None:
-                return await apply_rendering(View(None, request), request, view_result)
+                resp = await apply_rendering(View(None, request), request, view_result)
+                return await apply_cors(request, resp)
 
             # Raise unhandled exceptions to ErrorMiddleware
             raise

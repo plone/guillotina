@@ -197,7 +197,7 @@ async def apply_rendering(view, request, view_result):
     return await renderer(view_result)
 
 
-async def _apply_cors(request, resp) -> IResponse:
+async def apply_cors(request, resp) -> IResponse:
     cors_renderer = app_settings["cors_renderer"](request)
     try:
         cors_headers = await cors_renderer.get_headers()
@@ -274,7 +274,7 @@ class MatchInfo(BaseMatchInfo):
         if not IResponse.providedBy(resp) or not resp.prepared:
             resp = await apply_rendering(self.view, self.request, resp)
             request.record("renderer")
-            resp = await _apply_cors(request, resp)
+            resp = await apply_cors(request, resp)
 
         if not request._view_error:
             request.execute_futures()
@@ -315,7 +315,7 @@ class BasicMatchInfo(BaseMatchInfo):
         self.debug(request, resp)
         if not IResponse.providedBy(resp) or not resp.prepared:
             resp = await apply_rendering(View(None, request), request, resp)
-            resp = await _apply_cors(request, resp)
+            resp = await apply_cors(request, resp)
         return resp
 
     def get_info(self):
