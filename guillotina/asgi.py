@@ -9,8 +9,8 @@ from guillotina.interfaces import IErrorResponseException
 from guillotina.middlewares import ErrorsMiddleware
 from guillotina.request import Request
 from guillotina.response import Response
-from guillotina.traversal import apply_rendering
 from guillotina.traversal import apply_cors
+from guillotina.traversal import apply_rendering
 from guillotina.utils import get_dotted_name
 from guillotina.utils import resolve_dotted_name
 
@@ -18,7 +18,6 @@ import asyncio
 import enum
 import traceback
 import uuid
-
 
 logger = glogging.getLogger("guillotina")
 
