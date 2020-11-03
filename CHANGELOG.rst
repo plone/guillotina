@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.59 (unreleased)
+5.3.59 (2020-11-03)
 -------------------
 
 - Fix db metrics to isolate acquiring connection
