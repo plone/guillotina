@@ -255,7 +255,7 @@ class CockroachStorage(pg.PostgresqlStorage):
         return transaction._tid
 
     # Cockroach cant use at version 1.0.3 row count (no fetch)
-    async def get_one_row(self, txn, sql, *args, prepare=False):
+    async def get_one_row(self, txn, sql, *args, prepare=False, metric=None):
         # Helper function to provide easy adaptation to cockroach
         conn = await txn.get_connection()
         try:
