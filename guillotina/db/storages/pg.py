@@ -851,7 +851,8 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
     @restart_conn_on_exception
     async def open(self):
-        return await self.pool.acquire(timeout=self._conn_acquire_timeout)
+        with watch("acquire_connection"):
+            return await self.pool.acquire(timeout=self._conn_acquire_timeout)
 
     async def _close(self, con):
         try:
@@ -885,8 +886,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def load(self, txn, oid):
         sql = self._sql.get("GET_OID", self._objects_table_name)
         async with watch_lock(txn._lock, "load_object_by_oid"):
-            with watch("load_object_by_oid"):
-                objects = await self.get_one_row(txn, sql, oid)
+            objects = await self.get_one_row(txn, sql, oid, metric="load_object_by_oid")
         if objects is None:
             raise KeyError(oid)
         return objects
@@ -1010,15 +1010,18 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
             with watch("current_tid"):
                 return await self.stmt_max_tid.fetchval()
 
-    async def get_one_row(self, txn, sql, *args, prepare=False):
+    async def get_one_row(self, txn, sql, *args, prepare=False, metric="get_one_row"):
         conn = await txn.get_connection()
         # Helper function to provide easy adaptation to cockroach
         if prepare:
             # latest version of asyncpg has prepare bypassing statement cache
-            smt = await conn.prepare(sql)
-            return await smt.fetchrow(*args)
+            with watch(metric + "_prepare"):
+                smt = await conn.prepare(sql)
+            with watch(metric):
+                return await smt.fetchrow(*args)
         else:
-            return await conn.fetchrow(sql, *args)
+            with watch(metric):
+                return await conn.fetchrow(sql, *args)
 
     def _db_transaction_factory(self, txn):
         # make sure asycpg knows this is a new transaction
@@ -1128,8 +1131,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def get_child(self, txn, parent_oid, id):
         sql = self._sql.get("GET_CHILD", self._objects_table_name)
         async with watch_lock(txn._lock, "get_child"):
-            with watch("get_child"):
-                result = await self.get_one_row(txn, sql, parent_oid, id)
+            result = await self.get_one_row(txn, sql, parent_oid, id, metric="get_child")
         return result
 
     async def get_children(self, txn, parent_oid, ids):
@@ -1142,8 +1144,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def has_key(self, txn, parent_oid, id):
         sql = self._sql.get("EXIST_CHILD", self._objects_table_name)
         async with watch_lock(txn._lock, "has_key"):
-            with watch("has_key"):
-                result = await self.get_one_row(txn, sql, parent_oid, id)
+            result = await self.get_one_row(txn, sql, parent_oid, id, metric="has_key")
         if result is None:
             return False
         else:
@@ -1170,8 +1171,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def get_annotation(self, txn, oid, id):
         sql = self._sql.get("GET_ANNOTATION", self._objects_table_name)
         async with watch_lock(txn._lock, "load_annotation"):
-            with watch("load_annotation"):
-                result = await self.get_one_row(txn, sql, oid, id, prepare=True)
+            result = await self.get_one_row(txn, sql, oid, id, prepare=True, metric="load_annotation")
             if result is not None and result["parent_id"] == TRASHED_ID:
                 result = None
         return result
@@ -1191,7 +1191,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def write_blob_chunk(self, txn, bid, oid, chunk_index, data):
         sql = self._sql.get("HAS_OBJECT", self._objects_table_name)
         async with watch_lock(txn._lock, "has_object"):
-            result = await self.get_one_row(txn, sql, oid)
+            result = await self.get_one_row(txn, sql, oid, metric="has_object")
         if result is None:
             # check if we have a referenced ob, could be new and not in db yet.
             # if so, create a stub for it here...
@@ -1213,8 +1213,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def read_blob_chunk(self, txn, bid, chunk=0):
         sql = self._sql.get("READ_BLOB_CHUNK", self._blobs_table_name)
         async with watch_lock(txn._lock, "load_blob_chunk"):
-            with watch("load_blob_chunk"):
-                return await self.get_one_row(txn, sql, bid, chunk)
+            return await self.get_one_row(txn, sql, bid, chunk, metric="load_blob_chunk")
 
     async def read_blob_chunks(self, txn, bid):
         conn = await txn.get_connection()

@@ -4,7 +4,8 @@ CHANGELOG
 5.3.59 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix db metrics to isolate acquiring connection
+  [vangheem]
 
 
 5.3.58 (2020-10-16)
