@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.60 (unreleased)
+5.3.60 (2020-11-03)
 -------------------
 
 - Increase pg operation long tail bucket size
