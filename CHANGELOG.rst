@@ -4,7 +4,8 @@ CHANGELOG
 5.3.60 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Increase pg operation long tail bucket size
+  [vangheem]
 
 
 5.3.59 (2020-11-03)
