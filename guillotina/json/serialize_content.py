@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from guillotina import app_settings
 from guillotina import configure
 from guillotina.component import ComponentLookupError
 from guillotina.component import get_multi_adapter
@@ -95,6 +96,9 @@ class SerializeToJson(object):
                 # providedBy not working here?
                 await behavior.load(create=False)
             await self.get_schema(behavior_schema, behavior, result, True)
+
+        for post_serialize_processors in app_settings['post_serialize']:
+            await apply_coroutine(post_serialize_processors, self.context, result)
 
         return result
 
