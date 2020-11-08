@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.11 (unreleased)
+6.0.11 (2020-11-08)
 -------------------
 
 - Adding Vocabularies API compatible to Plone REST API
