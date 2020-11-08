@@ -112,7 +112,7 @@ class ContextBehavior:
         if not hasattr(context, key_name):
             return get_default_from_schema(self, self.__dict__["schema"], name, field.missing_value)
 
-        return getattr(context, key_name, field.default)
+        return getattr(context, key_name)
 
     def __setattr__(self, name, value):
         if name not in self.__dict__["schema"]:

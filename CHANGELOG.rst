@@ -4,8 +4,20 @@ CHANGELOG
 6.0.11 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Adding Vocabularies API compatible to Plone REST API
+  [bloodbare]
 
+- Adding Workflow contrib package with API compatible to Plone REST API
+  [bloodbare]
+
+- Adding languages and contrib vocabulary
+  [bloodbare]
+
+- Avoid default value check on get for each get operation
+  [bloodbare]
+
+- Adding post serialize mechanism to modify JSON responses based on packages
+  [bloodbare]
 
 6.0.10 (2020-11-01)
 -------------------

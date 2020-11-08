@@ -1,0 +1,172 @@
+initial_state: private
+states:
+  pending:
+    actions:
+      publish:
+        title: Publish
+        to: published
+        check_permission: guillotina.ReviewContent
+      reject:
+        title: Send back
+        to: private
+        check_permission: guillotina.ReviewContent
+      retract:
+        title: Retract
+        to: private
+        check_permission: guillotina.RequestReview
+    set_permission:
+      perminhe:
+      - setting: Deny
+        permission: guillotina.AccessContent
+      - setting: Deny
+        permission: guillotina.ModifyContent
+      - setting: Deny
+        permission: guillotina.ViewContent
+      roleperm:
+      - setting: Allow
+        permission: guillotina.AccessContent
+        role: guillotina.Manager
+      - setting: Allow
+        permission: guillotina.AccessContent
+        role: guillotina.Owner
+      - setting: Allow
+        permission: guillotina.AccessContent
+        role: guillotina.Editor
+      - setting: Allow
+        permission: guillotina.AccessContent
+        role: guillotina.Reader
+      - setting: Allow
+        permission: guillotina.AccessContent
+        role: guillotina.Reviewer
+      - setting: Allow
+        permission: guillotina.AccessContent
+        role: guillotina.ContainerAdmin
+      - setting: Allow
+        permission: guillotina.ModifyContent
+        role: guillotina.Reviewer
+      - setting: Allow
+        permission: guillotina.ModifyContent
+        role: guillotina.ContainerAdmin
+      - setting: Allow
+        permission: guillotina.ModifyContent
+        role: guillotina.Manager
+      - setting: Allow
+        permission: guillotina.ViewContent
+        role: guillotina.Manager
+      - setting: Allow
+        permission: guillotina.ViewContent
+        role: guillotina.Owner
+      - setting: Allow
+        permission: guillotina.ViewContent
+        role: guillotina.Editor
+      - setting: Allow
+        permission: guillotina.ViewContent
+        role: guillotina.Reader
+      - setting: Allow
+        permission: guillotina.ViewContent
+        role: guillotina.Reviewer
+      - setting: Allow
+        permission: guillotina.ViewContent
+        role: guillotina.ContainerAdmin
+  private:
+    actions:
+      publish:
+        title: Publish
+        to: published
+        check_permission: guillotina.ReviewContent
+      submit:
+        title: Submit
+        to: pending
+        check_permission: guillotina.RequestReview
+    set_permission:
+      perminhe:
+      - setting: Deny
+        permission: guillotina.AccessContent
+      - setting: Deny
+        permission: guillotina.ModifyContent
+      - setting: Deny
+        permission: guillotina.ViewContent
+      roleperm:
+      - setting: Allow
+        permission: guillotina.AccessContent
+        role: guillotina.Manager
+      - setting: Allow
+        permission: guillotina.AccessContent
+        role: guillotina.Owner
+      - setting: Allow
+        permission: guillotina.AccessContent
+        role: guillotina.Editor
+      - setting: Allow
+        permission: guillotina.AccessContent
+        role: guillotina.Reader
+      - setting: Allow
+        permission: guillotina.AccessContent
+        role: guillotina.ContainerAdmin
+      - setting: Allow
+        permission: guillotina.ModifyContent
+        role: guillotina.Owner
+      - setting: Allow
+        permission: guillotina.ModifyContent
+        role: guillotina.ContainerAdmin
+      - setting: Allow
+        permission: guillotina.ModifyContent
+        role: guillotina.Manager
+      - setting: Allow
+        permission: guillotina.ModifyContent
+        role: guillotina.Editor
+      - setting: Allow
+        permission: guillotina.ViewContent
+        role: guillotina.Manager
+      - setting: Allow
+        permission: guillotina.ViewContent
+        role: guillotina.Owner
+      - setting: Allow
+        permission: guillotina.ViewContent
+        role: guillotina.Editor
+      - setting: Allow
+        permission: guillotina.ViewContent
+        role: guillotina.Reader
+      - setting: Allow
+        permission: guillotina.ViewContent
+        role: guillotina.ContainerAdmin
+  published:
+    actions:
+      retract_pending:
+        title: Back to review
+        to: pending
+        check_permission: guillotina.ReviewContent
+      reject:
+        title: Send back
+        to: private
+        check_permission: guillotina.ReviewContent
+      retract:
+        title: Retract
+        to: private
+        check_permission: guillotina.RequestReview
+    set_permission:
+      perminhe:
+      - setting: Deny
+        permission: guillotina.AccessContent
+      - setting: Deny
+        permission: guillotina.ModifyContent
+      - setting: Deny
+        permission: guillotina.ViewContent
+      roleperm:
+      - setting: Allow
+        permission: guillotina.AccessContent
+        role: guillotina.Anonymous
+      - setting: Allow
+        permission: guillotina.ModifyContent
+        role: guillotina.Owner
+      - setting: Allow
+        permission: guillotina.ModifyContent
+        role: guillotina.ContainerAdmin
+      - setting: Allow
+        permission: guillotina.ModifyContent
+        role: guillotina.Manager
+      - setting: Allow
+        permission: guillotina.ModifyContent
+        role: guillotina.Editor
+      - setting: Allow
+        permission: guillotina.ViewContent
+        role: guillotina.Anonymous
