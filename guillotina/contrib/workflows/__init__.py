@@ -2,7 +2,7 @@ from guillotina import configure
 
 import glob
 import logging
-import typings
+import typing
 import yaml
 
 
@@ -24,7 +24,7 @@ app_settings = {
 
 path = "/".join(__file__.split("/")[:-1])
 
-workflows: typings.Any = app_settings["workflows"]
+workflows: typing.Any = app_settings["workflows"]
 for workflow_file in glob.glob(path + "/base/*.yaml"):
     with open(workflow_file, "r") as f:
         workflow_content = yaml.load(f, Loader=yaml.FullLoader)
