@@ -7,7 +7,7 @@ pytestmark = pytest.mark.asyncio
 @pytest.mark.app_settings(
     {
         "applications": ["guillotina", "guillotina.contrib.workflows"],
-        "workflows_content": {"guillotina.interfaces.IContainer": "guillotina_basic",},
+        "workflows_content": {"guillotina.interfaces.IContainer": "guillotina_basic"},
     }
 )
 async def test_workflow_basic(container_requester):

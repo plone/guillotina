@@ -84,7 +84,7 @@ def create_workflow_factory(proto_name, proto_definition):
                 "time": datetime.datetime.now(),
                 "title": action_def["title"],
                 "type": "workflow",
-                "data": {"action": action, "review_state": new_state,},
+                "data": {"action": action, "review_state": new_state},
             }
 
             workflow_behavior = IWorkflowBehavior(self.context)

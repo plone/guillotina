@@ -5,7 +5,7 @@ pytestmark = pytest.mark.asyncio
 
 
 @pytest.mark.app_settings(
-    {"applications": ["guillotina", "guillotina.contrib.vocabularies"],}
+    {"applications": ["guillotina", "guillotina.contrib.vocabularies"]}
 )
 async def test_contrib_vocabulary(container_requester):
     async with container_requester as requester:
