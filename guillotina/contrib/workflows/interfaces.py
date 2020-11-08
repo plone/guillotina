@@ -1,12 +1,15 @@
-from guillotina.interfaces import IAsyncUtility
-from guillotina.schema.interfaces import IContextAwareDefaultFactory
-from guillotina.interfaces import IResource
-from zope.interface import Interface
-from zope.interface import interfaces
-from zope.interface import implementer
 from guillotina import schema
 from guillotina.directives import index_field
+from guillotina.interfaces import IAsyncUtility
+from guillotina.interfaces import IResource
+from guillotina.schema.interfaces import IContextAwareDefaultFactory
+from zope.interface import Attribute
+from zope.interface import implementer
+from zope.interface import Interface
+from zope.interface import interfaces
+
 import json
+
 
 HISTORY_SCHEMA = json.dumps(
     {
@@ -28,7 +31,8 @@ class IWorkflowUtility(IAsyncUtility):
 
 
 class IWorkflow(Interface):
-    pass
+
+    initial_state = Attribute("Initial state of the workflow")
 
 
 class IWorkflowChangedEvent(interfaces.IObjectEvent):
@@ -37,7 +41,7 @@ class IWorkflowChangedEvent(interfaces.IObjectEvent):
 
 @implementer(IContextAwareDefaultFactory)
 class DefaultReviewState:
-    def __call__(self, context: IResource = None) -> str:
+    def __call__(self, context: IResource) -> str:
         return IWorkflow(context.context).initial_state
 
 

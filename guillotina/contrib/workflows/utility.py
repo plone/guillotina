@@ -1,23 +1,23 @@
-import datetime
 from guillotina import app_settings
-from guillotina.contrib.workflows.interfaces import IWorkflowUtility
-from guillotina.contrib.workflows.interfaces import IWorkflow
 from guillotina import configure
 from guillotina.component import provide_adapter
 from guillotina.component import query_adapter
-
-from guillotina.utils import import_class
-from guillotina.contrib.workflows.interfaces import IWorkflowBehavior
-from guillotina.response import HTTPUnauthorized
-from guillotina.utils import get_authenticated_user_id, get_security_policy
-from guillotina.security.utils import apply_sharing
-from guillotina.contrib.workflows.events import WorkflowChangedEvent
-from guillotina.event import notify
 from guillotina.contrib.workflows import logger
+from guillotina.contrib.workflows.events import WorkflowChangedEvent
+from guillotina.contrib.workflows.interfaces import IWorkflow
+from guillotina.contrib.workflows.interfaces import IWorkflowBehavior
+from guillotina.contrib.workflows.interfaces import IWorkflowUtility
+from guillotina.event import notify
+from guillotina.response import HTTPUnauthorized
+from guillotina.security.utils import apply_sharing
+from guillotina.utils import get_authenticated_user_id
+from guillotina.utils import get_security_policy
+from guillotina.utils import import_class
+
+import datetime
 
 
 def create_workflow_factory(proto_name, proto_definition):
-
     class Workflow:
 
         name = proto_name
@@ -25,8 +25,8 @@ def create_workflow_factory(proto_name, proto_definition):
 
         def __init__(self, context):
             self.context = context
-            self._states = self.definition['states']
-            self._initial_state = self.definition['initial_state']
+            self._states = self.definition["states"]
+            self._initial_state = self.definition["initial_state"]
 
         @property
         def states(self):
@@ -38,16 +38,17 @@ def create_workflow_factory(proto_name, proto_definition):
             if adapter is None:
                 return {}
             state = adapter.review_state
-            return self._states[state]['actions']
+            return self._states[state]["actions"]
 
         async def available_actions(self, request):
             policy = get_security_policy()
             for action_name, action in self.actions.items():
                 add = False
-                if 'check_permission' in action and policy.check_permission(
-                        action['check_permission'], self.context):
+                if "check_permission" in action and policy.check_permission(
+                    action["check_permission"], self.context
+                ):
                     add = True
-                elif 'check_permission' not in action:
+                elif "check_permission" not in action:
                     add = True
 
                 if add:
@@ -60,32 +61,30 @@ def create_workflow_factory(proto_name, proto_definition):
         async def do_action(self, request, action, comments):
             available_actions = self.actions
             if action not in available_actions:
-                raise KeyError('Unavailable action')
+                raise KeyError("Unavailable action")
 
             action_def = available_actions[action]
             policy = get_security_policy()
-            if 'check_permission' in action_def and not policy.check_permission(
-                    action_def['check_permission'], self.context):
+            if "check_permission" in action_def and not policy.check_permission(
+                action_def["check_permission"], self.context
+            ):
                 raise HTTPUnauthorized()
 
             # Change permission
-            new_state = action_def['to']
+            new_state = action_def["to"]
 
-            if 'set_permission' in self.states[new_state]:
-                await apply_sharing(self.context, self.states[new_state]['set_permission'])
+            if "set_permission" in self.states[new_state]:
+                await apply_sharing(self.context, self.states[new_state]["set_permission"])
 
             # Write history
             user = get_authenticated_user_id()
             history = {
-                'actor': user,
-                'comments': comments,
-                'time': datetime.datetime.now(),
-                'title': action_def['title'],
-                'type': 'workflow',
-                'data': {
-                    'action': action,
-                    'review_state': new_state,
-                }
+                "actor": user,
+                "comments": comments,
+                "time": datetime.datetime.now(),
+                "title": action_def["title"],
+                "type": "workflow",
+                "data": {"action": action, "review_state": new_state,},
             }
 
             workflow_behavior = IWorkflowBehavior(self.context)
@@ -107,21 +106,20 @@ class WorkflowUtility:
 
     def __init__(self, settings={}, loop=None):
         self.loop = loop
-        self.workflows = app_settings['workflows']
-        self.workflows_content = app_settings['workflows_content']
+        self.workflows = app_settings["workflows"]
+        self.workflows_content = app_settings["workflows_content"]
         self.factories = {}
 
     async def initialize(self, app):
         self.app = app
         for workflow_name, definition in self.workflows.items():
-            logger.info(f'Registered workflow {workflow_name}')
+            logger.info(f"Registered workflow {workflow_name}")
             factory = create_workflow_factory(workflow_name, definition)
             self.factories[workflow_name] = factory
         for interface_str, workflow in self.workflows_content.items():
-            logger.info(f'Linked workflow {workflow} to {interface_str}')
+            logger.info(f"Linked workflow {workflow} to {interface_str}")
             iface = import_class(interface_str)
-            provide_adapter(
-                self.factories[workflow], adapts=(iface,), provides=IWorkflow)
+            provide_adapter(self.factories[workflow], adapts=(iface,), provides=IWorkflow)
 
     async def finalize(self, app):
         self.factories = {}

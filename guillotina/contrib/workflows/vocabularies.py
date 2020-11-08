@@ -1,14 +1,12 @@
 from guillotina import configure
-from guillotina.contrib.workflows.interfaces import IWorkflowUtility
-from guillotina.contrib.workflows.interfaces import IWorkflow
 from guillotina.component import get_utility
+from guillotina.contrib.workflows.interfaces import IWorkflow
+from guillotina.contrib.workflows.interfaces import IWorkflowUtility
 from guillotina.interfaces import IResource
 
 
-@configure.vocabulary(
-    name="worklow_states")
+@configure.vocabulary(name="worklow_states")
 class WorkflowVocabulary:
-
     def __init__(self, context):
         self.context = context
         self.utility = get_utility(IWorkflowUtility)
@@ -33,4 +31,4 @@ class WorkflowVocabulary:
         if value in self.states:
             return value
         else:
-            raise KeyError('No valid state')
+            raise KeyError("No valid state")

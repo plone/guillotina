@@ -97,7 +97,7 @@ class SerializeToJson(object):
                 await behavior.load(create=False)
             await self.get_schema(behavior_schema, behavior, result, True)
 
-        for post_serialize_processors in app_settings['post_serialize']:
+        for post_serialize_processors in app_settings["post_serialize"]:
             await apply_coroutine(post_serialize_processors, self.context, result)
 
         return result

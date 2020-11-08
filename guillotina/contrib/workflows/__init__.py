@@ -1,9 +1,12 @@
 from guillotina import configure
-import glob
-import yaml
-import logging
 
-logger = logging.getLogger('guillotina.contrib.workflows')
+import glob
+import logging
+import typings
+import yaml
+
+
+logger = logging.getLogger("guillotina.contrib.workflows")
 
 
 app_settings = {
@@ -16,16 +19,18 @@ app_settings = {
             "settings": {},
         }
     },
-    "post_serialize": ['guillotina.contrib.workflows.post_serialize.apply_review']
+    "post_serialize": ["guillotina.contrib.workflows.post_serialize.apply_review"],
 }
 
 path = "/".join(__file__.split("/")[:-1])
 
+workflows: typings.Any = app_settings["workflows"]
 for workflow_file in glob.glob(path + "/base/*.yaml"):
     with open(workflow_file, "r") as f:
         workflow_content = yaml.load(f, Loader=yaml.FullLoader)
     ident = workflow_file.split("/")[-1].rstrip(".yaml")
-    app_settings["workflows"][ident] = workflow_content
+    workflows[ident] = workflow_content
+
 
 def includeme(root, settings):
     configure.scan("guillotina.contrib.workflows.permissions")

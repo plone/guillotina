@@ -1,6 +1,6 @@
-from zope.interface import implementer
-from guillotina.events import ObjectEvent
 from guillotina.contrib.workflows.interfaces import IWorkflowChangedEvent
+from guillotina.events import ObjectEvent
+from zope.interface import implementer
 
 
 @implementer(IWorkflowChangedEvent)
