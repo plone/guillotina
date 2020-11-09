@@ -4,7 +4,8 @@ CHANGELOG
 6.0.12 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Bytes serializer
+  [bloodbare]
 
 
 6.0.11 (2020-11-08)

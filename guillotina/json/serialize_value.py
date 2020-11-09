@@ -40,6 +40,9 @@ def vocabulary_converter(value):
 def string_converter(value):
     return str(value)
 
+@configure.value_serializer(bytes)
+def bytes_converter(value):
+    return str(value, encoding="utf-8")
 
 @configure.value_serializer(list)
 def list_converter(value):
