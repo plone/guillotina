@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.61 (unreleased)
+5.3.61 (2020-11-11)
 -------------------
 
 - Do nothing when memcache delete_all opeartion receives an empty list. Observe
