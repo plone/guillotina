@@ -134,7 +134,7 @@ async def test_delete_all():
             watch_mocked.assert_called()
             all_keys.observe.assert_called_with(2)
             driver._client.delete.assert_has_calls(
-                [mock.call(safe_key("foo"), noreply=True), mock.call(safe_key("bar"), noreply=True),]
+                [mock.call(safe_key("foo"), noreply=True), mock.call(safe_key("bar"), noreply=True)]
             )
 
 
