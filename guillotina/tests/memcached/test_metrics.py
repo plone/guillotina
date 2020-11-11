@@ -118,3 +118,4 @@ class TestMemcachedMetrics:
             )
             > 0
         )
+        assert metrics_registry.get_sample_value("guillotina_cache_memcached_delete_all_num_keys_sum") > 0
