@@ -4,7 +4,8 @@ CHANGELOG
 5.3.61 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Do nothing when memcache delete_all opeartion receives an empty list. Observe
+  size of the len of keys [pfreixes]
 
 
 5.3.60 (2020-11-03)
