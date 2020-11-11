@@ -140,7 +140,9 @@ async def test_delete_all():
 
 async def test_delete_all_empty_keys():
     with mock.patch("guillotina.contrib.memcached.driver.watch") as watch_mocked:
-        driver = MemcachedDriver()
-        driver._client = mock.Mock()
-        await driver.delete_all([])
-        watch_mocked.assert_not_called()
+        with mock.patch("guillotina.contrib.memcached.driver.MEMCACHED_OPS_DELETE_ALL_NUM_KEYS") as all_keys:
+            driver = MemcachedDriver()
+            driver._client = mock.Mock()
+            await driver.delete_all([])
+            all_keys.observe.assert_not_called()
+            watch_mocked.assert_not_called()
