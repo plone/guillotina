@@ -21,6 +21,7 @@ import logging
 
 try:
     import prometheus_client
+    from prometheus_client.utils import INF
 
     _SEND_METRICS = True
 
@@ -33,6 +34,11 @@ try:
         "guillotina_cache_memcached_ops_processing_time_seconds",
         "Histogram of operations processing time by type (in seconds)",
         labelnames=["type"],
+    )
+    MEMCACHED_OPS_DELETE_ALL_NUM_KEYS = prometheus_client.Histogram(
+        "guillotina_cache_memcached_delete_all_num_keys",
+        "Histogram of number of keys deleted at each delete all call",
+        buckets=(1, 2, 4, 10, 20, 50, 100, INF),
     )
 
     MEMCACHED_CURRENT_CONNECTIONS = prometheus_client.Gauge(
@@ -211,6 +217,12 @@ class MemcachedDriver:
             await client.delete(safe_key(key), noreply=True)
 
     async def delete_all(self, keys: List[str]) -> None:
+        if len(keys) == 0:
+            return
+
+        if _SEND_METRICS:
+            MEMCACHED_OPS_DELETE_ALL_NUM_KEYS.observe(len(keys))
+
         client = self._get_client()
         with watch("delete_many"):
             for key in keys:

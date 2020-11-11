@@ -81,7 +81,7 @@ setup(
             "pytest-asyncio==0.10.0",
             "pytest-cov>=2.0.0,<=2.9.0",
             "coverage>=4.0.3",
-            "pytest-docker-fixtures",
+            "pytest-docker-fixtures==1.3.11",
             "pytest-rerunfailures<10.0.0",
             "openapi-spec-validator",
             "asyncmock",

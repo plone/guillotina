@@ -123,3 +123,24 @@ async def test_safe_key(unsafe_key):
     for char in key:
         assert char >= 33
         assert char <= 126
+
+
+async def test_delete_all():
+    with mock.patch("guillotina.contrib.memcached.driver.watch") as watch_mocked:
+        with mock.patch("guillotina.contrib.memcached.driver.MEMCACHED_OPS_DELETE_ALL_NUM_KEYS") as all_keys:
+            driver = MemcachedDriver()
+            driver._client = mock.Mock()
+            await driver.delete_all(["foo", "bar"])
+            watch_mocked.assert_called()
+            all_keys.observe.assert_called_with(2)
+            driver._client.delete.assert_has_calls(
+                [mock.call(safe_key("foo"), noreply=True), mock.call(safe_key("bar"), noreply=True),]
+            )
+
+
+async def test_delete_all_empty_keys():
+    with mock.patch("guillotina.contrib.memcached.driver.watch") as watch_mocked:
+        driver = MemcachedDriver()
+        driver._client = mock.Mock()
+        await driver.delete_all([])
+        watch_mocked.assert_not_called()
