@@ -4,7 +4,11 @@ CHANGELOG
 6.0.12 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fixing workflow subscriber for state history
+  [bloodbare]
+
+- Allow to search on basic workflow state publish
+  [bloodbare]
 
 
 6.0.11 (2020-11-08)

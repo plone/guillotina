@@ -14,6 +14,9 @@ states:
       - setting: Deny
         role: guillotina.Anonymous
         permission: guillotina.AccessContent
+      - setting: Deny
+        role: guillotina.Anonymous
+        permission: guillotina.SearchContent
   public:
     actions:
       retire:
@@ -28,3 +31,6 @@ states:
       - setting: AllowSingle
         role: guillotina.Anonymous
         permission: guillotina.AccessContent
+      - setting: AllowSingle
+        role: guillotina.Anonymous
+        permission: guillotina.SearchContent

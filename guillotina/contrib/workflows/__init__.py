@@ -38,4 +38,5 @@ def includeme(root, settings):
     configure.scan("guillotina.contrib.workflows.behavior")
     configure.scan("guillotina.contrib.workflows.events")
     configure.scan("guillotina.contrib.workflows.utility")
+    configure.scan("guillotina.contrib.workflows.subscriber")
     configure.scan("guillotina.contrib.workflows.vocabularies")
