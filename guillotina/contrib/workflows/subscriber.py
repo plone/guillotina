@@ -31,7 +31,7 @@ async def workflow_object_added(obj, event):
                 "time": datetime.datetime.now(),
                 "title": "Created",
                 "type": "workflow",
-                "data": {"action": None, "review_state": state,}
+                "data": {"action": None, "review_state": state}
             }
         )
         workflow.register()
