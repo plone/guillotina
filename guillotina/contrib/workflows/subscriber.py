@@ -1,12 +1,10 @@
 import datetime
 
 from guillotina import configure
-from guillotina.catalog import index
 from guillotina.component import query_adapter
 from guillotina.interfaces import IObjectAddedEvent
 from guillotina.interfaces import IResource
 from guillotina.security.utils import apply_sharing
-from guillotina.transactions import get_transaction
 from guillotina.utils import get_authenticated_user_id
 from guillotina.contrib.workflows.interfaces import IWorkflowBehavior
 from guillotina.contrib.workflows.interfaces import IWorkflow

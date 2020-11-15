@@ -22,7 +22,7 @@ async def test_workflow_basic(container_requester):
         assert status == 401
 
         response, _ = await requester("GET", "/db/guillotina/@sharing")
-        assert "guillotina.Anonymous" not in response["local"]["roleperm"]
+        assert response["local"]["roleperm"]["guillotina.Anonymous"]["guillotina.AccessContent"] == "Deny"
 
         response, _ = await requester("POST", "/db/guillotina/@workflow/publish")
         assert response["actor"] == "root"
@@ -32,7 +32,7 @@ async def test_workflow_basic(container_requester):
         assert response["review_state"] == "public"
 
         response, _ = await requester("GET", "/db/guillotina/@sharing")
-        assert "guillotina.Anonymous" in response["local"]["roleperm"]
+        assert response["local"]["roleperm"]["guillotina.Anonymous"]["guillotina.AccessContent"] == "AllowSingle"
 
         response, status = await requester("GET", "/db/guillotina", token=None)
         assert status == 200
