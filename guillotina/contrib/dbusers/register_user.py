@@ -23,7 +23,12 @@ async def run(token_data, payload):
             data[key] = token_data[key]
 
     user = await create_content_in_container(
-        user_folders, "User", token_data["id"], creators=(token_data["id"],), check_security=False, **data
+        user_folders,
+        "User",
+        token_data.get("username", token_data.get("id")),
+        creators=(token_data.get("username", token_data.get("id")),),
+        check_security=False,
+        **data,
     )
     user.user_roles = ["guillotina.Member"]
     await notify(ObjectAddedEvent(user))

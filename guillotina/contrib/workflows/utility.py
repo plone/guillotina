@@ -58,7 +58,7 @@ def create_workflow_factory(proto_name, proto_definition):
         def initial_state(self):
             return self._initial_state
 
-        async def do_action(self, request, action, comments):
+        async def do_action(self, action, comments):
             available_actions = self.actions
             if action not in available_actions:
                 raise KeyError("Unavailable action")
