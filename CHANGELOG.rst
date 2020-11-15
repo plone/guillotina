@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.12 (unreleased)
+6.0.12 (2020-11-15)
 -------------------
 
 - Fixing workflow subscriber for state history
