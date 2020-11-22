@@ -1,3 +1,4 @@
+from guillotina.interfaces.content import IGetOwner
 from guillotina import addons
 from guillotina import app_settings
 from guillotina import configure
@@ -68,9 +69,11 @@ async def create_container(
     await container.install()
 
     # Local Roles assign owner as the creator user
-    if owner_id is not None:
+    get_owner = IGetOwner(container)
+    owner = await get_owner(owner_id)
+    if owner is not None:
         roleperm = IPrincipalRoleManager(container)
-        roleperm.assign_role_to_principal("guillotina.Owner", owner_id)
+        roleperm.assign_role_to_principal("guillotina.Owner", owner)
 
     if emit_events:
         await notify(
