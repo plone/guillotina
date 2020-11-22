@@ -42,6 +42,8 @@ class IWorkflowChangedEvent(interfaces.IObjectEvent):
 @implementer(IContextAwareDefaultFactory)
 class DefaultReviewState:
     def __call__(self, context: IResource) -> str:
+        if context is None:
+            return None
         return IWorkflow(context.context).initial_state
 
 

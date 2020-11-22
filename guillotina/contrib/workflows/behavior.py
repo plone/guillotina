@@ -7,4 +7,4 @@ from guillotina.contrib.workflows.interfaces import IWorkflowBehavior
     title="Workflow data behavior", provides=IWorkflowBehavior, for_="guillotina.interfaces.IResource"
 )
 class WorkflowBehavior(ContextBehavior):
-    pass
+    auto_serialize = True
