@@ -485,9 +485,13 @@ class StaticFileSpecialPermissions(PrincipalPermissionManager):
         self.grant_permission_to_principal("guillotina.AccessContent", ANONYMOUS_USER_ID)
 
 
-@configure.utility(provides=IGetOwner)
-async def default_get_owner(obj, creator):
-    return creator
+@configure.adapter(for_=IResource, provides=IGetOwner)
+class DefaultGetOwner:
+    def __init__(self, context):
+        self.context = context
+
+    async def __call__(self, creator: str) -> Optional[str]:
+        return creator
 
 
 def load_cached_schema():
@@ -735,9 +739,9 @@ async def duplicate(
 
     if reset_acl:
         new_obj.__acl__ = None
-        get_owner = get_utility(IGetOwner)
+        get_owner = IGetOwner(new_obj)
         roleperm = IPrincipalRoleManager(new_obj)
-        owner = await get_owner(new_obj, user_id)
+        owner = await get_owner(user_id)
         if owner is not None:
             roleperm.assign_role_to_principal("guillotina.Owner", owner)
     else:

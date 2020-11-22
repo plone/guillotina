@@ -4,7 +4,8 @@ CHANGELOG
 6.0.13 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Allowing to define Owner roles users on creation
+  [bloodbare]
 
 
 6.0.12 (2020-11-15)
