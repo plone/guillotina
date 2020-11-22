@@ -284,6 +284,15 @@ class IGetOwner(Interface):
     Defines a utility for calculating the owner of a new resource
     """
 
+    def __init__(context):
+        """
+        adapts context
+        """
+
+    async def __call__(default):
+        """
+        get owner
+        """
 
 class IIDGenerator(Interface):
     """

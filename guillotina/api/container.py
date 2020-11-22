@@ -1,4 +1,3 @@
-from guillotina.interfaces.content import IGetOwner
 from guillotina import addons
 from guillotina import app_settings
 from guillotina import configure
@@ -17,6 +16,7 @@ from guillotina.interfaces import IContainer
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IResourceSerializeToJson
+from guillotina.interfaces.content import IGetOwner
 from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.response import ErrorResponse
 from guillotina.response import HTTPConflict

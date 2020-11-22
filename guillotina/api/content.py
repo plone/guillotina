@@ -7,7 +7,6 @@ from guillotina._settings import app_settings
 from guillotina.api.service import Service
 from guillotina.component import get_adapter
 from guillotina.component import get_multi_adapter
-from guillotina.component import get_utility
 from guillotina.component import query_adapter
 from guillotina.component import query_multi_adapter
 from guillotina.content import create_content_in_container
