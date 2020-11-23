@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.13 (unreleased)
+6.0.13 (2020-11-23)
 -------------------
 
 - Allowing to define Owner roles users on creation
