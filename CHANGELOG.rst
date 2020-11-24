@@ -4,7 +4,8 @@ CHANGELOG
 6.0.14 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix reset password flow to be equal to register
+  [bloodbare]
 
 
 6.0.13 (2020-11-23)
