@@ -1,4 +1,5 @@
 from guillotina import configure
+from guillotina.component import query_adapter
 from guillotina.component import get_utility
 from guillotina.contrib.workflows.interfaces import IWorkflow
 from guillotina.contrib.workflows.interfaces import IWorkflowUtility
@@ -10,10 +11,15 @@ class WorkflowVocabulary:
     def __init__(self, context):
         self.context = context
         self.utility = get_utility(IWorkflowUtility)
+        adapter = None
         if not IResource.providedBy(context):
-            self.states = IWorkflow(context.context).states
+            adapter = query_adapter(context.context, IWorkflow)
         else:
-            self.states = IWorkflow(context).states
+            adapter = query_adapter(context, IWorkflow)
+        if adapter is not None:
+            self.states = adapter.states
+        else:
+            self.states = {}
 
     def keys(self):
         return self.states

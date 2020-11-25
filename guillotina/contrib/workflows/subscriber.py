@@ -13,10 +13,10 @@ import datetime
 @configure.subscriber(for_=(IResource, IObjectAddedEvent), priority=1001)  # after indexing
 async def workflow_object_added(obj, event):
     workflow = query_adapter(obj, IWorkflowBehavior)
-    if workflow is not None:
+    wkf = query_adapter(obj, IWorkflow)
+    if workflow is not None and wkf is not None:
         user_id = get_authenticated_user_id()
-
-        wkf = IWorkflow(obj)
+        
         await workflow.load(create=True)
         state = workflow.review_state
 
