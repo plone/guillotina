@@ -4,7 +4,8 @@ CHANGELOG
 6.0.15 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix not defined workflow exception
+  [bloodbare]
 
 
 6.0.14 (2020-11-25)
