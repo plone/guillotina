@@ -144,9 +144,7 @@ class Transaction:
     _skip_commit = False
     user = None
 
-    def __init__(
-        self, manager, loop=None, read_only: bool = False, cache=None, strategy=None,
-    ):
+    def __init__(self, manager, loop=None, read_only: bool = False, cache=None, strategy=None):
         # Transaction Manager
         self._manager = manager
 
@@ -164,9 +162,7 @@ class Transaction:
         # which would correspond with one connection
         self._lock = asyncio.Lock(loop=loop)
 
-    def initialize(
-        self, read_only, cache=None, strategy=None,
-    ):
+    def initialize(self, read_only, cache=None, strategy=None):
         self._read_only = read_only
         self._txn_time = None
         self._tid = None
@@ -455,13 +451,13 @@ class Transaction:
     async def tpc_commit(self):
         """Commit changes to an object"""
         await self._strategy.tpc_commit()
+        for oid, obj in self.deleted.items():
+            await self._manager._storage.delete(self, oid)
         for oid, obj in self.added.items():
             await self._store_object(obj, oid, True)
             obj.__new_marker__ = False
         for oid, obj in self.modified.items():
             await self._store_object(obj, oid)
-        for oid, obj in self.deleted.items():
-            await self._manager._storage.delete(self, oid)
 
     @profilable
     async def tpc_vote(self):
@@ -556,7 +552,12 @@ class Transaction:
 
     @profilable
     async def contains(self, oid: str, key: str) -> bool:
-        return await self._manager._storage.has_key(self, oid, key)  # noqa
+        if not await self._manager._storage.has_key(self, oid, key):  # noqa
+            return False
+        for obj in self.deleted.values():
+            if obj.id == key:
+                return False
+        return True
 
     @profilable
     @cache(lambda oid: {"oid": oid, "variant": "len"})

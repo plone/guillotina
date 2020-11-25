@@ -4,7 +4,8 @@ CHANGELOG
 5.3.63 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Update Transaction.contains
+  [qiwn]
 
 
 5.3.62 (2020-11-25)
