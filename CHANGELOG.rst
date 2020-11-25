@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.15 (unreleased)
+6.0.15 (2020-11-25)
 -------------------
 
 - Fix not defined workflow exception
