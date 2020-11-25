@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.62 (unreleased)
+5.3.62 (2020-11-25)
 -------------------
 
 - Fix recording root hit/miss metrics
