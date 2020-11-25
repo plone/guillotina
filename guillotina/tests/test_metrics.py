@@ -1,4 +1,5 @@
 from asyncmock import AsyncMock
+from asyncpg.protocol.protocol import _create_record as Record
 from guillotina import metrics
 from guillotina.const import ROOT_ID
 from guillotina.content import Container
@@ -264,6 +265,33 @@ class TestTransactionMetrics:
             "tid": 1,
             "id": "foobar",
         }
+        strategy = AsyncMock()
+        txn = Transaction(mng, cache=cache, strategy=strategy)
+
+        await txn.get("foobar")
+
+        assert (
+            metrics_registry.get_sample_value("guillotina_cache_ops_total", {"type": "_get", "result": "hit"})
+            is None
+        )
+
+        assert (
+            metrics_registry.get_sample_value(
+                "guillotina_cache_ops_total", {"type": "_get", "result": "hit_roots"}
+            )
+            == 1.0
+        )
+
+    async def test_record_transaction_cache_hit_container_pg_record(self, dummy_guillotina, metrics_registry):
+        storage = AsyncMock()
+        mng = TransactionManager(storage)
+        cache = AsyncMock()
+
+        mock_ob = Record(
+            {"state": 0, "zoid": 1, "tid": 2, "id": 3},
+            (pickle.dumps(create_content(Container)), ROOT_ID, 1, "foobar"),
+        )
+        cache.get.return_value = mock_ob
         strategy = AsyncMock()
         txn = Transaction(mng, cache=cache, strategy=strategy)
 
