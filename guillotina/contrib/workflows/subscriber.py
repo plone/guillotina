@@ -16,7 +16,7 @@ async def workflow_object_added(obj, event):
     wkf = query_adapter(obj, IWorkflow)
     if workflow is not None and wkf is not None:
         user_id = get_authenticated_user_id()
-        
+
         await workflow.load(create=True)
         state = workflow.review_state
 
