@@ -360,7 +360,6 @@ class Transaction:
         additional_keys=[lambda item: {"container": item["parent_id"], "id": item["id"]}],
     )
     async def _get(self, oid):
-        print("loading")
         return await self._manager._storage.load(self, oid)
 
     @profilable
