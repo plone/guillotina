@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.14 (unreleased)
+6.0.14 (2020-11-25)
 -------------------
 
 - Fix reset password flow to be equal to register
