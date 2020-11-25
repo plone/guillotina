@@ -31,6 +31,7 @@ from typing_extensions import TypedDict
 from zope.interface import implementer
 
 import asyncio
+import asyncpg
 import logging
 import sys
 import time
@@ -61,7 +62,7 @@ try:
     ) -> None:
         if value == _EMPTY:
             result_type += "_empty"
-        elif isinstance(value, dict) and (
+        elif isinstance(value, (dict, asyncpg.Record)) and (
             value["zoid"] == ROOT_ID
             or value.get("parent_id") == ROOT_ID
             or isinstance(key_args.get("container"), (Container, Registry, Root))

@@ -4,7 +4,8 @@ CHANGELOG
 5.3.62 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix recording root hit/miss metrics
+  [vangheem]
 
 
 5.3.61 (2020-11-11)
