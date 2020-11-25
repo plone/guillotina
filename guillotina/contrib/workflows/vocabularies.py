@@ -1,6 +1,6 @@
 from guillotina import configure
-from guillotina.component import query_adapter
 from guillotina.component import get_utility
+from guillotina.component import query_adapter
 from guillotina.contrib.workflows.interfaces import IWorkflow
 from guillotina.contrib.workflows.interfaces import IWorkflowUtility
 from guillotina.interfaces import IResource
