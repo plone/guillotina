@@ -1,5 +1,6 @@
 from datetime import datetime
 from guillotina.utils import get_jwk_key
+from guillotina import app_settings
 from jwcrypto import jwe
 from jwcrypto.common import json_encode
 
@@ -24,7 +25,11 @@ async def generate_validation_token(data, ttl=3660):
     token = jwetoken.serialize(compact=True)
 
     last_time = time.time() + ttl
-    last_date = datetime.fromtimestamp(last_time).isoformat()
+    datetime_format = app_settings.get('datetime_format')
+    if datetime_format is None:
+        last_date = datetime.fromtimestamp(last_time).isoformat()
+    else:
+        last_date = datetime.fromtimestamp(last_time).strftime(datetime_format)
     return token, last_date
 
 

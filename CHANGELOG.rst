@@ -4,6 +4,9 @@ CHANGELOG
 6.0.16 (unreleased)
 -------------------
 
+- Allow to define date format for recovery password
+  [bloodbare]
+
 - Abort transaction if tpc_commit() crashes
   [masipcat]
 
