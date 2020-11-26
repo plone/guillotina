@@ -4,7 +4,8 @@ CHANGELOG
 6.0.16 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Abort transaction if tpc_commit() crashes
+  [masipcat]
 
 
 6.0.15 (2020-11-25)

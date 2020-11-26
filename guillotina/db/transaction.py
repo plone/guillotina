@@ -363,6 +363,10 @@ class Transaction:
             await self._cache.close(invalidate=isinstance(ex, TIDConflictError), publish=False)
             self.tpc_cleanup()
             raise
+        except Exception:
+            await self.abort()
+            raise
+
         self.status = Status.COMMITTED
         await self._call_after_commit_hooks()
 
