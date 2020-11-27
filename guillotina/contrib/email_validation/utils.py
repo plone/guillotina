@@ -25,7 +25,7 @@ async def generate_validation_token(data, ttl=3660):
     token = jwetoken.serialize(compact=True)
 
     last_time = time.time() + ttl
-    datetime_format = app_settings.get('datetime_format')
+    datetime_format = app_settings.get("datetime_format")
     if datetime_format is None:
         last_date = datetime.fromtimestamp(last_time).isoformat()
     else:
