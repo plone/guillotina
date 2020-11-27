@@ -1,4 +1,5 @@
 from .interfaces import IStorageDeserializer
+from .reader import recursive_load
 from dateutil.parser import parse
 from guillotina import configure
 from guillotina.interfaces.security import PermissionSetting
@@ -9,6 +10,14 @@ from zope.interface.declarations import Implements
 
 import base64
 import pickle
+
+
+class PickleDeserializer:
+    def __init__(self, data):
+        self.data = data
+
+    def __call__(self):
+        return pickle.loads(base64.b64decode(self.data["__pickle__"]))
 
 
 @configure.adapter(
@@ -22,8 +31,22 @@ class AnyObjectDeserializer:
         klass = self.data.pop("__class__")
         type_class = resolve_dotted_name(klass)
         obj = type_class.__new__(type_class)
-        obj.__dict__ = self.data
+        obj.__dict__ = recursive_load(self.data)
         return obj
+
+
+@configure.adapter(
+    for_=Interface, provides=IStorageDeserializer, name="guillotina.fields.annotation.BucketListValue",
+)
+class BucketListValueDeserializer(PickleDeserializer):
+    pass
+
+
+@configure.adapter(
+    for_=Interface, provides=IStorageDeserializer, name="guillotina.blob.Blob",
+)
+class BlobDeserializer(PickleDeserializer):
+    pass
 
 
 @configure.adapter(for_=Interface, provides=IStorageDeserializer, name="builtins.set")

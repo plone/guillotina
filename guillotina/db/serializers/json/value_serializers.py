@@ -7,6 +7,19 @@ import base64
 import pickle
 
 
+class PickleSerializer:
+    dotted_name: str
+
+    def __init__(self, obj):
+        self.obj = obj
+
+    def __call__(self):
+        return {
+            "__class__": self.dotted_name,
+            "__pickle__": base64.b64encode(pickle.dumps(self.obj)).decode(),
+        }
+
+
 @configure.adapter(
     for_=Interface, provides=IStorageSerializer, name="$.AnyObjectDict",
 )
@@ -19,6 +32,30 @@ class AnyObjectSerializer:
             **{"__class__": get_dotted_name(self.obj)},
             **self.obj.__dict__,
         }
+
+
+@configure.adapter(
+    for_=Interface, provides=IStorageSerializer, name="guillotina.fields.annotation.BucketListValue",
+)
+class BucketListValueSerializer(PickleSerializer):
+    """
+    The internal structure of the BucketListValue contains a dictionary
+    whose keys are of type other than string
+    """
+
+    dotted_name = "guillotina.fields.annotation.BucketListValue"
+
+
+@configure.adapter(
+    for_=Interface, provides=IStorageSerializer, name="guillotina.blob.Blob",
+)
+class BlobSerializer(PickleSerializer):
+    """
+    The internal structure of the Blob contains a dictionary
+    whose keys are of type other than string
+    """
+
+    dotted_name = "guillotina.blob.Blob"
 
 
 @configure.adapter(for_=Interface, provides=IStorageSerializer, name="builtins.set")

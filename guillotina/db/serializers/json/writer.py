@@ -37,8 +37,6 @@ def json_default(obj):
 
 @configure.adapter(for_=(IResource), provides=IWriter, name="json")
 class Writer(writer.ResourceWriter):
-    collection = "Objects"
-
     def serialize(self):
         d = {
             **self._obj.__dict__,
@@ -51,45 +49,32 @@ class Writer(writer.ResourceWriter):
             },
         }
         d.pop("__provides__", None)
-
-        return orjson.dumps(
-            d, default=json_default, option=orjson.OPT_PASSTHROUGH_DATETIME | orjson.OPT_NON_STR_KEYS,
-        )
+        return orjson.dumps(d, default=json_default, option=orjson.OPT_PASSTHROUGH_DATETIME)
 
 
 @configure.adapter(for_=(IAnnotationData), provides=IWriter, name="json")
 class AnnotationWriter(writer.Writer):
-    collection = "Annotations"
-
     def serialize(self):
-        return orjson.dumps(
-            {
-                **self._obj.__dict__,
-                **{
-                    "__class__": get_dotted_name(self._obj),
-                    "__providedBy__": self._obj.__providedBy__,
-                    "__implemented__": self._obj.__implemented__,
-                },
+        d = {
+            **self._obj.__dict__,
+            **{
+                "__class__": get_dotted_name(self._obj),
+                "__providedBy__": self._obj.__providedBy__,
+                "__implemented__": self._obj.__implemented__,
             },
-            default=json_default,
-            option=orjson.OPT_PASSTHROUGH_DATETIME | orjson.OPT_NON_STR_KEYS,
-        )
+        }
+        return orjson.dumps(d, default=json_default, option=orjson.OPT_PASSTHROUGH_DATETIME)
 
 
 @configure.adapter(for_=(IDatabase), provides=IWriter, name="json")
 class DatabaseWriter(writer.Writer):
     def serialize(self):
-        d = orjson.dumps(
-            {
-                **self._obj.__dict__,
-                **{
-                    "type_name": self._obj.type_name,
-                    "__class__": get_dotted_name(self._obj),
-                    "__providedBy__": self._obj.__providedBy__,
-                    "__implemented__": self._obj.__implemented__,
-                },
+        d = {
+            **self._obj.__dict__,
+            **{
+                "__class__": get_dotted_name(self._obj),
+                "__providedBy__": self._obj.__providedBy__,
+                "__implemented__": self._obj.__implemented__,
             },
-            default=json_default,
-            option=orjson.OPT_PASSTHROUGH_DATETIME | orjson.OPT_NON_STR_KEYS,
-        )
-        return d
+        }
+        return orjson.dumps(d, default=json_default, option=orjson.OPT_PASSTHROUGH_DATETIME)
