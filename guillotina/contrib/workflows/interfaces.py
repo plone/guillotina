@@ -4,11 +4,11 @@ from guillotina.directives import index_field
 from guillotina.interfaces import IAsyncUtility
 from guillotina.interfaces import IResource
 from guillotina.schema.interfaces import IContextAwareDefaultFactory
+from typing import Optional
 from zope.interface import Attribute
 from zope.interface import implementer
 from zope.interface import Interface
 from zope.interface import interfaces
-from typing import Optional
 
 import json
 

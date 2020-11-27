@@ -1,6 +1,6 @@
 from datetime import datetime
-from guillotina.utils import get_jwk_key
 from guillotina import app_settings
+from guillotina.utils import get_jwk_key
 from jwcrypto import jwe
 from jwcrypto.common import json_encode
 
