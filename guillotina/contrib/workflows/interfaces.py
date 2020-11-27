@@ -1,4 +1,5 @@
 from guillotina import schema
+from guillotina.component import query_adapter
 from guillotina.directives import index_field
 from guillotina.interfaces import IAsyncUtility
 from guillotina.interfaces import IResource
@@ -44,7 +45,11 @@ class DefaultReviewState:
     def __call__(self, context: IResource) -> str:
         if context is None:
             return None
-        return IWorkflow(context.context).initial_state
+        workflow = query_adapter(context.context, IWorkflow)
+        if workflow is not None:
+            return workflow.initial_state
+        else:
+            return None
 
 
 class IWorkflowBehavior(Interface):
