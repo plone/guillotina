@@ -8,6 +8,7 @@ from guillotina.component import get_utility
 from guillotina.component import provide_utility
 from guillotina.const import ROOT_ID
 from guillotina.db.interfaces import IDatabaseManager
+from guillotina.db.interfaces import IReader
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionManager
 from guillotina.db.interfaces import IWriter
@@ -175,16 +176,19 @@ class Database:
             await txn._strategy.retrieve_tid()
             root = await tm._storage.load(txn, ROOT_ID)
             if root is not None:
-                root = app_settings["object_reader"](root)
+                reader = get_adapter(root, IReader, name=app_settings["db_serializer"])
+                root = reader()
                 root.__txn__ = txn
                 if root.__db_id__ is None:
                     root.__db_id__ = self.__db_id__
-                    await tm._storage.store(ROOT_ID, 0, IWriter(root), root, txn)
+                    writer = get_adapter(root, IWriter, name=app_settings["db_serializer"])
+                    await tm._storage.store(ROOT_ID, 0, writer, root, txn)
         except KeyError:
             from guillotina.db.db import Root
 
             root = Root(self.__db_id__)
-            await tm._storage.store(ROOT_ID, 0, IWriter(root), root, txn)
+            writer = get_adapter(root, IWriter, name=app_settings["db_serializer"])
+            await tm._storage.store(ROOT_ID, 0, writer, root, txn)
         finally:
             await tm.commit(txn=txn)
 

@@ -9,6 +9,7 @@ from guillotina.catalog.types import BasicParsedQueryInfo
 from guillotina.catalog.utils import get_index_definition
 from guillotina.catalog.utils import iter_indexes
 from guillotina.catalog.utils import parse_query
+from guillotina.component import get_adapter
 from guillotina.component import get_utility
 from guillotina.const import TRASHED_ID
 from guillotina.db.interfaces import IPostgresStorage
@@ -706,7 +707,7 @@ class PGSearchUtility(DefaultSearchUtility):
 
         uuid = obj.__uuid__
 
-        writer = IWriter(obj)
+        writer = get_adapter(obj, IWriter, name=app_settings["db_serializer"])
         await self._index(uuid, writer, data["transaction"], data["table_name"])
 
         data["count"] += 1

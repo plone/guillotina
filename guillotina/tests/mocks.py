@@ -1,6 +1,7 @@
 from collections import OrderedDict
 from guillotina import app_settings
 from guillotina import task_vars
+from guillotina.component import get_adapter
 from guillotina.component import query_adapter
 from guillotina.db.cache.dummy import DummyCache
 from guillotina.db.interfaces import IStorage
@@ -131,7 +132,7 @@ class MockStorage:  # type: ignore
                 return self._objects[oid]
 
     def store(self, oid, old_serial, writer, ob, txn):
-        writer = IWriter(ob)
+        writer = get_adapter(ob, IWriter, name=app_settings["db_serializer"])
         self._objects[ob.__uuid__] = {
             "state": writer.serialize(),
             "zoid": ob.__uuid__,
