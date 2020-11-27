@@ -14,6 +14,7 @@ DEFAULT_REGISTRATION_SETTINGS = {
     ],
     "mailer": {"utility": "guillotina.contrib.mailer.utility.TestMailerUtility"},
     "allow_register": True,
+    "datetime_format": "%m/%d/%Y, MYTIMEFORMAT %H:%M:%S",
     "_fake_recaptcha_": "FAKE_RECAPTCHA",
 }
 

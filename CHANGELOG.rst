@@ -3,6 +3,11 @@ CHANGELOG
 
 6.0.16 (unreleased)
 -------------------
+- Fixing workflow exception if not defined
+  [bloodbare]
+
+- Allow to define date format for recovery password
+  [bloodbare]
 
 - Abort transaction if tpc_commit() crashes
   [masipcat]
