@@ -176,8 +176,7 @@ class Database:
             await txn._strategy.retrieve_tid()
             root = await tm._storage.load(txn, ROOT_ID)
             if root is not None:
-                reader = get_adapter(root, IReader, name=app_settings["db_serializer"])
-                root = reader()
+                root = get_adapter(root, IReader, name=app_settings["db_serializer"])
                 root.__txn__ = txn
                 if root.__db_id__ is None:
                     root.__db_id__ = self.__db_id__
