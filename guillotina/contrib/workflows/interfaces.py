@@ -8,6 +8,7 @@ from zope.interface import Attribute
 from zope.interface import implementer
 from zope.interface import Interface
 from zope.interface import interfaces
+from typing import Optional
 
 import json
 
@@ -42,7 +43,7 @@ class IWorkflowChangedEvent(interfaces.IObjectEvent):
 
 @implementer(IContextAwareDefaultFactory)
 class DefaultReviewState:
-    def __call__(self, context: IResource) -> str:
+    def __call__(self, context: IResource) -> Optional[str]:
         if context is None:
             return None
         workflow = query_adapter(context.context, IWorkflow)
