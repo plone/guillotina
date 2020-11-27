@@ -42,6 +42,7 @@ jobs:
         python-version: [3.7, 3.8]
         database: ["DUMMY", "postgres", "cockroachdb"]
         db_schema: ["custom", "public"]
+        db_serializer: ["pickle", "json"]
         exclude:
           - database: "DUMMY"
             db_schema: "custom"
@@ -52,6 +53,7 @@ jobs:
     env:
       DATABASE: ${{ matrix.database }}
       DB_SCHEMA: ${{ matrix.db_schema }}
+      DB_SERIALIZER: ${{ matrix.db_serializer }}
 
     steps:
       - name: Checkout the repository

@@ -8,6 +8,7 @@ from guillotina.component import get_utility
 from guillotina.component import query_multi_adapter
 from guillotina.const import TRASHED_ID
 from guillotina.db.interfaces import IDatabaseManager
+from guillotina.db.interfaces import IReader
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.exceptions import DatabaseNotFound
 from guillotina.interfaces import IAbsoluteURL
@@ -183,7 +184,7 @@ async def get_object_by_uid(uid: str, txn=None) -> IBaseObject:
     if result["parent_id"] == TRASHED_ID:
         raise KeyError(uid)
 
-    obj = app_settings["object_reader"](result)
+    obj = get_adapter(result, IReader, name=app_settings["db_serializer"])
     obj.__txn__ = txn
     if result["parent_id"]:
         parent = await get_object_by_uid(result["parent_id"], txn)

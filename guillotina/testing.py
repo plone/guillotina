@@ -8,6 +8,7 @@ import base64
 import os
 
 
+DB_SERIALIZER = os.environ.get("DB_SERIALIZER", "pickle")
 TESTING_PORT = 55001
 
 TESTING_SETTINGS: Dict[str, Any] = {
@@ -70,6 +71,7 @@ def configure_with(func):
 
 def get_settings():
     settings = deepcopy(TESTING_SETTINGS)
+    settings["db_serializer"] = DB_SERIALIZER
     for func in _configurators:
         lazy_apply(func, settings, _configurators)
     return settings

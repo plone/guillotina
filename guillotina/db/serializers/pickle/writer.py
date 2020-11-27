@@ -29,7 +29,7 @@ class DefaultJSONDBSerializer(DefaultCatalogDataAdapter):
         return data
 
 
-@configure.adapter(for_=(IBaseObject), provides=IWriter)
+@configure.adapter(for_=(IBaseObject), provides=IWriter, name="pickle")
 class Writer(object):
 
     resource = False
@@ -71,7 +71,7 @@ class Writer(object):
         return getattr(self._obj, "id", None)
 
 
-@configure.adapter(for_=(IResource), provides=IWriter)
+@configure.adapter(for_=(IResource), provides=IWriter, name="pickle")
 class ResourceWriter(Writer):
 
     resource = True

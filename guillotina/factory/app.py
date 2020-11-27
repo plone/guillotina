@@ -139,7 +139,6 @@ _dotted_name_settings = (
     "cors_renderer",
     "check_writable_request",
     "indexer",
-    "object_reader",
 )
 
 _moved = {"oid_generator": "uid_generator", "request_indexer": "indexer"}
@@ -233,7 +232,7 @@ async def startup_app(config_file=None, settings=None, loop=None, server_app=Non
     configure.scan("guillotina.db.strategies")
     configure.scan("guillotina.db.storages.vacuum")
     configure.scan("guillotina.db.cache")
-    configure.scan("guillotina.db.writer")
+    configure.scan("guillotina.db.serializers")
     configure.scan("guillotina.db.factory")
     configure.scan("guillotina.exc_resp")
     configure.scan("guillotina.fields")

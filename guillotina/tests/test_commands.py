@@ -15,6 +15,7 @@ import pytest
 
 DATABASE = os.environ.get("DATABASE", "DUMMY")
 DB_SCHEMA = os.environ.get("DB_SCHEMA", "public")
+DB_SERIALIZER = os.environ.get("DB_SERIALIZER", "pickle")
 
 
 def test_run_command(command_arguments):
@@ -38,6 +39,7 @@ async def run(app):
 
 
 @pytest.mark.skipif(DATABASE != "postgres", reason="Only works with pg")
+@pytest.mark.skipif(DB_SERIALIZER != "pickle", reason="DB hardcoded in table.sql with pickle")
 @pytest.mark.skipif(DB_SCHEMA != "public", reason="Fixture 'container_command' does not support 'db_schema'")
 def test_run_command_with_container(command_arguments, container_command):
     _, filepath = mkstemp(suffix=".py")
@@ -59,6 +61,7 @@ async def run(container):
 
 
 @pytest.mark.skipif(DATABASE != "postgres", reason="Only works with pg")
+@pytest.mark.skipif(DB_SERIALIZER != "pickle", reason="DB hardcoded in table.sql with pickle")
 @pytest.mark.skipif(DB_SCHEMA != "public", reason="Fixture 'container_command' does not support 'db_schema'")
 def test_run_vacuum_with_container(command_arguments, container_command):
     command = VacuumCommand(command_arguments)
@@ -66,6 +69,7 @@ def test_run_vacuum_with_container(command_arguments, container_command):
 
 
 @pytest.mark.skipif(DATABASE != "postgres", reason="Only works with pg")
+@pytest.mark.skipif(DB_SERIALIZER != "pickle", reason="DB hardcoded in table.sql with pickle")
 @pytest.mark.skipif(DB_SCHEMA != "public", reason="Fixture 'container_command' does not support 'db_schema'")
 def test_run_migration(command_arguments, container_command):
     command = MigrateCommand(command_arguments)

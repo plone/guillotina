@@ -3,6 +3,7 @@ from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.component import get_adapter
 from guillotina.component import query_adapter
+from guillotina.db.interfaces import IReader
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionCache
 from guillotina.db.interfaces import ITransactionStrategy
@@ -318,7 +319,7 @@ class Transaction:
         if result is None:
             result = await self._get(oid)
 
-        obj = app_settings["object_reader"](result)
+        obj = get_adapter(result, IReader, name=app_settings["db_serializer"])
         obj.__txn__ = self
         if obj.__immutable_cache__:
             # ttl of zero means we want to provide a hard cache here
@@ -392,7 +393,7 @@ class Transaction:
         else:
             serial = getattr(obj, "__serial__", None) or 0
 
-        writer = IWriter(obj)
+        writer = get_adapter(obj, IWriter, name=app_settings["db_serializer"])
         await self._manager._storage.store(uid, serial, writer, obj, self)
         obj.__serial__ = self._tid
         obj.__uuid__ = uid
@@ -459,7 +460,7 @@ class Transaction:
         return self._fill_object(result, parent)
 
     def _fill_object(self, item: dict, parent: IBaseObject) -> IBaseObject:
-        obj = app_settings["object_reader"](item)
+        obj = get_adapter(item, IReader, name=app_settings["db_serializer"])
         obj.__parent__ = parent
         obj.__txn__ = self
         return obj
@@ -539,7 +540,7 @@ class Transaction:
         if result == _EMPTY:
             raise KeyError(id)
         if reader is None:
-            obj = app_settings["object_reader"](result)
+            obj = get_adapter(result, IReader, name=app_settings["db_serializer"])
         else:
             obj = reader(result)
         obj.__of__ = base_obj.__uuid__

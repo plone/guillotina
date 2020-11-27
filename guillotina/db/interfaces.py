@@ -17,6 +17,10 @@ class IWriter(Interface):
     """Serializes the object for DB storage"""
 
 
+class IReader(Interface):
+    """Deserializes the object from DB storage"""
+
+
 class ITransaction(Interface):
     _db_conn = Attribute("")
     _query_count_end = Attribute("")
