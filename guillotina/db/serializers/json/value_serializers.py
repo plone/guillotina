@@ -16,7 +16,7 @@ class AnyObjectSerializer:
 
     def __call__(self):
         return {
-            **{"__class__": get_dotted_name(self.obj),},
+            **{"__class__": get_dotted_name(self.obj)},
             **self.obj.__dict__,
         }
 

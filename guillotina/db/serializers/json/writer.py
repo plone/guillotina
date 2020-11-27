@@ -3,7 +3,6 @@ from guillotina import configure
 from guillotina.component import get_adapter
 from guillotina.component import query_adapter
 from guillotina.db.interfaces import IWriter
-from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.db.serializers.pickle import writer
 from guillotina.interfaces import IAnnotationData
 from guillotina.interfaces import IDatabase
