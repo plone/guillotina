@@ -1,6 +1,12 @@
 CHANGELOG
 =========
 
+6.0.17 (unreleased)
+-------------------
+
+- Nothing changed yet.
+
+
 6.0.16 (2020-11-27)
 -------------------
 - Fixing workflow exception if not defined
