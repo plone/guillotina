@@ -32,7 +32,6 @@ import pytest
 _dir = os.path.dirname(os.path.realpath(__file__))
 
 DATABASE = os.environ.get("DATABASE", "DUMMY")
-DB_SERIALIZER = os.environ.get("DB_SERIALIZER", "pickle")
 DB_SCHEMA = os.environ.get("DB_SCHEMA", "public")
 
 annotations = {"testdatabase": DATABASE, "test_dbschema": DB_SCHEMA, "redis": None}
@@ -65,7 +64,6 @@ def event_loop():
 
 def get_dummy_settings(pytest_node=None):
     settings = testing.get_settings()
-    settings["db_serializer"] = DB_SERIALIZER
     settings["databases"]["db"]["storage"] = "DUMMY"
     settings["databases"]["db"]["dsn"] = {}
     settings = _update_from_pytest_markers(settings, pytest_node)
@@ -116,7 +114,6 @@ def _update_from_pytest_markers(settings, pytest_node):
 
 def get_db_settings(pytest_node=None):
     settings = testing.get_settings()
-    settings["db_serializer"] = DB_SERIALIZER
 
     if annotations["redis"] is not None:
         if "redis" not in settings:
