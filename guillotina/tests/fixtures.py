@@ -114,7 +114,6 @@ def _update_from_pytest_markers(settings, pytest_node):
 
 def get_db_settings(pytest_node=None):
     settings = testing.get_settings()
-
     if annotations["redis"] is not None:
         if "redis" not in settings:
             settings["redis"] = {}
