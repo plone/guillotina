@@ -4,7 +4,11 @@ CHANGELOG
 5.3.63 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Check deleted list in Transaction.contains
+  [qiwn]
+
+- Change commit order (delete before add) in Transaction.tpc_commit
+  [qiwn]
 
 
 5.3.62 (2020-11-25)

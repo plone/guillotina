@@ -455,13 +455,13 @@ class Transaction:
     async def tpc_commit(self):
         """Commit changes to an object"""
         await self._strategy.tpc_commit()
+        for oid, obj in self.deleted.items():
+            await self._manager._storage.delete(self, oid)
         for oid, obj in self.added.items():
             await self._store_object(obj, oid, True)
             obj.__new_marker__ = False
         for oid, obj in self.modified.items():
             await self._store_object(obj, oid)
-        for oid, obj in self.deleted.items():
-            await self._manager._storage.delete(self, oid)
 
     @profilable
     async def tpc_vote(self):
@@ -556,6 +556,10 @@ class Transaction:
 
     @profilable
     async def contains(self, oid: str, key: str) -> bool:
+        for obj in self.deleted.values():
+            if obj.id == key and obj.__parent__.__uuid__ == oid:
+                return False
+
         return await self._manager._storage.has_key(self, oid, key)  # noqa
 
     @profilable

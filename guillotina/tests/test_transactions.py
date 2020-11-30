@@ -99,6 +99,21 @@ async def test_txn_refresh(container_requester):
             assert container1.title == container2.title
 
 
+async def test_txn_contains(container_requester):
+    async with container_requester as requester:
+        async with transaction(db=requester.db) as txn:
+            root = await txn.get(ROOT_ID)
+            container = await root.async_get("guillotina")
+            await create_content_in_container(
+                container, "Item", "foobar", check_security=False, __uuid__="foobar"
+            )
+
+        async with transaction(db=requester.db) as txn:
+            assert await container.async_contains("foobar") is True
+            await container.async_del("foobar")
+            assert await container.async_contains("foobar") is False
+
+
 async def test_register_with_local_txn_if_no_global(container_requester):
     async with container_requester as requester:
         db = requester.db
