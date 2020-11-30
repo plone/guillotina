@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.63 (unreleased)
+5.3.63 (2020-11-30)
 -------------------
 
 - Check deleted list in Transaction.contains
