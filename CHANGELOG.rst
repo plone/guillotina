@@ -4,7 +4,7 @@ CHANGELOG
 5.3.63 (unreleased)
 -------------------
 
-- Update Transaction.contains
+- Update Transaction.contains, Transaction.tpc_commit
   [qiwn]
 
 
