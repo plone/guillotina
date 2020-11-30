@@ -145,7 +145,7 @@ class Transaction:
     user = None
 
     def __init__(
-        self, manager, loop=None, read_only: bool = False, cache=None, strategy=None
+        self, manager, loop=None, read_only: bool = False, cache=None, strategy=None,
     ):
         # Transaction Manager
         self._manager = manager
@@ -165,7 +165,7 @@ class Transaction:
         self._lock = asyncio.Lock(loop=loop)
 
     def initialize(
-        self, read_only, cache=None, strategy=None
+        self, read_only, cache=None, strategy=None,
     ):
         self._read_only = read_only
         self._txn_time = None
