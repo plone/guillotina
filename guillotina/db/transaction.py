@@ -554,6 +554,7 @@ class Transaction:
     async def contains(self, oid: str, key: str) -> bool:
         if not await self._manager._storage.has_key(self, oid, key):  # noqa
             return False
+
         for obj in self.deleted.values():
             if obj.id == key:
                 return False
