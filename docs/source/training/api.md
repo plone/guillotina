@@ -80,7 +80,6 @@ Then, to download the file, use the `@download` endpoint.
    :path: /db/container/foobar5/@download/file
    :path_spec: /(db)/(container)/(content)/@download/file
    :basic_auth: root:root
-   :body: <text data>
 ```
 
 ## Uploading files with TUS
