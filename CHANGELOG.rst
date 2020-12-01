@@ -1,10 +1,89 @@
 CHANGELOG
 =========
 
-6.0.9 (unreleased)
+6.0.17 (unreleased)
+-------------------
+
+- Nothing changed yet.
+
+
+6.0.16 (2020-11-27)
+-------------------
+- Fixing workflow exception if not defined
+  [bloodbare]
+
+- Allow to define date format for recovery password
+  [bloodbare]
+
+- Abort transaction if tpc_commit() crashes
+  [masipcat]
+
+
+6.0.15 (2020-11-25)
+-------------------
+
+- Fix not defined workflow exception
+  [bloodbare]
+
+
+6.0.14 (2020-11-25)
+-------------------
+
+- Fix reset password flow to be equal to register
+  [bloodbare]
+
+
+6.0.13 (2020-11-23)
+-------------------
+
+- Allowing to define Owner roles users on creation
+  [bloodbare]
+
+
+6.0.12 (2020-11-15)
+-------------------
+
+- Fixing workflow subscriber for state history
+  [bloodbare]
+
+- Allow to search on basic workflow state publish
+  [bloodbare]
+
+
+6.0.11 (2020-11-08)
+-------------------
+
+- Adding Vocabularies API compatible to Plone REST API
+  [bloodbare]
+
+- Adding Workflow contrib package with API compatible to Plone REST API
+  [bloodbare]
+
+- Adding languages and contrib vocabulary
+  [bloodbare]
+
+- Avoid default value check on get for each get operation
+  [bloodbare]
+
+- Adding post serialize mechanism to modify JSON responses based on packages
+  [bloodbare]
+
+6.0.10 (2020-11-01)
+-------------------
+
+- Fix conflict cors response.
+  [bloodbare]
+
+
+6.0.9 (2020-10-30)
 ------------------
 
-- Fixed transaction strategy 'simple'
+- Change transaction strategy 'simple'
+  [masipcat]
+
+- Fix bug on error deserialization
+
+- Fix transaction context manager doesn't abort the txn when a exception is raised
   [masipcat]
 
 - Add id checker for move

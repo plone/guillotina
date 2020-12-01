@@ -10,7 +10,6 @@ logger = glogging.getLogger("guillotina")
 
 @configure.adapter(for_=ITransaction, provides=IDBTransactionStrategy, name="simple")
 class SimpleStrategy(BaseStrategy):
-
     async def tpc_begin(self):
         if self._transaction._db_txn is None:
             await self._storage.start_transaction(self._transaction)

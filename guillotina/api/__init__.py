@@ -12,5 +12,6 @@ from . import search  # noqa
 from . import storage  # noqa
 from . import types  # noqa
 from . import user  # noqa
+from . import vocabularies  # noqa
 from . import ws  # noqa
 from guillotina.json import definitions  # noqa

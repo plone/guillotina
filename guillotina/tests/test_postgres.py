@@ -333,9 +333,8 @@ async def test_should_not_resolve_conflict_error_with_resolve(db, dummy_guilloti
 
 @pytest.mark.skipif(DATABASE in ("DUMMY",), reason="DUMMY not support simple...")
 async def test_should_raise_conflict_error_on_concurrent_insert(db, container_requester):
-    async with container_requester:
-        aps = await get_aps(db, "simple")
-        with TransactionManager(aps) as tm:
+    async with container_requester as requester:
+        with requester.db.get_transaction_manager() as tm:
             txn = await tm.begin()
             root_ob = await tm.get_root()
             container = await create_container(root_ob, "test-container")
@@ -357,9 +356,8 @@ async def test_should_raise_conflict_error_on_concurrent_insert(db, container_re
 
 @pytest.mark.skipif(DATABASE in ("DUMMY",), reason="DUMMY not support simple...")
 async def test_should_raise_conflict_error_on_concurrent_update(db, container_requester):
-    async with container_requester:
-        aps = await get_aps(db, "simple")
-        with TransactionManager(aps) as tm:
+    async with container_requester as requester:
+        with requester.db.get_transaction_manager() as tm:
             txn = await tm.begin()
             root_ob = await tm.get_root()
             container = await create_container(root_ob, "test-container")

@@ -1,6 +1,6 @@
 from guillotina.response import Response
 from guillotina.tests.utils import get_mocked_request
-from guillotina.traversal import _apply_cors
+from guillotina.traversal import apply_cors
 
 import pytest
 
@@ -32,7 +32,7 @@ async def test_apply_cors(guillotina_main):
             "Location": "/test",
         }
     )
-    resp = await _apply_cors(request, resp)
+    resp = await apply_cors(request, resp)
     assert resp.headers["Access-Control-Allow-Origin"] == "http://localhost:8080"
     assert resp.headers["Access-Control-Allow-Methods"] == "GET, POST, PUT, PATCH"
     assert resp.headers["Access-Control-Allow-Headers"] == "*"

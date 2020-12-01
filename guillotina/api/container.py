@@ -16,6 +16,7 @@ from guillotina.interfaces import IContainer
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IPrincipalRoleManager
 from guillotina.interfaces import IResourceSerializeToJson
+from guillotina.interfaces.content import IGetOwner
 from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.response import ErrorResponse
 from guillotina.response import HTTPConflict
@@ -68,9 +69,11 @@ async def create_container(
     await container.install()
 
     # Local Roles assign owner as the creator user
-    if owner_id is not None:
+    get_owner = IGetOwner(container)
+    owner = await get_owner(owner_id)
+    if owner is not None:
         roleperm = IPrincipalRoleManager(container)
-        roleperm.assign_role_to_principal("guillotina.Owner", owner_id)
+        roleperm.assign_role_to_principal("guillotina.Owner", owner)
 
     if emit_events:
         await notify(

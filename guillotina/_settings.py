@@ -18,6 +18,7 @@ app_settings: Dict[str, Any] = {
     "port": 8080,
     "static": {},
     "jsapps": {},
+    "post_serialize": [],
     "default_static_filenames": ["index.html", "index.htm"],
     "container_types": ["Container"],
     "load_utilities": {
