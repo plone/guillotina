@@ -1,5 +1,6 @@
 from asyncio import shield
 from guillotina import glogging
+from guillotina import metrics
 from guillotina._settings import app_settings
 from guillotina.const import TRASHED_ID
 from guillotina.db.events import StorageCreatedEvent
@@ -24,6 +25,49 @@ import concurrent
 import orjson
 import time
 
+
+try:
+    import prometheus_client
+
+    PG_OPS = prometheus_client.Counter(
+        "guillotina_db_pg_ops_total",
+        "Total count of ops by type of operation and the error if there was.",
+        labelnames=["type", "error"],
+    )
+    PG_OPS_PROCESSING_TIME = prometheus_client.Histogram(
+        "guillotina_db_pg_ops_processing_time_seconds",
+        "Histogram of operations processing time by type (in seconds)",
+        labelnames=["type"],
+    )
+    PG_LOCK_ACQUIRE_TIME = prometheus_client.Histogram(
+        "guillotina_db_pg_lock_time_seconds",
+        "Histogram of time it takes to acquire locks (in seconds)",
+        labelnames=["type"],
+    )
+
+    class watch(metrics.watch):
+        def __init__(self, operation: str):
+            super().__init__(
+                counter=PG_OPS,
+                histogram=PG_OPS_PROCESSING_TIME,
+                labels={"type": operation},
+                error_mappings={
+                    "undefined_table_error": asyncpg.exceptions.UndefinedTableError,
+                    "connection_error": asyncpg.exceptions.PostgresConnectionError,
+                    "interface_error": asyncpg.exceptions.InterfaceError,
+                    "unique_key_error": asyncpg.exceptions.UniqueViolationError,
+                    "foreign_key_error": asyncpg.exceptions.ForeignKeyViolationError,
+                    "deadlock_error": asyncpg.exceptions.DeadlockDetectedError,
+                },
+            )
+
+    class watch_lock(metrics.watch_lock):
+        def __init__(self, lock: asyncio.Lock, operation: str):
+            super().__init__(PG_LOCK_ACQUIRE_TIME, lock, labels={"type": operation})
+
+
+except ImportError:
+    watch = metrics.watch  # type: ignore
 
 log = glogging.getLogger("guillotina.storage")
 
@@ -395,7 +439,8 @@ class PGVacuum:
         async with self._manager.pool.acquire(timeout=self._manager._conn_acquire_timeout) as conn:
             sql = self._sql.get("DELETE_OBJECT", table_name)
             try:
-                await conn.execute(sql, oid)
+                with watch("vacuum_object"):
+                    await conn.execute(sql, oid)
             except Exception:
                 log.warning("Error deleting trashed object", exc_info=True)
 
@@ -469,7 +514,7 @@ class PGConnectionManager:
         return self._lock
 
     async def close(self):
-        async with self._lock:
+        async with watch_lock(self._lock, "shared_close_conn"):
             if self._pool is None:
                 # nothing to close
                 return
@@ -483,7 +528,8 @@ class PGConnectionManager:
                 self._vacuum = self._vacuum_task = None
 
             try:
-                await shield(self._pool.release(self._read_conn))
+                with watch("release_connection"):
+                    await shield(self._pool.release(self._read_conn))
             except asyncpg.exceptions.InterfaceError:
                 pass
             # terminate force closes all these
@@ -513,7 +559,7 @@ class PGConnectionManager:
             await self._initialize_tid_statements(True)
 
     async def initialize(self, loop=None, **kw):
-        async with self._lock:
+        async with watch_lock(self._lock, "shared_initialize"):
             if self._pool is not None:
                 # nothing to open
                 return
@@ -713,26 +759,27 @@ class PostgresqlStorage(BaseStorage):
         statements.extend(self._initialize_objects_statements)
         statements.extend(self._initialize_blobs_statements)
 
-        for statement in statements:
-            otable_name = clear_table_name(self.objects_table_name)
-            if otable_name == "objects":
-                otable_name = "object"
-            btable_name = clear_table_name(self.blobs_table_name)
-            if btable_name == "blobs":
-                btable_name = "blob"
-            statement = statement.format(
-                objects_table_name=self.objects_table_name,
-                blobs_table_name=self.blobs_table_name,
-                # singular, index names
-                object_table_name=otable_name,
-                blob_table_name=btable_name,
-                schema=self._db_schema,
-            )
-            try:
-                await conn.execute(statement)
-            except asyncpg.exceptions.UniqueViolationError:
-                # this is okay on creation, means 2 getting created at same time
-                pass
+        with watch("create_db"):
+            for statement in statements:
+                otable_name = clear_table_name(self.objects_table_name)
+                if otable_name == "objects":
+                    otable_name = "object"
+                btable_name = clear_table_name(self.blobs_table_name)
+                if btable_name == "blobs":
+                    btable_name = "blob"
+                statement = statement.format(
+                    objects_table_name=self.objects_table_name,
+                    blobs_table_name=self.blobs_table_name,
+                    # singular, index names
+                    object_table_name=otable_name,
+                    blob_table_name=btable_name,
+                    schema=self._db_schema,
+                )
+                try:
+                    await conn.execute(statement)
+                except asyncpg.exceptions.UniqueViolationError:
+                    # this is okay on creation, means 2 getting created at same time
+                    pass
 
     async def restart_connection(self, timeout=0.1):
         log.error("Connection potentially lost to pg, restarting")
@@ -766,31 +813,32 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
             )
             await self._connection_manager.initialize(loop, **kw)
 
-        async with self.pool.acquire(timeout=self._conn_acquire_timeout) as conn:
-            if await self.has_unique_constraint(conn):
-                self._supports_unique_constraints = True
-
-            trash_sql = self._sql.get("CREATE_TRASH", self.objects_table_name)
-            try:
-                await conn.execute(trash_sql)
-            except asyncpg.exceptions.ReadOnlySQLTransactionError:
-                # Not necessary for read-only pg
-                pass
-            except (asyncpg.exceptions.UndefinedTableError, asyncpg.exceptions.InvalidSchemaNameError):
-                async with conn.transaction():
-                    await self.create(conn)
-                    # only available on new databases
-                    for constraint in self._unique_constraints:
-                        await conn.execute(
-                            constraint.format(
-                                objects_table_name=self.objects_table_name,
-                                constraint_name=clear_table_name(self.objects_table_name),
-                                TRASHED_ID=TRASHED_ID,
-                            ).replace("CONCURRENTLY", "")
-                        )
+        with watch("initialize_db"):
+            async with self.pool.acquire(timeout=self._conn_acquire_timeout) as conn:
+                if await self.has_unique_constraint(conn):
                     self._supports_unique_constraints = True
+
+                trash_sql = self._sql.get("CREATE_TRASH", self.objects_table_name)
+                try:
                     await conn.execute(trash_sql)
-                    await notify(StorageCreatedEvent(self, db_conn=conn))
+                except asyncpg.exceptions.ReadOnlySQLTransactionError:
+                    # Not necessary for read-only pg
+                    pass
+                except (asyncpg.exceptions.UndefinedTableError, asyncpg.exceptions.InvalidSchemaNameError):
+                    async with conn.transaction():
+                        await self.create(conn)
+                        # only available on new databases
+                        for constraint in self._unique_constraints:
+                            await conn.execute(
+                                constraint.format(
+                                    objects_table_name=self.objects_table_name,
+                                    constraint_name=clear_table_name(self.objects_table_name),
+                                    TRASHED_ID=TRASHED_ID,
+                                ).replace("CONCURRENTLY", "")
+                            )
+                        self._supports_unique_constraints = True
+                        await conn.execute(trash_sql)
+                        await notify(StorageCreatedEvent(self, db_conn=conn))
 
         self._connection_initialized_on = time.time()
 
@@ -806,7 +854,8 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
     async def close(self, con):
         try:
-            await shield(self.pool.release(con, timeout=1))
+            with watch("release_connection"):
+                await shield(self.pool.release(con, timeout=1))
         except (asyncio.CancelledError, asyncio.TimeoutError, asyncpg.exceptions.ConnectionDoesNotExistError):
             log.warning("Exception on connection close", exc_info=True)
 
@@ -816,8 +865,9 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
     async def load(self, txn, oid):
         sql = self._sql.get("GET_OID", self.objects_table_name)
-        async with txn._lock:
-            objects = await self.get_one_row(txn, sql, oid)
+        async with watch_lock(txn._lock, "load_object_by_oid"):
+            with watch("load_object_by_oid"):
+                objects = await self.get_one_row(txn, sql, oid)
         if objects is None:
             raise KeyError(oid)
         return objects
@@ -846,23 +896,24 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
             update = True
 
         conn = await txn.get_connection()
-        async with txn._lock:
+        async with watch_lock(txn._lock, "store_object"):
             try:
-                result = await conn.fetch(
-                    statement_sql,
-                    oid,  # The OID of the object
-                    txn._tid,  # Our TID
-                    len(pickled),  # Len of the object
-                    part,  # Partition indicator
-                    writer.resource,  # Is a resource ?
-                    writer.of,  # It belogs to a main
-                    old_serial,  # Old serial
-                    writer.parent_id,  # Parent OID
-                    writer.id,  # Traversal ID
-                    writer.type,  # Guillotina type
-                    json,  # JSON catalog
-                    pickled,  # Pickle state)
-                )
+                with watch("store_object"):
+                    result = await conn.fetch(
+                        statement_sql,
+                        oid,  # The OID of the object
+                        txn._tid,  # Our TID
+                        len(pickled),  # Len of the object
+                        part,  # Partition indicator
+                        writer.resource,  # Is a resource ?
+                        writer.of,  # It belogs to a main
+                        old_serial,  # Old serial
+                        writer.parent_id,  # Parent OID
+                        writer.id,  # Traversal ID
+                        writer.type,  # Guillotina type
+                        json,  # JSON catalog
+                        pickled,  # Pickle state)
+                    )
             except asyncpg.exceptions.UniqueViolationError as ex:
                 if "Key (parent_id, id)" in ex.detail or "Key (of, id)" in ex.detail:
                     raise ConflictIdOnContainer(ex)
@@ -870,8 +921,8 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
             except asyncpg.exceptions.ForeignKeyViolationError:
                 txn.deleted[obj.__uuid__] = obj
                 raise TIDConflictError(
-                    f"Bad value inserting into database that could be caused "
-                    f"by a bad cache value. This should resolve on request retry.",
+                    "Bad value inserting into database that could be caused "
+                    "by a bad cache value. This should resolve on request retry.",
                     oid,
                     txn,
                     old_serial,
@@ -880,18 +931,18 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
             except asyncpg.exceptions._base.InterfaceError as ex:
                 if "another operation is in progress" in ex.args[0]:
                     raise ConflictError(
-                        f"asyncpg error, another operation in progress.", oid, txn, old_serial, writer
+                        "asyncpg error, another operation in progress.", oid, txn, old_serial, writer
                     )
                 raise
             except asyncpg.exceptions.DeadlockDetectedError:
-                raise ConflictError(f"Deadlock detected.", oid, txn, old_serial, writer)
+                raise ConflictError("Deadlock detected.", oid, txn, old_serial, writer)
             if len(result) != 1 or result[0]["count"] != 1:
                 if update:
                     # raise tid conflict error
                     raise TIDConflictError(
-                        f"Mismatch of tid of object being updated. This is likely "
-                        f"caused by a cache invalidation race condition and should "
-                        f"be an edge case. This should resolve on request retry.",
+                        "Mismatch of tid of object being updated. This is likely "
+                        "caused by a cache invalidation race condition and should "
+                        "be an edge case. This should resolve on request retry.",
                         oid,
                         txn,
                         old_serial,
@@ -911,9 +962,10 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def delete(self, txn, oid):
         conn = await txn.get_connection()
         sql = self._sql.get("TRASH_PARENT_ID", self.objects_table_name)
-        async with txn._lock:
+        async with watch_lock(txn._lock, "delete_object"):
             # for delete, we reassign the parent id and delete in the vacuum task
-            await conn.execute(sql, oid)
+            with watch("delete_object"):
+                await conn.execute(sql, oid)
         if self._autovacuum:
             txn.add_after_commit_hook(self._txn_oid_commit_hook, oid)
 
@@ -924,18 +976,20 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
             if err in str(ex):
                 if (time.time() - self._connection_initialized_on) > BAD_CONNECTION_RESTART_DELAY:
                     # we need to make sure we aren't calling this over and over again
-                    async with self.lock:
+                    async with watch_lock(self.lock, "shared_restart_conn"):
                         return await self.restart_connection()
 
     @restart_conn_on_exception
     async def get_next_tid(self, txn):
-        async with self.lock:
-            return await self.stmt_next_tid.fetchval()
+        async with watch_lock(self.lock, "shared_next_tid"):
+            with watch("next_tid"):
+                return await self.stmt_next_tid.fetchval()
 
     @restart_conn_on_exception
     async def get_current_tid(self, txn):
-        async with self.lock:
-            return await self.stmt_max_tid.fetchval()
+        async with watch_lock(self.lock, "shared_current_tid"):
+            with watch("current_tid"):
+                return await self.stmt_max_tid.fetchval()
 
     async def get_one_row(self, txn, sql, *args, prepare=False):
         conn = await txn.get_connection()
@@ -960,11 +1014,12 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def start_transaction(self, txn, retries=0):
         error = None
         conn = await txn.get_connection()
-        async with txn._lock:
+        async with watch_lock(txn._lock, "start_txn"):
             txn._db_txn = await self._async_db_transaction_factory(txn)
 
             try:
-                await txn._db_txn.start()
+                with watch("start_txn"):
+                    await txn._db_txn.start()
                 return
             except (asyncpg.exceptions.InterfaceError, asyncpg.exceptions.InternalServerError) as ex:
                 error = ex
@@ -996,7 +1051,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                 return await self.start_transaction(txn, retries + 1)
 
     async def get_conflicts(self, txn):
-        async with self.lock:
+        async with watch_lock(self.lock, "shared_conflicts"):
             if len(txn.modified) == 0:
                 return []
             # use storage lock instead of transaction lock
@@ -1004,24 +1059,28 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                 # if it's too large, we're not going to check on object ids
                 modified_oids = [k for k in txn.modified.keys()]
                 sql = self._sql.get("TXN_CONFLICTS_ON_OIDS", self.objects_table_name)
-                return await self.read_conn.fetch(sql, txn._tid, modified_oids)
+                with watch("get_conflicts_oids"):
+                    return await self.read_conn.fetch(sql, txn._tid, modified_oids)
             else:
                 sql = self._sql.get("TXN_CONFLICTS", self.objects_table_name)
-                return await self.read_conn.fetch(sql, txn._tid)
+                with watch("get_conflicts"):
+                    return await self.read_conn.fetch(sql, txn._tid)
 
     async def commit(self, transaction):
-        async with transaction._lock:
+        async with watch_lock(transaction._lock, "commit_txn"):
             if transaction._db_txn is not None:
-                await transaction._db_txn.commit()
+                with watch("commit_txn"):
+                    await transaction._db_txn.commit()
             elif self._transaction_strategy not in ("none", "tidonly") and not transaction._skip_commit:
                 log.warning("Do not have db transaction to commit")
             return transaction._tid
 
     async def abort(self, transaction):
-        async with transaction._lock:
+        async with watch_lock(transaction._lock, "rollback_txn"):
             if transaction._db_txn is not None:
                 try:
-                    await transaction._db_txn.rollback()
+                    with watch("rollback_txn"):
+                        await transaction._db_txn.rollback()
                 except asyncpg.exceptions._base.InterfaceError:
                     # we're okay with this error here...
                     pass
@@ -1034,33 +1093,38 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
         conn = await txn.get_connection()
         keys = []
         sql = self._sql.get("BATCHED_GET_CHILDREN_KEYS", self.objects_table_name)
-        for record in await conn.fetch(sql, oid, page_size, (page - 1) * page_size):
-            keys.append(record["id"])
+        with watch("page_of_keys"):
+            for record in await conn.fetch(sql, oid, page_size, (page - 1) * page_size):
+                keys.append(record["id"])
         return keys
 
     async def keys(self, txn, oid):
         conn = await txn.get_connection()
         sql = self._sql.get("GET_CHILDREN_KEYS", self.objects_table_name)
-        async with txn._lock:
-            result = await conn.fetch(sql, oid)
+        async with watch_lock(txn._lock, "keys"):
+            with watch("keys"):
+                result = await conn.fetch(sql, oid)
         return result
 
     async def get_child(self, txn, parent_oid, id):
         sql = self._sql.get("GET_CHILD", self.objects_table_name)
-        async with txn._lock:
-            result = await self.get_one_row(txn, sql, parent_oid, id)
+        async with watch_lock(txn._lock, "get_child"):
+            with watch("get_child"):
+                result = await self.get_one_row(txn, sql, parent_oid, id)
         return result
 
     async def get_children(self, txn, parent_oid, ids):
         conn = await txn.get_connection()
         sql = self._sql.get("GET_CHILDREN_BATCH", self.objects_table_name)
-        async with txn._lock:
-            return await conn.fetch(sql, parent_oid, ids)
+        async with watch_lock(txn._lock, "get_children"):
+            with watch("get_children"):
+                return await conn.fetch(sql, parent_oid, ids)
 
     async def has_key(self, txn, parent_oid, id):
         sql = self._sql.get("EXIST_CHILD", self.objects_table_name)
-        async with txn._lock:
-            result = await self.get_one_row(txn, sql, parent_oid, id)
+        async with watch_lock(txn._lock, "has_key"):
+            with watch("has_key"):
+                result = await self.get_one_row(txn, sql, parent_oid, id)
         if result is None:
             return False
         else:
@@ -1069,22 +1133,26 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def len(self, txn, oid):
         conn = await txn.get_connection()
         sql = self._sql.get("NUM_CHILDREN", self.objects_table_name)
-        async with txn._lock:
-            result = await conn.fetchval(sql, oid)
+        async with watch_lock(txn._lock, "num_children"):
+            with watch("num_children"):
+                result = await conn.fetchval(sql, oid)
         return result
 
     async def items(self, txn, oid):
         conn = await txn.get_connection()
         sql = self._sql.get("GET_CHILDREN", self.objects_table_name)
-        async for record in conn.cursor(sql, oid):
-            # locks are dangerous in cursors since comsuming code might do
-            # sub-queries and they you end up with a deadlock
-            yield record
+        with watch("items"):
+            # not going to be accurate measure but will tell you if it is abused
+            async for record in conn.cursor(sql, oid):
+                # locks are dangerous in cursors since comsuming code might do
+                # sub-queries and they you end up with a deadlock
+                yield record
 
     async def get_annotation(self, txn, oid, id):
         sql = self._sql.get("GET_ANNOTATION", self.objects_table_name)
-        async with txn._lock:
-            result = await self.get_one_row(txn, sql, oid, id, prepare=True)
+        async with watch_lock(txn._lock, "load_annotation"):
+            with watch("load_annotation"):
+                result = await self.get_one_row(txn, sql, oid, id, prepare=True)
             if result is not None and result["parent_id"] == TRASHED_ID:
                 result = None
         return result
@@ -1092,8 +1160,9 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def get_annotation_keys(self, txn, oid):
         conn = await txn.get_connection()
         sql = self._sql.get("GET_ANNOTATIONS_KEYS", self.objects_table_name)
-        async with txn._lock:
-            result = await conn.fetch(sql, oid)
+        async with watch_lock(txn._lock, "load_annotation_keys"):
+            with watch("load_annotation_keys"):
+                result = await conn.fetch(sql, oid)
         items = []
         for item in result:
             if item["parent_id"] != TRASHED_ID:
@@ -1102,61 +1171,70 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
     async def write_blob_chunk(self, txn, bid, oid, chunk_index, data):
         sql = self._sql.get("HAS_OBJECT", self.objects_table_name)
-        async with txn._lock:
+        async with watch_lock(txn._lock, "has_object"):
             result = await self.get_one_row(txn, sql, oid)
         if result is None:
             # check if we have a referenced ob, could be new and not in db yet.
             # if so, create a stub for it here...
             conn = await txn.get_connection()
-            async with txn._lock:
-                await conn.execute(
-                    f"""INSERT INTO {self.objects_table_name}
-(zoid, tid, state_size, part, resource, type)
-VALUES ($1::varchar({MAX_UID_LENGTH}), -1, 0, 0, TRUE, 'stub')""",
-                    oid,
-                )
+            async with watch_lock(txn._lock, "store_blob_stub"):
+                with watch("store_blob_stub"):
+                    await conn.execute(
+                        f"""INSERT INTO {self.objects_table_name}
+    (zoid, tid, state_size, part, resource, type)
+    VALUES ($1::varchar({MAX_UID_LENGTH}), -1, 0, 0, TRUE, 'stub')""",
+                        oid,
+                    )
         conn = await txn.get_connection()
         sql = self._sql.get("INSERT_BLOB_CHUNK", self.blobs_table_name)
-        async with txn._lock:
-            return await conn.execute(sql, bid, oid, chunk_index, data)
+        async with watch_lock(txn._lock, "store_blob_chunk"):
+            with watch("store_blob_chunk"):
+                return await conn.execute(sql, bid, oid, chunk_index, data)
 
     async def read_blob_chunk(self, txn, bid, chunk=0):
         sql = self._sql.get("READ_BLOB_CHUNK", self.blobs_table_name)
-        async with txn._lock:
-            return await self.get_one_row(txn, sql, bid, chunk)
+        async with watch_lock(txn._lock, "load_blob_chunk"):
+            with watch("load_blob_chunk"):
+                return await self.get_one_row(txn, sql, bid, chunk)
 
     async def read_blob_chunks(self, txn, bid):
         conn = await txn.get_connection()
-        async for record in conn.cursor(bid):
-            # locks are dangerous in cursors since comsuming code might do
-            # sub-queries and they you end up with a deadlock
-            yield record
+        with watch("read_blob_chunks"):
+            # again, not accurate through an iterator
+            async for record in conn.cursor(bid):
+                # locks are dangerous in cursors since comsuming code might do
+                # sub-queries and they you end up with a deadlock
+                yield record
 
     async def del_blob(self, txn, bid):
         conn = await txn.get_connection()
         sql = self._sql.get("DELETE_BLOB", self.blobs_table_name)
-        async with txn._lock:
-            await conn.execute(sql, bid)
+        async with watch_lock(txn._lock, "delete_blob_chunk"):
+            with watch("delete_blob_chunk"):
+                await conn.execute(sql, bid)
 
     async def get_total_number_of_objects(self, txn):
         conn = await txn.get_connection()
         sql = self._sql.get("NUM_ROWS", self.objects_table_name)
-        async with txn._lock:
-            result = await conn.fetchval(sql)
+        async with watch_lock(txn._lock, "total_objects"):
+            with watch("total_objects"):
+                result = await conn.fetchval(sql)
         return result
 
     async def get_total_number_of_resources(self, txn):
         conn = await txn.get_connection()
         sql = self._sql.get("NUM_RESOURCES", self.objects_table_name)
-        async with txn._lock:
-            result = await conn.fetchval(sql)
+        async with watch_lock(txn._lock, "total_resources"):
+            with watch("total_resources"):
+                result = await conn.fetchval(sql)
         return result
 
     async def get_total_resources_of_type(self, txn, type_):
         conn = await txn.get_connection()
         sql = self._sql.get("NUM_RESOURCES_BY_TYPE", self.objects_table_name)
-        async with txn._lock:
-            result = await conn.fetchval(sql, type_)
+        async with watch_lock(txn._lock, "total_objects_by_type"):
+            with watch("total_objects_by_type"):
+                result = await conn.fetchval(sql, type_)
         return result
 
     # Massive treatment without security
