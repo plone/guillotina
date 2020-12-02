@@ -64,7 +64,8 @@ Creating users is just creating a user object.
         "@type": "User",
         "email": "bob@domain.io",
         "password": "secret",
-        "username": "Bob"
+        "username": "Bob",
+        "user_roles": ["guillotina.Member"]
     }
 
 

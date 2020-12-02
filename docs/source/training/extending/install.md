@@ -53,6 +53,16 @@ class ManageAddon(Addon):
 
 Then, using Postman, do a `POST` request to the `@addons` endpoint:
 
-```json
-{"id": "guillotina_chat"}
+```eval_rst
+..  http:example:: curl wget httpie python-requests
+
+    POST /db/container/@addons HTTP/1.1
+    Accept: application/json
+    Authorization: Basic cm9vdDpyb290
+    Content-Type: application/json
+    Host: localhost:8080
+
+    {
+        "id": "guillotina_chat"
+    }
 ```
