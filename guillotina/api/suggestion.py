@@ -19,13 +19,10 @@ from guillotina.response import HTTPServiceUnavailable
                 "application/json": {
                     "schema": {
                         "type": "object",
-                        "properties": {
-                            "count": {"type": "integer"},
-                            "items": {"type": "array"}
-                        }
+                        "properties": {"count": {"type": "integer"}, "items": {"type": "array"}},
                     }
                 }
-            }
+            },
         }
     },
 )
