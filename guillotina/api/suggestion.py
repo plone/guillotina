@@ -16,9 +16,15 @@ from guillotina.interfaces import IResource
             "description": "Suggestion results",
             "content": {
                 "application/json": {
-                    "schema": {"type": "object", "properties": {"count": "integer", "items": "array"}},
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "count": {"type": "integer"},
+                            "items": {"type": "array"}
+                        }
+                    }
                 }
-            },
+            }
         }
     },
 )
