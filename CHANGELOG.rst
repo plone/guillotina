@@ -4,6 +4,9 @@ CHANGELOG
 6.0.17 (unreleased)
 -------------------
 
+- Bytes serializer
+  [bloodbare]
+
 - doc: improve training
   [masipcat]
 
