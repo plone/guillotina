@@ -1,4 +1,5 @@
 from collections import Counter
+from guillotina.response import HTTPServiceUnavailable
 from guillotina import configure
 from guillotina.component import query_utility
 from guillotina.interfaces import ICatalogUtility
@@ -32,7 +33,7 @@ async def suggestion_get(context, request):
     query = request.query.copy()
     search = query_utility(ICatalogUtility)
     if search is None:
-        return {}
+        raise HTTPServiceUnavailable()
 
     fields = request.query.get("_metadata", "").split(",")
     result = await search.query_aggregation(context, query)
