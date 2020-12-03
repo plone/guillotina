@@ -55,12 +55,13 @@ setup(
     packages=find_packages(),
     install_requires=[
         "uvicorn",
+        "websockets",
         "jsonschema",
         "python-dateutil",
         "pycryptodome",
         "jwcrypto",
         "setuptools",
-        "orjson",
+        "orjson==2.6.0",
         "zope.interface",
         "pyjwt",
         "asyncpg",
@@ -86,6 +87,8 @@ setup(
             "async-asgi-testclient<2.0.0",
             "openapi-spec-validator",
             "aiohttp>=3.0.0,<4.0.0",
+            "asyncmock",
+            "prometheus-client",
         ],
         "docs": [
             "async-asgi-testclient<2.0.0",

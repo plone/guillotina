@@ -1,8 +1,10 @@
 from guillotina import schema
+from guillotina.component import query_adapter
 from guillotina.directives import index_field
 from guillotina.interfaces import IAsyncUtility
 from guillotina.interfaces import IResource
 from guillotina.schema.interfaces import IContextAwareDefaultFactory
+from typing import Optional
 from zope.interface import Attribute
 from zope.interface import implementer
 from zope.interface import Interface
@@ -41,8 +43,14 @@ class IWorkflowChangedEvent(interfaces.IObjectEvent):
 
 @implementer(IContextAwareDefaultFactory)
 class DefaultReviewState:
-    def __call__(self, context: IResource) -> str:
-        return IWorkflow(context.context).initial_state
+    def __call__(self, context: IResource) -> Optional[str]:
+        if context is None:
+            return None
+        workflow = query_adapter(context.context, IWorkflow)
+        if workflow is not None:
+            return workflow.initial_state
+        else:
+            return None
 
 
 class IWorkflowBehavior(Interface):

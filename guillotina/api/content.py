@@ -7,7 +7,6 @@ from guillotina._settings import app_settings
 from guillotina.api.service import Service
 from guillotina.component import get_adapter
 from guillotina.component import get_multi_adapter
-from guillotina.component import get_utility
 from guillotina.component import query_adapter
 from guillotina.component import query_multi_adapter
 from guillotina.content import create_content_in_container
@@ -226,9 +225,9 @@ class DefaultPOST(Service):
         await deserializer(data, validate_all=True, create=True)
 
         # Local Roles assign owner as the creator user
-        get_owner = get_utility(IGetOwner)
+        get_owner = IGetOwner(obj)
         roleperm = IPrincipalRoleManager(obj)
-        owner = await get_owner(obj, user)
+        owner = await get_owner(user)
         if owner is not None:
             roleperm.assign_role_to_principal("guillotina.Owner", owner)
 

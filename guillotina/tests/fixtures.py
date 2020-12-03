@@ -26,6 +26,7 @@ import aiohttp
 import asyncio
 import json
 import os
+import prometheus_client.registry
 import pytest
 
 
@@ -622,3 +623,12 @@ def redis_container():
 @pytest.fixture(scope="function")
 async def dbusers_requester(guillotina):
     return ContainerRequesterAsyncContextManager(guillotina, ["dbusers"])
+
+
+@pytest.fixture(scope="function")
+async def metrics_registry():
+    for collector in prometheus_client.registry.REGISTRY._names_to_collectors.values():
+        if not hasattr(collector, "_metrics"):
+            continue
+        collector._metrics.clear()
+    yield prometheus_client.registry.REGISTRY

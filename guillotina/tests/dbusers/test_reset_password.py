@@ -30,6 +30,8 @@ async def test_reset_password(container_install_requester):
         util = get_utility(IMailer)
         assert "http://localhost:4200/@@validation" in util.mail[0]["html"]
         assert "<p>Reset password</p>" in util.mail[0]["html"]
+        assert "<p>Reset password</p>" in util.mail[0]["html"]
+        assert "MYTIMEFORMAT" in util.mail[0]["html"]
 
         token = (
             util.mail[0]["html"]

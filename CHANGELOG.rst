@@ -1,10 +1,68 @@
 CHANGELOG
 =========
 
-6.0.12 (unreleased)
+6.0.17 (unreleased)
 -------------------
 
 - Bytes serializer
+  [bloodbare]
+
+- doc: improve training
+  [masipcat]
+
+- Record metrics on cache hit/misses
+  [vangheem]
+
+- Record metrics on time waiting for pg locks
+  [vangheem]
+
+- Record redis cache misses
+  [vangheem]
+
+- Add metrics to pg and redis operations
+  [vangheem]
+
+
+6.0.16 (2020-11-27)
+-------------------
+- Fixing workflow exception if not defined
+  [bloodbare]
+
+- Allow to define date format for recovery password
+  [bloodbare]
+
+- Abort transaction if tpc_commit() crashes
+  [masipcat]
+
+
+6.0.15 (2020-11-25)
+-------------------
+
+- Fix not defined workflow exception
+  [bloodbare]
+
+
+6.0.14 (2020-11-25)
+-------------------
+
+- Fix reset password flow to be equal to register
+  [bloodbare]
+
+
+6.0.13 (2020-11-23)
+-------------------
+
+- Allowing to define Owner roles users on creation
+  [bloodbare]
+
+
+6.0.12 (2020-11-15)
+-------------------
+
+- Fixing workflow subscriber for state history
+  [bloodbare]
+
+- Allow to search on basic workflow state publish
   [bloodbare]
 
 

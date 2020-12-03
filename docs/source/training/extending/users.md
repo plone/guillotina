@@ -1,22 +1,10 @@
 # Users
 
-Guillotina does not come with any user provider OOTB and is designed to be
-plugged in with other services.
+Guillotina provides OOTB the package to manage and store users/groups.
 
-However, there is a simple provider that stores user data in the database
-called `guillotina_dbusers` that we will use for the purpose of our training.
+## Installation
 
-## Install guillotina_dbusers
-
-Just use pip
-
-
-```
-pip install guillotina_dbusers
-```
-
-
-And add the `guillotina_dbusers` to the list of applications in your `config.yaml`.
+Add the `guillotina.contrib.dbusers` to the list of applications in your `config.yaml`.
 Also make sure you are not overriding the `auth_user_identifiers` configuration
 value in your `config.yaml` as `guillotina_dbusers` uses that to work.
 
@@ -76,7 +64,8 @@ Creating users is just creating a user object.
         "@type": "User",
         "email": "bob@domain.io",
         "password": "secret",
-        "username": "Bob"
+        "username": "Bob",
+        "user_roles": ["guillotina.Member"]
     }
 
 

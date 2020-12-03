@@ -12,11 +12,10 @@ Create a `utility.py` file and put the following code in it.
 from guillotina.async_util import IAsyncUtility
 from guillotina.component import get_multi_adapter
 from guillotina.interfaces import IResourceSerializeToJsonSummary
-from guillotina.renderers import GuillotinaJSONEncoder
 from guillotina.utils import get_authenticated_user_id, get_current_request
 
 import asyncio
-import json
+import orjson
 import logging
 
 logger = logging.getLogger('guillotina_chat')
@@ -59,8 +58,7 @@ class MessageSenderUtility:
                 for user_id in message.__parent__.users:
                     for ws in self._webservices:
                         if ws.user_id == user_id:
-                            await ws.send_str(json.dumps(
-                                summary, cls=GuillotinaJSONEncoder))
+                            await ws.send_str(orjson.dumps(summary))
             except (RuntimeError, asyncio.CancelledError, asyncio.TimeoutError):
                 pass
             except Exception:

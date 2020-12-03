@@ -56,5 +56,5 @@ class DoAction(Service):
         action_id = self.request.matchdict["action_id"]
         comment = ""
         workflow = IWorkflow(self.context)
-        result = await workflow.do_action(self.request, action_id, comment)
+        result = await workflow.do_action(action_id, comment)
         return result
