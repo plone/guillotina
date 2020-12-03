@@ -61,7 +61,6 @@ setup(
         "jwcrypto",
         "setuptools",
         "orjson==2.6.0",
-        "pytz==2020.1",
         "zope.interface",
         "pyjwt",
         "asyncpg",
@@ -105,6 +104,7 @@ setup(
         ],
         "redis": ['aioredis>=1.2.0;python_version<"3.8"', 'aioredis>=1.3.0;python_version>="3.8"'],
         "mailer": ["html2text>=2018.1.9", "aiosmtplib>=1.0.6"],
+        "validation": ["pytz==2020.1"],
         "recaptcha": ["aiohttp<4"],
     },
     entry_points={
