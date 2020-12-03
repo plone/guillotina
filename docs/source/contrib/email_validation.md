@@ -4,7 +4,7 @@
 
 Its scalable on defining different actions that need email validation. By default Guillotina provides Register user and Reset password actions email validation.
 
-This addon requires Installing addon `email_validation` to register the persistent settings on the container.
+This addon requires Installing the `email_validation` addon to register the persistent settings on the container.
 
 ## Configuration
 
