@@ -4,6 +4,12 @@ CHANGELOG
 6.0.17 (unreleased)
 -------------------
 
+- Adding metadata endpoint to inspect query parameters for the search endpoint
+  [bloodbare]
+
+- Adding workflow/email_validation/vocabularies documentation
+  [bloodbare]
+
 - Record metrics on cache hit/misses
   [vangheem]
 
