@@ -13,6 +13,9 @@ CHANGELOG
 - Adding workflow/email_validation/vocabularies documentation
   [bloodbare]
 
+- Bytes serializer
+  [bloodbare]
+
 - doc: improve training
   [masipcat]
 
