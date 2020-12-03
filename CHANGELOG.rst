@@ -13,6 +13,9 @@ CHANGELOG
 - Adding workflow/email_validation/vocabularies documentation
   [bloodbare]
 
+- doc: improve training
+  [masipcat]
+
 - Record metrics on cache hit/misses
   [vangheem]
 

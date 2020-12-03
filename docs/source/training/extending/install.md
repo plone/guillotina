@@ -32,6 +32,10 @@ class ManageAddon(Addon):
 
     @classmethod
     async def install(cls, container, request):
+        roleperm = IRolePermissionManager(container)
+        roleperm.grant_permission_to_role_no_inherit(
+            'guillotina.AccessContent', 'guillotina.Member')
+
         if not await container.async_contains('conversations'):
             conversations = await create_content_in_container(
                 container, 'Folder', 'conversations',
@@ -53,6 +57,16 @@ class ManageAddon(Addon):
 
 Then, using Postman, do a `POST` request to the `@addons` endpoint:
 
-```json
-{"id": "guillotina_chat"}
+```eval_rst
+..  http:example:: curl wget httpie python-requests
+
+    POST /db/container/@addons HTTP/1.1
+    Accept: application/json
+    Authorization: Basic cm9vdDpyb290
+    Content-Type: application/json
+    Host: localhost:8080
+
+    {
+        "id": "guillotina_chat"
+    }
 ```

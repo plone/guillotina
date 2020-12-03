@@ -59,28 +59,30 @@ the results for you. This is to demonstration some interaction with objects
 and the database with services; however, you can do the same as what is
 going on here with the `@search` endpoint.
 
+Make sure `guillotina.contrib.catalog.pg` is listed in your `config.json` file.
+
+```json
+{
+    "applications": [
+        "guillotina.contrib.catalog.pg"
+    ]
+}
+```
+
 For example:
 
 ```
-POST @search {
-    "type_name": "Conversation"
-}
+GET @search?type_name=Conversation
 ```
 
 and...
 
 ```
-POST @search {
-    "type_name": "Message"
-}
+GET @search?type_name=Message
 ```
 
 You can take this further to query by dates and the text of the message as well.
 
 ```
-POST @search {
-    "type_name": "Message",
-    "text": "foobar",
-    "creation_date__gte": "2019-10-20T15:30:27.580369+00:00"
-}
+GET @search?type_name=Message&text=foobar&creation_date__gte=2019-10-20T15:30:27.580369+00:00
 ```
