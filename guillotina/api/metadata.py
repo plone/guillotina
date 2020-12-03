@@ -17,13 +17,17 @@ from guillotina.interfaces import IContainer
     responses={
         "200": {
             "description": "Result results on indices",
-            "schema": {
-                "type": "object",
-                "properties": {
-                    "@id": {"type": "string"},
-                    "types": {"type": "object"},
-                    "behaviors": {"type": "object"},
-                },
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "@id": {"type": "string"},
+                            "types": {"type": "object"},
+                            "behaviors": {"type": "object"},
+                        },
+                    }
+                }
             },
         }
     },
