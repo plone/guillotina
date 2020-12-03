@@ -1,10 +1,7 @@
 from guillotina import configure
-from guillotina.catalog.utils import parse_query
 from guillotina.interfaces import IResource
-from guillotina.utils import find_container
 from guillotina.component import query_utility
 from guillotina.interfaces import ICatalogUtility
-import itertools
 from collections import Counter
 
 
@@ -16,9 +13,15 @@ from collections import Counter
     summary="Make suggestion request",
     responses={
         "200": {
-            "description": "Search results",
+            "description": "Suggestion results",
             "type": "object",
-            "schema": {"$ref": "#/definitions/SearchResults"},
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "count": "integer",
+                    "items": "array"
+                }
+            },
         }
     },
 )
@@ -30,12 +33,12 @@ async def suggestion_get(context, request):
 
     fields = request.query.get("_metadata", "").split(",")
     result = await search.query_aggregation(context, query)
-    if "member" in result:
+    if "items" in result:
         aggregation = []
         for field in fields:
             aggregation.append([])
 
-        for items in result["member"]:
+        for items in result["items"]:
             for index, item in enumerate(items):
                 if isinstance(item, list):
                     aggregation[index].extend(item)

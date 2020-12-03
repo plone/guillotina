@@ -21,8 +21,8 @@ from guillotina._cache import FACTORY_CACHE
                 "type": "object",
                 "properties": {
                     "@id": {"type": "string"},
-                    "types": {"type": "array"},
-                    "behaviors": {"type": "array"},
+                    "types": {"type": "object"},
+                    "behaviors": {"type": "object"},
                 },
             },
         }

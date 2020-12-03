@@ -134,26 +134,26 @@ Return full object::
 
 ### Examples:
 
-ACTUAL::
+Plone call::
 
 	GET /plone/@search?path.query=%2Ffolder&path.depth=2
 
-PROPOSAL::
+Guillotina call::
 	GET @search?path_starts=folder&depth_gte=2
 
-ACTUAL::
+Plone call::
 
 	GET /plone/@search?Title=lorem&portal_type=Document
 
-PROPOSAL::
+Guillotina call::
 	
 	GET @search?title_in=lorem&portal_type=Document
 
-ACTUAL::
+Plone call::
 
 	GET /plone/@search?Title=lorem&portal_type=Document&review_state=published&facet=true&facet_field:list=portal_type&facet_field:list=review_state
 
-PROPOSAL::
+Guillotina call::
 
 	GET @search?title_in=lorem&portal_type=Document&review_state=published&_aggregations=portal_type+review_state
 
