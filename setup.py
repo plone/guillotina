@@ -61,6 +61,7 @@ setup(
         "jwcrypto",
         "setuptools",
         "orjson==2.6.0",
+        "pytz==2020.1",
         "zope.interface",
         "pyjwt",
         "asyncpg",

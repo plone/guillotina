@@ -9,6 +9,7 @@ pycryptodome==3.6.6
 PyJWT==1.6.0
 python-dateutil==2.6.1
 PyYaml>=5.1
+pytz==2020.1
 six==1.11.0
 orjson==2.6.0
 zope.interface==5.1.0

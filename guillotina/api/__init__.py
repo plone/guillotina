@@ -9,6 +9,7 @@ from . import files  # noqa
 from . import login  # noqa
 from . import registry  # noqa
 from . import search  # noqa
+from . import suggestion  # noqa
 from . import storage  # noqa
 from . import types  # noqa
 from . import user  # noqa
