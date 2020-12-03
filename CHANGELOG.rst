@@ -4,6 +4,9 @@ CHANGELOG
 6.0.17 (unreleased)
 -------------------
 
+- doc: improve training
+  [masipcat]
+
 - Record metrics on cache hit/misses
   [vangheem]
 
