@@ -7,6 +7,7 @@ from . import content  # noqa
 from . import dynamic  # noqa
 from . import files  # noqa
 from . import login  # noqa
+from . import metadata  # noqa
 from . import registry  # noqa
 from . import search  # noqa
 from . import suggestion  # noqa

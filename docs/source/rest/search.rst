@@ -162,7 +162,7 @@ PROPOSAL::
 
 Verb: GET
 Description: Get Indexes information
-Endpoint: @indices
+Endpoint: @metadata
 
 Result::
 
