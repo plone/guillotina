@@ -6,8 +6,8 @@ from jwcrypto.common import json_encode
 
 import logging
 import orjson
-import time
 import pytz
+import time
 
 
 logger = logging.getLogger("guillotina.email_validation")

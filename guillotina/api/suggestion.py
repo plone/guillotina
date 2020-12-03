@@ -1,8 +1,8 @@
+from collections import Counter
 from guillotina import configure
-from guillotina.interfaces import IResource
 from guillotina.component import query_utility
 from guillotina.interfaces import ICatalogUtility
-from collections import Counter
+from guillotina.interfaces import IResource
 
 
 @configure.service(
