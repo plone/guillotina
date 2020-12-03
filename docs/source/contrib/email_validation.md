@@ -68,7 +68,7 @@ class MyService(Service):
         ...
 ```
 
-Once the mail is sent and the user clicks on the link frontend can:
+Once the mail is sent and the user clicks on the link the frontend can:
 
 - ask for the needed schema at `CONTAINER/@validate_schema/TOKEN`
 - render the JSON Schema to ask required extra information to the user
