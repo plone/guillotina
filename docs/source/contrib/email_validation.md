@@ -28,7 +28,7 @@ auth_validation_tasks:
         executor: guillotina.contrib.email_validation.reset_password
 ```
 
-This configuration defined the action `reset_password`, which is the schema that will need to be validated on 2nd fase flow and who is the executor of the action after validation.
+This configuration defines the action `reset_password`, which is the schema that will need to be validated on 2nd fase flow and who is the executor of the action after validation.
 The executor should be a module with an async `run` function.
 
 ### Container configuration
