@@ -14,12 +14,9 @@ from guillotina.interfaces import IResource
     responses={
         "200": {
             "description": "Suggestion results",
-            "type": "object",
-            "schema": {
-                "type": "object",
-                "properties": {
-                    "count": "integer",
-                    "items": "array"
+            "content": {
+                "application/json": {
+                    "schema": {"type": "object", "properties": {"count": "integer", "items": "array"}},
                 }
             },
         }
