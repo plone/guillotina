@@ -11,3 +11,4 @@ Contents:
    container
    item
    folder
+   search
