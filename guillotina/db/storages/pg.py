@@ -67,7 +67,27 @@ try:
 
 
 except ImportError:
-    watch = metrics.watch  # type: ignore
+
+    class watch:
+        def __init__(self, op):
+            pass
+
+        def __enter__(self):
+            pass
+
+        def __exit__(self, exc_type, exc_value, exc_traceback):
+            pass
+
+    class watch_lock:
+        def __init__(self, lock, op):
+            pass
+
+        async def __aenter__(self):
+            pass
+
+        async def __aexit__(self, exc_type, exc_value, exc_traceback):
+            pass
+
 
 log = glogging.getLogger("guillotina.storage")
 
