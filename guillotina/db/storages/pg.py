@@ -78,15 +78,9 @@ except ImportError:
         def __exit__(self, exc_type, exc_value, exc_traceback):
             pass
 
-    class watch_lock:
-        def __init__(self, lock, op):
-            pass
-
-        async def __aenter__(self):
-            pass
-
-        async def __aexit__(self, exc_type, exc_value, exc_traceback):
-            pass
+    class watch_lock(metrics.watch_lock):
+        def __init__(self, lock: asyncio.Lock, operation: str):
+            super().__init__(None, lock, labels={"type": operation})
 
 
 log = glogging.getLogger("guillotina.storage")
