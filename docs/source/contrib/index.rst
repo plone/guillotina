@@ -8,6 +8,10 @@ Contents:
    :maxdepth: 2
 
    cache
+   email_validation
+   template
+   workflow
+   vocabularies
    jsonbcatalog
    pubsub
    swagger
