@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.17 (unreleased)
+6.0.17 (2020-12-04)
 -------------------
 
 - Adding timezone on email validation link expiration
