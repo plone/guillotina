@@ -6,6 +6,7 @@ from jwcrypto.common import json_encode
 
 import logging
 import orjson
+import pytz
 import time
 
 
@@ -26,10 +27,13 @@ async def generate_validation_token(data, ttl=3660):
 
     last_time = time.time() + ttl
     datetime_format = app_settings.get("datetime_format")
+    default_timezone = app_settings.get("default_timezone", "UTC")
+    tz = pytz.timezone(default_timezone)
+
     if datetime_format is None:
-        last_date = datetime.fromtimestamp(last_time).isoformat()
+        last_date = datetime.fromtimestamp(last_time, tz=tz).isoformat()
     else:
-        last_date = datetime.fromtimestamp(last_time).strftime(datetime_format)
+        last_date = datetime.fromtimestamp(last_time, tz=tz).strftime(datetime_format)
     return token, last_date
 
 

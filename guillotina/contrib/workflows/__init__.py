@@ -13,7 +13,7 @@ app_settings = {
     "workflows": {},
     "workflows_content": {},
     "load_utilities": {
-        "guillotina_cms.workflow": {
+        "workflows": {
             "provides": "guillotina.contrib.workflows.interfaces.IWorkflowUtility",
             "factory": "guillotina.contrib.workflows.utility.WorkflowUtility",
             "settings": {},

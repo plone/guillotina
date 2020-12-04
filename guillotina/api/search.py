@@ -4,6 +4,7 @@ from guillotina.catalog.utils import reindex_in_future
 from guillotina.component import query_utility
 from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import IResource
+from guillotina.response import HTTPServiceUnavailable
 
 import logging
 
@@ -92,7 +93,7 @@ QUERY_PARAMETERS = [
 async def search_get(context, request):
     search = query_utility(ICatalogUtility)
     if search is None:
-        return {"items_total": 0, "items": []}
+        raise HTTPServiceUnavailable()
 
     return await search.search(context, dict(request.query))
 
@@ -119,7 +120,7 @@ async def search_post(context, request):
     q = await request.json()
     search = query_utility(ICatalogUtility)
     if search is None:
-        return {"items_total": 0, "items": []}
+        raise HTTPServiceUnavailable()
 
     return await search.search_raw(context, q)
 
@@ -139,8 +140,9 @@ class CatalogReindex(Service):
 
     async def __call__(self):
         search = query_utility(ICatalogUtility)
-        if search is not None:
-            await search.reindex_all_content(self.context, self._security_reindex)
+        if search is None:
+            raise HTTPServiceUnavailable()
+        await search.reindex_all_content(self.context, self._security_reindex)
         return {}
 
 
@@ -172,6 +174,8 @@ class AsyncCatalogReindex(Service):
 )
 async def catalog_post(context, request):
     search = query_utility(ICatalogUtility)
+    if search is None:
+        raise HTTPServiceUnavailable()
     await search.initialize_catalog(context)
     return {}
 
@@ -186,5 +190,7 @@ async def catalog_post(context, request):
 )
 async def catalog_delete(context, request):
     search = query_utility(ICatalogUtility)
+    if search is None:
+        raise HTTPServiceUnavailable()
     await search.remove_catalog(context)
     return {}

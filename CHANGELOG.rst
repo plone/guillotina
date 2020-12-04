@@ -4,6 +4,15 @@ CHANGELOG
 6.0.17 (unreleased)
 -------------------
 
+- Adding timezone on email validation link expiration
+  [bloodbare]
+
+- Adding metadata endpoint to inspect query parameters for the search endpoint
+  [bloodbare]
+
+- Adding workflow/email_validation/vocabularies documentation
+  [bloodbare]
+
 - Bytes serializer
   [bloodbare]
 
