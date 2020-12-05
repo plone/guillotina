@@ -78,7 +78,7 @@ class watch_lock:
     async def __aenter__(self) -> None:
         start = time.time()
         await self.lock.acquire()
-        if self.histogram:
+        if self.histogram is not None:
             finished = time.time()
             if len(self.labels) > 0:
                 self.histogram.labels(**self.labels).observe(finished - start)
