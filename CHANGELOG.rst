@@ -4,7 +4,8 @@ CHANGELOG
 6.0.18 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix watch/watch_lock when prometheus is not installed
+  [masipcat]
 
 
 6.0.17 (2020-12-04)

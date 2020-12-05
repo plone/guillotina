@@ -78,11 +78,12 @@ class watch_lock:
     async def __aenter__(self) -> None:
         start = time.time()
         await self.lock.acquire()
-        finished = time.time()
-        if len(self.labels) > 0:
-            self.histogram.labels(**self.labels).observe(finished - start)
-        else:
-            self.histogram.observe(finished - start)
+        if self.histogram is not None:
+            finished = time.time()
+            if len(self.labels) > 0:
+                self.histogram.labels(**self.labels).observe(finished - start)
+            else:
+                self.histogram.observe(finished - start)
 
     async def __aexit__(self, exc_type, exc, tb):
         self.lock.release()
