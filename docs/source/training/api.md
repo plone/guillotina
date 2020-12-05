@@ -19,10 +19,13 @@ with the username `root` and password `root` for basic auth.
 We can not necessarily go over every single API but will touch on a few and
 give a general understanding of how to explore and use the API.
 
-## Creating a container
+## Creating content
+
+To create content, do a `POST` request on a container or folder object.
 
 ```eval_rst
 .. http:gapi::
+   :hidden:
    :path: /db/container
    :basic_auth: root:root
    :method: POST
@@ -30,13 +33,7 @@ give a general understanding of how to explore and use the API.
           "@type": "Container",
           "id": "container"
         }
-```
 
-## Creating content
-
-To create content, do a `POST` request on a container or folder object.
-
-```eval_rst
 .. http:gapi::
    :path: /db/container
    :path_spec: /(db)/(container)

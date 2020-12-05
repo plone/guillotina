@@ -21,7 +21,7 @@ logger = logging.getLogger('guillotina_chat')
 
 
 @configure.service(
-    context=IContainer, method='GET', allow_access=True,
+    context=IContainer, method='GET',
     permission='guillotina.AccessContent', name='@conversate')
 async def ws_conversate(context, request):
     ws = request.get_ws()
@@ -34,18 +34,11 @@ async def ws_conversate(context, request):
     await tm.abort()
     try:
         async for msg in ws:
-            if msg.tp == aiohttp.WSMsgType.text:
-                # ws does not receive any messages, just sends
-                pass
-            elif msg.tp == aiohttp.WSMsgType.error:
-                logger.debug(
-                    'ws connection closed with exception {0:s}'.format(ws.exception()))
-    except (RuntimeError, asyncio.CancelledError):
-        pass
+            # ws does not receive any messages, just sends
+            pass
     finally:
         logger.debug('websocket connection closed')
         utility.unregister_ws(ws)
-
     return {}
 ```
 
