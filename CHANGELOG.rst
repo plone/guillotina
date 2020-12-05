@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.18 (unreleased)
+6.0.18 (2020-12-05)
 -------------------
 
 - doc: training: fix websockets in G6
