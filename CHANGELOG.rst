@@ -10,6 +10,9 @@ CHANGELOG
 - doc: training: revert a change in api.md
   [masipcat]
 
+- Fix watch/watch_lock when prometheus is not installed
+  [masipcat]
+
 
 6.0.17 (2020-12-04)
 -------------------
