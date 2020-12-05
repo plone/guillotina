@@ -44,43 +44,32 @@ try:
         "Histogram of time it takes to acquire locks (in seconds)",
         labelnames=["type"],
     )
-
-    class watch(metrics.watch):
-        def __init__(self, operation: str):
-            super().__init__(
-                counter=PG_OPS,
-                histogram=PG_OPS_PROCESSING_TIME,
-                labels={"type": operation},
-                error_mappings={
-                    "undefined_table_error": asyncpg.exceptions.UndefinedTableError,
-                    "connection_error": asyncpg.exceptions.PostgresConnectionError,
-                    "interface_error": asyncpg.exceptions.InterfaceError,
-                    "unique_key_error": asyncpg.exceptions.UniqueViolationError,
-                    "foreign_key_error": asyncpg.exceptions.ForeignKeyViolationError,
-                    "deadlock_error": asyncpg.exceptions.DeadlockDetectedError,
-                },
-            )
-
-    class watch_lock(metrics.watch_lock):
-        def __init__(self, lock: asyncio.Lock, operation: str):
-            super().__init__(PG_LOCK_ACQUIRE_TIME, lock, labels={"type": operation})
-
-
 except ImportError:
+    PG_OPS = None
+    PG_OPS_PROCESSING_TIME = None
+    PG_LOCK_ACQUIRE_TIME = None
 
-    class watch:
-        def __init__(self, op):
-            pass
 
-        def __enter__(self):
-            pass
+class watch(metrics.watch):
+    def __init__(self, operation: str):
+        super().__init__(
+            counter=PG_OPS,
+            histogram=PG_OPS_PROCESSING_TIME,
+            labels={"type": operation},
+            error_mappings={
+                "undefined_table_error": asyncpg.exceptions.UndefinedTableError,
+                "connection_error": asyncpg.exceptions.PostgresConnectionError,
+                "interface_error": asyncpg.exceptions.InterfaceError,
+                "unique_key_error": asyncpg.exceptions.UniqueViolationError,
+                "foreign_key_error": asyncpg.exceptions.ForeignKeyViolationError,
+                "deadlock_error": asyncpg.exceptions.DeadlockDetectedError,
+            },
+        )
 
-        def __exit__(self, exc_type, exc_value, exc_traceback):
-            pass
 
-    class watch_lock(metrics.watch_lock):
-        def __init__(self, lock: asyncio.Lock, operation: str):
-            super().__init__(None, lock, labels={"type": operation})
+class watch_lock(metrics.watch_lock):
+    def __init__(self, lock: asyncio.Lock, operation: str):
+        super().__init__(PG_LOCK_ACQUIRE_TIME, lock, labels={"type": operation})
 
 
 log = glogging.getLogger("guillotina.storage")
