@@ -4,6 +4,9 @@ CHANGELOG
 6.0.18 (unreleased)
 -------------------
 
+- doc: training: fix websockets in G6
+  [masipcat]
+
 - doc: training: revert a change in api.md
   [masipcat]
 
