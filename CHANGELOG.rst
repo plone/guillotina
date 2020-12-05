@@ -4,7 +4,8 @@ CHANGELOG
 6.0.18 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- doc: training: revert a change in api.md
+  [masipcat]
 
 
 6.0.17 (2020-12-04)
