@@ -3,8 +3,7 @@ CHANGELOG
 
 6.0.19 (unreleased)
 -------------------
-
-- Nothing changed yet.
+- Update gmi
 
 
 6.0.18 (2020-12-05)
