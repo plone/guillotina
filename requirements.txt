@@ -10,7 +10,7 @@ PyJWT==1.6.0
 python-dateutil==2.6.1
 PyYaml>=5.1
 six==1.11.0
-orjson==2.6.0
+orjson>=3,<4
 zope.interface==5.1.0
 uvicorn==0.10.8
 argon2-cffi==18.3.0
