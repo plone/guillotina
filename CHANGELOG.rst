@@ -5,6 +5,9 @@ CHANGELOG
 -------------------
 - Update gmi
 
+- Update orjson to 3.x
+  [waghanza]
+
 
 6.0.18 (2020-12-05)
 -------------------
