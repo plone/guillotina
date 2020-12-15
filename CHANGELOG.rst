@@ -3,8 +3,12 @@ CHANGELOG
 
 6.0.19 (unreleased)
 -------------------
-- Update gmi
 
+- Update gmi
+  [jordic]
+
+- Search by text by rank if its on search paramaters otherwise by alpha order
+  [bloodbare]
 
 6.0.18 (2020-12-05)
 -------------------
