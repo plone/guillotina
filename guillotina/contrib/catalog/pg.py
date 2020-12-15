@@ -132,7 +132,7 @@ class Parser(BaseParser):
 
     def process_queried_field(
         self, field: str, value
-    ) -> typing.Optional[typing.Tuple[typing.Any, typing.List[typing.Any], typing.List[str]]]:
+    ) -> typing.Optional[typing.Tuple[typing.Any, typing.List[typing.Any], typing.List[str], str]]:
         # compound field support
         if field.endswith("__or"):
             return self.process_compound_field(field, value, " OR ")
@@ -208,10 +208,10 @@ class Parser(BaseParser):
 
     def __call__(self, params: typing.Dict) -> ParsedQueryInfo:
         query_info = super().__call__(params)
-        wheres = []
-        arguments = []
-        selects = []
-        selects_arguments = []
+        wheres: typing.List[str] = []
+        arguments: typing.List[str] = []
+        selects: typing.List[str] = []
+        selects_arguments: typing.List[str] = []
         sort_field = query_info.get("sort_on", None)
         sort_on_fields = False
         for field, value in query_info["params"].items():
