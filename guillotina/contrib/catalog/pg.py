@@ -227,7 +227,6 @@ class Parser(BaseParser):
                 selects.extend(select)
                 selects_arguments.extend(values)
 
-
         return typing.cast(
             ParsedQueryInfo,
             dict(
@@ -529,7 +528,11 @@ class PGSearchUtility(DefaultSearchUtility):
             raise TransactionNotFound()
         sql_wheres.extend(self.get_default_where_clauses(container))
 
-        order = order_by_index.order_by_score(query["sort_dir"]) if query["sort_on_fields"] else order_by_index.order_by(query["sort_dir"])
+        order = (
+            order_by_index.order_by_score(query["sort_dir"])
+            if query["sort_on_fields"]
+            else order_by_index.order_by(query["sort_dir"])
+        )
         sql = """select {} {}
                  from {}
                  where {}
