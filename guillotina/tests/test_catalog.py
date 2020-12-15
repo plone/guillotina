@@ -346,7 +346,9 @@ async def test_fulltext_query_pg_catalog_order(container_requester):
         await requester(
             "POST",
             "/db/guillotina/",
-            data=json.dumps({"@type": "Item", "title": "Something else something foobar something", "id": "item2"}),
+            data=json.dumps(
+                {"@type": "Item", "title": "Something else something foobar something", "id": "item2"}
+            ),
         )
 
         async with requester.db.get_transaction_manager() as tm, await tm.begin():
@@ -357,11 +359,11 @@ async def test_fulltext_query_pg_catalog_order(container_requester):
             util = PGSearchUtility()
             await util.initialize()
             results = await util.search(container, {"title": "something", "_sort_asc": "title"})
-            assert results['items'][0]['title'] == 'Something interesting'
+            assert results["items"][0]["title"] == "Something interesting"
             assert len(results["items"]) == 2
 
             results = await util.search(container, {"_sort_asc": "title"})
-            assert results['items'][0]['title'] == 'Something else something foobar something'
+            assert results["items"][0]["title"] == "Something else something foobar something"
             assert len(results["items"]) == 2
 
 
