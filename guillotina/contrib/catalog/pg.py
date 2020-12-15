@@ -87,6 +87,7 @@ WHERE
 
 
 class ParsedQueryInfo(BasicParsedQueryInfo):
+    sort_on_fields: bool
     wheres: typing.List[typing.Any]
     wheres_arguments: typing.List[typing.Any]
     selects: typing.List[str]
@@ -131,7 +132,7 @@ class Parser(BaseParser):
 
     def process_queried_field(
         self, field: str, value
-    ) -> typing.Optional[typing.Tuple[typing.Any, typing.List[typing.Any], typing.List[str]]]:
+    ) -> typing.Optional[typing.Tuple[typing.Any, typing.List[typing.Any], typing.List[str], str]]:
         # compound field support
         if field.endswith("__or"):
             return self.process_compound_field(field, value, " OR ")
@@ -140,6 +141,7 @@ class Parser(BaseParser):
             return self.process_compound_field(field, value, " AND ")
 
         result: typing.Any = value
+
         operator = "="
         if field.endswith("__not"):
             operator = "!="
@@ -202,19 +204,23 @@ class Parser(BaseParser):
             operator = "?|"
 
         pg_index = get_pg_index(field)
-        return pg_index.where(result, operator), [result], pg_index.select()
+        return pg_index.where(result, operator), [result], pg_index.select(), field
 
     def __call__(self, params: typing.Dict) -> ParsedQueryInfo:
         query_info = super().__call__(params)
-        wheres = []
-        arguments = []
-        selects = []
-        selects_arguments = []
+        wheres: typing.List[str] = []
+        arguments: typing.List[str] = []
+        selects: typing.List[str] = []
+        selects_arguments: typing.List[str] = []
+        sort_field = query_info.get("sort_on", None)
+        sort_on_fields = False
         for field, value in query_info["params"].items():
             result = self.process_queried_field(field, value)
             if result is None:
                 continue
-            sql, values, select = result
+            sql, values, select, field = result
+            if sort_field is not None and field == sort_field:
+                sort_on_fields = True
             wheres.append(sql)
             arguments.extend(values)
             if select:
@@ -225,6 +231,7 @@ class Parser(BaseParser):
             ParsedQueryInfo,
             dict(
                 query_info,
+                sort_on_fields=sort_on_fields,
                 wheres=wheres,
                 wheres_arguments=arguments,
                 selects=selects,
@@ -365,7 +372,7 @@ using gin(to_tsvector('english', json->>'{sqlq(self.name)}'));"""
         return f"""
 to_tsvector('english', json->>'{sqlq(self.name)}') @@ plainto_tsquery(${{arg}}::text)"""
 
-    def order_by(self, direction="ASC"):
+    def order_by_score(self, direction="ASC"):
         return f"order by {sqlq(self.name)}_score {sqlq(direction)}"
 
     def select(self):
@@ -495,6 +502,7 @@ class PGSearchUtility(DefaultSearchUtility):
         sql_arguments = []
         sql_wheres = []
         arg_index = 1
+
         for idx, select in enumerate(query["selects"]):
             select_fields.append(select.format(arg=arg_index))
             sql_arguments.append(query["selects_arguments"][idx])
@@ -520,6 +528,11 @@ class PGSearchUtility(DefaultSearchUtility):
             raise TransactionNotFound()
         sql_wheres.extend(self.get_default_where_clauses(container))
 
+        order = (
+            order_by_index.order_by_score(query["sort_dir"])
+            if query["sort_on_fields"]
+            else order_by_index.order_by(query["sort_dir"])
+        )
         sql = """select {} {}
                  from {}
                  where {}
@@ -529,7 +542,7 @@ class PGSearchUtility(DefaultSearchUtility):
             ",".join(select_fields),
             sqlq(txn.storage.objects_table_name),
             " AND ".join(sql_wheres),
-            "" if distinct else order_by_index.order_by(query["sort_dir"]),
+            "" if distinct else order,
             sqlq(query["size"]),
             sqlq(query["_from"]),
         )

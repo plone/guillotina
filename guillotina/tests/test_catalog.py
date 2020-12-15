@@ -334,6 +334,41 @@ async def test_fulltext_query_pg_catalog(container_requester):
 
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)
 @pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
+async def test_fulltext_query_pg_catalog_order(container_requester):
+    from guillotina.contrib.catalog.pg import PGSearchUtility
+
+    async with container_requester as requester:
+        await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps({"@type": "Item", "id": "item1", "title": "Something interesting"}),
+        )
+        await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps(
+                {"@type": "Item", "title": "Something else something foobar something", "id": "item2"}
+            ),
+        )
+
+        async with requester.db.get_transaction_manager() as tm, await tm.begin():
+            test_utils.login()
+            root = await tm.get_root()
+            container = await root.async_get("guillotina")
+
+            util = PGSearchUtility()
+            await util.initialize()
+            results = await util.search(container, {"title": "something", "_sort_asc": "title"})
+            assert results["items"][0]["title"] == "Something interesting"
+            assert len(results["items"]) == 2
+
+            results = await util.search(container, {"_sort_asc": "title"})
+            assert results["items"][0]["title"] == "Something else something foobar something"
+            assert len(results["items"]) == 2
+
+
+@pytest.mark.app_settings(PG_CATALOG_SETTINGS)
+@pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
 async def test_build_pg_query(dummy_guillotina):
     from guillotina.contrib.catalog.pg import PGSearchUtility
 
@@ -402,7 +437,7 @@ async def test_pg_field_parser(dummy_guillotina):
 
     # test convert operators
     for q1, q2 in (("gte", ">="), ("gt", ">"), ("eq", "="), ("lte", "<="), ("not", "!="), ("lt", "<")):
-        where, value, select = parser.process_queried_field(f"depth__{q1}", "2")
+        where, value, select, field = parser.process_queried_field(f"depth__{q1}", "2")
         assert f" {q2} " in where
         assert value == [2]
 
@@ -410,37 +445,37 @@ async def test_pg_field_parser(dummy_guillotina):
     assert parser.process_queried_field(f"depth__{q1}", "foobar") is None
 
     # convert bool
-    where, value, select = parser.process_queried_field(f"boolean_field", "true")
+    where, value, select, field = parser.process_queried_field(f"boolean_field", "true")
     assert value == [True]
-    where, value, select = parser.process_queried_field(f"boolean_field", "false")
+    where, value, select, field = parser.process_queried_field(f"boolean_field", "false")
     assert value == [False]
 
     # none for invalid
     assert parser.process_queried_field(f"foobar", None) is None
 
     # convert to list
-    where, value, select = parser.process_queried_field(f"tags__in", "foo,bar")
+    where, value, select, field = parser.process_queried_field(f"tags__in", "foo,bar")
     assert value == [["foo", "bar"]]
     assert " ?| " in where
 
-    where, value, select = parser.process_queried_field(f"tags", "bar")
+    where, value, select, field = parser.process_queried_field(f"tags", "bar")
     assert " ? " in where
 
-    where, value, select = parser.process_queried_field(f"tags", ["foo", "bar"])
+    where, value, select, field = parser.process_queried_field(f"tags", ["foo", "bar"])
     assert " ?| " in where
 
     # date parsing
-    where, value, select = parser.process_queried_field(
+    where, value, select, field = parser.process_queried_field(
         f"creation_date__gte", "2019-06-15T18:37:31.008359+00:00"
     )
     assert isinstance(value[0], datetime)
 
     # path
-    where, value, select = parser.process_queried_field(f"path", "/foo/bar")
+    where, value, select, field = parser.process_queried_field(f"path", "/foo/bar")
     assert "substring(json->>" in where
 
     # ft
-    where, value, select = parser.process_queried_field(f"title", "foobar")
+    where, value, select, field = parser.process_queried_field(f"title", "foobar")
     assert "to_tsvector" in where
 
 
