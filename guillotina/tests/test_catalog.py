@@ -437,7 +437,7 @@ async def test_pg_field_parser(dummy_guillotina):
 
     # test convert operators
     for q1, q2 in (("gte", ">="), ("gt", ">"), ("eq", "="), ("lte", "<="), ("not", "!="), ("lt", "<")):
-        where, value, select = parser.process_queried_field(f"depth__{q1}", "2")
+        where, value, select, field = parser.process_queried_field(f"depth__{q1}", "2")
         assert f" {q2} " in where
         assert value == [2]
 
