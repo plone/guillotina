@@ -445,37 +445,37 @@ async def test_pg_field_parser(dummy_guillotina):
     assert parser.process_queried_field(f"depth__{q1}", "foobar") is None
 
     # convert bool
-    where, value, select = parser.process_queried_field(f"boolean_field", "true")
+    where, value, select, field = parser.process_queried_field(f"boolean_field", "true")
     assert value == [True]
-    where, value, select = parser.process_queried_field(f"boolean_field", "false")
+    where, value, select, field = parser.process_queried_field(f"boolean_field", "false")
     assert value == [False]
 
     # none for invalid
     assert parser.process_queried_field(f"foobar", None) is None
 
     # convert to list
-    where, value, select = parser.process_queried_field(f"tags__in", "foo,bar")
+    where, value, select, field = parser.process_queried_field(f"tags__in", "foo,bar")
     assert value == [["foo", "bar"]]
     assert " ?| " in where
 
-    where, value, select = parser.process_queried_field(f"tags", "bar")
+    where, value, select, field = parser.process_queried_field(f"tags", "bar")
     assert " ? " in where
 
-    where, value, select = parser.process_queried_field(f"tags", ["foo", "bar"])
+    where, value, select, field = parser.process_queried_field(f"tags", ["foo", "bar"])
     assert " ?| " in where
 
     # date parsing
-    where, value, select = parser.process_queried_field(
+    where, value, select, field = parser.process_queried_field(
         f"creation_date__gte", "2019-06-15T18:37:31.008359+00:00"
     )
     assert isinstance(value[0], datetime)
 
     # path
-    where, value, select = parser.process_queried_field(f"path", "/foo/bar")
+    where, value, select, field = parser.process_queried_field(f"path", "/foo/bar")
     assert "substring(json->>" in where
 
     # ft
-    where, value, select = parser.process_queried_field(f"title", "foobar")
+    where, value, select, field = parser.process_queried_field(f"title", "foobar")
     assert "to_tsvector" in where
 
 
