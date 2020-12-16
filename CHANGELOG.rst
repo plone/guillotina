@@ -4,7 +4,8 @@ CHANGELOG
 6.0.20 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Update orjson to 3.x
+  [waghanza]
 
 
 6.0.19 (2020-12-15)
@@ -15,6 +16,7 @@ CHANGELOG
 
 - Search by text by rank if its on search paramaters otherwise by alpha order
   [bloodbare]
+
 
 6.0.18 (2020-12-05)
 -------------------
