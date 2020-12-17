@@ -14,6 +14,8 @@ def test_convert_dublin_core(dummy_guillotina):
     assert "creation_date" in schema
     assert "tags" in schema
     assert schema["tags"]["type"] == "array"
+    assert schema["title"]["widget"] == "input"
+    assert schema["description"]["widget"] == "textarea"
 
 
 def test_get_json_schema_validator(dummy_guillotina):

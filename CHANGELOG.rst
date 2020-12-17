@@ -4,6 +4,9 @@ CHANGELOG
 6.0.20 (unreleased)
 -------------------
 
+- Adding widget field on json schema
+  [bloodbare]
+
 - Update orjson to 3.x
   [waghanza]
 
