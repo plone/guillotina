@@ -61,7 +61,7 @@ setup(
         "pycryptodome",
         "jwcrypto",
         "setuptools",
-        "orjson==2.6.0",
+        "orjson>=3,<4",
         "zope.interface",
         "pyjwt",
         "asyncpg",
