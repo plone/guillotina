@@ -64,6 +64,8 @@ class DefaultSchemaFieldSerializer(object):
     def serialize(self):
         field = self.get_field()
         result = {"type": self.field_type}
+        if self.widget is not None:
+            result["widget"] = self.widget
         # caching the field_attributes here improves performance dramatically
         if field.__class__ in FIELDS_CACHE:
             field_attributes = FIELDS_CACHE[field.__class__].copy()
@@ -134,6 +136,11 @@ class DefaultSchemaFieldSerializer(object):
         # Needs to be implemented on specific type
         return None
 
+    @property
+    def widget(self):
+        # Needs to be implemented on specific type
+        return None
+
 
 @configure.adapter(for_=(IText, Interface, Interface), provides=ISchemaFieldSerializeToJson)
 class DefaultTextSchemaFieldSerializer(DefaultSchemaFieldSerializer):
@@ -141,12 +148,20 @@ class DefaultTextSchemaFieldSerializer(DefaultSchemaFieldSerializer):
     def field_type(self):
         return "string"
 
+    @property
+    def widget(self):
+        return "textarea"
+
 
 @configure.adapter(for_=(IFileField, Interface, Interface), provides=ISchemaFieldSerializeToJson)
 class DefaultFileSchemaFieldSerializer(DefaultSchemaFieldSerializer):
     @property
     def field_type(self):
         return "object"
+
+    @property
+    def widget(self):
+        return "file"
 
 
 @configure.adapter(for_=(IPatchField, Interface, Interface), provides=ISchemaFieldSerializeToJson)
@@ -167,6 +182,10 @@ class DefaultCloudFileSchemaFieldSerializer(DefaultSchemaFieldSerializer):
     def field_type(self):
         return "object"
 
+    @property
+    def widget(self):
+        return "file"
+
 
 @configure.adapter(for_=(IJSONField, Interface, Interface), provides=ISchemaFieldSerializeToJson)
 class DefaultJSONFieldSerializer(DefaultSchemaFieldSerializer):
@@ -180,6 +199,10 @@ class DefaultTextLineSchemaFieldSerializer(DefaultSchemaFieldSerializer):
     @property
     def field_type(self):
         return "string"
+
+    @property
+    def widget(self):
+        return "input"
 
 
 @configure.adapter(for_=(IFloat, Interface, Interface), provides=ISchemaFieldSerializeToJson)
@@ -215,6 +238,10 @@ class DefaultChoiceSchemaFieldSerializer(DefaultSchemaFieldSerializer):
     @property
     def field_type(self):
         return "string"
+
+    @property
+    def widget(self):
+        return "select"
 
 
 @configure.adapter(for_=(IObject, Interface, Interface), provides=ISchemaFieldSerializeToJson)

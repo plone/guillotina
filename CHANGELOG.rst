@@ -4,7 +4,8 @@ CHANGELOG
 6.0.20 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Adding widget field on json schema
+  [bloodbare]
 
 
 6.0.19 (2020-12-15)
