@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.20 (unreleased)
+6.0.20 (2020-12-17)
 -------------------
 
 - Update uvicorn to 0.13.1
