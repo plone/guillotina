@@ -4,6 +4,9 @@ CHANGELOG
 6.0.20 (unreleased)
 -------------------
 
+- Update uvicorn to 0.13.1
+  [bloodbare]
+
 - Adding widget field on json schema
   [bloodbare]
 
