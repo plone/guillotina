@@ -72,6 +72,7 @@ setup(
         "argon2-cffi",
         "backoff",
         "multidict",
+        "typing_extensions"
     ],
     extras_require={
         "test": [
