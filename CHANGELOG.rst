@@ -4,7 +4,8 @@ CHANGELOG
 6.0.21 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Adding typing_extensions as dependency
+  [bloodbare]
 
 
 6.0.20 (2020-12-17)
