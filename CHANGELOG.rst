@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.21 (unreleased)
+6.0.21 (2020-12-22)
 -------------------
 
 - Adding typing_extensions as dependency
