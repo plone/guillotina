@@ -23,6 +23,10 @@ COPY VERSION /VERSION
 
 # Install with pip
 # hadolint ignore=DL3013
+
+RUN pip install --upgrade "pip>=19.3"
+RUN pip install --upgrade orjson==3.4.6
+RUN pip install --upgrade Cython==0.29.13
 RUN pip install -r /requirements.txt
 COPY . /app
 # hadolint ignore=DL3013
