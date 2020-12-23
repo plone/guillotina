@@ -716,11 +716,9 @@ async def addable_types(context, request):
     constrains = IConstrainTypes(context, None)
     types = constrains and constrains.get_allowed_types()
     if types is None:
-        types = []
-        for type_name in FACTORY_CACHE:
-            types.append(type_name)
-    app_settings["container_types"]
-    types = [item for item in types if item not in app_settings["container_types"]]
+        types = [type_name for type_name in FACTORY_CACHE if constrains.is_globally_allowed(type_name)]
+    container_types = app_settings.get("container_types", [])
+    types = [item for item in types if item not in container_types]
     return types
 
 

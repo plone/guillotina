@@ -4,6 +4,9 @@ CHANGELOG
 6.0.22 (unreleased)
 -------------------
 
+- Fixing addable-types, filtering not global addable types.
+  [bloodbare]
+
 - PyJwt > 2.0 breaks contract on decoding a JWT. Pinning to 1.6.0
   [bloodbare]
 
