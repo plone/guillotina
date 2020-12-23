@@ -63,7 +63,7 @@ setup(
         "setuptools",
         "orjson>=3,<4",
         "zope.interface",
-        "pyjwt",
+        "pyjwt<2.0.0",
         "asyncpg",
         "cffi",
         "PyYAML>=5.1",
