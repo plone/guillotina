@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.22 (unreleased)
+6.0.22 (2020-12-23)
 -------------------
 
 - Fixing addable-types, filtering not global addable types.
