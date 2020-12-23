@@ -717,8 +717,8 @@ async def addable_types(context, request):
     types = constrains and constrains.get_allowed_types()
     if types is None:
         types = [type_name for type_name in FACTORY_CACHE if constrains.is_globally_allowed(type_name)]
-    app_settings["container_types"]
-    types = [item for item in types if item not in app_settings["container_types"]]
+    container_types = app_settings.get("container_types", [])
+    types = [item for item in types if item not in container_types]
     return types
 
 
