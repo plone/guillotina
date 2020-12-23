@@ -4,7 +4,8 @@ CHANGELOG
 6.0.22 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- PyJwt > 2.0 breaks contract on decoding a JWT. Pinning to 1.6.0
+  [bloodbare]
 
 
 6.0.21 (2020-12-22)
