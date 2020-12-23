@@ -4,7 +4,8 @@ CHANGELOG
 6.0.22 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fixing addable-types, filtering not global addable types.
+  [bloodbare]
 
 
 6.0.21 (2020-12-22)
