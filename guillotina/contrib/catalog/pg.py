@@ -187,7 +187,7 @@ class Parser(BaseParser):
             else:
                 result = False
         elif _type == "keyword" and operator not in ("?", "?|"):
-            if operator == '!=':
+            if operator == "!=":
                 operator = "NOT ?"
             else:
                 operator = "?"

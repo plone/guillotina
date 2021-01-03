@@ -305,10 +305,11 @@ async def test_query_pg_catalog(container_requester):
             assert len(results["items"]) == 1
             assert results["items"][0][0][0] == "root"
 
-            results = await util.query_aggregation(container, {"_metadata": ["title", "creators"], "title__eq": "Item2"})
+            results = await util.query_aggregation(
+                container, {"_metadata": ["title", "creators"], "title__eq": "Item2"}
+            )
             assert len(results["items"]) == 1
             assert results["items"][0][1][0] == "root"
-
 
 
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)
@@ -508,8 +509,6 @@ async def test_parse_metadata(dummy_guillotina):
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)
 @pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
 async def test_not_in(container_requester):
-
-    from guillotina.contrib.catalog.pg import PGSearchUtility
 
     async with container_requester as requester:
         await requester(
