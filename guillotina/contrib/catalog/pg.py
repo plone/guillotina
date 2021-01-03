@@ -205,6 +205,8 @@ class Parser(BaseParser):
 
         if operator == "?" and isinstance(result, list):
             operator = "?|"
+        elif operator == "NOT ?" and isinstance(result, list):
+            operator = "NOT ?|"
 
         pg_index = get_pg_index(field)
         return pg_index.where(result, operator), [result], pg_index.select(), field
