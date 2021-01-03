@@ -1,37 +1,22 @@
 Search Endpoint
 ===============
 
-Suggestion endpoint
--------------------
+Aggregation endpoint
+--------------------
 
 Verb: GET
-Description: Get a suggestion for a term on a field
-Endpoint: @suggestion
-
-params::
-
-	term (string) 
-	type (string) [Subject, Language,...]
-
-Result::
-
-	{
-	   type: object,
-	   properties: {
-	      count: integer,
-	      items: array
-	   }
-	}
+Description: Get aggregation for a search
+Endpoint: @aggregation
 
 Example::
 
-	@suggestion?term=gui&type=subject
+	@aggregation?title__eq=my+title&metadata=title
 	{
-	   “count”: 2,
-	   “items”: [
+	   items_total: 2,
+	   “items”: [[[
 	      “guillotina”,
 	      “guillotinaweb”
-	    ]
+	    ]]]
 	}
 
 
@@ -53,7 +38,6 @@ Use cases:
 
   - Define from which element you want to search
   - Define the search size return
-  - Define aggregations of filters
   - Define metadata included and excluded on the result
   - Return full objects
 
@@ -112,10 +96,6 @@ Search size::
 From which element to return::
 
 	query : _from=30
-
-Aggregations:
-
-	query : _aggregations=subject+language
 
 Search for paths::
 

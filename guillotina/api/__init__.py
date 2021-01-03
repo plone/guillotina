@@ -11,7 +11,7 @@ from . import metadata  # noqa
 from . import registry  # noqa
 from . import search  # noqa
 from . import storage  # noqa
-from . import suggestion  # noqa
+from . import aggregation  # noqa
 from . import types  # noqa
 from . import user  # noqa
 from . import vocabularies  # noqa
