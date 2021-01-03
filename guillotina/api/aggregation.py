@@ -1,4 +1,5 @@
 from collections import Counter
+import pdb
 from guillotina import configure
 from guillotina.component import query_utility
 from guillotina.interfaces import ICatalogUtility
@@ -34,6 +35,7 @@ async def aggregation_get(context, request):
 
     fields = request.query.get("_metadata", "").split(",")
     result = await search.query_aggregation(context, query)
+    import pdb; pdb.set_trace()
     if "items" in result:
         aggregation = []
         for field in fields:

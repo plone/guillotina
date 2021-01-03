@@ -10,13 +10,20 @@ Endpoint: @aggregation
 
 Example::
 
-	@aggregation?title__eq=my+title&metadata=title
+	@aggregation?title__eq=my+title&metadata=title,creators
 	{
-	   items_total: 2,
-	   “items”: [[[
-	      “guillotina”,
-	      “guillotinaweb”
-	    ]]]
+		'title': {
+			'items': {
+				'Item2': 1
+			},
+			'total': 1
+		},
+		'creators': {
+			'items': {
+				'root': 1
+			},
+			'total': 1
+		}
 	}
 
 

@@ -311,6 +311,15 @@ async def test_query_pg_catalog(container_requester):
             assert len(results["items"]) == 1
             assert results["items"][0][1][0] == "root"
 
+        resp, status = await requester(
+            "GET", "/db/guillotina/@aggregation?title__eq=Item2&_metadata=title,creators",
+        )
+        assert status == 200
+        assert resp == {
+            "title": {"items": {"Item2": 1}, "total": 1},
+            "creators": {"items": {"root": 1}, "total": 1},
+        }
+
 
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)
 @pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
