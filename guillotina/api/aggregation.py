@@ -1,5 +1,4 @@
 from collections import Counter
-import pdb
 from guillotina import configure
 from guillotina.component import query_utility
 from guillotina.interfaces import ICatalogUtility
