@@ -3,6 +3,7 @@ from .exceptions import RangeException
 from guillotina import configure
 from guillotina import glogging
 from guillotina._settings import app_settings
+from guillotina.api.service import DictFieldProxy
 from guillotina.component import get_adapter
 from guillotina.component import get_multi_adapter
 from guillotina.files.utils import read_request_data
@@ -474,3 +475,7 @@ class FileManager(object):
 
     async def delete(self):
         await self.file_storage_manager.delete()
+
+        if isinstance(self.field.context, DictFieldProxy):
+            delattr(self.field.context, self.field.__name__)
+            self.field.context.register()

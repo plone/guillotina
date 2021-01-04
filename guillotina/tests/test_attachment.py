@@ -132,6 +132,10 @@ async def test_multi_upload(manager_type, redis_container, container_requester):
         response, status = await requester("GET", "/db/guillotina/foobar/@download/files/key2")
         assert status == 404
 
+        response, status = await requester("GET", "/db/guillotina/foobar")
+        assert status == 200
+        assert "key2" not in response[IMultiAttachment.__identifier__]["files"]
+
 
 @pytest.mark.parametrize("manager_type", _pytest_params)
 async def test_large_upload_chunks(manager_type, redis_container, container_requester):

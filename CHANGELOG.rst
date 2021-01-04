@@ -4,6 +4,9 @@ CHANGELOG
 6.0.23 (unreleased)
 -------------------
 
+- Fix file not deleted in IMultiAttachments dict
+  [masipcat]
+
 - Keyword not pg catalog search and aggregation endpoint
   [bloodbare]
 

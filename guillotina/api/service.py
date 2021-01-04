@@ -51,6 +51,16 @@ class DictFieldProxy:
         else:
             setattr(self.__context, name, value)
 
+    def __delattr__(self, name):
+        if name.startswith("_DictFieldProxy"):  # local attribute
+            return super().__delattr__(name)
+        if name == self.__field_name:
+            d = getattr(self.__context, name)
+            if d is not None:
+                del d[self.__key]
+        else:
+            delattr(self.__context, name)
+
 
 _sentinal = object()
 
