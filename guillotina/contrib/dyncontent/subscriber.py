@@ -48,14 +48,14 @@ def get_vocabulary(prop, params):
 
 
 def get_fields(*, properties: typing.Dict[str, typing.Dict]):
-    fields = {}
-    tags = {}
+    fields: typing.Dict[str, typing.Any] = {}
+    tags: typing.Dict[str, typing.Any] = {}
 
     for prop_id, prop in properties.items():
 
         params = {}
 
-        field_class = import_class(prop.get("type"))
+        field_class = import_class(prop.get("type"))  # noqa
 
         # Vocabulary
         get_vocabulary(prop, params)
@@ -79,7 +79,7 @@ def get_fields(*, properties: typing.Dict[str, typing.Dict]):
         value_type = prop.get("value_type", None)
         if value_type:
             value_class = import_class(value_type)
-            params["value_type"] = value_class(required=False, title=params["title"] + " value")
+            params["value_type"] = value_class(required=False, title=params["title"] + " value")  # noqa
 
         # Default
         if prop.get("default", None) is not None:
@@ -102,7 +102,7 @@ def get_fields(*, properties: typing.Dict[str, typing.Dict]):
         if read_permission:
             tags.setdefault(prop_id, {})["read_permission"] = read_permission
 
-        fields[prop_id] = field_class(**params)
+        fields[prop_id] = field_class(**params)  # noqa
 
     #
     return fields, tags
