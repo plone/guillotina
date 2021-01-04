@@ -4,7 +4,8 @@ CHANGELOG
 6.0.23 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Keyword not pg catalog search and aggregation endpoint
+  [bloodbare]
 
 
 6.0.22 (2020-12-23)

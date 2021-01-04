@@ -187,7 +187,10 @@ class Parser(BaseParser):
             else:
                 result = False
         elif _type == "keyword" and operator not in ("?", "?|"):
-            operator = "?"
+            if operator == "!=":
+                operator = "NOT ?"
+            else:
+                operator = "?"
         elif _type in ("text", "searchabletext"):
             operator = "="
             value = "&".join(to_list(value))
@@ -202,6 +205,8 @@ class Parser(BaseParser):
 
         if operator == "?" and isinstance(result, list):
             operator = "?|"
+        elif operator == "NOT ?" and isinstance(result, list):
+            operator = "NOT ?|"
 
         pg_index = get_pg_index(field)
         return pg_index.where(result, operator), [result], pg_index.select(), field
@@ -286,7 +291,7 @@ ON {sqlq(storage.objects_table_name)} (((json->>'{sqlq(self.name)}')::boolean));
 
 
 class KeywordIndex(BasicJsonIndex):
-    operators = ["?", "?|"]
+    operators = ["?", "?|", "NOT ?"]
 
     def get_index_sql(self, storage):
         return [
@@ -297,7 +302,11 @@ ON {sqlq(storage.objects_table_name)} USING gin ((json->'{sqlq(self.name)}'))"""
 
     def where(self, value, operator="?"):
         assert operator in self.operators
-        return f"""json->'{sqlq(self.name)}' {sqlq(operator)} ${{arg}} """
+        not_value = ""
+        if "NOT" in operator:
+            operator = operator.split()[1]
+            not_value = "NOT"
+        return f"""{not_value} json->'{sqlq(self.name)}' {sqlq(operator)} ${{arg}} """
 
 
 class PathIndex(BasicJsonIndex):

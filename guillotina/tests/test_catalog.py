@@ -301,6 +301,25 @@ async def test_query_pg_catalog(container_requester):
             assert len(results["items"]) == 2
             assert results["items"][0][1][0] == "root"
 
+            results = await util.query_aggregation(container, {"_metadata": ["creators"]})
+            assert len(results["items"]) == 1
+            assert results["items"][0][0][0] == "root"
+
+            results = await util.query_aggregation(
+                container, {"_metadata": ["title", "creators"], "title__eq": "Item2"}
+            )
+            assert len(results["items"]) == 1
+            assert results["items"][0][1][0] == "root"
+
+        resp, status = await requester(
+            "GET", "/db/guillotina/@aggregation?title__eq=Item2&_metadata=title,creators",
+        )
+        assert status == 200
+        assert resp == {
+            "title": {"items": {"Item2": 1}, "total": 1},
+            "creators": {"items": {"root": 1}, "total": 1},
+        }
+
 
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)
 @pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
@@ -494,3 +513,41 @@ async def test_parse_metadata(dummy_guillotina):
         query = parse_query(content, {"_metadata_not": "foobar"})
         result = util.load_meatdata(query, {"foobar": "foobar", "blah": "blah"})
         assert result == {"blah": "blah"}
+
+
+@pytest.mark.app_settings(PG_CATALOG_SETTINGS)
+@pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
+async def test_not_in(container_requester):
+
+    async with container_requester as requester:
+        await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps({"@type": "Item", "id": "item1", "title": "Something interesting"}),
+        )
+        await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps(
+                {"@type": "Item", "title": "Something else something foobar something", "id": "item2"}
+            ),
+        )
+        await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps(
+                {"@type": "Item", "title": "Something else something foobar something", "id": "item3"}
+            ),
+        )
+
+        async with requester.db.get_transaction_manager() as tm, await tm.begin():
+            test_utils.login()
+            root = await tm.get_root()
+            container = await root.async_get("guillotina")
+            util = query_utility(ICatalogUtility)
+            results = await util.search(container, {"id__not": "item1"})
+            assert len(results["items"]) == 2
+
+            util = query_utility(ICatalogUtility)
+            results = await util.search(container, {"type_name__not": "Item"})
+            assert len(results["items"]) == 0

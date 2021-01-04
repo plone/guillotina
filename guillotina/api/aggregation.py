@@ -10,11 +10,11 @@ from guillotina.response import HTTPServiceUnavailable
     context=IResource,
     method="GET",
     permission="guillotina.AccessContent",
-    name="@suggestion",
-    summary="Make suggestion request",
+    name="@aggregation",
+    summary="Make aggregation request",
     responses={
         "200": {
-            "description": "Suggestion results",
+            "description": "aggregation results",
             "content": {
                 "application/json": {
                     "schema": {
@@ -26,7 +26,7 @@ from guillotina.response import HTTPServiceUnavailable
         }
     },
 )
-async def suggestion_get(context, request):
+async def aggregation_get(context, request):
     query = request.query.copy()
     search = query_utility(ICatalogUtility)
     if search is None:
