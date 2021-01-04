@@ -4,6 +4,9 @@ CHANGELOG
 6.0.23 (unreleased)
 -------------------
 
+- Dynamic content via config.yaml
+  [bloodbare]
+
 - Keyword not pg catalog search and aggregation endpoint
   [bloodbare]
 

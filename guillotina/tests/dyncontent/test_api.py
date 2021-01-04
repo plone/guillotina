@@ -1,0 +1,36 @@
+from . import settings
+from guillotina.tests.utils import get_container
+
+import base64
+import json
+import pytest
+import random
+
+
+pytestmark = pytest.mark.asyncio
+
+
+@pytest.mark.app_settings(settings.DEFAULT_SETTINGS)
+async def test_add_dyncontent(container_requester):
+    async with container_requester as requester:
+        resp, status_code = await requester("POST", "/db/guillotina", data=json.dumps({
+            '@type': 'mydoc',
+            'title': 'My Doc',
+            'json_example': {
+                'items': [1, 2, 3]
+            },
+            'text': 'Hello my friend',
+            'mysecondoption': 'guillotina',
+            'mylovedlist': ['test1', 'test2'],
+            'guillotina.contrib.dyncontent.interfaces.Imycontextdata': {
+                "mydata1": "My text"
+            }
+        }))
+ 
+        assert status_code == 201
+
+        resp, status_code = await requester("GET", "/db/guillotina/" + resp['@name'])
+
+        assert status_code == 200
+        assert len(resp['@static_behaviors']) == 2
+ 
