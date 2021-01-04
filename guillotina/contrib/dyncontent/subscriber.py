@@ -40,13 +40,9 @@ def get_vocabulary(prop, params):
     # Vocabulary option
     if "vocabulary" in prop:
         if isinstance(prop["vocabulary"], dict):
-            params["vocabulary"] = SimpleVocabulary.fromItems(
-                [x for x in prop["vocabulary"].items()]
-            )
+            params["vocabulary"] = SimpleVocabulary.fromItems([x for x in prop["vocabulary"].items()])
         elif prop["vocabulary"].startswith("appsettings:"):
-            params["source"] = AppSettingSource(
-                prop["vocabulary"].replace("appsettings:", "")
-            )
+            params["source"] = AppSettingSource(prop["vocabulary"].replace("appsettings:", ""))
         else:
             params["vocabulary"] = prop["vocabulary"]
 
@@ -83,9 +79,7 @@ def get_fields(*, properties: typing.Dict[str, typing.Dict]):
         value_type = prop.get("value_type", None)
         if value_type:
             value_class = import_class(value_type)
-            params["value_type"] = value_class(
-                required=False, title=params["title"] + " value"
-            )
+            params["value_type"] = value_class(required=False, title=params["title"] + " value")
 
         # Default
         if prop.get("default", None) is not None:
@@ -116,13 +110,9 @@ def get_fields(*, properties: typing.Dict[str, typing.Dict]):
 
 def create_content_factory(proto_name, proto_definition):
     parent_interface = import_class(
-        proto_definition.get(
-            "inherited_interface", "guillotina.interfaces.content.IFolder"
-        )
+        proto_definition.get("inherited_interface", "guillotina.interfaces.content.IFolder")
     )
-    parent_class = import_class(
-        proto_definition.get("inherited_class", "guillotina.content.Folder")
-    )
+    parent_class = import_class(proto_definition.get("inherited_class", "guillotina.content.Folder"))
 
     schema_fields, tags = get_fields(properties=proto_definition.get("properties"))
 
@@ -139,21 +129,13 @@ def create_content_factory(proto_name, proto_definition):
                 if tag_metadata is None:
                     SUPPORTED_DIRECTIVES[tag_id].apply(class_interface, field_id)
                 elif isinstance(tag_metadata, dict):
-                    SUPPORTED_DIRECTIVES[tag_id].apply(
-                        class_interface, field_id, **tag_metadata
-                    )
+                    SUPPORTED_DIRECTIVES[tag_id].apply(class_interface, field_id, **tag_metadata)
                 elif isinstance(tag_metadata, list):
-                    SUPPORTED_DIRECTIVES[tag_id].apply(
-                        class_interface, field_id, *tag_metadata
-                    )
+                    SUPPORTED_DIRECTIVES[tag_id].apply(class_interface, field_id, *tag_metadata)
                 elif tag_id == "fieldset":
-                    SUPPORTED_DIRECTIVES[tag_id].apply(
-                        class_interface, field_id, tag_metadata
-                    )
+                    SUPPORTED_DIRECTIVES[tag_id].apply(class_interface, field_id, tag_metadata)
                 elif isinstance(tag_metadata, str):
-                    SUPPORTED_DIRECTIVES[tag_id].apply(
-                        class_interface, **{field_id: tag_metadata}
-                    )
+                    SUPPORTED_DIRECTIVES[tag_id].apply(class_interface, **{field_id: tag_metadata})
 
     klass = type(proto_name, (parent_class,), {})
 
@@ -171,9 +153,7 @@ def create_content_factory(proto_name, proto_definition):
         "schema": class_interface,
         "type_name": proto_name,
         "allowed_types": proto_definition.get("allowed_types", []),
-        "add_permission": proto_definition.get(
-            "add_permission", "guillotina.AddContent"
-        ),
+        "add_permission": proto_definition.get("add_permission", "guillotina.AddContent"),
         "behaviors": behaviors,
     }
 
@@ -196,9 +176,7 @@ def create_behaviors_factory(proto_name, proto_definition):
         raise Exception("Wrong for interface")
 
     parent_class = import_class(
-        proto_definition.get(
-            "inherited_class", "guillotina.behaviors.instance.AnnotationBehavior"
-        )
+        proto_definition.get("inherited_class", "guillotina.behaviors.instance.AnnotationBehavior")
     )
 
     schema_fields, tags = get_fields(properties=proto_definition.get("properties"))
@@ -217,9 +195,7 @@ def create_behaviors_factory(proto_name, proto_definition):
     for field_id, tag in tags.items():
         for tag_id, tag_metadata in tag.items():
             if tag_id in SUPPORTED_DIRECTIVES:
-                SUPPORTED_DIRECTIVES[tag_id].apply(
-                    class_interface, field_id, tag_metadata
-                )
+                SUPPORTED_DIRECTIVES[tag_id].apply(class_interface, field_id, tag_metadata)
 
     klass = type(proto_name, (parent_class,), {})
 
@@ -242,9 +218,7 @@ def create_behaviors_factory(proto_name, proto_definition):
 
 def reload_behavior_configuration():
     root = get_utility(IApplication, name="root")
-    configure.load_configuration(
-        root.app.config, "guillotina.contrib.dyncontent.behaviors", "behavior"
-    )
+    configure.load_configuration(root.app.config, "guillotina.contrib.dyncontent.behaviors", "behavior")
 
     root.app.config.execute_actions()
     configure.clear()
@@ -253,9 +227,7 @@ def reload_behavior_configuration():
 
 def reload_content_configuration():
     root = get_utility(IApplication, name="root")
-    configure.load_configuration(
-        root.app.config, "guillotina.contrib.dyncontent.contents", "contenttype"
-    )
+    configure.load_configuration(root.app.config, "guillotina.contrib.dyncontent.contents", "contenttype")
     root.app.config.execute_actions()
     configure.clear()
     load_cached_schema()
@@ -274,7 +246,6 @@ async def add_initialized(event):
         create_content_factory(type_name, definition)
         type_names.append(type_name)
     reload_content_configuration()
-
 
     for type_name in type_names:
         # Verify its created

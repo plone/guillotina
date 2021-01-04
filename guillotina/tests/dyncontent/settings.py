@@ -1,9 +1,6 @@
 DEFAULT_SETTINGS = {
     "applications": ["guillotina.contrib.dyncontent"],
-    "myoptions": [
-        ['guillotina', 'Also Love Guillotina'],
-        ['plone', 'Also Love Plone']
-    ],
+    "myoptions": [["guillotina", "Also Love Guillotina"], ["plone", "Also Love Plone"]],
     "behaviors": {
         "myannotationdata": {
             "title": "MyData",
