@@ -4,6 +4,9 @@ CHANGELOG
 6.0.23 (unreleased)
 -------------------
 
+- Dynamic content via config.yaml
+  [bloodbare]
+
 - Fix file not deleted in IMultiAttachments dict
   [masipcat]
 
