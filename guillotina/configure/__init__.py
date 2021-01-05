@@ -630,8 +630,7 @@ def grant_directive(_context, principal=None, role=None, permission=None, permis
 
 
 def grantAll_directive(_context, principal=None, role=None):  # noqa: N802
-    """Grant all permissions to a role or principal
-    """
+    """Grant all permissions to a role or principal"""
     from guillotina.security.security_code import role_permission_manager
     from guillotina.security.security_code import principal_permission_manager
 
@@ -673,3 +672,21 @@ def scan(path: str):
 
 def clear():
     _registered_configurations[:] = []
+
+
+def clear_behavior_by_name(name: str):
+    delete_items = filter(
+        lambda x: x[0] == "behavior" and x[1].get("config", {}).get("name") == name,
+        _registered_configurations,
+    )
+    for item in delete_items:
+        _registered_configurations.remove(item)
+
+
+def clear_contenttype_by_name(name: str):
+    delete_items = filter(
+        lambda x: x[0] == "contenttype" and x[1].get("config", {}).get("type_name") == name,
+        _registered_configurations,
+    )
+    for item in delete_items:
+        _registered_configurations.remove(item)

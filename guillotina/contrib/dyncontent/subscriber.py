@@ -7,6 +7,7 @@ from guillotina.component import get_utility
 from guillotina.component import query_utility
 from guillotina.content import get_cached_factory
 from guillotina.content import load_cached_schema
+from guillotina.contrib.dyncontent import behaviors
 from guillotina.contrib.dyncontent import contents
 from guillotina.contrib.dyncontent.vocabularies import AppSettingSource
 from guillotina.directives import index_field
@@ -201,6 +202,7 @@ def create_behaviors_factory(proto_name, proto_definition):
     klass = type(proto_name, (parent_class,), {})
 
     klass.__module__ = "guillotina.contrib.dyncontent.behaviors"
+    setattr(behaviors, proto_name, klass)
 
     behavior = {
         "for_": for_,
@@ -220,9 +222,7 @@ def create_behaviors_factory(proto_name, proto_definition):
 def reload_behavior_configuration():
     root = get_utility(IApplication, name="root")
     configure.load_configuration(root.app.config, "guillotina.contrib.dyncontent.behaviors", "behavior")
-
     root.app.config.execute_actions()
-    configure.clear()
     load_cached_schema()
 
 
@@ -230,7 +230,6 @@ def reload_content_configuration():
     root = get_utility(IApplication, name="root")
     configure.load_configuration(root.app.config, "guillotina.contrib.dyncontent.contents", "contenttype")
     root.app.config.execute_actions()
-    configure.clear()
     load_cached_schema()
 
 
@@ -238,6 +237,7 @@ def reload_content_configuration():
 async def add_initialized(event):
     type_names = []
     behaviors = []
+
     for type_name, definition in app_settings.get("behaviors", {}).items():
         create_behaviors_factory(type_name, definition)
         behaviors.append(type_name)
@@ -261,3 +261,12 @@ async def add_initialized(event):
         class_interface = import_class(interface_name)
         assert BEHAVIOR_CACHE[interface_name].__identifier__ == interface_name
         utility.interface == class_interface
+
+
+@configure.subscriber(for_=IApplicationInitializedEvent)
+async def clean_up(event):
+    for type_name, _ in app_settings.get("behaviors", {}).items():
+        configure.clear_behavior_by_name(type_name)
+
+    for type_name, _ in app_settings.get("contents", {}).items():
+        configure.clear_contenttype_by_name(type_name)

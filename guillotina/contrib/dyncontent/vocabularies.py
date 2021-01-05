@@ -1,4 +1,5 @@
 from guillotina import app_settings
+from guillotina import configure
 from guillotina.contrib.dyncontent.exceptions import VocabularySettingNotFound
 from guillotina.schema.interfaces import ISource
 from zope.interface import implementer
@@ -44,3 +45,8 @@ class AppSettingSource:
             if k == value:
                 return value
         raise KeyError(value)
+
+
+@configure.value_serializer(AppSettingSource)
+def app_setting_source_serializer(value):
+    return value.values
