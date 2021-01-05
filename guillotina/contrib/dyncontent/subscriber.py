@@ -1,30 +1,31 @@
-import logging
-import typing
-import json
 from guillotina import app_settings
-from guillotina.contrib.dyncontent.vocabularies import AppSettingSource
-from guillotina.contrib.dyncontent import contents
+from guillotina import BEHAVIOR_CACHE
 from guillotina import configure
 from guillotina import FACTORY_CACHE
-from guillotina import BEHAVIOR_CACHE
-
 from guillotina.component import get_global_components
 from guillotina.component import get_utility
 from guillotina.component import query_utility
 from guillotina.content import get_cached_factory
 from guillotina.content import load_cached_schema
-from guillotina.schema.vocabulary import SimpleVocabulary
+from guillotina.contrib.dyncontent import contents
+from guillotina.contrib.dyncontent.vocabularies import AppSettingSource
 from guillotina.directives import index_field
 from guillotina.directives import metadata
 from guillotina.directives import read_permission
 from guillotina.directives import write_permission
 from guillotina.interfaces import IApplication
-from guillotina.interfaces import IBehavior
 from guillotina.interfaces import IApplicationInitializedEvent
+from guillotina.interfaces import IBehavior
 from guillotina.interfaces import IResourceFactory
+from guillotina.schema.vocabulary import SimpleVocabulary
 from guillotina.utils import import_class
 from zope.interface import Interface
 from zope.interface.interface import InterfaceClass
+
+import json
+import logging
+import typing
+
 
 SUPPORTED_DIRECTIVES = {
     "index": index_field,
@@ -53,9 +54,9 @@ def get_fields(*, properties: typing.Dict[str, typing.Dict]):
 
     for prop_id, prop in properties.items():
 
-        params = {}
+        params: typing.Dict[str, typing.Any] = {}
 
-        field_class = import_class(prop.get("type"))  # noqa
+        field_class = typing.cast(typing.Callable, import_class(typing.cast(str, prop.get("type"))))
 
         # Vocabulary
         get_vocabulary(prop, params)
@@ -78,8 +79,8 @@ def get_fields(*, properties: typing.Dict[str, typing.Dict]):
         # Value type
         value_type = prop.get("value_type", None)
         if value_type:
-            value_class = import_class(value_type)
-            params["value_type"] = value_class(required=False, title=params["title"] + " value")  # noqa
+            value_class = typing.cast(typing.Callable, import_class(value_type))
+            params["value_type"] = value_class(required=False, title=params["title"] + " value")
 
         # Default
         if prop.get("default", None) is not None:
