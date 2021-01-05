@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.23 (unreleased)
+6.0.23 (2021-01-05)
 -------------------
 
 - Dynamic content via config.yaml
