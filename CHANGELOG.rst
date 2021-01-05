@@ -7,6 +7,9 @@ CHANGELOG
 - Dynamic content via config.yaml
   [bloodbare]
 
+- Fix file not deleted in IMultiAttachments dict
+  [masipcat]
+
 - Keyword not pg catalog search and aggregation endpoint
   [bloodbare]
 
