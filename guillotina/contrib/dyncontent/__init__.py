@@ -1,8 +1,9 @@
 from guillotina import configure
-from typing import Dict, Any
+from typing import Any
+from typing import Dict
 
 
-app_settings : Dict[str, Any] = {}
+app_settings: Dict[str, Any] = {}
 
 
 def includeme(root, settings):
