@@ -1,10 +1,12 @@
 CHANGELOG
 =========
 
-6.0.24 (unreleased)
+6.1.0 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- (Breaking change) Fix download file name to query parameter so dictionary file field downloads with filename.
+  API with filename on query path needs to change to filename query param
+  [bloodbare]
 
 
 6.0.23 (2021-01-05)
