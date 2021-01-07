@@ -144,16 +144,24 @@ class DeleteFile(TraversableFieldService):
     method="GET",
     permission="guillotina.ViewContent",
     name="@download/{field_name}",
-    **_traversed_file_doc("Download the content of a file"),
+    **_traversed_file_doc(
+        "Download the content of a file",
+        parameters=[
+            {"name": "filename", "in": "query", "required": False, "schema": {"type": "string"}},
+        ],
+    ),
 )
 @configure.service(
     context=IResource,
     method="GET",
     permission="guillotina.ViewContent",
-    name="@download/{field_name}/{filename}",
+    name="@download/{field_name}/{file_key}",
     **_traversed_file_doc(
         "Download the content of a file",
-        parameters=[{"in": "path", "name": "filename", "required": True, "schema": {"type": "string"}}],
+        parameters=[
+            {"in": "path", "name": "file_key", "required": True, "schema": {"type": "string"}},
+            {"in": "query", "name": "filename", "required": False, "schema": {"type": "string"}},
+        ],
     ),
 )
 class DownloadFile(TraversableFieldService):
@@ -164,8 +172,9 @@ class DownloadFile(TraversableFieldService):
         # We need to get the upload as async IO and look for an adapter
         # for the field to save there by chunks
         kwargs = {}
-        if "filename" in self.request.matchdict:
-            kwargs["filename"] = self.request.matchdict["filename"]
+        filename = self.request.query.get("filename")
+        if filename is not None:
+            kwargs["filename"] = filename
         try:
             adapter = get_multi_adapter((self.context, self.request, self.field), IFileManager)
             return await self.handle(adapter, kwargs)
