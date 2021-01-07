@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.1.0 (unreleased)
+6.0.24 (2021-01-07)
 -------------------
 
 - (Breaking change) Fix download file name to query parameter so dictionary file field downloads with filename.
