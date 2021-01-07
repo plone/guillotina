@@ -148,7 +148,7 @@ class DeleteFile(TraversableFieldService):
     name="@download/{field_name}",
     **_traversed_file_doc(
         "Download the content of a file",
-        parameters=[{"name": "filename", "in": "query", "required": False, "schema": {"type": "string"}},],
+        parameters=[{"name": "filename", "in": "query", "required": False, "schema": {"type": "string"}}],
     ),
 )
 @configure.service(
@@ -197,7 +197,7 @@ class DownloadFile(TraversableFieldService):
     name="@download/{field_name}/{file_key}",
     **_traversed_file_doc(
         "HEAD download",
-        parameters=[{"name": "file_key", "in": "path", "required": True, "schema": {"type": "string"}},],
+        parameters=[{"name": "file_key", "in": "path", "required": True, "schema": {"type": "string"}}],
     ),
 )
 class HeadFile(DownloadFile):
@@ -232,7 +232,7 @@ class HeadFile(DownloadFile):
     name="@tusupload/{field_name}/{file_key}",
     **_traversed_file_doc(
         "TUS endpoint",
-        parameters=[{"name": "file_key", "in": "path", "required": True, "schema": {"type": "string"}},]
+        parameters=[{"name": "file_key", "in": "path", "required": True, "schema": {"type": "string"}}]
         + TUS_PARAMETERS,
         responses={
             "204": {
@@ -264,7 +264,7 @@ class TusCreateFile(UploadFile):
     name="@tusupload/{field_name}/{file_key}",
     **_traversed_file_doc(
         "TUS endpoint",
-        parameters=[{"name": "file_key", "in": "path", "required": True, "schema": {"type": "string"}},],
+        parameters=[{"name": "file_key", "in": "path", "required": True, "schema": {"type": "string"}}],
         responses={
             "204": {
                 "description": "Successfully patched data",
@@ -378,7 +378,7 @@ class TusPatchFile(UploadFile):
     name="@tusupload/{field_name}/{file_key}",
     **_traversed_file_doc(
         "TUS endpoint",
-        parameters=[{"name": "file_key", "in": "path", "required": True, "schema": {"type": "string"}},],
+        parameters=[{"name": "file_key", "in": "path", "required": True, "schema": {"type": "string"}}],
         responses={
             "200": {
                 "description": "Successfully returned tus info",
