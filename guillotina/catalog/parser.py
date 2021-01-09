@@ -90,7 +90,9 @@ class BaseParser:
 
         if "_size" in params:
             try:
-                size = min(int(params.pop("_size")), app_settings.get("catalog_max_results"))
+                size = min(
+                    int(params.pop("_size")), typing.cast(int, app_settings.get("catalog_max_results"))
+                )
             except ValueError:
                 pass
 
