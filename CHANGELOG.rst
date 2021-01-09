@@ -4,7 +4,8 @@ CHANGELOG
 6.0.25 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Adding config option for max result search value
+  [bloodbare]
 
 
 6.0.24 (2021-01-07)
