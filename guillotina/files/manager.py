@@ -391,12 +391,12 @@ class FileManager(object):
         await self.file_storage_manager.start(self.dm)
         await self.dm.save()
 
-        if "filename" in self.request.matchdict:
+        if "file_key" in self.request.matchdict:
             location = posixpath.join(
                 get_object_url(self.context, self.request),
                 "@tusupload",
                 self.field.__name__,
-                self.request.matchdict["filename"],
+                self.request.matchdict["file_key"],
             )
         else:
             location = posixpath.join(

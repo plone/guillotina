@@ -4,7 +4,8 @@ CHANGELOG
 6.0.26 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Bug on Tus Upload with dict fieldname, location is wrong on POST request
+  [bloodbare]
 
 
 6.0.25 (2021-01-09)
