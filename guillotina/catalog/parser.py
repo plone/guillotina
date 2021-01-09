@@ -1,3 +1,4 @@
+from guillotina import app_settings
 from guillotina.catalog.types import BasicParsedQueryInfo
 from guillotina.catalog.utils import iter_indexes
 from guillotina.utils import get_content_depth
@@ -89,7 +90,7 @@ class BaseParser:
 
         if "_size" in params:
             try:
-                size = min(int(params.pop("_size")), 50)
+                size = min(int(params.pop("_size")), app_settings.get("catalog_max_results"))
             except ValueError:
                 pass
 
