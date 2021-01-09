@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.25 (unreleased)
+6.0.25 (2021-01-09)
 -------------------
 
 - Adding config option for max result search value
