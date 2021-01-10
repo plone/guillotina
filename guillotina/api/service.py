@@ -250,8 +250,9 @@ class TraversableFieldService(Service):
             await self.behavior.load()
 
         if IDict.providedBy(field) and ICloudFileField.providedBy(field.value_type):
-            key = self.request.matchdict["file_key"]
-            self.field = CloudFileField(__name__=name).bind(DictFieldProxy(key, ctx, name))
+            key = self.request.matchdict.get("file_key")
+            if key is not None:
+                self.field = CloudFileField(__name__=name).bind(DictFieldProxy(key, ctx, name))
         elif ICloudFileField.providedBy(field):
             self.field = field.bind(ctx)
 
