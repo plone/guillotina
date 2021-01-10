@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.0.26 (unreleased)
+6.0.26 (2021-01-10)
 -------------------
 
 - Bug on Tus Upload with dict fieldname, location is wrong on POST request
