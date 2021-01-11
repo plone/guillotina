@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.64 (unreleased)
+5.3.64 (2021-01-11)
 -------------------
 
 - Bump emcache version and provide support for new metrics and new intialization parameters
