@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-6.1.0 (unreleased)
--------------------
+6.1.0 (2021-01-11)
+------------------
 
 - (Breaking change) Fixing TLS and STARTTLS
   At configuration starttls was used in case of tls: true. Its needed to change it to starttls: true
