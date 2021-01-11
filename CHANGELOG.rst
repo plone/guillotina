@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.65 (unreleased)
+5.3.65 (2021-01-11)
 -------------------
 
 - Fix emcache client settings pass-through [lferran]
