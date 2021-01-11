@@ -53,11 +53,11 @@ async def test_create_client_ignores_invalid_params(mocked_create_client):
     "param,values",
     [
         ("timeout", [1.0, None]),
-        ("max_connections", [20,]),
-        ("min_connections", [2,]),
+        ("max_connections", [20]),
+        ("min_connections", [2]),
         ("purge_unused_connections_after", [1, None]),
         ("connection_timeout", [20, None]),
-        ("purge_unhealthy_nodes", [True,]),
+        ("purge_unhealthy_nodes", [True]),
     ],
 )
 async def test_create_client_sets_configured_params(mocked_create_client, param, values):
