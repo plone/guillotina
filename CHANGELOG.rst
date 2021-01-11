@@ -9,6 +9,9 @@ CHANGELOG
   Now you can configura tls with tls: true or starttls with starttls: true on the server configuration
   [bloodbare]
 
+- Better exception on worflow
+  [bloodbare]
+
 
 6.0.26 (2021-01-10)
 -------------------
