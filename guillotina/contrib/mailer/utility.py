@@ -47,13 +47,13 @@ class SMTPMailEndpoint(object):
     async def connect(self):
         try:
             params = {
-                'hostname': self.settings["host"],
-                'port': self.settings["port"],
+                "hostname": self.settings["host"],
+                "port": self.settings["port"],
             }
             if "tls" in self.settings and self.settings["tls"]:
-                params['use_tls'] = True
+                params["use_tls"] = True
             if "starttls" in self.settings and self.settings["starttls"]:
-                params['use_tls'] = False
+                params["use_tls"] = False
             self.conn = aiosmtplib.SMTP(**params)
             await self.conn.connect()
             if "starttls" in self.settings and self.settings["starttls"]:
