@@ -4,7 +4,8 @@ CHANGELOG
 6.0.27 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Better exception on worflow
+  [bloodbare]
 
 
 6.0.26 (2021-01-10)
