@@ -112,9 +112,9 @@ Learn how to use Guillotina by following the [training](./training/index.html "L
 ```eval_rst
 .. toctree::
    :caption: Training
-   :maxdepth: 2
+   :maxdepth: 1
 
-   training/index
+   training/introduction
 ```
 
 ## REST API
@@ -135,6 +135,7 @@ The endpoints available around these objects are detailed below:
 
 ```eval_rst
 .. toctree::
+   :caption: REST API
    :maxdepth: 1
    :glob:
 
@@ -152,6 +153,7 @@ Now you can start hands-on style guide to learn how to use it.
 
 ```eval_rst
 .. toctree::
+   :caption: Developing
    :maxdepth: 2
 
    developer/narrative
@@ -229,13 +231,3 @@ Now you can start hands-on style guide to learn how to use it.
 
 - [Read about](./about.html) the rich history of the project
 
-```eval_rst
-.. toctree::
-   :hidden:
-   :glob:
-
-   developer/*
-   installation/*
-   training/*
-   *
-```
