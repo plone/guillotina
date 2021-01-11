@@ -8,6 +8,7 @@ from guillotina.contrib.workflows.interfaces import IWorkflow
 from guillotina.contrib.workflows.interfaces import IWorkflowBehavior
 from guillotina.contrib.workflows.interfaces import IWorkflowUtility
 from guillotina.event import notify
+from guillotina.response import HTTPPreconditionFailed
 from guillotina.response import HTTPUnauthorized
 from guillotina.security.utils import apply_sharing
 from guillotina.utils import get_authenticated_user_id
@@ -61,7 +62,7 @@ def create_workflow_factory(proto_name, proto_definition):
         async def do_action(self, action, comments):
             available_actions = self.actions
             if action not in available_actions:
-                raise KeyError("Unavailable action")
+                raise HTTPPreconditionFailed(content={"reason": "Unavailable action"})
 
             action_def = available_actions[action]
             policy = get_security_policy()
