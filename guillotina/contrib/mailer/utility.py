@@ -46,12 +46,20 @@ class SMTPMailEndpoint(object):
 
     async def connect(self):
         try:
-            self.conn = aiosmtplib.SMTP(self.settings["host"], self.settings["port"])
+            params = {
+                'hostname': self.settings["host"],
+                'port': self.settings["port"],
+            }
+            if "tls" in self.settings and self.settings["tls"]:
+                params['use_tls'] = True
+            if "starttls" in self.settings and self.settings["starttls"]:
+                params['use_tls'] = False
+            self.conn = aiosmtplib.SMTP(**params)
             await self.conn.connect()
+            if "starttls" in self.settings and self.settings["starttls"]:
+                await self.conn.starttls()
             if "username" in self.settings:
                 await self.conn.login(self.settings["username"], self.settings["password"])
-            if "tls" in self.settings and self.settings["tls"]:
-                await self.conn.starttls()
         except Exception:
             logger.error("Error connecting to smtp server", exc_info=True)
 
