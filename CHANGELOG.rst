@@ -4,7 +4,8 @@ CHANGELOG
 5.3.64 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Bump emcache version and provide support for new metrics and new intialization parameters
+  [pfreixes]
 
 
 5.3.63 (2020-11-30)

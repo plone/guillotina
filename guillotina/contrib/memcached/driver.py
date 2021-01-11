@@ -89,6 +89,30 @@ try:
         labelnames=["node"],
     )
 
+    MEMCACHED_CREATE_CONNECTION_AVG = prometheus_client.Gauge(
+        "guillotina_cache_memcached_node_create_connection_avg",
+        "Avg time for crateing a new connection per node",
+        labelnames=["node"],
+    )
+
+    MEMCACHED_CREATE_CONNECTION_P50 = prometheus_client.Gauge(
+        "guillotina_cache_memcached_node_create_connection_p50",
+        "P50 time for crateing a new connection per node",
+        labelnames=["node"],
+    )
+
+    MEMCACHED_CREATE_CONNECTION_P99 = prometheus_client.Gauge(
+        "guillotina_cache_memcached_node_create_connection_p99",
+        "P99 time for crateing a new connection per node",
+        labelnames=["node"],
+    )
+
+    MEMCACHED_CREATE_CONNECTION_UPPER = prometheus_client.Gauge(
+        "guillotina_cache_memcached_node_create_connection_upper",
+        "Upper time for crateing a new connection per node",
+        labelnames=["node"],
+    )
+
     class watch(metrics.watch):
         def __init__(self, operation: str):
             super().__init__(
@@ -161,6 +185,7 @@ class MemcachedDriver:
         for param in [
             "timeout",
             "max_connections",
+            "min_connections",
             "purge_unused_connections_after",
             "connection_timeout",
             "purge_unhealthy_nodes",
@@ -265,6 +290,20 @@ async def update_connection_pool_metrics(
             break
         node_label = str(node)
         MEMCACHED_CURRENT_CONNECTIONS.labels(node=node_label).set(node_metrics.cur_connections)
+
+        # Updagte create connection latencies
+        for latency_gauge, metric_attr in {
+            MEMCACHED_CREATE_CONNECTION_AVG: "create_connection_avg",
+            MEMCACHED_CREATE_CONNECTION_P50: "create_connection_p50",
+            MEMCACHED_CREATE_CONNECTION_P99: "create_connection_p99",
+            MEMCACHED_CREATE_CONNECTION_UPPER: "create_connection_upper",
+        }.items():
+            value = getattr(node_metrics, metric_attr)
+            # Latencies are initialized as None, we only report
+            # a latency value when it's not None
+            if value is not None:
+                latency_gauge.labels(node=node_label).set(value)
+
         # Update counters
         for counter, attr in {
             MEMCACHED_CONNECTIONS_CREATED: "connections_created",

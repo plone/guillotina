@@ -1,5 +1,6 @@
 from guillotina.contrib.memcached.driver import MemcachedDriver
 from guillotina.contrib.memcached.driver import safe_key
+from guillotina.contrib.memcached.driver import update_connection_pool_metrics
 from guillotina.utils import resolve_dotted_name
 from unittest import mock
 
@@ -53,6 +54,7 @@ async def test_create_client_ignores_invalid_params(mocked_create_client):
     [
         ("timeout", 1.0),
         ("max_connections", 20),
+        ("min_connections", 2),
         ("purge_unused_connections_after", 1),
         ("connection_timeout", 20),
         ("purge_unhealthy_nodes", True),
@@ -146,3 +148,79 @@ async def test_delete_all_empty_keys():
             await driver.delete_all([])
             all_keys.observe.assert_not_called()
             watch_mocked.assert_not_called()
+
+
+class TestUpdateConnectionPoolMetrics:
+    @pytest.fixture
+    def avg(self):
+        with mock.patch("guillotina.contrib.memcached.driver.MEMCACHED_CREATE_CONNECTION_AVG") as _avg:
+            yield _avg
+
+    @pytest.fixture
+    def p50(self):
+        with mock.patch("guillotina.contrib.memcached.driver.MEMCACHED_CREATE_CONNECTION_P50") as _p50:
+            yield _p50
+
+    @pytest.fixture
+    def p99(self):
+        with mock.patch("guillotina.contrib.memcached.driver.MEMCACHED_CREATE_CONNECTION_P99") as _p99:
+            yield _p99
+
+    @pytest.fixture
+    def upper(self):
+        with mock.patch("guillotina.contrib.memcached.driver.MEMCACHED_CREATE_CONNECTION_UPPER") as _upper:
+            yield _upper
+
+    @pytest.fixture
+    async def metrics(self):
+        metrics = mock.Mock()
+        metrics.cur_connections = 1
+        metrics.connections_created = 1
+        metrics.connections_created_with_error = 0
+        metrics.connections_purged = 0
+        metrics.connections_closed = 0
+        metrics.operations_executed = 1
+        metrics.operations_executed_with_error = 0
+        metrics.operations_waited = 0
+        metrics.create_connection_avg = 10.0
+        metrics.create_connection_p50 = 50.0
+        metrics.create_connection_p99 = 99.0
+        metrics.create_connection_upper = 100.0
+        return metrics
+
+    async def test_updated_connection_pool_metrics_create_connection_latencies(
+        self, avg, p50, p99, upper, metrics
+    ):
+        node_metrics = {"node1": metrics}
+        last_state = {"node1": metrics}
+        client = mock.Mock()
+        client.cluster_managment.return_value.connection_pool_metrics.return_value = node_metrics
+
+        await update_connection_pool_metrics(client, last_state)
+
+        avg.assert_has_calls([mock.call.labels(node="node1"), mock.call.labels().set(10.0)])
+        p50.assert_has_calls([mock.call.labels(node="node1"), mock.call.labels().set(50.0)])
+        p99.assert_has_calls([mock.call.labels(node="node1"), mock.call.labels().set(99.0)])
+        upper.assert_has_calls([mock.call.labels(node="node1"), mock.call.labels().set(100.0)])
+
+    async def test_updated_connection_pool_metrics_create_connection_latencies_none(
+        self, avg, p50, p99, upper, metrics
+    ):
+        # Override default fixture values for simulating that latencies do not have
+        # values yet.
+        metrics.create_connection_avg = None
+        metrics.create_connection_p50 = None
+        metrics.create_connection_p99 = None
+        metrics.create_connection_upper = None
+
+        node_metrics = {"node1": metrics}
+        last_state = {"node1": metrics}
+        client = mock.Mock()
+        client.cluster_managment.return_value.connection_pool_metrics.return_value = node_metrics
+
+        await update_connection_pool_metrics(client, last_state)
+
+        avg.assert_not_called()
+        p50.assert_not_called()
+        p99.assert_not_called()
+        upper.assert_not_called()
