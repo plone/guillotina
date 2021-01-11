@@ -4,7 +4,8 @@ CHANGELOG
 6.1.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Improve markup (docs/index.md)
+  [svx]
 
 
 6.1.0 (2021-01-11)
