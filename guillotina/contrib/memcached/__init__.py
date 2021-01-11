@@ -6,7 +6,7 @@ from typing import Dict
 
 _driver = None
 
-app_settings: Dict[str, Any] = {"memcached": {"hosts": [], "timeout": None, "max_connections": None}}
+app_settings: Dict[str, Any] = {"memcached": {"hosts": []}}
 
 
 def includeme(root, settings):

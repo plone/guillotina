@@ -190,7 +190,7 @@ class MemcachedDriver:
             "connection_timeout",
             "purge_unhealthy_nodes",
         ]:
-            if param in settings and settings[param] is not None:
+            if param in settings:
                 client_params[param] = settings[param]
         with watch("connect"):
             return await emcache.create_client(servers, **client_params)

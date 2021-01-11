@@ -50,21 +50,22 @@ async def test_create_client_ignores_invalid_params(mocked_create_client):
 
 
 @pytest.mark.parametrize(
-    "param,value",
+    "param,values",
     [
-        ("timeout", 1.0),
-        ("max_connections", 20),
-        ("min_connections", 2),
-        ("purge_unused_connections_after", 1),
-        ("connection_timeout", 20),
-        ("purge_unhealthy_nodes", True),
+        ("timeout", [1.0, None]),
+        ("max_connections", [20]),
+        ("min_connections", [2]),
+        ("purge_unused_connections_after", [1, None]),
+        ("connection_timeout", [20, None]),
+        ("purge_unhealthy_nodes", [True]),
     ],
 )
-async def test_create_client_sets_configured_params(mocked_create_client, param, value):
-    settings = {"hosts": MOCK_HOSTS}
-    driver = MemcachedDriver()
-    await driver._create_client({**settings, **{param: value}})
-    assert mocked_create_client.call_args[1][param] == value
+async def test_create_client_sets_configured_params(mocked_create_client, param, values):
+    for value in values:
+        settings = {"hosts": MOCK_HOSTS}
+        driver = MemcachedDriver()
+        await driver._create_client({**settings, **{param: value}})
+        assert mocked_create_client.call_args[1][param] == value
 
 
 @pytest.mark.app_settings(MEMCACHED_SETTINGS)
