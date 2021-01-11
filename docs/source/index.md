@@ -111,6 +111,7 @@ Learn how to use Guillotina by following the [training](./training/index.html "L
 
 ```eval_rst
 .. toctree::
+   :caption: Training
    :maxdepth: 2
 
    training/index

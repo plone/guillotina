@@ -142,7 +142,7 @@ html_use_smartypants = False
 #html_theme_options = {}
 html_theme_options = {
     "repository_url": "https://github.com/plone/guillotina",
-    "use_edit_page_button": True,
+    "use_edit_page_button": False,
 }
 
 # Add any paths that contain custom themes here, relative to this directory.
