@@ -1,4 +1,4 @@
-# Guillotina: The Python AsyncIO REST API Framework
+# The Python AsyncIO REST API Framework
 
 Guillotina is the only full-featured Python AsyncIO REST Resource Application
 Server designed for high-performance, horizontally scaling solutions.
@@ -7,14 +7,14 @@ Server designed for high-performance, horizontally scaling solutions.
 
 Install Guillotina:
 
-```shell
+```sh
 pip install guillotina
 g serve --port=8080
 ```
 
-Then use curl, [Postman](https://www.postman.com/ "Link to Postman") or build something with it::
+Then use curl, [Postman](https://www.postman.com/ "Link to Postman") or build something with it:
 
-```shell
+```sh
 curl -XPOST --user root:root http://localhost:8080/db -d '{
   "@type": "Container",
   "id": "container"
