@@ -1,10 +1,12 @@
 CHANGELOG
 =========
 
-6.0.27 (unreleased)
+6.1.0 (unreleased)
 -------------------
 
-- Fixing TLS and STARTTLS
+- (Breaking change) Fixing TLS and STARTTLS
+  At configuration starttls was used in case of tls: true. Its needed to change it to starttls: true
+  Now you can configura tls with tls: true or starttls with starttls: true on the server configuration
   [bloodbare]
 
 
