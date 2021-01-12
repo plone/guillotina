@@ -18,15 +18,15 @@ Features:
  - Robust customizable component architecture and configuration syntax
  - Content types, dynamic behaviors, based on python interfaces and json schemas.
  - Built-in CORS support
- - Serialitzation/Validiation library integrated.
+ - Serialization/Validation library integrated.
  - Elastic search integration through guillotina_elasticsearch, or fallback to [PostgreSQL](https://www.postgresql.org/ "Link to PostgreSQL")
    json indexing.
  - Declarative configuration using decorators.
  - Integrated cloud storage file uploads.
- - py.test fixtues for easy service/api/endpoint testing
+ - py.test fixtures for easy service/api/endpoint testing
  - Built-in command system to run jobs.
  - Rich ecosystem of additional packages for adding additional features: Integration with
-   rabbitmq, batching of queries, redis cache layer.
+   [RabbitMQ](https://www.rabbitmq.com/), batching of queries, redis cache layer.
  - Powerful  addon architecture based on [Zope](https://www.zope.org/ "Link to Zope") Component Architecture.
 
 

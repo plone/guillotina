@@ -6,7 +6,7 @@ Applications are used to provide additional functionality to Guillotina.
 ## Core Addons
 
 - `guillotina.contrib.swagger`: Activate swagger support at `/@docs`.
-- `guillotina.contrib.catalog.pg`: Provide search functionality with postgresql queries.
+- `guillotina.contrib.catalog.pg`: Provide search functionality with PostgreSQL queries.
 - `guillotina.contrib.cache`: Cache support for guillotina.
 - `guillotina.contrib.redis`: Cache support for guillotina using redis with invalidation across multiple instances.
 - `guillotina.contrib.pubsub`: Pubsub support for guillotina
