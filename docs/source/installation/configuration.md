@@ -63,7 +63,7 @@ Currently supported database drivers are:
 ### Storages
 
 Guillotina also provides the ability to dynamically create databases with the `@storages` endpoint.
-But in order to utilitize this feature, you need to configure the databases connection settings.
+But in order to utilize this feature, you need to configure the databases connection settings.
 
 These are configured in much of the same way as databases.
 
@@ -174,7 +174,7 @@ middlewares:
 
 ## Server settings
 
-You can pass `server_settings` to configure the asgi server.
+You can pass `server_settings` to configure the ASGI server.
 
 ```yaml
 server_settings:
@@ -214,7 +214,7 @@ jwk:
 - `oid_generator`: be able to customize the function used to generate oids on the system.
   defaults to `guillotina.db.oid.generate_oid`
 - `cors_renderer`: customize the cors renderer, defaults to `guillotina.cors.DefaultCorsRenderer`
-- `request_indexer`: customize the class used to index content, defaults to 
+- `request_indexer`: customize the class used to index content, defaults to
   `guillotina.catalog.index.RequestIndexer`
 
 
@@ -327,7 +327,7 @@ the root user/password.
 
 ### Validators
 
-`auth_token_validators` allows you to customize what kind of values we'll athorize extracted
+`auth_token_validators` allows you to customize what kind of values we'll authorize extracted
 credentials and identified users against.
 
 - guillotina.auth.validators.JWTValidator: Validate extract jwt token

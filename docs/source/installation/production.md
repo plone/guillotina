@@ -2,8 +2,8 @@
 
 ## Nginx front
 
-It's very common to run the API using `nginx` with a `proxy_pass` in front, 
-so there is an option to define the URL for the generated URLs inside the api:
+It's very common to run the API using `nginx` with a `proxy_pass` in front,
+so there is an option to define the URL for the generated URLs inside the API:
 
 Adding the header:
 
@@ -57,18 +57,18 @@ getambassador.io/config: |
 ```
 
 
-## Postgresql
+## PostgreSQL
 
-With very large databases, Postgresql can get into a state where particular
+With very large databases, PostgreSQL can get into a state where particular
 prepared statements perform very poorly and they'll start pegging your CPU.
 
 The origin of this problem is related to how asyncpg caches prepared statements.
 
-If you start seeing this problem, it is recommdned to tune the following
+If you start seeing this problem, it is recommended to tune the following
 connection configuration options:
 
 - `statement_cache_size`: Setting to `0` is an option
 - `max_cached_statement_lifetime`: Set to extremely low value(2)
 
 
-(Make sure to tune postgresql for your server and dataset size.)
+(Make sure to tune PostgreSQL for your server and dataset size.)

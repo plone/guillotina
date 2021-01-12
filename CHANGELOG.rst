@@ -7,6 +7,9 @@ CHANGELOG
 - Improve markup (docs/index.md)
   [svx]
 
+- Various documentation improvements
+  [svx]
+
 
 6.1.0 (2021-01-11)
 ------------------

@@ -3,7 +3,7 @@
 Guillotina comes with some amazing utilities to make working with
 AsyncIO a bit easier.
 
-Of those, Guillotina provides functions to run asychronous functions
+Of those, Guillotina provides functions to run asynchronous functions
 in a queue or a pool.
 
 
