@@ -67,5 +67,5 @@ python -m aiomonitor.cli
 ## Jupyter
 
 Guillotina also works with Jupyter notebooks. Load the
-[example notebook](https://github.com/plone/guillotina/blob/master/guillotina.ipynb) in the guillotina
+[example notebook](https://github.com/plone/guillotina/blob/master/guillotina.ipynb) in the Guillotina
 repository to see an example of how to get started.
