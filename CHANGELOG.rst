@@ -10,6 +10,9 @@ CHANGELOG
 - Various documentation improvements
   [svx]
 
+- Unify wording in dev docs
+  [svx]
+
 
 6.1.0 (2021-01-11)
 ------------------
