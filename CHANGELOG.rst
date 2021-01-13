@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.66 (unreleased)
+5.3.66 (2021-01-13)
 -------------------
 
 - Fix: prevent caching large objects on fill_cache [lferran]
