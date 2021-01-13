@@ -116,7 +116,6 @@ class cache:
             result = await func(self, *args, **kwargs)
 
             record_cache_metric(func.__name__, "miss", result, key_args)
-
             if result is not None:
                 if result == _EMPTY:
                     await self._cache.set(result, keyset=[key_args])
@@ -144,7 +143,12 @@ class Transaction:
     user = None
 
     def __init__(
-        self, manager, loop=None, read_only: bool = False, cache=None, strategy=None,
+        self,
+        manager,
+        loop=None,
+        read_only: bool = False,
+        cache=None,
+        strategy=None,
     ):
         # Transaction Manager
         self._manager = manager
@@ -164,7 +168,10 @@ class Transaction:
         self._lock = asyncio.Lock(loop=loop)
 
     def initialize(
-        self, read_only, cache=None, strategy=None,
+        self,
+        read_only,
+        cache=None,
+        strategy=None,
     ):
         self._read_only = read_only
         self._txn_time = None
@@ -229,26 +236,22 @@ class Transaction:
         return self._manager._storage
 
     def get_before_commit_hooks(self):
-        """ See ITransaction.
-        """
+        """See ITransaction."""
         return iter(self._before_commit)
 
     def add_before_commit_hook(self, hook, *real_args, args=None, kws=None, **kwargs):
-        """ See ITransaction.
-        """
+        """See ITransaction."""
         args = args or []
         kws = kws or {}
         kwargs.update(kws)
         self._before_commit.append((hook, real_args + tuple(args), kwargs))
 
     def get_after_commit_hooks(self):
-        """ See ITransaction.
-        """
+        """See ITransaction."""
         return iter(self._after_commit)
 
     def add_after_commit_hook(self, hook, *real_args, args=None, kws=None, **kwargs):
-        """ See ITransaction.
-        """
+        """See ITransaction."""
         args = args or []
         kws = kws or {}
         kwargs.update(kws)
@@ -457,6 +460,7 @@ class Transaction:
     @profilable
     async def tpc_commit(self):
         """Commit changes to an object"""
+
         await self._strategy.tpc_commit()
         for oid, obj in self.added.items():
             await self._store_object(obj, oid, True)
@@ -475,8 +479,7 @@ class Transaction:
 
     @profilable
     async def tpc_finish(self):
-        """Indicate confirmation that the transaction is done.
-        """
+        """Indicate confirmation that the transaction is done."""
         await self._strategy.tpc_finish()
         await self._cache.close()
         self.tpc_cleanup()
