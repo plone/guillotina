@@ -81,8 +81,7 @@ class BasicCache(BaseCache):
     async def store_object(self, obj, pickled):
         if len(pickled) > self.max_cache_record_size:
             # Do not store objects that exceed the record size
-            # return
-            pass
+            return
 
         if len(self._stored_objects) < self.max_publish_objects:
             self._stored_objects.append((obj, pickled))
