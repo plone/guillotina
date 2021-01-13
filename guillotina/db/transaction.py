@@ -117,7 +117,6 @@ class cache:
             result = await func(self, *args, **kwargs)
 
             record_cache_metric(func.__name__, "miss", result, key_args)
-
             if result is not None:
                 if result == _EMPTY:
                     await self._cache.set(result, keyset=[key_args])
@@ -454,6 +453,7 @@ class Transaction:
     @profilable
     async def tpc_commit(self):
         """Commit changes to an object"""
+
         await self._strategy.tpc_commit()
         for oid, obj in self.deleted.items():
             await self._manager._storage.delete(self, oid)
