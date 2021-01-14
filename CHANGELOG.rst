@@ -4,7 +4,8 @@ CHANGELOG
 6.1.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- DB Users storing group on DB due to pickling groups_cache leads to wrong objects
+  [bloodbare]
 
 
 6.1.0 (2021-01-11)
