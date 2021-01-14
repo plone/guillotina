@@ -4,6 +4,8 @@ CHANGELOG
 6.1.1 (unreleased)
 ------------------
 
+- Fix: prevent caching large objects on fill_cache [lferran]
+
 - Improve markup (docs/index.md)
   [svx]
 
