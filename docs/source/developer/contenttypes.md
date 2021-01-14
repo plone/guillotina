@@ -34,7 +34,7 @@ class MyType(Folder):
     pass
 ```
 
-This example creates a simple schema and assigns it to the `MyType` content
+This example creates a schema and assigns it to the `MyType` content
 type.
 
 

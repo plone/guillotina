@@ -16,7 +16,7 @@ There are three kinds of objects that are considered on the system:
 
 If you're manually modifying objects in services(or views) without using
 the serialization adapters, you need to register the object to be saved
-to the database. To do this, just use the `register()` method.
+to the database. To do this, use the `register()` method.
 
 
 ```python

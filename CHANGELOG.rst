@@ -7,6 +7,15 @@ CHANGELOG
 - DB Users storing group on DB due to pickling groups_cache leads to wrong objects
   [bloodbare]
 
+- Improve markup (docs/index.md)
+  [svx]
+
+- Various documentation improvements
+  [svx]
+
+- Unify wording in dev docs
+  [svx]
+
 
 6.1.0 (2021-01-11)
 ------------------
