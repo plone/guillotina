@@ -147,7 +147,7 @@ async def test_do_not_cache_large_object(guillotina_main):
 
 
 @pytest.fixture(scope="function")
-def mocked_cache_set(loop):
+def mocked_cache_set():
     with mock.patch("guillotina.contrib.cache.strategy.BasicCache.set") as mock_set:
         f = asyncio.Future()
         f.set_result(None)
@@ -156,7 +156,7 @@ def mocked_cache_set(loop):
 
 
 @pytest.mark.app_settings(DEFAULT_SETTINGS)
-async def test_fill_cache_doesnt_cache_large_objects(guillotina_main, loop, mocked_cache_set):
+async def test_fill_cache_doesnt_cache_large_objects(guillotina_main, mocked_cache_set):
     tm = mocks.MockTransactionManager()
     txn = Transaction(tm)
     cache = BasicCache(txn)
