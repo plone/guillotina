@@ -3,26 +3,7 @@
 Guillotina is the only full-featured Python AsyncIO REST Resource Application
 Server designed for high-performance, horizontally scaling solutions.
 
-## Quick Start
-
-Install Guillotina:
-
-```sh
-pip install guillotina
-g serve --port=8080
-```
-
-Then use curl, [Postman](https://www.postman.com/ "Link to Postman") or build something with it:
-
-```sh
-curl -XPOST --user root:root http://localhost:8080/db -d '{
-  "@type": "Container",
-  "id": "container"
-}'
-curl --user root:root http://localhost:8080/db/container
-```
-
-## Why Guillotina
+## Features
 
  - **Performance**: Traditional Python web servers limit the number of simultaneous
    requests to the number of threads running the server. With AsyncIO, you are
@@ -42,6 +23,30 @@ curl --user root:root http://localhost:8080/db/container
    at a level not available to other frameworks.
  - **Scale**: With integrations like Redis, ElasticSearch and Cockroach, you
    have the tools to scale.
+
+## Use cases
+
+- Awesome case one
+- Awesome case two
+
+## Quick Start
+
+Install Guillotina:
+
+```sh
+pip install guillotina
+g serve --port=8080
+```
+
+Then use curl, [Postman](https://www.postman.com/ "Link to Postman") or build something with it:
+
+```sh
+curl -XPOST --user root:root http://localhost:8080/db -d '{
+  "@type": "Container",
+  "id": "container"
+}'
+curl --user root:root http://localhost:8080/db/container
+```
 
 ## Getting started
 
@@ -151,37 +156,6 @@ The endpoints available around these objects are detailed below:
 After reading quick tour or training section,
 Now you can start hands-on style guide to learn how to use it.
 
-```eval_rst
-.. toctree::
-   :caption: Developing
-   :maxdepth: 2
-
-   developer/narrative
-   developer/security
-   developer/roles
-   developer/applications
-   developer/addons
-   developer/services
-   developer/render
-   developer/contenttypes
-   developer/behavior
-   developer/interfaces
-   developer/events
-   developer/commands
-   developer/applicationconfiguration
-   developer/design
-   developer/persistence
-   developer/blob
-   developer/router
-   developer/exceptions
-   developer/fields
-   developer/serialize
-   developer/async_utils
-   developer/component-architecture
-   developer/debugging
-```
-
-
 ## Deploying
 
 - [Installing Guillotina](./installation/installation.html)
@@ -196,38 +170,6 @@ Now you can start hands-on style guide to learn how to use it.
   [behind a proxy](./installation/production.html)
   when you deploy it.
 
-
-## References
-
-```eval_rst
-.. toctree::
-   :maxdepth: 2
-
-   api/index
-```
-
-```eval_rst
-.. toctree::
-   :maxdepth: 2
-
-   migration/index
-```
-
-```eval_rst
-.. toctree::
-   :maxdepth: 2
-
-   installation/index
-```
-
-```eval_rst
-.. toctree::
-   :maxdepth: 2
-
-   contrib/index
-```
-
 ## About
 
 - [Read about](./about.html) the rich history of the project
-
