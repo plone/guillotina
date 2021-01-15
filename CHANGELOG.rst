@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.1.1 (unreleased)
+6.1.1 (2021-01-15)
 ------------------
 
 - Support other languages on FTS at pgcatalog
