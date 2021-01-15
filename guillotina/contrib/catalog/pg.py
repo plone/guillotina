@@ -370,24 +370,24 @@ class FullTextIndex(BasicJsonIndex):
             f"""
 CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
 ON {sqlq(storage.objects_table_name)}
-using gin(to_tsvector('english', json->>'{sqlq(self.name)}'));"""
+using gin(to_tsvector('simple', json->>'{sqlq(self.name)}'));"""
         ]
 
     def where(self, value, operator=""):
         """
-        to_tsvector('english', json->>'text') @@ to_tsquery('python & ruby')
+        to_tsvector(json->>'text') @@ to_tsquery('python & ruby')
         operator is ignored for now...
         """
         return f"""
-to_tsvector('english', json->>'{sqlq(self.name)}') @@ plainto_tsquery(${{arg}}::text)"""
+to_tsvector('simple', json->>'{sqlq(self.name)}') @@ plainto_tsquery('simple', ${{arg}}::text)"""
 
     def order_by_score(self, direction="ASC"):
         return f"order by {sqlq(self.name)}_score {sqlq(direction)}"
 
     def select(self):
         return [
-            f"""ts_rank_cd(to_tsvector('english', json->>'{sqlq(self.name)}'),
-                    plainto_tsquery(${{arg}}::text)) AS {sqlq(self.name)}_score"""
+            f"""ts_rank_cd(to_tsvector('simple', json->>'{sqlq(self.name)}'),
+                    plainto_tsquery('simple', ${{arg}}::text)) AS {sqlq(self.name)}_score"""
         ]
 
 
