@@ -4,6 +4,9 @@ CHANGELOG
 6.1.1 (unreleased)
 ------------------
 
+- Support other languages on FTS at pgcatalog
+  [bloodbare]
+
 - DB Users storing group on DB due to pickling groups_cache leads to wrong objects
   [bloodbare]
 
