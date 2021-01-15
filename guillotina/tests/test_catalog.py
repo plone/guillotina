@@ -353,6 +353,36 @@ async def test_fulltext_query_pg_catalog(container_requester):
 
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)
 @pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
+async def test_fulltext_query_pg_catalog_lang(container_requester):
+    from guillotina.contrib.catalog.pg import PGSearchUtility
+
+    async with container_requester as requester:
+        await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps({"@type": "Item", "id": "item1", "title": "Something Grande Casa foobar"}),
+        )
+        await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps({"@type": "Item", "title": "Something Grande", "id": "item2"}),
+        )
+
+        async with requester.db.get_transaction_manager() as tm, await tm.begin():
+            test_utils.login()
+            root = await tm.get_root()
+            container = await root.async_get("guillotina")
+
+            util = PGSearchUtility()
+            await util.initialize()
+            results = await util.search(container, {"title": "Grande"})
+            assert len(results["items"]) == 2
+            results = await util.search(container, {"title": "Casa"})
+            assert len(results["items"]) == 1
+
+
+@pytest.mark.app_settings(PG_CATALOG_SETTINGS)
+@pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
 async def test_fulltext_query_pg_catalog_order(container_requester):
     from guillotina.contrib.catalog.pg import PGSearchUtility
 
