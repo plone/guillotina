@@ -61,7 +61,6 @@ class User(Folder):
         self.user_permissions = []
         self.user_roles = []
         self.properties = {}
-        self._groups_cache = {}
         self.username = self.email = self.name = self.password = None
         self.disabled = False
         super().__init__(*args, **kwargs)
@@ -96,6 +95,14 @@ class User(Folder):
 
         self.password = hash_password(new_password)
         self.register()
+
+    @property
+    def _groups_cache(self):
+        return self.__volatile__.setdefault("_groups_cache", {})
+
+    @_groups_cache.setter
+    def _groups_cache(self, value):
+        self.__volatile__["_groups_cache"] = value
 
 
 @configure.contenttype(

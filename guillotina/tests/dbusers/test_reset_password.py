@@ -90,10 +90,41 @@ async def test_change_password(container_install_requester):
         assert status_code == 401
 
         resp, status_code = await requester(
+            "POST", "/db/guillotina/@login", data=json.dumps({"username": "foobar", "password": "password"}),
+        )
+        assert status_code == 200
+        token = resp["token"]
+
+        resp, status_code = await requester(
+            "POST", "/db/guillotina/groups", data=json.dumps(settings.group_data)
+        )
+        assert status_code == 201
+
+        resp, status_code = await requester(
+            "PATCH",
+            "/db/guillotina/users/foobar",
+            data=json.dumps({"user_groups": ["foobar_group"], "user_roles": []}),
+        )
+        assert status_code == 204
+
+        resp, status_code = await requester(
             "POST",
             "/db/guillotina/@users/foobar/reset-password",
             token=base64.b64encode(b"foobar:password").decode("utf-8"),
             data=json.dumps({"old_password": "password", "new_password": NEW_PASSWORD}),
+        )
+        assert status_code == 200
+
+        resp, status_code = await requester(
+            "POST",
+            "/db/guillotina/@users/foobar/reset-password",
+            token=base64.b64encode(b"foobar:password").decode("utf-8"),
+            data=json.dumps({"old_password": "password", "new_password": NEW_PASSWORD}),
+        )
+        assert status_code == 200
+
+        resp, status_code = await requester(
+            "GET", "/db/guillotina/users/foobar", token=token, auth_type="Bearer"
         )
         assert status_code == 200
 

@@ -26,3 +26,9 @@ user_data = {
     "email": "foo@bar.com",
     "password": "password",
 }
+
+group_data = {
+    "@type": "Group",
+    "name": "Foobar Group",
+    "id": "foobar_group",
+}

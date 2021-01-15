@@ -4,6 +4,9 @@ CHANGELOG
 6.1.1 (unreleased)
 ------------------
 
+- DB Users storing group on DB due to pickling groups_cache leads to wrong objects
+  [bloodbare]
+
 - Improve markup (docs/index.md)
   [svx]
 
