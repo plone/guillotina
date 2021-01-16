@@ -96,6 +96,9 @@ applications:
 cache:
   driver: guillotina.contrib.memcached
 memcached:
+  hosts:
+  - memcached.host1:11211
+  - memcached.host2:11211
   timeout: 0.1
   max_connections: 4
   min_connections: 2
