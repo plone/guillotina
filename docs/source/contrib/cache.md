@@ -116,7 +116,7 @@ applications:
 - guillotina.contrib.pubsub
 - guillotina.contrib.cache
 cache:
-  driver: guillotina.contrib.redis
+  driver: guillotina.contrib.memcached
   updates_channel: guillotina
   push: false
 ```
