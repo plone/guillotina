@@ -4,6 +4,7 @@ from guillotina.interfaces import ICacheUtility
 
 import pytest
 
+
 pytestmark = pytest.mark.asyncio
 
 

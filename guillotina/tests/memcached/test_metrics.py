@@ -3,6 +3,7 @@ from guillotina.contrib.memcached.driver import MemcachedDriver
 
 import pytest
 
+
 pytestmark = pytest.mark.asyncio
 
 
