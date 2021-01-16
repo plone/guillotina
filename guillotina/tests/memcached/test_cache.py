@@ -4,6 +4,8 @@ from guillotina.interfaces import ICacheUtility
 
 import pytest
 
+pytestmark = pytest.mark.asyncio
+
 
 MEMCACHED_SETTINGS = {
     "applications": ["guillotina", "guillotina.contrib.memcached", "guillotina.contrib.cache"],
@@ -12,7 +14,7 @@ MEMCACHED_SETTINGS = {
 
 
 @pytest.mark.app_settings(MEMCACHED_SETTINGS)
-async def test_cache_uses_memcached_driver_when_configured(memcached_container, guillotina_main, loop):
+async def test_cache_uses_memcached_driver_when_configured(memcached_container, guillotina_main):
     cache = get_utility(ICacheUtility)
     assert isinstance(cache._obj_driver, MemcachedDriver)
     assert cache._obj_driver.initialized is True

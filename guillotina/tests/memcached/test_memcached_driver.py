@@ -18,7 +18,7 @@ MOCK_HOSTS = ["localhost:11211"]
 
 
 @pytest.fixture(scope="function")
-def mocked_create_client(loop):
+def mocked_create_client():
     with mock.patch("guillotina.contrib.memcached.driver.emcache.create_client") as create_client:
         f = asyncio.Future()
         f.set_result(None)
@@ -26,7 +26,7 @@ def mocked_create_client(loop):
         yield create_client
 
 
-async def test_create_client_returns_emcache_client(memcached_container, guillotina_main, loop):
+async def test_create_client_returns_emcache_client(memcached_container, guillotina_main):
     driver = MemcachedDriver()
     assert driver.client is None
     host, port = memcached_container
@@ -69,7 +69,7 @@ async def test_create_client_sets_configured_params(mocked_create_client, param,
 
 
 @pytest.mark.app_settings(MEMCACHED_SETTINGS)
-async def test_memcached_ops(memcached_container, guillotina_main, loop):
+async def test_memcached_ops(memcached_container, guillotina_main):
     driver = await resolve_dotted_name("guillotina.contrib.memcached").get_driver()
     assert driver.initialized
     assert driver.client is not None
@@ -110,7 +110,7 @@ unsafe_keys = ["a" * 255, "foo bar", b"\x130".decode()]
 
 @pytest.mark.app_settings(MEMCACHED_SETTINGS)
 @pytest.mark.parametrize("unsafe_key", unsafe_keys)
-async def test_memcached_ops_are_safe_key(memcached_container, guillotina_main, loop, unsafe_key):
+async def test_memcached_ops_are_safe_key(memcached_container, guillotina_main, unsafe_key):
     driver = await resolve_dotted_name("guillotina.contrib.memcached").get_driver()
     await driver.get(unsafe_key)
     await driver.set(unsafe_key, b"foo")

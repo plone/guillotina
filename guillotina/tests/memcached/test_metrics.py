@@ -1,12 +1,16 @@
 from asyncmock import AsyncMock
 from guillotina.contrib.memcached.driver import MemcachedDriver
 
+import pytest
+
+pytestmark = pytest.mark.asyncio
+
 
 class TestMemcachedMetrics:
-    async def test_connect_metric(self, metrics_registry, loop):
+    async def test_connect_metric(self, metrics_registry, event_loop):
         driver = MemcachedDriver()
         driver._client = AsyncMock()
-        await driver.initialize(loop)
+        await driver.initialize(event_loop)
         assert (
             metrics_registry.get_sample_value(
                 "guillotina_cache_memcached_ops_total", {"type": "connect", "error": "none"}
