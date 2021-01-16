@@ -1,10 +1,19 @@
 CHANGELOG
 =========
 
-6.1.1 (unreleased)
+6.1.2 (unreleased)
 ------------------
 
 - Fix: prevent caching large objects on fill_cache [lferran]
+
+6.1.1 (2021-01-15)
+------------------
+
+- Support other languages on FTS at pgcatalog
+  [bloodbare]
+
+- DB Users storing group on DB due to pickling groups_cache leads to wrong objects
+  [bloodbare]
 
 - Improve markup (docs/index.md)
   [svx]
