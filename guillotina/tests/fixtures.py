@@ -35,7 +35,12 @@ _dir = os.path.dirname(os.path.realpath(__file__))
 DATABASE = os.environ.get("DATABASE", "DUMMY")
 DB_SCHEMA = os.environ.get("DB_SCHEMA", "public")
 
-annotations = {"testdatabase": DATABASE, "test_dbschema": DB_SCHEMA, "redis": None, "memcached": None,}
+annotations = {
+    "testdatabase": DATABASE,
+    "test_dbschema": DB_SCHEMA,
+    "redis": None,
+    "memcached": None,
+}
 
 
 def base_settings_configurator(settings):
