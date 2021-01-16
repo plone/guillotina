@@ -4,8 +4,7 @@ CHANGELOG
 6.1.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
-
+- Add memcached support as cache driver [lferran]
 
 6.1.1 (2021-01-15)
 ------------------

@@ -35,7 +35,7 @@ _dir = os.path.dirname(os.path.realpath(__file__))
 DATABASE = os.environ.get("DATABASE", "DUMMY")
 DB_SCHEMA = os.environ.get("DB_SCHEMA", "public")
 
-annotations = {"testdatabase": DATABASE, "test_dbschema": DB_SCHEMA, "redis": None}
+annotations = {"testdatabase": DATABASE, "test_dbschema": DB_SCHEMA, "redis": None, "memcached": None,}
 
 
 def base_settings_configurator(settings):
@@ -120,6 +120,17 @@ def get_db_settings(pytest_node=None):
             settings["redis"] = {}
         settings["redis"]["host"] = annotations["redis"][0]
         settings["redis"]["port"] = annotations["redis"][1]
+
+    # Inject memcached docker fixture config into settings
+    try:
+        memcached = annotations["memcached"]
+    except KeyError:
+        memcached = None
+    if memcached is not None:
+        if "memcached" not in settings:
+            settings["memcached"] = {}
+        host, port = memcached
+        settings["memcached"]["hosts"] = [f"{host}:{port}"]
 
     if annotations["testdatabase"] == "DUMMY":
         return _update_from_pytest_markers(settings, pytest_node)
@@ -618,6 +629,17 @@ def redis_container():
     yield host, port  # provide the fixture value
     pytest_docker_fixtures.redis_image.stop()
     annotations["redis"] = None
+
+
+@pytest.fixture(scope="session")
+def memcached_container():
+    import pytest_docker_fixtures
+
+    host, port = pytest_docker_fixtures.memcached_image.run()
+    annotations["memcached"] = (host, port)
+    yield host, port  # provide the fixture value
+    pytest_docker_fixtures.memcached_image.stop()
+    annotations["memcached"] = None
 
 
 @pytest.fixture(scope="function")
