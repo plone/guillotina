@@ -13,6 +13,7 @@ app_settings = {
             "schema": {"title": "Register new user", "type": "object", "properties": {}},
         }
     },
+    "min_username_length": 4,
 }
 
 
@@ -24,3 +25,4 @@ def includeme(root, settings):
     configure.scan("guillotina.contrib.dbusers.subscribers")
     configure.scan("guillotina.contrib.dbusers.permissions")
     configure.scan("guillotina.contrib.dbusers.serializers")
+    configure.scan("guillotina.contrib.dbusers.adapters")
