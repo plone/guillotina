@@ -115,14 +115,14 @@ async def test_patch_user_data(dbusers_requester, user_data):
         assert "guillotina.Manager" in resp["roles"]
 
         # Change password
-        data = {"password": "1234"}
+        data = {"password": "asdf"}
         resp, status_code = await requester("PATCH", "/db/guillotina/@users/foobar", data=json.dumps(data))
         assert status_code == 204
 
         resp, status_code = await requester(
             "POST",
             "/db/guillotina/@login",
-            data=json.dumps({"username": "foobar", "password": "1234"}),
+            data=json.dumps({"username": "foobar", "password": "asdf"}),
             authenticated=False,
         )
         assert status_code == 200
