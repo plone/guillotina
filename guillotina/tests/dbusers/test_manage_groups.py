@@ -49,6 +49,15 @@ async def test_ensure_crud_groups(dbusers_requester, user_data):
         assert status == 204
         resp, status = await requester("GET", "/db/guillotina/@groups/foo")
         assert set(resp["users"]["items"]) == set(["foobar"])
+
+        # fix bug https://github.com/plone/guillotina/issues/1069
+        resp, status = await requester(
+            "PATCH", "/db/guillotina/@groups/foo", data=json.dumps({"user_roles": ["guillotina.Reader"]})
+        )
+        assert status == 204
+        resp, status = await requester("GET", "/db/guillotina/@groups/foo")
+        assert set(resp["users"]["items"]) == set(["foobar"])
+
         resp, status = await requester("GET", "/db/guillotina/users/foobar")
         assert resp["user_groups"] == ["foo"]
         data = {"users": {"foobar": False}}

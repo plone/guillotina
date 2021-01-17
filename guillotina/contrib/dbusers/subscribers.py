@@ -65,7 +65,9 @@ async def on_group_modified(group: Group, event: BeforeObjectModifiedEvent) -> N
     old_users = group.users or []
     users_added = set() - set(old_users)
     users_removed = set(old_users) - set()
-    changes = event.payload.get("users", {})
+    changes = event.payload.get("users", None)
+    if changes is None:
+        return
     for user, is_new in changes.items():
         if is_new:
             users_added.add(user)
