@@ -23,7 +23,6 @@ class UserJSONSummarySerializer(DefaultJSONSummarySerializer):
                 "roles": self.context.user_roles,
                 "user_groups": self.context.user_groups,
                 "homepage": None,
-                "disabled": self.context.disabled,
             }
         )
         return data
