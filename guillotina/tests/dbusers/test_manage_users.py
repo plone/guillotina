@@ -114,6 +114,19 @@ async def test_patch_user_data(dbusers_requester, user_data):
         assert resp["email"] == "foobar2@foo.com"
         assert "guillotina.Manager" in resp["roles"]
 
+        # Change password
+        data = {"password": "1234"}
+        resp, status_code = await requester("PATCH", "/db/guillotina/@users/foobar", data=json.dumps(data))
+        assert status_code == 204
+
+        resp, status_code = await requester(
+            "POST",
+            "/db/guillotina/@login",
+            data=json.dumps({"username": "foobar", "password": "1234"}),
+            authenticated=False,
+        )
+        assert status_code == 200
+
 
 @pytest.mark.app_settings(settings.DEFAULT_SETTINGS)
 async def test_patch_groups_on_user_updates_groups(dbusers_requester, user_data):

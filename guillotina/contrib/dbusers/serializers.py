@@ -1,4 +1,5 @@
 from guillotina import configure
+from guillotina.auth.validators import hash_password
 from guillotina.contrib.dbusers.content.groups import IGroup
 from guillotina.contrib.dbusers.content.users import IUser
 from guillotina.interfaces import IPATCH
@@ -38,6 +39,8 @@ class UserDeserializer:
         self.apply_roles(data)
         if "email" in data:
             self.context.email = data["email"]
+        if "password" in data:
+            self.context.password = hash_password(data["password"])
         if "fullname" in data:
             self.context.name = data["fullname"]
         if "user_groups" in data:
