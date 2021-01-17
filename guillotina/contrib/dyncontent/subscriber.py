@@ -44,10 +44,7 @@ def get_vocabulary(prop, params):
     if "vocabulary" in prop:
         if isinstance(prop["vocabulary"], dict):
             params["vocabulary"] = SimpleVocabulary(
-                [
-                    SimpleTerm(token, title=value)
-                    for (token, value) in prop["vocabulary"].items()
-                ]
+                [SimpleTerm(token, title=value) for (token, value) in prop["vocabulary"].items()]
             )
         elif prop["vocabulary"].startswith("appsettings:"):
             params["source"] = AppSettingSource(prop["vocabulary"].replace("appsettings:", ""))

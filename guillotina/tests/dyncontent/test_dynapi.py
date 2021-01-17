@@ -44,4 +44,4 @@ async def test_add_dyncontent(container_requester):
 
         resp, status_code = await requester("GET", "/db/guillotina/@types/mydoc")
         assert status_code == 200
-        assert resp['properties']['mysecondoption']['vocabulary'] == ['guillotina', 'plone']
+        assert resp["properties"]["mysecondoption"]["vocabulary"] == ["guillotina", "plone"]
