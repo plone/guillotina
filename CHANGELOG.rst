@@ -5,6 +5,8 @@ CHANGELOG
 ------------------
 
 - Fix: prevent caching large objects on fill_cache [lferran]
+- Fix: patch a role on dbusers:groups don't remove users from them
+- Fix: if patch the password on a user hash it
 
 6.1.1 (2021-01-15)
 ------------------
