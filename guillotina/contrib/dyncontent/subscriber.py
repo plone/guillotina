@@ -18,8 +18,8 @@ from guillotina.interfaces import IApplication
 from guillotina.interfaces import IApplicationInitializedEvent
 from guillotina.interfaces import IBehavior
 from guillotina.interfaces import IResourceFactory
-from guillotina.schema.vocabulary import SimpleVocabulary
 from guillotina.schema.vocabulary import SimpleTerm
+from guillotina.schema.vocabulary import SimpleVocabulary
 from guillotina.utils import import_class
 from zope.interface import Interface
 from zope.interface.interface import InterfaceClass
