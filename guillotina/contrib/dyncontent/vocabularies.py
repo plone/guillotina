@@ -49,4 +49,4 @@ class AppSettingSource:
 
 @configure.value_serializer(AppSettingSource)
 def app_setting_source_serializer(value):
-    return value.values
+    return value.keys()

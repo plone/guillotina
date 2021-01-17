@@ -19,6 +19,7 @@ from guillotina.interfaces import IApplicationInitializedEvent
 from guillotina.interfaces import IBehavior
 from guillotina.interfaces import IResourceFactory
 from guillotina.schema.vocabulary import SimpleVocabulary
+from guillotina.schema.vocabulary import SimpleTerm
 from guillotina.utils import import_class
 from zope.interface import Interface
 from zope.interface.interface import InterfaceClass
@@ -42,7 +43,12 @@ def get_vocabulary(prop, params):
     # Vocabulary option
     if "vocabulary" in prop:
         if isinstance(prop["vocabulary"], dict):
-            params["vocabulary"] = SimpleVocabulary.fromItems([x for x in prop["vocabulary"].items()])
+            params["vocabulary"] = SimpleVocabulary(
+                [
+                    SimpleTerm(token, title=value)
+                    for (token, value) in prop["vocabulary"].items()
+                ]
+            )
         elif prop["vocabulary"].startswith("appsettings:"):
             params["source"] = AppSettingSource(prop["vocabulary"].replace("appsettings:", ""))
         else:

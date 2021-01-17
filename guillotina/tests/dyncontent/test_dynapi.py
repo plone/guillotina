@@ -30,14 +30,18 @@ async def test_add_dyncontent(container_requester):
                     "text": "Hello my friend",
                     "mysecondoption": "guillotina",
                     "mylovedlist": ["test1", "test2"],
+                    "mythirdoption": "option2",
                     "guillotina.contrib.dyncontent.interfaces.Imycontextdata": {"mydata1": "My text"},
                 }
             ),
         )
-
         assert status_code == 201
 
         resp, status_code = await requester("GET", "/db/guillotina/" + resp["@name"])
 
         assert status_code == 200
         assert len(resp["@static_behaviors"]) == 2
+
+        resp, status_code = await requester("GET", "/db/guillotina/@types/mydoc")
+        assert status_code == 200
+        assert resp['properties']['mysecondoption']['vocabulary'] == ['guillotina', 'plone']
