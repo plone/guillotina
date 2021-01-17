@@ -223,9 +223,30 @@ async def test_invalid_usernames(dbusers_requester):
         "email": "foo@bar.com",
         "password": "password",
     }
-    invalid_usernames = ["root", "User", "manager", "the user", "__user", "aaa"]
+    invalid_usernames = ["root", "User", "manager", "the user", "__user", "aaa", ""]
     async with dbusers_requester as requester:
         for user in invalid_usernames:
             data["username"] = user
             _, status = await requester("POST", "/db/guillotina/users", data=json.dumps(data))
             assert status == 412, f"Failed at {user}"
+
+
+settings_with_email_identifier = copy.deepcopy(settings_with_catalog)
+settings_with_email_identifier["auth_user_identifiers"] = [
+    "guillotina.contrib.dbusers.users.EmailDBUserIdentifier"
+]
+
+
+@pytest.mark.app_settings(settings_with_email_identifier)
+@pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
+async def test_login_with_email(dbusers_requester, user_data):
+    async with dbusers_requester as requester:
+        resp, status_code = await requester("POST", "/db/guillotina/users", data=json.dumps(user_data))
+        assert status_code == 201
+        resp, status_code = await requester(
+            "POST",
+            "/db/guillotina/@login",
+            data=json.dumps({"username": "foo@bar.com", "password": "password"}),
+            authenticated=False,
+        )
+        assert status_code == 200
