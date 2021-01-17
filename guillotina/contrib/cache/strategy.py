@@ -79,6 +79,10 @@ class BasicCache(BaseCache):
         await self._utility.delete_all(keys)
 
     async def store_object(self, obj, pickled):
+        if len(pickled) > self.max_cache_record_size:
+            # Do not store objects that exceed the record size
+            return
+
         if len(self._stored_objects) < self.max_publish_objects:
             self._stored_objects.append((obj, pickled))
             # also assume these objects are then stored

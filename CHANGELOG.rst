@@ -6,6 +6,8 @@ CHANGELOG
 
 - Add memcached support as cache driver [lferran]
 
+- Fix: prevent caching large objects on fill_cache [lferran]
+
 6.1.1 (2021-01-15)
 ------------------
 
