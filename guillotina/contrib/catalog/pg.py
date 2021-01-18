@@ -361,6 +361,8 @@ ON {sqlq(storage.objects_table_name)} (f_cast_isots(json->>'{sqlq(self.name)}'))
         return f"""
 f_cast_isots(json->>'{sqlq(self.name)}') {sqlq(operator)} ${{arg}}::{sqlq(self.cast_type)}"""
 
+    def order_by_score(self, direction="ASC"):
+        return f"order by json->>'{sqlq(self.name)}' {sqlq(direction)}"
 
 class FullTextIndex(BasicJsonIndex):
     operators = ["?", "?|", "="]

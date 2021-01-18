@@ -4,6 +4,9 @@ CHANGELOG
 6.1.2 (unreleased)
 ------------------
 
+- Fix filter and sort by date field on pgcatalog
+  [bloodbare]
+
 - Add memcached support as cache driver
   [lferran]
 
