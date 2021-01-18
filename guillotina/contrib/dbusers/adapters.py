@@ -21,7 +21,7 @@ username_regex = re.compile(
     re.X,
 )
 
-reserved_words = ["root", "admin", "manager", "user", "guillotina"]
+reserved_words = ["root", "admin", "manager", "user"]
 
 
 @configure.adapter(for_=IUserManager, provides=IIDChecker)

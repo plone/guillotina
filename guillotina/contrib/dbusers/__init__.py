@@ -13,7 +13,7 @@ app_settings = {
             "schema": {"title": "Register new user", "type": "object", "properties": {}},
         }
     },
-    "min_username_length": 4,
+    "min_username_length": 3,
 }
 
 

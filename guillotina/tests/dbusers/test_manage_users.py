@@ -223,7 +223,7 @@ async def test_invalid_usernames(dbusers_requester):
         "email": "foo@bar.com",
         "password": "password",
     }
-    invalid_usernames = ["root", "User", "manager", "the user", "__user", "aaa", ""]
+    invalid_usernames = ["root", "User", "manager", "the user", "__user", "aa"]
     async with dbusers_requester as requester:
         for user in invalid_usernames:
             data["username"] = user
