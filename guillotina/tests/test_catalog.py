@@ -442,10 +442,14 @@ async def test_date_query_pg_catalog_sort(container_requester):
 
             util = PGSearchUtility()
             await util.initialize()
-            results = await util.search(container, {"creation_date__gt": "1/1/1900", "_sort_asc": "creation_date"})
+            results = await util.search(
+                container, {"creation_date__gt": "1/1/1900", "_sort_asc": "creation_date"}
+            )
             assert len(results["items"]) == 2
 
-            results = await util.search(container, {"creation_date__gt": "1/1/3000", "_sort_asc": "creation_date"})
+            results = await util.search(
+                container, {"creation_date__gt": "1/1/3000", "_sort_asc": "creation_date"}
+            )
             assert len(results["items"]) == 0
 
 
