@@ -55,6 +55,12 @@ DEFAULT_SETTINGS = {
                     "vocabulary": "appsettings:myoptions",
                     "index": {"type": "keyword"},
                 },
+                "mythirdoption": {
+                    "type": "guillotina.schema.Choice",
+                    "title": "My loved option",
+                    "vocabulary": {"option1": "token1", "option2": "token2"},
+                    "index": {"type": "keyword"},
+                },
                 "mylovedlist": {
                     "type": "guillotina.schema.List",
                     "value_type": "guillotina.schema.TextLine",

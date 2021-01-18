@@ -70,3 +70,56 @@ cache:
   push: false
 -
 ```
+
+
+## Memcached Storage Cache
+
+The Memcached driver (`guillotina.contrib.memcached`) is to be used as
+an alternative to Redis for a distributed cache for guillotina
+objects.
+
+The main advantage of [memcached](https://memcached.org/) is that
+server instances are multi-threaded (in contrast to Redis instances,
+that are single-threaded), so they scale up linearly on the number of
+CPUs.
+
+The `emcache` library is a required dependency.
+
+
+### Configuration
+
+```yaml
+applications:
+- guillotina.contrib.memcached
+- guillotina.contrib.pubsub
+- guillotina.contrib.cache
+cache:
+  driver: guillotina.contrib.memcached
+memcached:
+  hosts:
+  - memcached.host1:11211
+  - memcached.host2:11211
+  timeout: 0.1
+  max_connections: 4
+  min_connections: 2
+  purge_unused_connections_after: null
+  purge_unhealthy_nodes: true
+```
+
+
+### Invalidations
+
+Currently, cache invalidations are not supported by the memcached
+driver. However, it is compatible with invalidations through redis.
+
+```yaml
+applications:
+- guillotina.contrib.redis
+- guillotina.contrib.memcached
+- guillotina.contrib.pubsub
+- guillotina.contrib.cache
+cache:
+  driver: guillotina.contrib.memcached
+  updates_channel: guillotina
+  push: false
+```

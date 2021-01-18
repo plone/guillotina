@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.1.2 (unreleased)
+6.1.3 (unreleased)
 ------------------
 
 - Fix: patch a role on dbusers:groups don't remove users from them
@@ -15,6 +15,22 @@ CHANGELOG
 
 - Feat: db_users, being able to login by email
   [jordic]
+
+
+6.1.2 (2021-01-18)
+------------------
+
+- Fix filter and sort by date field on pgcatalog
+  [bloodbare]
+
+- Add memcached support as cache driver
+  [lferran]
+
+- Fix: prevent caching large objects on fill_cache
+  [lferran]
+
+- Fix: dyncontent vocabularies json serialization
+  [bloodbare]
 
 - Fix: prevent caching large objects on fill_cache
   [lferran]
