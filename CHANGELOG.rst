@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.1.2 (unreleased)
+6.1.2 (2021-01-18)
 ------------------
 
 - Fix filter and sort by date field on pgcatalog
