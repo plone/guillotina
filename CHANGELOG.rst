@@ -4,9 +4,20 @@ CHANGELOG
 6.1.2 (unreleased)
 ------------------
 
-- Fix: patch a role on dbusers:groups don't remove users from them [jordic]
-- Fix: if patch the password on a user hash it [jordic]
-- Fix: prevent caching large objects on fill_cache [lferran]
+- Fix: patch a role on dbusers:groups don't remove users from them
+  [jordic]
+
+- Fix: patching password on a user hash it
+  [jordic]
+
+- Fix: only allow lowercase usernames on dbusers creation
+  [jordic]
+
+- Feat: db_users, being able to login by email
+  [jordic]
+
+- Fix: prevent caching large objects on fill_cache
+  [lferran]
 
 6.1.1 (2021-01-15)
 ------------------
