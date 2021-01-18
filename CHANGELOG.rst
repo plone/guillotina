@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.1.3 (unreleased)
+6.1.3 (2021-01-18)
 ------------------
 
 - Fix: patch a role on dbusers:groups don't remove users from them
