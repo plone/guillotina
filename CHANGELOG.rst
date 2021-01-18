@@ -4,7 +4,11 @@ CHANGELOG
 6.1.2 (unreleased)
 ------------------
 
-- Fix: prevent caching large objects on fill_cache [lferran]
+- Fix: dyncontent vocabularies json serialization
+  [bloodbare]
+
+- Fix: prevent caching large objects on fill_cache
+  [lferran]
 
 6.1.1 (2021-01-15)
 ------------------
