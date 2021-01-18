@@ -42,6 +42,8 @@ async def on_user_removed(user: User, event) -> None:
 @configure.subscriber(for_=(IUser, IBeforeObjectModifiedEvent))
 async def on_user_modified(user: User, event: BeforeObjectModifiedEvent) -> None:
     # keep group.users updated with changes from users
+    if "password" in event.payload:
+        event.payload["password"] = hash_password(event.payload["password"])
     old_groups = user.user_groups or []
     new_groups = event.payload.get("user_groups", [])
     groups_added = set(new_groups) - set(old_groups)
@@ -65,7 +67,9 @@ async def on_group_modified(group: Group, event: BeforeObjectModifiedEvent) -> N
     old_users = group.users or []
     users_added = set() - set(old_users)
     users_removed = set(old_users) - set()
-    changes = event.payload.get("users", {})
+    changes = event.payload.get("users", None)
+    if changes is None:
+        return
     for user, is_new in changes.items():
         if is_new:
             users_added.add(user)

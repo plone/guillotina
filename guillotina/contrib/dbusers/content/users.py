@@ -43,6 +43,7 @@ class IUser(IFolder, IPrincipal):
     )
 
     write_permission(disabled="guillotina.ManageUsers")
+    index_field("disabled", type="boolean")
     disabled = schema.Bool(title=_("Disabled"), default=False)
 
     properties = schema.Dict(required=False, default={})

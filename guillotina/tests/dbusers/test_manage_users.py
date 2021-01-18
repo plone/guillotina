@@ -114,6 +114,19 @@ async def test_patch_user_data(dbusers_requester, user_data):
         assert resp["email"] == "foobar2@foo.com"
         assert "guillotina.Manager" in resp["roles"]
 
+        # Change password
+        data = {"password": "asdf"}
+        resp, status_code = await requester("PATCH", "/db/guillotina/@users/foobar", data=json.dumps(data))
+        assert status_code == 204
+
+        resp, status_code = await requester(
+            "POST",
+            "/db/guillotina/@login",
+            data=json.dumps({"username": "foobar", "password": "asdf"}),
+            authenticated=False,
+        )
+        assert status_code == 200
+
 
 @pytest.mark.app_settings(settings.DEFAULT_SETTINGS)
 async def test_patch_groups_on_user_updates_groups(dbusers_requester, user_data):
@@ -199,3 +212,41 @@ async def test_users_cannot_be_added_outside_users_folder(dbusers_requester, use
         assert status_code == 412
         assert resp["reason"] == "notAllowed"
         assert resp["details"] == "Type not allowed to be added here"
+
+
+@pytest.mark.app_settings(settings.DEFAULT_SETTINGS)
+async def test_invalid_usernames(dbusers_requester):
+    data = {
+        "@type": "User",
+        "name": "Foobar",
+        "username": "root",
+        "email": "foo@bar.com",
+        "password": "password",
+    }
+    invalid_usernames = ["root", "User", "manager", "the user", "__user", "aa"]
+    async with dbusers_requester as requester:
+        for user in invalid_usernames:
+            data["username"] = user
+            _, status = await requester("POST", "/db/guillotina/users", data=json.dumps(data))
+            assert status == 412, f"Failed at {user}"
+
+
+settings_with_email_identifier = copy.deepcopy(settings_with_catalog)
+settings_with_email_identifier["auth_user_identifiers"] = [
+    "guillotina.contrib.dbusers.users.EmailDBUserIdentifier"
+]
+
+
+@pytest.mark.app_settings(settings_with_email_identifier)
+@pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
+async def test_login_with_email(dbusers_requester, user_data):
+    async with dbusers_requester as requester:
+        resp, status_code = await requester("POST", "/db/guillotina/users", data=json.dumps(user_data))
+        assert status_code == 201
+        resp, status_code = await requester(
+            "POST",
+            "/db/guillotina/@login",
+            data=json.dumps({"username": "foo@bar.com", "password": "password"}),
+            authenticated=False,
+        )
+        assert status_code == 200

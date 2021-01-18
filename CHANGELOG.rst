@@ -4,7 +4,17 @@ CHANGELOG
 6.1.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix: patch a role on dbusers:groups don't remove users from them
+  [jordic]
+
+- Fix: patching password on a user hash it
+  [jordic]
+
+- Fix: only allow lowercase usernames on dbusers creation
+  [jordic]
+
+- Feat: db_users, being able to login by email
+  [jordic]
 
 
 6.1.2 (2021-01-18)

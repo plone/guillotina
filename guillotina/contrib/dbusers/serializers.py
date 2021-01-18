@@ -38,6 +38,8 @@ class UserDeserializer:
         self.apply_roles(data)
         if "email" in data:
             self.context.email = data["email"]
+        if "password" in data:
+            self.context.password = data["password"]
         if "fullname" in data:
             self.context.name = data["fullname"]
         if "user_groups" in data:
