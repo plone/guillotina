@@ -4,6 +4,12 @@ CHANGELOG
 6.1.2 (unreleased)
 ------------------
 
+- Add memcached support as cache driver
+  [lferran]
+
+- Fix: prevent caching large objects on fill_cache
+  [lferran]
+
 - Fix: dyncontent vocabularies json serialization
   [bloodbare]
 

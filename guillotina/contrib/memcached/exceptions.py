@@ -1,0 +1,2 @@
+class NoMemcachedConfigured(Exception):
+    pass
