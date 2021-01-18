@@ -49,7 +49,9 @@ class DBUserIdentifier:
 
 
 class EmailDBUserIdentifier:
-    """ Identifier of users by email """
+    """ Identifier of users by email.
+    This method only works with pgcatalog active.
+    """
 
     async def get_user(self, token: typing.Dict) -> typing.Optional[IPrincipal]:
         try:
@@ -59,9 +61,9 @@ class EmailDBUserIdentifier:
             return None
 
         catalog = query_utility(ICatalogUtility)
-        if catalog.__class__ != PGSearchUtility:
-            # DefaultSearchUtility does nothing
+        if not isinstance(catalog, PGSearchUtility):
             raise NoCatalogException()
+
         txn = get_transaction()
         if txn is None:
             raise TransactionNotFound()
