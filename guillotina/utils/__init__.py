@@ -1,5 +1,6 @@
 from .auth import get_authenticated_user  # noqa
 from .auth import get_authenticated_user_id  # noqa
+from .auth import get_roles_principal  # noqa
 from .auth import get_security_policy  # noqa
 from .content import get_behavior  # noqa
 from .content import get_containers  # noqa

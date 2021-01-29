@@ -1,6 +1,7 @@
 from guillotina.api.container import create_container
 from guillotina.auth.users import GuillotinaUser
 from guillotina.content import create_content_in_container
+from guillotina.interfaces import Allow
 from guillotina.interfaces import IRolePermissionManager
 from guillotina.security.policy import cached_roles
 from guillotina.security.utils import get_principals_with_access_content
@@ -10,6 +11,7 @@ from guillotina.tests import utils
 from guillotina.tests.utils import get_db
 from guillotina.transactions import transaction
 from guillotina.utils import get_authenticated_user
+from guillotina.utils import get_roles_principal
 from guillotina.utils import get_security_policy
 
 import json
@@ -487,6 +489,7 @@ async def test_allowsingle2(container_requester):
 
         user = GuillotinaUser("user3")
         user._groups = ["group1", "group2", "group3"]
+        user._roles = {"testing.Role1": Allow}
 
         utils.login(user=user)
         test1 = await content.async_get("test1")
@@ -495,6 +498,12 @@ async def test_allowsingle2(container_requester):
         policy = get_security_policy(user)
         assert policy.check_permission("guillotina.ViewContent", test1)
         assert policy.check_permission("guillotina.ViewContent", test2)
+
+        roles = get_roles_principal(test2)
+        assert "guillotina.Reader" in roles
+        assert "guillotina.Anonymous" in roles
+        assert "guillotina.Authenticated" in roles
+        assert "testing.Role1" in roles
 
 
 async def test_cached_access_roles(dummy_guillotina):

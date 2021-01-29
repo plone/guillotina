@@ -36,6 +36,7 @@ from guillotina.utils import get_content_path
 from guillotina.utils import get_current_request
 from guillotina.utils import get_current_transaction
 from guillotina.utils import get_object_url
+from guillotina.utils import get_roles_principal
 from guillotina.utils import get_security_policy
 from zope.interface import implementer
 
@@ -487,6 +488,7 @@ class PGSearchUtility(DefaultSearchUtility):
         users.extend(principal.groups)
         roles_dict = policy.global_principal_roles(principal.id, principal.groups)
         roles.extend([key for key, value in roles_dict.items() if value])
+        roles = get_roles_principal(container)
 
         clauses = [
             "json->'access_users' ?| array['{}']".format("','".join([sqlq(u) for u in users])),

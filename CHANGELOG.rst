@@ -4,7 +4,8 @@ CHANGELOG
 6.1.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Apply local roles on @search with pgcatalog
+  [bloodbare]
 
 
 6.1.3 (2021-01-18)
