@@ -51,6 +51,7 @@ def get_roles_principal(obj):
     authenticated = get_authenticated_user()
     if authenticated is None:
         from guillotina.auth.users import AnonymousUser
+
         authenticated = AnonymousUser()
     policy = get_security_policy(authenticated)
     roles = policy.cached_principal_roles(obj, authenticated.id, authenticated.groups, "o")
