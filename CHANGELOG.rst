@@ -4,7 +4,8 @@ CHANGELOG
 6.1.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fixing 6.1.4 release (anonymous users not working on search)
+  [bloodbare]
 
 
 6.1.4 (2021-01-31)
