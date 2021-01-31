@@ -50,5 +50,5 @@ def get_roles_principal(obj):
 
     authenticated = get_authenticated_user()
     policy = get_security_policy(authenticated)
-    roles = policy.cached_principal_roles(obj, authenticated.id, authenticated._groups, "o")
+    roles = policy.cached_principal_roles(obj, authenticated.id, authenticated.groups, "o")
     return [role for role, value in roles.items() if value]
