@@ -1,5 +1,5 @@
-from guillotina.auth.users import AnonymousUser
 from guillotina import task_vars
+from guillotina.auth.users import AnonymousUser
 from guillotina.component import get_adapter
 from guillotina.interfaces import IPrincipal
 from guillotina.interfaces import ISecurityPolicy
