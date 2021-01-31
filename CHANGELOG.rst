@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.1.4 (unreleased)
+6.1.4 (2021-01-31)
 ------------------
 
 - Apply local roles on @search with pgcatalog
