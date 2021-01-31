@@ -37,7 +37,6 @@ from guillotina.utils import get_current_request
 from guillotina.utils import get_current_transaction
 from guillotina.utils import get_object_url
 from guillotina.utils import get_roles_principal
-from guillotina.utils import get_security_policy
 from zope.interface import implementer
 
 import asyncpg.exceptions
