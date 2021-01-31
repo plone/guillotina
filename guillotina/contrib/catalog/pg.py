@@ -477,17 +477,13 @@ class PGSearchUtility(DefaultSearchUtility):
 
     def get_default_where_clauses(self, container: IContainer) -> typing.List[str]:
         users = []
-        roles = []
         principal = get_authenticated_user()
         if principal is None:
             # assume anonymous then
             principal = AnonymousUser()
-        policy = get_security_policy(principal)
 
         users.append(principal.id)
         users.extend(principal.groups)
-        roles_dict = policy.global_principal_roles(principal.id, principal.groups)
-        roles.extend([key for key, value in roles_dict.items() if value])
         roles = get_roles_principal(container)
 
         clauses = [

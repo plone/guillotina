@@ -1,3 +1,4 @@
+from guillotina.auth.users import AnonymousUser
 from guillotina import task_vars
 from guillotina.component import get_adapter
 from guillotina.interfaces import IPrincipal
@@ -49,6 +50,8 @@ def get_roles_principal(obj):
         return []
 
     authenticated = get_authenticated_user()
+    if authenticated is None:
+        authenticated = AnonymousUser()
     policy = get_security_policy(authenticated)
     roles = policy.cached_principal_roles(obj, authenticated.id, authenticated.groups, "o")
     return [role for role, value in roles.items() if value]
