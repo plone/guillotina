@@ -68,6 +68,9 @@ class UnRetryableRequestError(Exception):
     pass
 
 
+class MaxDepthReached(Exception):
+    pass
+
 class PreconditionFailed(Exception):
     def __init__(self, container, precondition):
         super().__init__()
