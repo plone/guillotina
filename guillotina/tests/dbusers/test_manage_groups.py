@@ -24,8 +24,8 @@ async def test_ensure_crud_groups(dbusers_requester, user_data):
         assert status_code == 201
         resp, status_code = await requester("GET", "/db/guillotina/@groups")
         assert status_code == 200
-        assert len(resp) == 1
-        assert resp[0]["groupname"] == "foo"
+        assert len(resp) == 2
+        assert resp[1]["groupname"] == "foo" or resp[0]["groupname"] == "foo"
 
         data = {"roles": {"guillotina.Manager": True, "guillotina.Tester": True, "guillotina.Bad": False}}
 
@@ -87,23 +87,24 @@ settings_with_catalog["load_utilities"]["catalog"] = {  # type: ignore
 @pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
 async def test_list_groups_works_with_catalog(dbusers_requester, user_data):
     async with dbusers_requester as requester:
-        # Check initially there is no users
+        # Check initially there just one group
         resp, status_code = await requester("GET", "/db/guillotina/@groups")
         assert status_code == 200
-        assert len(resp) == 0
+        assert len(resp) == 1
 
-        # Add a user
+        # Add a group
         resp, status_code = await requester("POST", "/db/guillotina/groups", data=json.dumps(_group))
         assert status_code == 201
 
         # Check it gets listed
         resp, status_code = await requester("GET", "/db/guillotina/@groups")
         assert status_code == 200
-        assert len(resp) == 1
-        assert resp[0]["@name"]
-        assert resp[0]["title"]
-        assert isinstance(resp[0]["roles"], list)
-        assert isinstance(resp[0]["users"], list)
+        assert len(resp) == 2
+        for group in resp:
+            assert group["@name"]
+            assert group["title"]
+            assert isinstance(group["roles"], list)
+            assert isinstance(group["users"], list)
 
 
 @pytest.mark.app_settings(settings.DEFAULT_SETTINGS)
