@@ -197,6 +197,7 @@ class DefaultPOST(Service):
                 )
             new_id = id_
 
+        # Restrict object tree height
         max_depth = app_settings.get("max_content_depth", None)
         if max_depth is not None and get_content_depth(self.context) > max_depth:
             raise MaxDepthReached()
