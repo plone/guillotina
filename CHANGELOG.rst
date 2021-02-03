@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.67 (unreleased)
+5.3.67 (2021-02-03)
 -------------------
 
 - Improve memcached metrics probe [lferran]
