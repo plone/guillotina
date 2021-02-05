@@ -4,6 +4,8 @@ CHANGELOG
 6.1.5 (unreleased)
 ------------------
 
+- Improve memcached metrics probe [lferran]
+
 - Fixing checking field permission on content creation
   [bloodbare]
 
