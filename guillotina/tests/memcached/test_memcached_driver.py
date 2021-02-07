@@ -197,7 +197,9 @@ class TestUpdateConnectionPoolMetrics:
         metrics.create_connection_upper = 100.0
         return metrics
 
-    def test_updated_connection_pool_metrics_create_connection_latencies(self, avg, p50, p99, upper, metrics):
+    async def test_updated_connection_pool_metrics_create_connection_latencies(
+        self, avg, p50, p99, upper, metrics
+    ):
         node_metrics = {"node1": metrics}
         last_state = {"node1": metrics}
         client = mock.Mock()
@@ -210,7 +212,7 @@ class TestUpdateConnectionPoolMetrics:
         p99.assert_has_calls([mock.call.labels(node="node1"), mock.call.labels().set(99.0)])
         upper.assert_has_calls([mock.call.labels(node="node1"), mock.call.labels().set(100.0)])
 
-    def test_updated_connection_pool_metrics_create_connection_latencies_none(
+    async def test_updated_connection_pool_metrics_create_connection_latencies_none(
         self, avg, p50, p99, upper, metrics
     ):
         # Override default fixture values for simulating that latencies do not have
