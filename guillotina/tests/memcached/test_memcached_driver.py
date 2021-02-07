@@ -181,7 +181,7 @@ class TestUpdateConnectionPoolMetrics:
             yield _upper
 
     @pytest.fixture
-    def metrics(self):
+    async def metrics(self):
         metrics = mock.Mock()
         metrics.cur_connections = 1
         metrics.connections_created = 1
