@@ -28,6 +28,7 @@ from guillotina.events import ObjectLoadedEvent
 from guillotina.events import ObjectMovedEvent
 from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import InvalidContentType
+from guillotina.exceptions import MaxDepthReached
 from guillotina.exceptions import NoPermissionToAdd
 from guillotina.exceptions import NotAllowedContentType
 from guillotina.exceptions import PreconditionFailed
@@ -604,7 +605,7 @@ async def create_content_in_container(
     # Restrict object tree height
     max_depth = app_settings.get("max_content_depth", None)
     if max_depth is not None and get_content_depth(parent) > max_depth:
-        raise MaxDepthReached(max_depth)
+        raise MaxDepthReached()
 
     # We create the object with at least the ID
     obj = factory(id=id_, parent=parent)
