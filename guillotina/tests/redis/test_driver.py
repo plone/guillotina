@@ -35,7 +35,7 @@ async def test_redis_ops(redis_container, guillotina_main):
     result = await driver.get("test2")
     assert result is None
 
-    await asyncio.sleep(1)
+    await asyncio.sleep(2)
     result = await driver.get("test4")
     assert result is None
 

@@ -104,7 +104,7 @@ async def create_and_login_user(requester, user_id, password, roles):
     return await login_user(requester, user_id, password)
 
 
-async def _test_endpoint_access(requester, method, url, data=None, allowed_roles=None):  # pragma: no cover
+async def _test_endpoint_access(requester, method, url, data=None, allowed_roles=None, count=1):  # pragma: no cover
     data = data or {}
     allowed_roles = allowed_roles or []
     all_roles = [
@@ -115,9 +115,9 @@ async def _test_endpoint_access(requester, method, url, data=None, allowed_roles
         "guillotina.ContainerDeleter",
     ]
 
-    for role in all_roles:
+    for index, role in enumerate(all_roles):
         # Get a random user id
-        uid = f"user-{random.randint(0, 9999)}"
+        uid = f"user-{index}-{count}"
 
         token = await create_and_login_user(requester, uid, "password", roles=[role])
 
@@ -145,6 +145,7 @@ async def test_only_root_and_admins_can_create_users(dbusers_requester):
 @pytest.mark.app_settings(settings.DEFAULT_SETTINGS)
 async def test_only_root_and_admins_can_manage_users_and_groups(dbusers_requester):
     async with dbusers_requester as requester:
+        count = 1
         for method, url in [
             ("GET", "@users"),
             ("GET", "@users/foo"),
@@ -160,4 +161,6 @@ async def test_only_root_and_admins_can_manage_users_and_groups(dbusers_requeste
                 method,
                 "/db/guillotina/" + url,
                 allowed_roles=["guillotina.Manager", "guillotina.ContainerAdmin"],
+                count=count
             )
+            count += 1
