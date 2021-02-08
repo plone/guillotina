@@ -3,11 +3,11 @@ from guillotina import error_reasons
 from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import DeserializationError
 from guillotina.exceptions import InvalidContentType
+from guillotina.exceptions import MaxDepthReached
 from guillotina.exceptions import NotAllowedContentType
 from guillotina.exceptions import PreconditionFailed
 from guillotina.exceptions import Unauthorized
 from guillotina.exceptions import UnRetryableRequestError
-from guillotina.exceptions import MaxDepthReached
 from guillotina.interfaces import IErrorResponseException
 from guillotina.response import HTTPConflict
 from guillotina.response import HTTPExpectationFailed
@@ -89,7 +89,5 @@ register_handler_factory(
 
 register_handler_factory(
     MaxDepthReached,
-    exception_handler_factory(
-        error_reasons.PRECONDITION_FAILED, "MaxDepthReached", serialize_exc=True
-    ),
+    exception_handler_factory(error_reasons.PRECONDITION_FAILED, "MaxDepthReached", serialize_exc=True),
 )
