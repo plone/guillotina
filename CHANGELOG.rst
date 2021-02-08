@@ -4,8 +4,7 @@ CHANGELOG
 5.3.67 (unreleased)
 -------------------
 
-- Nothing changed yet.
-
+- Add max_content_depth [lferran]
 
 5.3.66 (2021-01-13)
 -------------------
