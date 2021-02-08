@@ -18,7 +18,6 @@ from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import read_permission
 from guillotina.event import notify
 from guillotina.events import BeforeObjectModifiedEvent
-from guillotina.exceptions import MaxDepthReached
 from guillotina.events import BeforeObjectRemovedEvent
 from guillotina.events import ObjectAddedEvent
 from guillotina.events import ObjectModifiedEvent
@@ -26,6 +25,7 @@ from guillotina.events import ObjectPermissionsViewEvent
 from guillotina.events import ObjectRemovedEvent
 from guillotina.events import ObjectVisitedEvent
 from guillotina.exceptions import ComponentLookupError
+from guillotina.exceptions import MaxDepthReached
 from guillotina.exceptions import PreconditionFailed
 from guillotina.i18n import default_message_factory as _
 from guillotina.interfaces import IAnnotations
@@ -58,7 +58,6 @@ from guillotina.response import Response
 from guillotina.security.utils import apply_sharing
 from guillotina.transactions import get_transaction
 from guillotina.utils import get_authenticated_user_id
-from guillotina.utils import get_content_depth
 from guillotina.utils import get_behavior
 from guillotina.utils import get_object_by_uid
 from guillotina.utils import get_object_url
@@ -196,11 +195,6 @@ class DefaultPOST(Service):
                     reason=error_reasons.INVALID_ID,
                 )
             new_id = id_
-
-        # Restrict object tree height
-        max_depth = app_settings.get("max_content_depth", None)
-        if max_depth is not None and get_content_depth(self.context) > max_depth:
-            raise MaxDepthReached()
 
         user = get_authenticated_user_id()
 
