@@ -82,6 +82,7 @@ class IExample(IResource):
     write_permission(write_protected="example.MyPermission")
     write_protected = schema.TextLine(title="Write protected field", required=False)
 
+    write_permission(default_factory_test="example.MyPermissionOwner")
     default_factory_test = schema.Text(defaultFactory=lambda: "foobar")
 
     context_default_factory_test = schema.Text(defaultFactory=ContextDefaultFactory())
@@ -101,6 +102,8 @@ def foobar_accessor(ob):
 
 
 configure.permission("example.MyPermission", "example permission")
+configure.permission("example.MyPermissionOwner", "example permission owner")
+configure.grant(role="guillotina.Owner", permission="example.MyPermissionOwner")
 
 
 @implementer(IExample)

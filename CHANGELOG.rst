@@ -4,6 +4,9 @@ CHANGELOG
 6.1.5 (unreleased)
 ------------------
 
+- Fixing checking field permission on content creation
+  [bloodbare]
+
 - Fixing 6.1.4 release (anonymous users not working on search)
   [bloodbare]
 
