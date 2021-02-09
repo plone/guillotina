@@ -83,7 +83,7 @@ setup(
             "pytest-asyncio<=0.13.0",
             "pytest-cov",
             "coverage>=4.0.3",
-            "git+https://github.com/guillotinaweb/pytest-docker-fixtures@try-fixing",
+            "pytest-docker-fixtures @ git+https://github.com/guillotinaweb/pytest-docker-fixtures@try-fixing#egg=pytest-docker-fixtures",
             # "pytest-docker-fixtures",
             "pytest-rerunfailures<=9.0",
             "async-asgi-testclient<2.0.0",
