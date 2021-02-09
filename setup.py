@@ -72,7 +72,7 @@ setup(
         "argon2-cffi",
         "backoff",
         "multidict",
-        "typing_extensions"
+        "typing_extensions",
     ],
     extras_require={
         "test": [
@@ -83,7 +83,8 @@ setup(
             "pytest-asyncio<=0.13.0",
             "pytest-cov",
             "coverage>=4.0.3",
-            "pytest-docker-fixtures",
+            "git+https://github.com/guillotinaweb/pytest-docker-fixtures@try-fixing",
+            # "pytest-docker-fixtures",
             "pytest-rerunfailures<=9.0",
             "async-asgi-testclient<2.0.0",
             "openapi-spec-validator",
