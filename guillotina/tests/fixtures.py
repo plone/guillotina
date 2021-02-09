@@ -641,19 +641,17 @@ def memcached_container():
     import pytest_docker_fixtures
 
     # pytest_docker_fixtures.images.configure("memcached", version="latest")
-    pytest_docker_fixtures.images.configure(
-        "memcached",
-        version="1.6.9-alpine",
-        options={
-            "cap_add": ["IPC_LOCK"],
-            "detach": True,
-            "environment": {},
-            "mem_limit": "200m",
-            "privileged": False,
-            "publish_all_ports": False,
-            "ports": {"11211/tcp": "11211"},
-        },
-    )
+    pytest_docker_fixtures.images.configure("memcached", version="1.6.9")
+    #        options={
+    #            "cap_add": ["IPC_LOCK"],
+    #            "detach": True,
+    #            "environment": {},
+    #            "mem_limit": "200m",
+    #            "privileged": False,
+    #            "publish_all_ports": False,
+    #            "ports": {"11211/tcp": "11211"},
+    #        },
+    #    )
 
     host, port = pytest_docker_fixtures.memcached_image.run()
     annotations["memcached"] = (host, port)
