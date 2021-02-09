@@ -52,6 +52,7 @@ jobs:
     env:
       DATABASE: ${{ matrix.database }}
       DB_SCHEMA: ${{ matrix.db_schema }}
+      MEMCACHED: "localhost:11211"
 
     steps:
       - name: Checkout the repository
@@ -69,6 +70,9 @@ jobs:
           pip install -r contrib-requirements.txt
           pip install -e .[test]
           pip install -e .[testdata]
+
+      - name: Start memcached image
+        uses: niden/actions-memcached@v7
 
       - name: Run tests
         run: |
