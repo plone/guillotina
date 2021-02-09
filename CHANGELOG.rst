@@ -4,6 +4,8 @@ CHANGELOG
 6.1.5 (unreleased)
 ------------------
 
+- Fix memcached tests not able to start docker image [lferran]
+
 - Fixing 6.1.4 release (anonymous users not working on search)
   [bloodbare]
 
