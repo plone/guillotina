@@ -637,20 +637,10 @@ def redis_container():
 
 
 @pytest.fixture(scope="session")
-def memcached_container():
-    if os.environ.get("MEMCACHED"):
-        host, port = os.environ["MEMCACHED"].split(":")
-        annotations["memcached"] = (host, port)
-        yield host, port
-
-    else:
-        import pytest_docker_fixtures
-
-        host, port = pytest_docker_fixtures.memcached_image.run()
-        annotations["memcached"] = (host, port)
-        yield host, port
-        pytest_docker_fixtures.memcached_image.stop()
-
+def memcached_container(memcached):
+    host, port = memcached
+    annotations["memcached"] = (host, port)
+    yield memcached
     annotations["memcached"] = None
 
 
