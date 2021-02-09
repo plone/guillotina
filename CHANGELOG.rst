@@ -4,6 +4,8 @@ CHANGELOG
 6.1.5 (unreleased)
 ------------------
 
+- Cleaner memcached_container pytest fixture [lferran]
+
 - Fixing checking field permission on content creation
   [bloodbare]
 
