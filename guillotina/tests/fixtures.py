@@ -640,6 +640,19 @@ def redis_container():
 def memcached_container():
     import pytest_docker_fixtures
 
+    # pytest_docker_fixtures.images.configure("memcached", version="latest")
+    pytest_docker_fixtures.images.configure(
+        "memcached",
+        options={
+            "cap_add": ["IPC_LOCK"],
+            "detach": True,
+            "environment": {},
+            "mem_limit": "200m",
+            "privileged": True,
+            "publish_all_ports": True,
+        },
+    )
+
     host, port = pytest_docker_fixtures.memcached_image.run()
     annotations["memcached"] = (host, port)
     yield host, port  # provide the fixture value
