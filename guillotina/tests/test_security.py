@@ -548,3 +548,40 @@ async def test_bad_sharing_payload(container_requester):
             data=json.dumps({"prinrole": [{"role": "guillotina.Owner", "setting": "Allow", "XX": "foobar"}]}),
         )
         assert status == 412
+
+
+@pytest.mark.app_settings(
+    {
+        "managers_roles": {
+            "guillotina.ContainerAdmin": 1,
+            "guillotina.ContainerDeleter": 1,
+            "guillotina.Member": 1,
+            "guillotina.Owner": 0,
+            "guillotina.Manager": 1,
+        }
+    }
+)
+async def test_set_owner_field(container_requester):
+    async with container_requester as requester:
+        response, status = await requester("GET", "/db/guillotina/@user")
+        assert response["groups"]["Managers"]["roles"]["guillotina.Owner"] == 0
+
+        response, status = await requester(
+            "POST",
+            "/db/guillotina/@sharing",
+            data=json.dumps(
+                {
+                    "prinrole": [{"role": "guillotina.Owner", "setting": "Unset", "principal": "root"}],
+                    "prinperm": [
+                        {"permission": "guillotina.AddContent", "setting": "Allow", "principal": "root"},
+                        {"permission": "guillotina.AccessContent", "setting": "Allow", "principal": "root"},
+                    ],
+                }
+            ),
+        )
+        assert status == 200
+
+        response, status = await requester(
+            "POST", "/db/guillotina/", data=json.dumps({"@type": "Example", "default_factory_test": "text"}),
+        )
+        assert status == 201

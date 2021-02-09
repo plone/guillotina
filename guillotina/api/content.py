@@ -212,6 +212,13 @@ class DefaultPOST(Service):
         for behavior in behaviors or ():
             obj.add_behavior(behavior)
 
+        # Local Roles assign owner as the creator user
+        get_owner = IGetOwner(obj)
+        roleperm = IPrincipalRoleManager(obj)
+        owner = await get_owner(user)
+        if owner is not None:
+            roleperm.assign_role_to_principal("guillotina.Owner", owner)
+
         # Update fields
         deserializer = query_multi_adapter((obj, self.request), IResourceDeserializeFromJson)
         if deserializer is None:
@@ -223,13 +230,6 @@ class DefaultPOST(Service):
             )
 
         await deserializer(data, validate_all=True, create=True)
-
-        # Local Roles assign owner as the creator user
-        get_owner = IGetOwner(obj)
-        roleperm = IPrincipalRoleManager(obj)
-        owner = await get_owner(user)
-        if owner is not None:
-            roleperm.assign_role_to_principal("guillotina.Owner", owner)
 
         data["id"] = obj.id
         await notify(ObjectAddedEvent(obj, self.context, obj.id, payload=data))
