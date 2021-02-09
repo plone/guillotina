@@ -97,5 +97,12 @@ app_settings: Dict[str, Any] = {
     "valid_id_characters": string.digits + string.ascii_lowercase + ".-_@$^()+ =",
     "load_catalog": True,
     "catalog_max_results": 50,
+    "managers_roles": {
+        "guillotina.ContainerAdmin": 1,
+        "guillotina.ContainerDeleter": 1,
+        "guillotina.Owner": 1,
+        "guillotina.Member": 1,
+        "guillotina.Manager": 1,
+    },
 }
 default_settings = copy.deepcopy(app_settings)

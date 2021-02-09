@@ -1,3 +1,4 @@
+from guillotina import app_settings
 from guillotina import configure
 from guillotina.auth.users import GuillotinaUser
 from guillotina.interfaces import IGroups
@@ -13,11 +14,7 @@ class GuillotinaGroup(GuillotinaUser):
 
         if ident == "Managers":
             # Special Case its a Root Manager user
-            self._roles["guillotina.ContainerAdmin"] = 1
-            self._roles["guillotina.ContainerDeleter"] = 1
-            self._roles["guillotina.Owner"] = 1
-            self._roles["guillotina.Member"] = 1
-            self._roles["guillotina.Manager"] = 1
+            self._roles.update(app_settings["managers_roles"])
 
 
 @configure.utility(provides=IGroups)
