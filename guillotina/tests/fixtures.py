@@ -649,7 +649,7 @@ def memcached_container():
             "detach": True,
             "environment": {},
             "mem_limit": "200m",
-            "privileged": True,
+            "privileged": False,
             "publish_all_ports": False,
             "ports": {"11211/tcp": "11211"},
         },
