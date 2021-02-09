@@ -4,7 +4,6 @@ from guillotina.tests.utils import get_container
 import base64
 import json
 import pytest
-import random
 
 
 pytestmark = pytest.mark.asyncio
@@ -104,7 +103,9 @@ async def create_and_login_user(requester, user_id, password, roles):
     return await login_user(requester, user_id, password)
 
 
-async def _test_endpoint_access(requester, method, url, data=None, allowed_roles=None, count=1):  # pragma: no cover
+async def _test_endpoint_access(
+    requester, method, url, data=None, allowed_roles=None, count=1
+):  # pragma: no cover
     data = data or {}
     allowed_roles = allowed_roles or []
     all_roles = [
@@ -161,6 +162,6 @@ async def test_only_root_and_admins_can_manage_users_and_groups(dbusers_requeste
                 method,
                 "/db/guillotina/" + url,
                 allowed_roles=["guillotina.Manager", "guillotina.ContainerAdmin"],
-                count=count
+                count=count,
             )
             count += 1
