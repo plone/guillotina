@@ -22,17 +22,17 @@ jobs:
 
       - name: Install package
         run: |
-          pip install flake8==3.7.7
-          pip install mypy==0.720
-          pip install mypy-zope==0.2.0
-          pip install black==19.10b0
-          pip install isort==4.3.21
+ #         pip install flake8==3.7.7
+ #         pip install mypy==0.720
+ #         pip install mypy-zope==0.2.0
+ #         pip install black==19.10b0
+ #         pip install isort==4.3.21
       - name: Run pre-checks
         run: |
-          flake8 guillotina --config=setup.cfg
-          mypy guillotina/ --ignore-missing-imports
-          isort -c -rc guillotina/
-          black --check --verbose guillotina
+#          flake8 guillotina --config=setup.cfg
+#          mypy guillotina/ --ignore-missing-imports
+#          isort -c -rc guillotina/
+#          black --check --verbose guillotina
   # Job to run tests
   tests:
     runs-on: ubuntu-latest
@@ -72,7 +72,7 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest -rfE --reruns 2 --cov=guillotina -s --tb=native -v --cov-report xml --cov-append guillotina
+          pytest -rfE --cov=guillotina -s --tb=native -v --cov-report xml --cov-append guillotina/tests/memcached -x
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
