@@ -4,8 +4,7 @@ CHANGELOG
 5.3.68 (unreleased)
 -------------------
 
-- Nothing changed yet.
-
+- Fix memcached tests in github actions [lferran]
 
 5.3.67 (2021-02-03)
 -------------------
