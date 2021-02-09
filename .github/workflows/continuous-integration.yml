@@ -72,7 +72,7 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest -rfE --reruns 2 --cov=guillotina -s --tb=native -v --cov-report xml --cov-append guillotina
+          pytest -rfE --reruns 2 --cov=guillotina -s --tb=native -v --cov-report xml --cov-append guillotina --ignore=guillotina/tests/memcached
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
