@@ -2,6 +2,7 @@
 
 ```eval_rst
 .. toctree::
+   :hidden:
    :caption: Training
    :maxdepth: 1
 
@@ -10,6 +11,7 @@
 
 ```eval_rst
 .. toctree::
+   :hidden:
    :caption: REST API
    :maxdepth: 1
    :glob:
@@ -23,6 +25,7 @@
 
 ```eval_rst
 .. toctree::
+   :hidden:
    :caption: Resources
    :maxdepth: 1
    :glob:
@@ -159,11 +162,6 @@ with:
 - Content: Item or Folder by default. This is your dynamic object tree you create
 
 The endpoints available around these objects are detailed below:
-
-## Developer Documentation
-
-After reading quick tour or training section,
-Now you can start hands-on style guide to learn how to use it.
 
 ## Deploying
 
