@@ -1,5 +1,5 @@
-About
-=====
+About Guillotina
+================
 
 As the Web evolves, so do the frameworks that we use to work with the Web.
 Guillotina is part of that evolution, providing an asynchronous web server

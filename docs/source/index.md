@@ -1,5 +1,35 @@
 # The Python AsyncIO REST API Framework
 
+```eval_rst
+.. toctree::
+   :caption: Training
+   :maxdepth: 1
+
+   training/introduction
+```
+
+```eval_rst
+.. toctree::
+   :caption: REST API
+   :maxdepth: 1
+   :glob:
+
+   rest/application
+   rest/db
+   rest/container
+   rest/item
+   rest/folder
+```
+
+```eval_rst
+.. toctree::
+   :caption: Resources
+   :maxdepth: 1
+   :glob:
+
+   about
+```
+
 Guillotina is the only full-featured Python AsyncIO REST Resource Application
 Server designed for high-performance, horizontally scaling solutions.
 
@@ -114,14 +144,6 @@ if __name__ == "__main__":
 
 Learn how to use Guillotina by following the [training](./training/index.html "Link to Guillotina trining docs").
 
-```eval_rst
-.. toctree::
-   :caption: Training
-   :maxdepth: 1
-
-   training/introduction
-```
-
 ## REST API
 
 After you're up and running, primarily, Guillotina provides a REST API to work with
@@ -137,19 +159,6 @@ with:
 - Content: Item or Folder by default. This is your dynamic object tree you create
 
 The endpoints available around these objects are detailed below:
-
-```eval_rst
-.. toctree::
-   :caption: REST API
-   :maxdepth: 1
-   :glob:
-
-   rest/application
-   rest/db
-   rest/container
-   rest/item
-   rest/folder
-```
 
 ## Developer Documentation
 
@@ -170,6 +179,3 @@ Now you can start hands-on style guide to learn how to use it.
   [behind a proxy](./installation/production.html)
   when you deploy it.
 
-## About
-
-- [Read about](./about.html) the rich history of the project
