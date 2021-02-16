@@ -1,10 +1,17 @@
 CHANGELOG
 =========
 
-6.1.5 (unreleased)
+6.1.6 (unreleased)
 ------------------
 
+
 - Improve memcached metrics probe [lferran]
+
+
+6.1.5 (2021-02-09)
+------------------
+
+- Cleaner memcached_container pytest fixture [lferran]
 
 - Fixing checking field permission on content creation
   [bloodbare]
