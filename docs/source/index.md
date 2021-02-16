@@ -62,6 +62,14 @@ Server designed for high-performance, horizontally scaling solutions.
 - Awesome case one
 - Awesome case two
 
+## Install requirements
+
+<!-- vale off -->
+
+- [Python 3.8](https://www.python.org/downloads/release/python-380/ "Python 3.8 download page")
+- [Python Virtual Environment (venv)](https://docs.python.org/3/library/venv.html "venv documentation page"), included with Python 3.8
+- [Python Package Installer (pip)](https://pypi.org/project/pip/ "pip documentation page")
+
 ## Quick Start
 
 Install Guillotina:
@@ -142,11 +150,6 @@ if __name__ == "__main__":
     uvicorn.run(app, host="localhost", port=8080)
 ```
 
-
-## Training / Tutorial
-
-Learn how to use Guillotina by following the [training](./training/index.html "Link to Guillotina trining docs").
-
 ## REST API
 
 After you're up and running, primarily, Guillotina provides a REST API to work with
@@ -166,7 +169,7 @@ The endpoints available around these objects are detailed below:
 ## Deploying
 
 - [Installing Guillotina](./installation/installation.html)
-  is done with pip but if you need to run with docker,
+  is done with pip but if you need to run with Docker,
   [we also have you covered](https://hub.docker.com/r/guillotina/guillotina/).
 - Guillotina has an quite a few
   [configuration options](./installation/configuration.html)
