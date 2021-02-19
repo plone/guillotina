@@ -3,7 +3,7 @@
 Guillotina is an [installable python package](https://pypi.python.org/pypi/guillotina)
 which can be installed with `pip`, `easy_install` or `buildout`.
 
-Additionally, Guillotina provides [docker images](https://hub.docker.com/r/guillotina/guillotina/).
+Additionally, Guillotina provides [Docker images](https://hub.docker.com/r/guillotina/guillotina/).
 
 ## Install with pip
 
@@ -11,9 +11,14 @@ Additionally, Guillotina provides [docker images](https://hub.docker.com/r/guill
 pip install guillotina
 ```
 
+## Docker
+
+HERE DOCKER STUFF
+
 ## Running
 
-Installing Guillotina provide the `g` executable. To run the server, simply:
+Installing Guillotina will provide the `g` executable.
+To run the server:
 
 ```
 g serve

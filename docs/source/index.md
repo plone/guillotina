@@ -3,6 +3,15 @@
 ```eval_rst
 .. toctree::
    :hidden:
+   :caption: Setup
+   :maxdepth: 1
+
+   install/installation
+```
+
+```eval_rst
+.. toctree::
+   :hidden:
    :caption: Training
    :maxdepth: 1
 
@@ -46,7 +55,7 @@ Server designed for high-performance, horizontally scaling solutions.
    for endpoints, out of the box CORS and websockets, your front-end team will be happy
    to work with Guillotina. We speak JSON but can adapt to any content type
    payload request/response bodies.
- - **AsyncIO**: With AsyncIO, websockets are simple. More interestingly, AsyncIO
+ - **AsyncIO**: With AsyncIO, websockets are effortless. More interestingly, AsyncIO
    is an ideal match with microservice architectures.
  - **Object model**: Guillotina uses a hierarchial object model. This hierarchy
    of objects then maps to URLs and is perfect for managing
@@ -59,8 +68,8 @@ Server designed for high-performance, horizontally scaling solutions.
 
 ## Use cases
 
-- Awesome case one
-- Awesome case two
+- NoSQL model with transactions and RBAC security or object API with security
+- Framework with batteries to do MVPs that needs to scale to final project
 
 ## Install requirements
 
@@ -79,7 +88,7 @@ pip install guillotina
 g serve --port=8080
 ```
 
-Then use curl, [Postman](https://www.postman.com/ "Link to Postman") or build something with it:
+Then use cURL, [Postman](https://www.postman.com/ "Link to Postman") or build something with it:
 
 ```sh
 curl -XPOST --user root:root http://localhost:8080/db -d '{
@@ -97,7 +106,7 @@ The [quick tour](./quick-tour.html) gives an overview of the major features in G
 
 Need help? Join our [Gitter channel](https://gitter.im/plone/guillotina).
 
-## Build a Guillotina app
+### Build a Guillotina app
 
 You can even run Guillotina as a single page app if you so desire.
 
@@ -179,4 +188,3 @@ The endpoints available around these objects are detailed below:
 - Finally, you may also need to put Guillotina
   [behind a proxy](./installation/production.html)
   when you deploy it.
-
