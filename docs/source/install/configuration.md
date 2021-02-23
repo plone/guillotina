@@ -1,5 +1,17 @@
 # Configuration
 
+- [Installing Guillotina](./installation/installation.html)
+  is done with pip but if you need to run with Docker,
+  [we also have you covered](https://hub.docker.com/r/guillotina/guillotina/).
+- Guillotina has an quite a few
+  [configuration options](./installation/configuration.html)
+  you might be curious about.
+- You can also setup
+  [logging configuration](./installation/logging.html).
+- Finally, you may also need to put Guillotina
+  [behind a proxy](./installation/production.html)
+  when you deploy it.
+
 `guillotina` and its addons define a global configuration that is used.
 All of these settings are configurable by providing a
 JSON configuration file or yaml to the start script.
@@ -10,7 +22,7 @@ file by using the `-c` option for the script like this: `./bin/guillotina -c myc
 
 ## Applications
 
-To load guillotina applications into your application, use the `applications` setting:
+To load Guillotina applications into your application, use the `applications` setting:
 
 ```yaml
 applications:

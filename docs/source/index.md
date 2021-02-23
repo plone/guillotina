@@ -7,6 +7,7 @@
    :maxdepth: 1
 
    install/installation
+   install/configuration
 ```
 
 ```eval_rst
@@ -25,6 +26,7 @@
    :maxdepth: 1
    :glob:
 
+   api/index
    rest/application
    rest/db
    rest/container
@@ -158,33 +160,3 @@ if __name__ == "__main__":
     )
     uvicorn.run(app, host="localhost", port=8080)
 ```
-
-## REST API
-
-After you're up and running, primarily, Guillotina provides a REST API to work with
-and it is what you should become the most familiar with.
-
-Guillotina API structure mirrors the object tree structure. Within the object
-tree structure, there are four major types of objects you'll want to be familiar
-with:
-
-- Application: The root of the tree: `/`
-- Database: A configured database: `/(db)`
-- Container: An main object to add data to: `/(db)/(container)`
-- Content: Item or Folder by default. This is your dynamic object tree you create
-
-The endpoints available around these objects are detailed below:
-
-## Deploying
-
-- [Installing Guillotina](./installation/installation.html)
-  is done with pip but if you need to run with Docker,
-  [we also have you covered](https://hub.docker.com/r/guillotina/guillotina/).
-- Guillotina has an quite a few
-  [configuration options](./installation/configuration.html)
-  you might be curious about.
-- You can also setup
-  [logging configuration](./installation/logging.html).
-- Finally, you may also need to put Guillotina
-  [behind a proxy](./installation/production.html)
-  when you deploy it.
