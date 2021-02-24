@@ -132,12 +132,16 @@ class ITestBehavior(Interface):
 
     test_required_field = schema.TextLine(required=True)
 
+    default_list = schema.List(value_type=schema.TextLine(), defaultFactory=list)
+    default_list_context = schema.List(value_type=schema.TextLine(), defaultFactory=list)
+
 
 @configure.behavior(
     title="", provides=ITestBehavior, marker=IMarkerBehavior, for_="guillotina.interfaces.IResource"
 )
 class GTestBehavior(AnnotationBehavior):
     foobar_context = ContextProperty("foobar_context")
+    default_list_context = ContextProperty("default_list_context")
 
 
 class ITestContextBehavior(Interface):

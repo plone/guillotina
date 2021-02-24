@@ -238,16 +238,33 @@ async def test_base_object(mock_txn):
 
 
 async def test_getattr_set_default(container_requester):
-    custom_content = await create_content("CustomContentType")
+    async with container_requester as requester:
+        async with requester.db.get_transaction_manager().transaction():
+            custom_content = await create_content("CustomContentType", **{"@behaviors": [ITestBehavior.__identifier__]})
 
-    images1 = custom_content.images
-    images2 = custom_content.images
+            images1 = custom_content.images
+            images2 = custom_content.images
 
-    assert isinstance(images1, dict)
+            assert isinstance(images1, dict)
 
-    # Assert that obj.__getattr__() returns always same instance of default value
-    # for empty fields
-    assert id(images1) == id(images2)
+            # Assert that obj.__getattr__() returns always same instance of default value
+            # for empty fields
+            assert id(images1) == id(images2)
+
+            # Check this also applies for fields in behaviors
+            behavior = await get_behavior(custom_content, ITestBehavior)
+            d1 = behavior.default_list
+            d2 = behavior.default_list
+
+            assert isinstance(d1, list)
+            assert id(d1 ) == id(d2)
+
+            # Check this also applies for fields in context behaviors
+            d1 = behavior.default_list_context
+            d2 = behavior.default_list_context
+
+            assert isinstance(d1, list)
+            assert id(d1 ) == id(d2)
 
 
 async def test_getattr_default_factory(container_requester):

@@ -17,7 +17,9 @@ class ContextProperty:
         if callable(result):
             result = result(context=inst.context, name=self.__name__)
         if result == _EMPTY:
-            return get_default_from_schema(inst.context, inst.schema, self.__name__)
+            result = get_default_from_schema(inst.context, inst.schema, self.__name__)
+            # Avoids returning a new instance of default value in future accesses
+            setattr(inst.context, self.__name__, result)
         return result
 
     def __set__(self, inst, value):

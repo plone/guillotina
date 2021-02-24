@@ -59,7 +59,8 @@ class AnnotationBehavior:
         data = self.__dict__["data"]
 
         if key_name not in data:
-            return get_default_from_schema(
+            # Adding the default to 'data' avoids returning a new instance in future accesses
+            data[key_name] = get_default_from_schema(
                 self, self.__dict__["schema"], name, self.__dict__["schema"][name].missing_value
             )
 
@@ -110,7 +111,10 @@ class ContextBehavior:
         key_name = self.__dict__["prefix"] + name
         field = self.__dict__["schema"][name]
         if not hasattr(context, key_name):
-            return get_default_from_schema(self, self.__dict__["schema"], name, field.missing_value)
+            value = get_default_from_schema(self, self.__dict__["schema"], name, field.missing_value)
+            # Avoids returning a new instance of default value in future accesses
+            self.__dict__["context"].__setattr__(key_name, value)
+            return value
 
         return getattr(context, key_name)
 
