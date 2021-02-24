@@ -4,7 +4,8 @@ CHANGELOG
 6.1.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix Behavior.__getattr__() returns a new instance of default value each time is called
+  [masipcat]
 
 
 6.1.5 (2021-02-09)
