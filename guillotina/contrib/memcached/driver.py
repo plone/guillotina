@@ -14,7 +14,6 @@ from typing import Optional
 
 import asyncio
 import backoff
-import copy
 import hashlib
 import logging
 
@@ -168,7 +167,7 @@ class MemcachedDriver:
                 except Exception:  # pragma: no cover
                     logger.error("Error initializing memcached driver", exc_info=True)
 
-                if _SEND_METRICS:
+                if _SEND_METRICS is True:
                     self._metrics_task = loop.create_task(metrics_probe(self.client))
 
     async def _create_client(self, settings: Dict[str, Any]) -> emcache.Client:
@@ -274,11 +273,11 @@ async def metrics_probe(client: emcache.Client, every: int = 30):
     """
     state: Optional[emcache.ConnectionPoolMetrics] = None
     while True:
-        state = await update_connection_pool_metrics(client, state)
+        state = update_connection_pool_metrics(client, state)
         await asyncio.sleep(every)
 
 
-async def update_connection_pool_metrics(
+def update_connection_pool_metrics(
     client: emcache.Client, last_state: Optional[emcache.ConnectionPoolMetrics] = None
 ) -> emcache.ConnectionPoolMetrics:
 
@@ -322,4 +321,4 @@ async def update_connection_pool_metrics(
             current_value = getattr(node_metrics, attr)
             counter.labels(node=node_label).inc(current_value - prev_value)
 
-    return copy.deepcopy(metrics)
+    return metrics

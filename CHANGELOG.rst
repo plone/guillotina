@@ -4,7 +4,8 @@ CHANGELOG
 6.1.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+
+- Improve memcached metrics probe [lferran]
 
 
 6.1.5 (2021-02-09)
