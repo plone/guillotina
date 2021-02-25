@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.1.6 (unreleased)
+6.1.6 (2021-02-25)
 ------------------
 
 - Reuse modified objects on same transactions on traversal/async_get navigation
