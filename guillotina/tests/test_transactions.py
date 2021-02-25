@@ -157,3 +157,15 @@ async def test_register_duplicate_object_oid(guillotina_main):
         txn.register(utils.create_content(uid="foobar"))
         with pytest.raises(TransactionObjectRegistrationMismatchException):
             txn.register(utils.create_content(uid="foobar"))
+
+
+async def test_txn_reuse(container_requester):
+    async with container_requester as requester:
+        async with transaction(db=requester.db) as txn:
+            root = await txn.get(ROOT_ID)
+            container1 = await root.async_get("guillotina")
+            container1.title = "My new title"
+            container1.register()
+            container2 = await root.async_get("guillotina")
+            assert container1 == container2
+            assert container2.title == "My new title"

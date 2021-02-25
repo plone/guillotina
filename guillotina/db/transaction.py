@@ -506,8 +506,14 @@ class Transaction:
         return await self._manager._storage.get_child(self, container.__uuid__, key)
 
     @profilable
-    async def get_child(self, parent, key):
+    async def get_child(self, parent, key, ignore_registered=False):
         result = await self._get_child(parent, key)
+
+        if not ignore_registered:
+            obj = self.modified.get(result["zoid"], None)
+            if obj is not None:
+                return obj
+
         if result is None:
             return None
 

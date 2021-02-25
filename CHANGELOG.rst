@@ -4,7 +4,8 @@ CHANGELOG
 6.1.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Reuse modified objects on same transactions on traversal/async_get navigation
+  [bloodbare]
 
 
 6.1.5 (2021-02-09)
