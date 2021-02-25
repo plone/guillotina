@@ -7,6 +7,8 @@ CHANGELOG
 - Reuse modified objects on same transactions on traversal/async_get navigation
   [bloodbare]
 
+- Improve memcached metrics probe [lferran]
+
 
 6.1.5 (2021-02-09)
 ------------------

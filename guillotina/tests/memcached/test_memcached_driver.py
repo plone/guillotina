@@ -18,6 +18,12 @@ MOCK_HOSTS = ["localhost:11211"]
 
 
 @pytest.fixture(scope="function")
+def dont_probe_metrics():
+    with mock.patch("guillotina.contrib.memcached.driver._SEND_METRICS", False):
+        yield
+
+
+@pytest.fixture(scope="function")
 def mocked_create_client():
     with mock.patch("guillotina.contrib.memcached.driver.emcache.create_client") as create_client:
         f = asyncio.Future()
@@ -69,7 +75,7 @@ async def test_create_client_sets_configured_params(mocked_create_client, param,
 
 
 @pytest.mark.app_settings(MEMCACHED_SETTINGS)
-async def test_memcached_ops(memcached_container, guillotina_main):
+async def test_memcached_ops(memcached_container, guillotina_main, dont_probe_metrics):
     driver = await resolve_dotted_name("guillotina.contrib.memcached").get_driver()
     assert driver.initialized
     assert driver.client is not None
@@ -110,7 +116,9 @@ unsafe_keys = ["a" * 255, "foo bar", b"\x130".decode()]
 
 @pytest.mark.app_settings(MEMCACHED_SETTINGS)
 @pytest.mark.parametrize("unsafe_key", unsafe_keys)
-async def test_memcached_ops_are_safe_key(memcached_container, guillotina_main, unsafe_key):
+async def test_memcached_ops_are_safe_key(
+    memcached_container, guillotina_main, unsafe_key, dont_probe_metrics
+):
     driver = await resolve_dotted_name("guillotina.contrib.memcached").get_driver()
     await driver.get(unsafe_key)
     await driver.set(unsafe_key, b"foo")
@@ -197,7 +205,7 @@ class TestUpdateConnectionPoolMetrics:
         client = mock.Mock()
         client.cluster_managment.return_value.connection_pool_metrics.return_value = node_metrics
 
-        await update_connection_pool_metrics(client, last_state)
+        update_connection_pool_metrics(client, last_state)
 
         avg.assert_has_calls([mock.call.labels(node="node1"), mock.call.labels().set(10.0)])
         p50.assert_has_calls([mock.call.labels(node="node1"), mock.call.labels().set(50.0)])
@@ -219,7 +227,7 @@ class TestUpdateConnectionPoolMetrics:
         client = mock.Mock()
         client.cluster_managment.return_value.connection_pool_metrics.return_value = node_metrics
 
-        await update_connection_pool_metrics(client, last_state)
+        update_connection_pool_metrics(client, last_state)
 
         avg.assert_not_called()
         p50.assert_not_called()
