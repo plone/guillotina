@@ -170,6 +170,7 @@ async def test_txn_reuse(container_requester):
             assert container1 == container2
             assert container2.title == "My new title"
 
+
 async def test_txn_reuse_delete(container_requester):
     async with container_requester as requester:
         async with transaction(db=requester.db) as txn:
@@ -179,6 +180,7 @@ async def test_txn_reuse_delete(container_requester):
             await root.async_del("guillotina")
             container2 = await root.async_get("guillotina")
             assert container2 is None
+
 
 async def test_txn_reuse_add(container_requester):
     async with container_requester as requester:

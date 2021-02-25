@@ -1,6 +1,4 @@
 from collections import OrderedDict
-
-from zope.interface.declarations import providedBy
 from guillotina import task_vars
 from guillotina._settings import app_settings
 from guillotina.component import get_adapter
