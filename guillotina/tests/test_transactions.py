@@ -169,3 +169,23 @@ async def test_txn_reuse(container_requester):
             container2 = await root.async_get("guillotina")
             assert container1 == container2
             assert container2.title == "My new title"
+
+async def test_txn_reuse_delete(container_requester):
+    async with container_requester as requester:
+        async with transaction(db=requester.db) as txn:
+            root = await txn.get(ROOT_ID)
+            container1 = await root.async_get("guillotina")
+            assert container1 is not None
+            await root.async_del("guillotina")
+            container2 = await root.async_get("guillotina")
+            assert container2 is None
+
+async def test_txn_reuse_add(container_requester):
+    async with container_requester as requester:
+        async with transaction(db=requester.db) as txn:
+            root = await txn.get(ROOT_ID)
+            container1 = await root.async_get("guillotina")
+            obj = await create_content_in_container(container1, "Folder", "myobj", check_security=False)
+            obj2 = await container1.async_get("myobj")
+            assert obj2 is None
+            assert obj == obj2
