@@ -4,6 +4,8 @@ CHANGELOG
 6.1.6 (unreleased)
 ------------------
 
+- Reuse modified objects on same transactions on traversal/async_get navigation
+  [bloodbare]
 
 - Improve memcached metrics probe [lferran]
 

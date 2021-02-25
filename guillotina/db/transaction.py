@@ -176,6 +176,7 @@ class Transaction:
         # needs to be ordered because content inserted after other might
         # reference each other
         self.added = OrderedDict()
+        self.added_children = {}
         self.modified = {}
         self.deleted = {}
 
@@ -319,6 +320,8 @@ class Transaction:
 
         obj.__uuid__ = oid
         if new or obj.__new_marker__:
+            if obj.__parent__ is not None and hasattr(obj, "id"):
+                self.added_children[(obj.__parent__.__uuid__, obj.id)] = obj.__uuid__
             self.added[oid] = obj
         elif oid in self.modified:
             if id(obj) != id(self.modified[oid]):
@@ -335,6 +338,7 @@ class Transaction:
                 del self.modified[oid]
             elif oid in self.added:
                 del self.added[oid]
+                del self.added_children[(obj.__parent__.__uuid__, obj.id)]
             self.deleted[oid] = obj
 
     async def clean_cache(self):
@@ -483,6 +487,7 @@ class Transaction:
 
     def tpc_cleanup(self):
         self.added = {}
+        self.added_children = {}
         self.modified = {}
         self.deleted = {}
         self._db_txn = None
@@ -506,10 +511,23 @@ class Transaction:
         return await self._manager._storage.get_child(self, container.__uuid__, key)
 
     @profilable
-    async def get_child(self, parent, key):
+    async def get_child(self, parent, key, ignore_registered=False):
+        if not ignore_registered:
+            uuid = self.added_children.get((parent.__uuid__, key), None)
+            if uuid is not None:
+                return self.added[uuid]
+
         result = await self._get_child(parent, key)
+
         if result is None:
             return None
+
+        if not ignore_registered:
+            if result["zoid"] in self.deleted:
+                return None
+            obj = self.modified.get(result["zoid"], None)
+            if obj is not None:
+                return obj
 
         return self._fill_object(result, parent)
 
