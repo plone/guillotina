@@ -320,8 +320,8 @@ class Transaction:
 
         obj.__uuid__ = oid
         if new or obj.__new_marker__:
-            if obj.__parent__ is not None:
-                self.added_children[(obj.__parent__.uuid, obj.id)] = obj.uuid
+            if obj.__parent__ is not None and hasattr(obj, "id"):
+                self.added_children[(obj.__parent__.__uuid__, obj.id)] = obj.__uuid__
             self.added[oid] = obj
         elif oid in self.modified:
             if id(obj) != id(self.modified[oid]):
