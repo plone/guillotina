@@ -525,8 +525,7 @@ class Transaction:
             return None
 
         if not ignore_registered:
-            obj = self.deleted.get(result["zoid"], None)
-            if obj is not None:
+            if result["zoid"] in self.deleted:
                 return None
             obj = self.modified.get(result["zoid"], None)
             if obj is not None:

@@ -187,5 +187,5 @@ async def test_txn_reuse_add(container_requester):
             container1 = await root.async_get("guillotina")
             obj = await create_content_in_container(container1, "Folder", "myobj", check_security=False)
             obj2 = await container1.async_get("myobj")
-            assert obj2 is None
+            assert obj2 is not None
             assert obj == obj2
