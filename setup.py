@@ -86,7 +86,7 @@ setup(
             "pytest-docker-fixtures",
             "pytest-rerunfailures<=9.0",
             "async-asgi-testclient<2.0.0",
-            "openapi-spec-validator",
+            "openapi-spec-validator==0.2.9",
             "aiohttp>=3.0.0,<4.0.0",
             "asyncmock",
             "prometheus-client",
