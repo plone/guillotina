@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from copy import deepcopy
 from guillotina import configure
 from guillotina import glogging
 from guillotina.component import ComponentLookupError
@@ -36,7 +37,6 @@ import asyncio
 
 
 logger = glogging.getLogger("guillotina")
-_missing = object()
 
 
 @configure.adapter(for_=(IResource, Interface), provides=IResourceDeserializeFromJson)
@@ -123,7 +123,7 @@ class DeserializeFromJson:
                     raise Unauthorized("Write permission not allowed")
 
                 if not found and field.missing_value is not None:
-                    data_value = field.missing_value
+                    data_value = deepcopy(field.missing_value)
 
                 try:
                     field = field.bind(obj)
