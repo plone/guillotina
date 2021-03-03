@@ -118,11 +118,14 @@ class DeserializeFromJson:
                 data_value = data[name] if name in data else None
                 found = True if name in data else False
 
-            if found or field.missing_value is not None:
+            # Only set missing_value when it's not present in 'data' and we are validating all fields
+            must_set_mv = not found and validate_all and field.missing_value is not None
+
+            if found or must_set_mv:
                 if found and not self.check_permission(write_permissions.get(name)):
                     raise Unauthorized("Write permission not allowed")
 
-                if not found and field.missing_value is not None:
+                if must_set_mv:
                     data_value = deepcopy(field.missing_value)
 
                 try:
