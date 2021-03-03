@@ -150,6 +150,7 @@ async def test_get_security_data(dummy_guillotina):
     ob = test_utils.create_content()
     adapter = get_adapter(ob, ISecurityInfo)
     data = adapter()
+    assert "id" in data
     assert "access_users" in data
     assert "access_roles" in data
 

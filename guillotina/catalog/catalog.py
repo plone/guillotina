@@ -118,6 +118,7 @@ class DefaultSecurityInfoAdapter(object):
     def __call__(self):
         """ access_users and access_roles """
         return {
+            "id": self.content.id,
             "path": get_content_path(self.content),
             "depth": get_content_depth(self.content),
             "parent_uuid": getattr(getattr(self.content, "__parent__", None), "uuid", None),

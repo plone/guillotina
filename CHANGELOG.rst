@@ -4,7 +4,8 @@ CHANGELOG
 6.1.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- ISecurityInfo: field 'id' was missing
+  [masipcat]
 
 
 6.1.6 (2021-02-25)
