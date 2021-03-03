@@ -122,7 +122,7 @@ class DeserializeFromJson:
                 if found and not self.check_permission(write_permissions.get(name)):
                     raise Unauthorized("Write permission not allowed")
 
-                if field.missing_value is not None:
+                if not found and field.missing_value is not None:
                     data_value = field.missing_value
 
                 try:
