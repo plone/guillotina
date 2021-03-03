@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.1.7 (unreleased)
+6.1.7 (2021-03-03)
 ------------------
 
 - ISecurityInfo: field 'id' was missing
