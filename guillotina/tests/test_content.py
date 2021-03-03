@@ -311,19 +311,14 @@ async def test_context_property_default_schema_value(container_requester):
 async def test_missing_value_is_set(container_requester):
     async with container_requester as requester:
         response, status = await requester(
-            "POST",
-            "/db/guillotina/",
-            data=json.dumps(
-                {
-                    "@type": "CustomContentType",
-                    "id": "item1",
-                }
-            ),
+            "POST", "/db/guillotina/", data=json.dumps({"@type": "CustomContentType", "id": "item1"}),
         )
         assert status == 201, response
 
         async with requester.db.get_transaction_manager().transaction():
             ob = await get_object_by_oid(response["@uid"])
+            # default value is NOT set
             assert "images" not in ob.__dict__
+            # missing_value is set
             assert "images_missing_value" in ob.__dict__
-            assert ob.__dict__["images_missing_value"] == {}  # default value is set
+            assert ob.__dict__["images_missing_value"] == {}

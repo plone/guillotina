@@ -4,7 +4,8 @@ CHANGELOG
 6.1.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Write missing_value to object on deserialization
+  [masipcat]
 
 
 6.1.7 (2021-03-03)
