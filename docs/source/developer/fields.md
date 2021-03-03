@@ -27,6 +27,15 @@ consist of field definitions.
 - guillotina.files.CloudFileField: file field for storing in db or cloud storage
 
 
+## Default values
+
+All the fields listed above can be configured to use a value as fallback when a value
+it's not provided. There are two ways to define it:
+
+1. Using the argument `missing_value` we can define the value we want to **set** to the field. For example, a schema with the field `counter = schema.Int(missing_value=0)` will be set to `0` during creation if no value is provided for the key `counter`.
+2. Using the argument `default` (or `defaultFactory`) we achive a similar behavior with one difference: the default value **it's not stored** in the object (this means that internally, the object is `None`) until a value it's provided explicitly.
+
+
 ## Patch field
 
 Guillotina provides a `PatchField` which allows you to patch values of
