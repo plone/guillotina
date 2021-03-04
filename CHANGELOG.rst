@@ -1,11 +1,16 @@
 CHANGELOG
 =========
 
-6.1.8 (unreleased)
+6.2.0 (unreleased)
 ------------------
 
 - Write missing_value to object on deserialization
   [masipcat]
+
+- BREAKING CHANGE: PG Catalog implementation splitted on multiple fields
+  if you are import PGSearchUtility you need to change the import line from:
+  `from guillotina.contrib.catalog.pg import PGSearchUtility` to `from guillotina.contrib.catalog.pg.utility import PGSearchUtility`
+  [bloodbare]
 
 
 6.1.7 (2021-03-03)
