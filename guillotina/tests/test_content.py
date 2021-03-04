@@ -35,6 +35,8 @@ class ICustomContentType(IItem):
 
     images = Dict(key_type=TextLine(), value_type=TextLine(), required=False, defaultFactory=dict)
 
+    images_missing_value = Dict(key_type=TextLine(), value_type=TextLine(), required=False, missing_value={})
+
 
 @configure.contenttype(type_name="CustomContentType", schema=ICustomContentType)
 class CustomContentType(Item):
@@ -304,3 +306,19 @@ async def test_context_property_default_schema_value(container_requester):
             ob = await get_object_by_oid(response["@uid"])
             behavior = await get_behavior(ob, ITestBehavior)
             assert behavior.foobar_context == "default-foobar"
+
+
+async def test_missing_value_is_set(container_requester):
+    async with container_requester as requester:
+        response, status = await requester(
+            "POST", "/db/guillotina/", data=json.dumps({"@type": "CustomContentType", "id": "item1"}),
+        )
+        assert status == 201, response
+
+        async with requester.db.get_transaction_manager().transaction():
+            ob = await get_object_by_oid(response["@uid"])
+            # default value is NOT set
+            assert "images" not in ob.__dict__
+            # missing_value is set
+            assert "images_missing_value" in ob.__dict__
+            assert ob.__dict__["images_missing_value"] == {}
