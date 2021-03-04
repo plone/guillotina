@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.2.0 (unreleased)
+6.2.0 (2021-03-04)
 ------------------
 
 - Write missing_value to object on deserialization
