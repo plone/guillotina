@@ -1,6 +1,6 @@
 from .services.utils import NoCatalogException
 from guillotina.component import query_utility
-from guillotina.contrib.catalog.pg import PGSearchUtility
+from guillotina.contrib.catalog.pg.utility import PGSearchUtility
 from guillotina.exceptions import ContainerNotFound
 from guillotina.exceptions import TransactionNotFound
 from guillotina.interfaces import IPrincipal

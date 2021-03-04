@@ -34,7 +34,7 @@ PG_CATALOG_SETTINGS = {
     "load_utilities": {
         "catalog": {
             "provides": "guillotina.interfaces.ICatalogUtility",
-            "factory": "guillotina.contrib.catalog.pg.PGSearchUtility",
+            "factory": "guillotina.contrib.catalog.pg.utility.PGSearchUtility",
         }
     },
 }
@@ -269,7 +269,7 @@ where json->>'id' = 'item1' AND json->>'container_id' = 'guillotina'
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)
 @pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
 async def test_query_pg_catalog(container_requester):
-    from guillotina.contrib.catalog.pg import PGSearchUtility
+    from guillotina.contrib.catalog.pg.utility import PGSearchUtility
 
     async with container_requester as requester:
         await requester(
@@ -325,7 +325,7 @@ async def test_query_pg_catalog(container_requester):
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)
 @pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
 async def test_fulltext_query_pg_catalog(container_requester):
-    from guillotina.contrib.catalog.pg import PGSearchUtility
+    from guillotina.contrib.catalog.pg.utility import PGSearchUtility
 
     async with container_requester as requester:
         await requester(
@@ -355,7 +355,7 @@ async def test_fulltext_query_pg_catalog(container_requester):
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)
 @pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
 async def test_fulltext_query_pg_catalog_lang(container_requester):
-    from guillotina.contrib.catalog.pg import PGSearchUtility
+    from guillotina.contrib.catalog.pg.utility import PGSearchUtility
 
     async with container_requester as requester:
         await requester(
@@ -385,7 +385,7 @@ async def test_fulltext_query_pg_catalog_lang(container_requester):
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)
 @pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
 async def test_fulltext_query_pg_catalog_order(container_requester):
-    from guillotina.contrib.catalog.pg import PGSearchUtility
+    from guillotina.contrib.catalog.pg.utility import PGSearchUtility
 
     async with container_requester as requester:
         await requester(
@@ -420,7 +420,7 @@ async def test_fulltext_query_pg_catalog_order(container_requester):
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)
 @pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
 async def test_date_query_pg_catalog_sort(container_requester):
-    from guillotina.contrib.catalog.pg import PGSearchUtility
+    from guillotina.contrib.catalog.pg.utility import PGSearchUtility
 
     async with container_requester as requester:
         await requester(
@@ -457,7 +457,7 @@ async def test_date_query_pg_catalog_sort(container_requester):
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)
 @pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
 async def test_build_pg_query(dummy_guillotina):
-    from guillotina.contrib.catalog.pg import PGSearchUtility
+    from guillotina.contrib.catalog.pg.utility import PGSearchUtility
 
     util = PGSearchUtility()
     with mocks.MockTransaction():
@@ -509,7 +509,7 @@ async def test_parse_base():
 
 
 async def test_basic_index_generator():
-    from guillotina.contrib.catalog.pg import BasicJsonIndex
+    from guillotina.contrib.catalog.pg.indexes import BasicJsonIndex
 
     index = BasicJsonIndex("foobar")
     assert "json->'" in index.where("foobar", "?")
@@ -517,7 +517,7 @@ async def test_basic_index_generator():
 
 
 async def test_pg_field_parser(dummy_guillotina):
-    from guillotina.contrib.catalog.pg import Parser
+    from guillotina.contrib.catalog.pg.parser import Parser
 
     content = test_utils.create_content(Container)
     parser = Parser(None, content)
@@ -569,7 +569,7 @@ async def test_pg_field_parser(dummy_guillotina):
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)
 @pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
 async def test_parse_metadata(dummy_guillotina):
-    from guillotina.contrib.catalog.pg import PGSearchUtility
+    from guillotina.contrib.catalog.pg.utility import PGSearchUtility
 
     util = PGSearchUtility()
     with mocks.MockTransaction():
