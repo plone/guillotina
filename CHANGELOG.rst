@@ -4,7 +4,8 @@ CHANGELOG
 6.2.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Allow to skip pg catalog initialization based on SKIP_PGCATALOG_INIT environmental var.
+  [bloodbare]
 
 
 6.2.0 (2021-03-04)

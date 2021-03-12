@@ -38,6 +38,7 @@ from zope.interface import implementer
 import asyncpg.exceptions
 import json
 import orjson
+import os
 import typing
 
 
@@ -82,6 +83,9 @@ class PGSearchUtility(DefaultSearchUtility):
 
     async def initialize(self, app=None):
         from guillotina import app_settings
+
+        if os.environ.get("SKIP_PGCATALOG_INIT") or app_settings.get("skip_pgcatalog_init", False):
+            return
 
         if not app_settings["store_json"]:
             return
