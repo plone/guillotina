@@ -82,10 +82,10 @@ class PGSearchUtility(DefaultSearchUtility):
         return {}
 
     async def initialize(self, app=None):
-        if os.environ.get('SKIP_PGCATALOG_INIT'):
-            return
-
         from guillotina import app_settings
+
+        if os.environ.get("SKIP_PGCATALOG_INIT") or app_settings.get("skip_pgcatalog_init", False):
+            return
 
         if not app_settings["store_json"]:
             return
