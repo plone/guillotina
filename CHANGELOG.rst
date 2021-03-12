@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.2.1 (unreleased)
+6.2.1 (2021-03-12)
 ------------------
 
 - Allow to skip pg catalog initialization based on SKIP_PGCATALOG_INIT environmental var.
