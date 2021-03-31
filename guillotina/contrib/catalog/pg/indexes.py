@@ -17,9 +17,9 @@ class BasicJsonIndex:
 
     def get_index_sql(self, storage: IPostgresStorage) -> typing.List[str]:
         return [
-            f"""CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
+            f"""CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}_{sqlq(storage.objects_table_name.replace('.', '_'))}
                 ON {sqlq(storage.objects_table_name)} ((json->>'{sqlq(self.name)}'));""",
-            f"""CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
+            f"""CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}_{sqlq(storage.objects_table_name.replace('.', '_'))}
                 ON {sqlq(storage.objects_table_name)} USING gin ((json->'{sqlq(self.name)}'))""",
         ]
 
@@ -38,10 +38,10 @@ class BasicJsonIndex:
 
 
 class BooleanIndex(BasicJsonIndex):
-    def get_index_sql(self, storage):
+    def get_index_sql(self, storage: IPostgresStorage):
         return [
             f"""
-CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
+CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}_{sqlq(storage.objects_table_name.replace('.', '_'))}
 ON {sqlq(storage.objects_table_name)} (((json->>'{sqlq(self.name)}')::boolean));"""
         ]
 
@@ -53,10 +53,10 @@ ON {sqlq(storage.objects_table_name)} (((json->>'{sqlq(self.name)}')::boolean));
 class KeywordIndex(BasicJsonIndex):
     operators = ["?", "?|", "NOT ?"]
 
-    def get_index_sql(self, storage):
+    def get_index_sql(self, storage: IPostgresStorage):
         return [
             f"""
-CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
+CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}_{sqlq(storage.objects_table_name.replace('.', '_'))}
 ON {sqlq(storage.objects_table_name)} USING gin ((json->'{sqlq(self.name)}'))"""
         ]
 
@@ -82,10 +82,10 @@ class CastIntIndex(BasicJsonIndex):
     cast_type = "integer"
     operators = ["=", "!=", ">", "<", ">=", "<="]
 
-    def get_index_sql(self, storage):
+    def get_index_sql(self, storage: IPostgresStorage):
         return [
             f"""
-CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
+CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}_{sqlq(storage.objects_table_name.replace('.', '_'))}
 ON {sqlq(storage.objects_table_name)}
 using btree(CAST(json->>'{sqlq(self.name)}' AS {sqlq(self.cast_type)}))"""
         ]
@@ -106,10 +106,10 @@ class CastFloatIndex(CastIntIndex):
 class CastDateIndex(CastIntIndex):
     cast_type = "timestamp"
 
-    def get_index_sql(self, storage):
+    def get_index_sql(self, storage: IPostgresStorage):
         return [
             f"""
-CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
+CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}_{sqlq(storage.objects_table_name.replace('.', '_'))}
 ON {sqlq(storage.objects_table_name)} (f_cast_isots(json->>'{sqlq(self.name)}'))"""
         ]
 
@@ -128,10 +128,10 @@ f_cast_isots(json->>'{sqlq(self.name)}') {sqlq(operator)} ${{arg}}::{sqlq(self.c
 class FullTextIndex(BasicJsonIndex):
     operators = ["?", "?|", "="]
 
-    def get_index_sql(self, storage):
+    def get_index_sql(self, storage: IPostgresStorage):
         return [
             f"""
-CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}
+CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}_{sqlq(storage.objects_table_name.replace('.', '_'))}
 ON {sqlq(storage.objects_table_name)}
 using gin(to_tsvector('simple', json->>'{sqlq(self.name)}'));"""
         ]

@@ -4,7 +4,8 @@ CHANGELOG
 6.2.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Index on PG Catalog IDS should be table named
+  [bloodbare]
 
 
 6.2.1 (2021-03-12)
