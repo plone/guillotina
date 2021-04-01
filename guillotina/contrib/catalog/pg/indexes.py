@@ -142,7 +142,7 @@ using gin(to_tsvector('simple', json->>'{sqlq(self.name)}'));"""
         operator is ignored for now...
         """
         return f"""
-to_tsvector('simple', json->>'{sqlq(self.name)}') @@ plainto_tsquery('simple', ${{arg}}::text)"""
+to_tsvector('simple', json->>'{sqlq(self.name)}') @@ to_tsquery('simple', ${{arg}}::text)"""
 
     def order_by_score(self, direction="ASC"):
         return f"order by {sqlq(self.name)}_score {sqlq(direction)}"

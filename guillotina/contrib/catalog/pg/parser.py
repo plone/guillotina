@@ -104,7 +104,7 @@ class Parser(BaseParser):
                 operator = "?"
         elif _type in ("text", "searchabletext"):
             operator = "="
-            value = "&".join(to_list(value))
+            result = "&".join(to_list(value + ':*'))
         if _type == "path":
             if operator != "starts":
                 # we do not currently support other search types
