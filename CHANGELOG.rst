@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.2.2 (unreleased)
+6.2.2 (2021-04-01)
 ------------------
 
 - Index on PG Catalog IDS should be table named
