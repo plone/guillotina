@@ -9,7 +9,7 @@ mypy==0.720
 mypy-zope==0.2.0
 black==19.10b0
 isort==4.3.21
-jinja2==2.11.1
+jinja2==2.11.3
 pytz==2020.1
 emcache==0.4.1
 pymemcache==3.4.0
