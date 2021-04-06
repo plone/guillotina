@@ -122,7 +122,7 @@ class WebsocketsView(Service):
         permission = get_utility(IPermission, name="guillotina.AccessContent")
 
         security = get_security_policy()
-        allowed = security.check_permission(permission.id, obj)
+        allowed = await security.check_permission(permission.id, obj)
         if not allowed:
             return await ws.send_str(ujson.dumps({"error": "Not allowed"}))
 
@@ -141,7 +141,7 @@ class WebsocketsView(Service):
 
         ViewClass = view.__class__
         view_permission = get_view_permission(ViewClass)
-        if not security.check_permission(view_permission, view):
+        if not await security.check_permission(view_permission, view):
             return await ws.send_str(ujson.dumps({"error": "No view access", "id": frame_id}))
 
         if hasattr(view, "prepare"):

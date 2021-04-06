@@ -449,10 +449,10 @@ async def can_i_do(context, request):
     if "permissions" in request.query:
         results = {}
         for perm in request.query["permissions"].split(","):
-            results[perm] = policy.check_permission(perm, context)
+            results[perm] = await policy.check_permission(perm, context)
         return results
     else:
-        return policy.check_permission(request.query["permission"], context)
+        return await policy.check_permission(request.query["permission"], context)
 
 
 @configure.service(
@@ -751,7 +751,7 @@ async def resolve_uid(context, request):
     except KeyError:
         return HTTPNotFound(content={"reason": f"Could not find uid: {uid}"})
     policy = get_security_policy()
-    if policy.check_permission("guillotina.AccessContent", ob):
+    if await policy.check_permission("guillotina.AccessContent", ob):
         return HTTPMovedPermanently(get_object_url(ob, request))
     else:
         # if a user doesn't have access to it, they shouldn't know anything about it
@@ -805,7 +805,7 @@ async def get_field_value(context, request):
     read_permissions = merged_tagged_value_dict(schema, read_permission.key)
     serializer = get_multi_adapter((context, request), IResourceSerializeToJson)
 
-    if not serializer.check_permission(read_permissions.get(field_name)):
+    if not await serializer.check_permission(read_permissions.get(field_name)):
         return HTTPUnauthorized(content={"reason": "You are not authorized to render this field"})
 
     field_renderer = query_multi_adapter((context, request, field), IFieldValueRenderer)

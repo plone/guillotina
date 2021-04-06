@@ -508,7 +508,7 @@ policy = get_utility(ISecurityPolicy)
 policy.global_principal_roles(principal, groups)
 
 # Get if the authenticated user has permission on a object
-policy.check_permission(permission, obj)
+await policy.check_permission(permission, obj)
 ```
 
 ## REST APIs

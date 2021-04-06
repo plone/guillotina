@@ -104,7 +104,7 @@ class SerializeToJson(object):
         schema_serial = {}
         for name, field in get_fields(schema).items():
 
-            if not self.check_permission(read_permissions.get(name)):
+            if not await self.check_permission(read_permissions.get(name)):
                 continue
 
             if behavior:
@@ -146,7 +146,7 @@ class SerializeToJson(object):
             result = await result
         return result
 
-    def check_permission(self, permission_name):
+    async def check_permission(self, permission_name):
         if permission_name is None:
             return True
 
@@ -157,7 +157,7 @@ class SerializeToJson(object):
             else:
                 security = get_security_policy()
                 self.permission_cache[permission_name] = bool(
-                    security.check_permission(permission.id, self.context)
+                    await security.check_permission(permission.id, self.context)
                 )
         return self.permission_cache[permission_name]
 
@@ -181,7 +181,7 @@ class SerializeFolderToJson(SerializeToJson):
             result["items"] = []
             async for ident, member in self.context.async_items(suppress_events=True):
                 if not ident.startswith("_") and bool(
-                    security.check_permission("guillotina.AccessContent", member)
+                    await security.check_permission("guillotina.AccessContent", member)
                 ):
                     if fullobjects:
                         result["items"].append(

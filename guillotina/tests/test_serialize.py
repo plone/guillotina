@@ -260,8 +260,8 @@ async def test_check_permission_deserialize_content(dummy_request):
     login()
     content = create_content()
     deserializer = get_multi_adapter((content, dummy_request), IResourceDeserializeFromJson)
-    assert deserializer.check_permission("guillotina.ViewContent")
-    assert deserializer.check_permission("guillotina.ViewContent")  # with cache
+    assert await deserializer.check_permission("guillotina.ViewContent")
+    assert await deserializer.check_permission("guillotina.ViewContent")  # with cache
 
 
 async def test_patch_list_field_normal_patch(dummy_request, mock_txn):

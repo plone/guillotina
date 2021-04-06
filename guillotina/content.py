@@ -174,8 +174,7 @@ class Resource(guillotina.db.orm.base.BaseObject):
         super(Resource, self).__init__()
 
     def __repr__(self):
-        """
-        """
+        """"""
         path = "/".join(get_physical_path(self))
         return "< {type} at {path} by {mem} >".format(type=self.type_name, path=path, mem=id(self))
 
@@ -389,8 +388,7 @@ class Folder(Resource):
 
 @configure.contenttype(type_name="Container", schema=IContainer)
 class Container(Folder):
-    """
-    """
+    """"""
 
     async def install(self):
         # Creating and registering a local registry
@@ -594,7 +592,7 @@ async def create_content_in_container(
 
         if permission is not None:
             policy = get_security_policy()
-            if not policy.check_permission(permission.id, parent):
+            if not await policy.check_permission(permission.id, parent):
                 raise NoPermissionToAdd(str(parent), type_)
 
     constrains = IConstrainTypes(parent, None)
@@ -684,7 +682,7 @@ async def duplicate(
 
     if check_permission:
         policy = get_security_policy()
-        if not policy.check_permission("guillotina.AddContent", destination_ob):
+        if not await policy.check_permission("guillotina.AddContent", destination_ob):
             raise PreconditionFailed(
                 context, "You do not have permission to add content to " "the destination object"
             )
@@ -801,7 +799,7 @@ async def move(
 
     if check_permission:
         policy = get_security_policy()
-        if not policy.check_permission("guillotina.AddContent", destination_ob):
+        if not await policy.check_permission("guillotina.AddContent", destination_ob):
             raise PreconditionFailed(
                 context, "You do not have permission to add content to the " "destination object"
             )

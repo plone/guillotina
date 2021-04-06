@@ -93,7 +93,7 @@ class SwaggerDefinitionService(Service):
             data["requestBody"] = request_body
         api_def[path or "/"][method.lower()] = data
 
-    def get_endpoints(self, iface_conf, base_path, api_def, tags=None):
+    async def get_endpoints(self, iface_conf, base_path, api_def, tags=None):
         tags = tags or []
         for method in iface_conf.keys():
             if method == "endpoints":
@@ -102,7 +102,7 @@ class SwaggerDefinitionService(Service):
                         if "tags" in iface_conf["endpoints"][name][http_method]:
                             tags = iface_conf["endpoints"][name][http_method]["tags"]
                             break
-                    self.get_endpoints(
+                    await self.get_endpoints(
                         iface_conf["endpoints"][name], os.path.join(base_path, name), api_def, tags=tags,
                     )
             else:
@@ -118,7 +118,7 @@ class SwaggerDefinitionService(Service):
                 ):
                     continue
 
-                if not self.policy.check_permission(
+                if not await self.policy.check_permission(
                     service_def.get("permission", app_settings["default_permission"]), self.context
                 ):
                     continue
@@ -171,7 +171,7 @@ class SwaggerDefinitionService(Service):
             iface = resolve_dotted_name(dotted_iface)
             if iface.providedBy(self.context):
                 iface_conf = api_defs[dotted_iface]
-                self.get_endpoints(iface_conf, path, definition["paths"])
+                await self.get_endpoints(iface_conf, path, definition["paths"])
 
         definition["components"]["schemas"] = app_settings["json_schema_definitions"]
         return definition

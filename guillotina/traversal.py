@@ -487,7 +487,7 @@ class TraversalRouter(AbstractRouter):
         # Check security on context to AccessContent unless
         # is view allows explicit or its OPTIONS
         permission = get_utility(IPermission, name="guillotina.AccessContent")
-        if not policy.check_permission(permission.id, resource):
+        if not await policy.check_permission(permission.id, resource):
             # Check if its a CORS call:
             if IOPTIONS != method:
                 # Check if the view has permissions explicit
@@ -524,7 +524,7 @@ class TraversalRouter(AbstractRouter):
         if view_permission is None:
             # use default view permission
             view_permission = app_settings["default_permission"]
-        if not policy.check_permission(view_permission, view):
+        if not await policy.check_permission(view_permission, view):
             if IOPTIONS != method:
                 raise HTTPUnauthorized(
                     content={

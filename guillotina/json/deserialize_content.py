@@ -121,7 +121,7 @@ class DeserializeFromJson(object):
                 found = True if name in data else False
             if found:
 
-                if not self.check_permission(write_permissions.get(name)):
+                if not await self.check_permission(write_permissions.get(name)):
                     raise Unauthorized("Write permission not allowed")
 
                 try:
@@ -198,7 +198,7 @@ class DeserializeFromJson(object):
         except ComponentLookupError:
             raise ValueDeserializationError(field, value, "Deserializer not found for field")
 
-    def check_permission(self, permission_name: str) -> bool:
+    async def check_permission(self, permission_name: str) -> bool:
         if permission_name is None:
             return True
 
@@ -208,6 +208,6 @@ class DeserializeFromJson(object):
                 self.permission_cache[permission_name] = True
             else:
                 self.permission_cache[permission_name] = bool(
-                    get_security_policy().check_permission(permission.id, self.context)
+                    await get_security_policy().check_permission(permission.id, self.context)
                 )
         return self.permission_cache[permission_name]

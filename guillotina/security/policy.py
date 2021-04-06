@@ -60,7 +60,7 @@ class SecurityPolicy:
         self._cache.clear()
 
     @profilable
-    def check_permission(self, permission, obj):
+    async def check_permission(self, permission, obj):
         # Always allow public attributes
         if permission is Public:
             return True
