@@ -4,7 +4,8 @@ CHANGELOG
 6.2.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Search on pg catalog should check security on context
+  [bloodbare]
 
 
 6.2.2 (2021-04-01)

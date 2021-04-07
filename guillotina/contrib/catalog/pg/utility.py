@@ -23,6 +23,7 @@ from guillotina.interfaces import IContainer
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IFolder
 from guillotina.interfaces import IPGCatalogUtility
+from guillotina.interfaces import IResource
 from guillotina.interfaces.content import IApplication
 from guillotina.response import HTTPNotImplemented
 from guillotina.transactions import get_transaction
@@ -114,7 +115,7 @@ class PGSearchUtility(DefaultSearchUtility):
                     return
                 raise
 
-    def get_default_where_clauses(self, container: IContainer) -> typing.List[str]:
+    def get_default_where_clauses(self, context: IResource) -> typing.List[str]:
         users = []
         principal = get_authenticated_user()
         if principal is None:
@@ -123,12 +124,16 @@ class PGSearchUtility(DefaultSearchUtility):
 
         users.append(principal.id)
         users.extend(principal.groups)
-        roles = get_roles_principal(container)
+        roles = get_roles_principal(context)
 
         clauses = [
             "json->'access_users' ?| array['{}']".format("','".join([sqlq(u) for u in users])),
             "json->'access_roles' ?| array['{}']".format("','".join([sqlq(r) for r in roles])),
         ]
+        container = find_container(context)
+        if container is None:
+            raise ContainerNotFound()
+
         sql_wheres = ["({})".format(" OR ".join(clauses))]
         sql_wheres.append(f"""json->>'container_id' = '{sqlq(container.id)}'""")
         sql_wheres.append("""type != 'Container'""")
@@ -137,7 +142,7 @@ class PGSearchUtility(DefaultSearchUtility):
 
     def build_query(
         self,
-        container: IContainer,
+        context: IResource,
         query: ParsedQueryInfo,
         select_fields: typing.List[str],
         distinct: typing.Optional[bool] = False,
@@ -175,7 +180,7 @@ class PGSearchUtility(DefaultSearchUtility):
         txn = get_transaction()
         if txn is None:
             raise TransactionNotFound()
-        sql_wheres.extend(self.get_default_where_clauses(container))
+        sql_wheres.extend(self.get_default_where_clauses(context))
 
         order = (
             order_by_index.order_by_score(query["sort_dir"])
@@ -273,22 +278,19 @@ class PGSearchUtility(DefaultSearchUtility):
         Search query, uses parser to transform query
         """
         parsed_query = parse_query(context, query, self)
-        container = find_container(context)
-        if container is not None:
-            return await self._query(container, parsed_query)  # type: ignore
-        raise ContainerNotFound()
+        return await self._query(context, parsed_query)  # type: ignore
 
-    async def _query(self, container: IContainer, query: ParsedQueryInfo):
-        sql, arguments = self.build_query(container, query, ["id", "zoid", "json"])
+    async def _query(self, context: IResource, query: ParsedQueryInfo):
+        sql, arguments = self.build_query(context, query, ["id", "zoid", "json"])
         txn = get_current_transaction()
         conn = await txn.get_connection()
         results = []
         fullobjects = query["fullobjects"]
         try:
-            context_url = get_object_url(container)
+            context_url = get_object_url(context)
             request = get_current_request()
         except RequestNotFound:
-            context_url = get_content_path(container)
+            context_url = get_content_path(context)
             request = None
 
         logger.debug(f"Running search:\n{sql}\n{arguments}")
@@ -312,7 +314,7 @@ class PGSearchUtility(DefaultSearchUtility):
         # also do count...
         total = len(results)
         if total >= query["size"] or query["_from"] != 0:
-            sql, arguments = self.build_count_query(container, query)
+            sql, arguments = self.build_count_query(context, query)
             logger.debug(f"Running search:\n{sql}\n{arguments}")
             async with txn.lock:
                 records = await conn.fetch(sql, *arguments)
