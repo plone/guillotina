@@ -4,8 +4,9 @@ CHANGELOG
 6.2.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
-
+- Enable X-Wait header to wait futures. Use only in case you need to make sure all futures are finished before request ends.
+  Alert: Afects performance on request response time.
+  [bloodbare]
 
 6.2.3 (2021-04-07)
 ------------------
