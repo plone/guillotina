@@ -154,11 +154,14 @@ class BaseMatchInfo:
     async def http_exception(self):
         return None
 
-    def wait(self, request):
+    def wait(self, request) -> Optional[int]:
         if "X-Wait" in request.headers:
-            return True
+            try:
+                return int(request.headers.get("X-Wait"))
+            except ValueError:
+                return -1
         else:
-            return False
+            return 0
 
     def debug(self, request, resp):
         resp.headers["Server"] = "Guillotina/" + __version__
@@ -287,8 +290,11 @@ class MatchInfo(BaseMatchInfo):
         else:
             task = request.execute_futures("failure")
 
-        if self.wait(request):
-            await asyncio.wait_for(task, app_settings.get("max_wait_futures"))
+        wait = self.wait(request)
+        if wait == -1:
+            await asyncio.wait(task)
+        elif wait > 0:
+            await asyncio.wait_for(task, wait)
 
         self.debug(request, resp)
 

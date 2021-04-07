@@ -97,7 +97,6 @@ app_settings: Dict[str, Any] = {
     "valid_id_characters": string.digits + string.ascii_lowercase + ".-_@$^()+ =",
     "load_catalog": True,
     "catalog_max_results": 50,
-    "max_wait_futures": 20,
     "managers_roles": {
         "guillotina.ContainerAdmin": 1,
         "guillotina.ContainerDeleter": 1,

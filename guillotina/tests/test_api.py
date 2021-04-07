@@ -908,7 +908,7 @@ async def test_wait_headers(container_requester):
     async with container_requester as requester:
         from guillotina.test_package import TESTING_VALUE
 
-        _, _, headers = await requester.make_request("GET", "/@wait-future", headers={"X-Wait": "1"})
+        _, _, headers = await requester.make_request("GET", "/@wait-future", headers={"X-Wait": "10"})
         assert TESTING_VALUE["started"]
         assert TESTING_VALUE["executed"]
 
