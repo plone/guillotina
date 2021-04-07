@@ -20,10 +20,10 @@ from guillotina.exceptions import ContainerNotFound
 from guillotina.exceptions import RequestNotFound
 from guillotina.exceptions import TransactionNotFound
 from guillotina.interfaces import IContainer
-from guillotina.interfaces import IResource
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IFolder
 from guillotina.interfaces import IPGCatalogUtility
+from guillotina.interfaces import IResource
 from guillotina.interfaces.content import IApplication
 from guillotina.response import HTTPNotImplemented
 from guillotina.transactions import get_transaction
