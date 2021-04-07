@@ -154,14 +154,18 @@ class BaseMatchInfo:
     async def http_exception(self):
         return None
 
-    def wait(self, request) -> Optional[int]:
+    async def wait(self, request, resp, task):
         if "X-Wait" in request.headers:
             try:
-                return int(request.headers.get("X-Wait"))
+                time_to_wait = int(request.headers.get("X-Wait"))
             except ValueError:
-                return -1
-        else:
-            return 0
+                time_to_wait = None
+            done, pending = await asyncio.wait({task}, timeout=time_to_wait)
+
+            if task in done:
+                resp.headers["XG-Wait"] = "done"
+            elif task in pending:
+                resp.headers["XG-Wait"] = "pending"
 
     def debug(self, request, resp):
         resp.headers["Server"] = "Guillotina/" + __version__
@@ -290,11 +294,7 @@ class MatchInfo(BaseMatchInfo):
         else:
             task = request.execute_futures("failure")
 
-        wait = self.wait(request)
-        if wait == -1:
-            await asyncio.wait(task)
-        elif wait > 0:
-            await asyncio.wait(task, wait)
+        await self.wait(request, resp, task)
 
         self.debug(request, resp)
 
