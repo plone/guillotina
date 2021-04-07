@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.2.3 (unreleased)
+6.2.3 (2021-04-07)
 ------------------
 
 - Search on pg catalog should check security on context
