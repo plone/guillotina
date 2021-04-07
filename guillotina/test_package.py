@@ -34,11 +34,13 @@ from guillotina.response import HTTPUnprocessableEntity
 from guillotina.schema import Object
 from guillotina.schema.interfaces import IContextAwareDefaultFactory
 from guillotina.utils import apply_coroutine
+from guillotina.utils import execute
 from shutil import copyfile
 from typing import AsyncIterator
 from zope.interface import implementer
 from zope.interface import Interface
 
+import asyncio
 import json
 import os
 import tempfile
@@ -210,6 +212,22 @@ configure.register_configuration(
 )
 async def raise_http_exception(context, request):
     raise HTTPUnprocessableEntity()
+
+
+TESTING_VALUE = {}
+
+
+async def future_func():
+    TESTING_VALUE["started"] = True
+    await asyncio.sleep(1)
+    TESTING_VALUE["executed"] = True
+
+
+@configure.service(
+    context=IApplication, method="GET", permission="guillotina.AccessContent", name="@wait-future"
+)
+async def wait_future(context, request):
+    execute.add_future("testing", future_func)
 
 
 # Create a new permission and grant it to authenticated users only

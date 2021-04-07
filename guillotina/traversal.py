@@ -154,6 +154,19 @@ class BaseMatchInfo:
     async def http_exception(self):
         return None
 
+    async def wait(self, request, resp, task):
+        if "X-Wait" in request.headers:
+            try:
+                time_to_wait = int(request.headers.get("X-Wait"))
+            except ValueError:
+                time_to_wait = None
+            done, pending = await asyncio.wait({task}, timeout=time_to_wait)
+
+            if task in done:
+                resp.headers["XG-Wait"] = "done"
+            elif task in pending:
+                resp.headers["XG-Wait"] = "pending"
+
     def debug(self, request, resp):
         resp.headers["Server"] = "Guillotina/" + __version__
         if "X-Debug" in request.headers:
@@ -277,9 +290,11 @@ class MatchInfo(BaseMatchInfo):
             resp = await apply_cors(request, resp)
 
         if not request._view_error:
-            request.execute_futures()
+            task = request.execute_futures()
         else:
-            request.execute_futures("failure")
+            task = request.execute_futures("failure")
+
+        await self.wait(request, resp, task)
 
         self.debug(request, resp)
 
