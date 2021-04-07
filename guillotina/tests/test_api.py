@@ -911,6 +911,15 @@ async def test_wait_headers(container_requester):
         _, _, headers = await requester.make_request("GET", "/@wait-future", headers={"X-Wait": "10"})
         assert TESTING_VALUE["started"]
         assert TESTING_VALUE["executed"]
+        assert headers["XG-Wait"] == "done"
+
+        TESTING_VALUE["started"] = False
+        TESTING_VALUE["executed"] = False
+
+        _, _, headers = await requester.make_request("GET", "/@wait-future", headers={"X-Wait": "0"})
+        assert TESTING_VALUE["started"]
+        assert TESTING_VALUE["executed"] is False
+        assert headers["XG-Wait"] == "pending"
 
         TESTING_VALUE["started"] = False
         TESTING_VALUE["executed"] = False
@@ -918,6 +927,7 @@ async def test_wait_headers(container_requester):
         _, _, headers = await requester.make_request("GET", "/@wait-future")
         assert TESTING_VALUE["started"]
         assert TESTING_VALUE["executed"] is False
+        assert "XG-Wait" not in headers
 
 
 async def test_adapter_exception_handlers(container_requester):
