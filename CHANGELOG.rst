@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.2.4 (unreleased)
+6.2.4 (2021-04-07)
 ------------------
 
 - Enable X-Wait header to wait futures. Use only in case you need to make sure all futures are finished before request ends.
