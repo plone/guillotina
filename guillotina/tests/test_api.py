@@ -907,16 +907,17 @@ async def test_debug_headers(container_requester):
 async def test_wait_headers(container_requester):
     async with container_requester as requester:
         from guillotina.test_package import TESTING_VALUE
-        _, _, headers = await requester.make_request("GET", "/@wait-future", headers={"X-Wait": "1"})
-        assert TESTING_VALUE['started']
-        assert TESTING_VALUE['executed']
 
-        TESTING_VALUE['started'] = False
-        TESTING_VALUE['executed'] = False
+        _, _, headers = await requester.make_request("GET", "/@wait-future", headers={"X-Wait": "1"})
+        assert TESTING_VALUE["started"]
+        assert TESTING_VALUE["executed"]
+
+        TESTING_VALUE["started"] = False
+        TESTING_VALUE["executed"] = False
 
         _, _, headers = await requester.make_request("GET", "/@wait-future")
-        assert TESTING_VALUE['started']
-        assert TESTING_VALUE['executed'] is False
+        assert TESTING_VALUE["started"]
+        assert TESTING_VALUE["executed"] is False
 
 
 async def test_adapter_exception_handlers(container_requester):

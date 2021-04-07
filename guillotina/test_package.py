@@ -216,16 +216,18 @@ async def raise_http_exception(context, request):
 
 TESTING_VALUE = {}
 
+
 async def future_func():
-    TESTING_VALUE['started'] = True
+    TESTING_VALUE["started"] = True
     await asyncio.sleep(1)
-    TESTING_VALUE['executed'] = True
+    TESTING_VALUE["executed"] = True
+
 
 @configure.service(
     context=IApplication, method="GET", permission="guillotina.AccessContent", name="@wait-future"
 )
 async def wait_future(context, request):
-    execute.add_future('testing', future_func)
+    execute.add_future("testing", future_func)
 
 
 # Create a new permission and grant it to authenticated users only
