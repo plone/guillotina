@@ -294,7 +294,7 @@ class MatchInfo(BaseMatchInfo):
         if wait == -1:
             await asyncio.wait(task)
         elif wait > 0:
-            await asyncio.wait_for(task, wait)
+            await asyncio.wait(task, wait)
 
         self.debug(request, resp)
 
