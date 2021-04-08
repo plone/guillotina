@@ -4,8 +4,8 @@ CHANGELOG
 6.2.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
-
+- Fix bug on empty waiting for empty tasks.
+  [bloodbare]
 
 6.2.4 (2021-04-07)
 ------------------
