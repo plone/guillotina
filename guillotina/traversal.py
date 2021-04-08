@@ -294,7 +294,8 @@ class MatchInfo(BaseMatchInfo):
         else:
             task = request.execute_futures("failure")
 
-        await self.wait(request, resp, task)
+        if task is not None:
+            await self.wait(request, resp, task)
 
         self.debug(request, resp)
 
