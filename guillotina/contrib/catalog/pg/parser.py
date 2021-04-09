@@ -103,7 +103,7 @@ class Parser(BaseParser):
             else:
                 operator = "?"
         elif _type in ("text", "searchabletext"):
-            if ' ' in value:
+            if " " in value:
                 operator = "phrase"
                 result = "&".join(to_list(value))
             else:

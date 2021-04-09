@@ -356,6 +356,7 @@ async def test_fulltext_query_pg_catalog(container_requester):
             results = await util.search(container, {"title": "someth"})
             assert len(results["items"]) == 2
 
+
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)
 @pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
 async def test_fulltext_query_pg_catalog_lang(container_requester):

@@ -141,7 +141,7 @@ using gin(to_tsvector('simple', json->>'{sqlq(self.name)}'));"""
         to_tsvector(json->>'text') @@ to_tsquery('python & ruby')
         operator is ignored for now...
         """
-        if operator == 'phrase':
+        if operator == "phrase":
             return f"""
     to_tsvector('simple', json->>'{sqlq(self.name)}') @@ phraseto_tsquery('simple', ${{arg}}::text)"""
         else:
