@@ -294,6 +294,7 @@ class PGSearchUtility(DefaultSearchUtility):
             request = None
 
         logger.debug(f"Running search:\n{sql}\n{arguments}")
+
         async with txn.lock:
             records = await conn.fetch(sql, *arguments)
         for record in records:
