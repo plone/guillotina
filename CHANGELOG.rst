@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.2.5 (unreleased)
+6.2.5 (2021-04-09)
 ------------------
 
 - Fix PGCatalog Phrase search
