@@ -4,6 +4,9 @@ CHANGELOG
 6.2.5 (unreleased)
 ------------------
 
+- Fix PGCatalog Phrase search
+  [bloodbare]
+
 - Fix bug on empty waiting for empty tasks.
   [bloodbare]
 

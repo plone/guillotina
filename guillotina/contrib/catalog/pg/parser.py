@@ -103,8 +103,12 @@ class Parser(BaseParser):
             else:
                 operator = "?"
         elif _type in ("text", "searchabletext"):
-            operator = "="
-            result = "&".join(to_list(value + ":*"))
+            if ' ' in value:
+                operator = "phrase"
+                result = "&".join(to_list(value))
+            else:
+                operator = "="
+                result = f"{value}:*"
         if _type == "path":
             if operator != "starts":
                 # we do not currently support other search types

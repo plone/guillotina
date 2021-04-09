@@ -141,8 +141,12 @@ using gin(to_tsvector('simple', json->>'{sqlq(self.name)}'));"""
         to_tsvector(json->>'text') @@ to_tsquery('python & ruby')
         operator is ignored for now...
         """
-        return f"""
-to_tsvector('simple', json->>'{sqlq(self.name)}') @@ to_tsquery('simple', ${{arg}}::text)"""
+        if operator == 'phrase':
+            return f"""
+    to_tsvector('simple', json->>'{sqlq(self.name)}') @@ phraseto_tsquery('simple', ${{arg}}::text)"""
+        else:
+            return f"""
+    to_tsvector('simple', json->>'{sqlq(self.name)}') @@ to_tsquery('simple', ${{arg}}::text)"""
 
     def order_by_score(self, direction="ASC"):
         return f"order by {sqlq(self.name)}_score {sqlq(direction)}"
