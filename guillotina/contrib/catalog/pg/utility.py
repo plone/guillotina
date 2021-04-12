@@ -287,6 +287,9 @@ class PGSearchUtility(DefaultSearchUtility):
         results = []
         fullobjects = query["fullobjects"]
         container = find_container(context)
+        if container is None:
+            raise ContainerNotFound()
+
         try:
             context_url = get_object_url(container)
             request = get_current_request()
