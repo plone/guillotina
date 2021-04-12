@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.2.6 (unreleased)
+6.2.6 (2021-04-12)
 ------------------
 
 - Fix bug on search results ids based on container path
