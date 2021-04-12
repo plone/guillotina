@@ -4,7 +4,8 @@ CHANGELOG
 6.2.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix bug on search results ids based on container path
+  [bloodbare]
 
 
 6.2.5 (2021-04-09)

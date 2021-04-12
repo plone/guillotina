@@ -286,11 +286,15 @@ class PGSearchUtility(DefaultSearchUtility):
         conn = await txn.get_connection()
         results = []
         fullobjects = query["fullobjects"]
+        container = find_container(context)
+        if container is None:
+            raise ContainerNotFound()
+
         try:
-            context_url = get_object_url(context)
+            context_url = get_object_url(container)
             request = get_current_request()
         except RequestNotFound:
-            context_url = get_content_path(context)
+            context_url = get_content_path(container)
             request = None
 
         logger.debug(f"Running search:\n{sql}\n{arguments}")
