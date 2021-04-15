@@ -469,12 +469,6 @@ class TraversalRouter(AbstractRouter):
 
         policy = get_security_policy(authenticated)
 
-        for language in get_acceptable_languages(request):
-            translator = query_adapter((resource, request), ILanguage, name=language)
-            if translator is not None:
-                resource = translator.translate()
-                break
-
         # container registry lookup
         try:
             view = query_multi_adapter((resource, request), method, name=view_name)
@@ -486,25 +480,23 @@ class TraversalRouter(AbstractRouter):
 
         # Check security on context to AccessContent unless
         # is view allows explicit or its OPTIONS
-        permission = get_utility(IPermission, name="guillotina.AccessContent")
-        if not await policy.check_permission(permission.id, resource):
+        if not view.__allow_access__ and not await policy.check_permission(
+            "guillotina.AccessContent", resource
+        ):
             # Check if its a CORS call:
             if IOPTIONS != method:
                 # Check if the view has permissions explicit
-                if view is None or not view.__allow_access__:
-                    logger.info(
-                        "No access content {content} with {auth}".format(
-                            content=resource, auth=authenticated.id
-                        ),
-                        request=request,
-                    )
-                    raise HTTPUnauthorized(
-                        content={
-                            "reason": "You are not authorized to access content",
-                            "content": str(resource),
-                            "auth": authenticated.id,
-                        }
-                    )
+                logger.info(
+                    "No access content {content} with {auth}".format(content=resource, auth=authenticated.id),
+                    request=request,
+                )
+                raise HTTPUnauthorized(
+                    content={
+                        "reason": "You are not authorized to access content",
+                        "content": str(resource),
+                        "auth": authenticated.id,
+                    }
+                )
 
         if view is None and len(tail) > 0:
             # Try arbitrary "path" in the path
@@ -512,7 +504,6 @@ class TraversalRouter(AbstractRouter):
             view = query_multi_adapter((resource, request), method, name=view_name)
             if view is None:
                 # we should have a view in this case because we are matching routes
-                await notify(TraversalViewMissEvent(request, tail))
                 raise HTTPNotFound(content={"reason": "object and/or route not found"})
 
         request.found_view = view
