@@ -480,23 +480,23 @@ class TraversalRouter(AbstractRouter):
 
         # Check security on context to AccessContent unless
         # is view allows explicit or its OPTIONS
-        if not view.__allow_access__ and not await policy.check_permission(
-            "guillotina.AccessContent", resource
+        if (
+            IOPTIONS != method
+            and (view is None or not view.__allow_access__)
+            and not await policy.check_permission("guillotina.AccessContent", resource)
         ):
-            # Check if its a CORS call:
-            if IOPTIONS != method:
-                # Check if the view has permissions explicit
-                logger.info(
-                    "No access content {content} with {auth}".format(content=resource, auth=authenticated.id),
-                    request=request,
-                )
-                raise HTTPUnauthorized(
-                    content={
-                        "reason": "You are not authorized to access content",
-                        "content": str(resource),
-                        "auth": authenticated.id,
-                    }
-                )
+            # Check if the view has permissions explicit
+            logger.info(
+                "No access content {content} with {auth}".format(content=resource, auth=authenticated.id),
+                request=request,
+            )
+            raise HTTPUnauthorized(
+                content={
+                    "reason": "You are not authorized to access content",
+                    "content": str(resource),
+                    "auth": authenticated.id,
+                }
+            )
 
         if view is None and len(tail) > 0:
             # Try arbitrary "path" in the path
