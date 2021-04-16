@@ -1007,15 +1007,8 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def get_one_row(self, txn, sql, *args, prepare=False, metric="get_one_row"):
         conn = await txn.get_connection()
         # Helper function to provide easy adaptation to cockroach
-        if prepare:
-            # latest version of asyncpg has prepare bypassing statement cache
-            with watch(metric + "_prepare"):
-                smt = await conn.prepare(sql)
-            with watch(metric):
-                return await smt.fetchrow(*args)
-        else:
-            with watch(metric):
-                return await conn.fetchrow(sql, *args)
+        with watch(metric):
+            return await conn.fetchrow(sql, *args)
 
     def _db_transaction_factory(self, txn):
         # make sure asycpg knows this is a new transaction
@@ -1167,7 +1160,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def get_annotation(self, txn, oid, id):
         sql = self._sql.get("GET_ANNOTATION", self._objects_table_name)
         async with watch_lock(txn._lock, "load_annotation"):
-            result = await self.get_one_row(txn, sql, oid, id, prepare=True, metric="load_annotation")
+            result = await self.get_one_row(txn, sql, oid, id, metric="load_annotation")
             if result is not None and result["parent_id"] == TRASHED_ID:
                 result = None
         return result
