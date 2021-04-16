@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.3.68 (unreleased)
+5.3.68 (2021-04-16)
 -------------------
 
 - No longer have dedicated read connection and do not use any prepared statements
