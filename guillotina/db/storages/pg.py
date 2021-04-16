@@ -734,7 +734,7 @@ class PostgresqlStorage(BaseStorage):
         else:
             await self._create(conn)
 
-    async def _create(self, conn: asyncpg):
+    async def _create(self, conn):
 
         # Check DB
         log.info("Creating initial database objects")
