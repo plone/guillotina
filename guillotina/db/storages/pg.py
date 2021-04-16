@@ -572,7 +572,7 @@ class PGConnectionManager:
             self._pool = await asyncpg.create_pool(
                 dsn=self._dsn,
                 max_size=self._pool_size,
-                min_size=2,
+                min_size=1,
                 connection_class=app_settings["pg_connection_class"],
                 loop=loop,
                 **kw,
