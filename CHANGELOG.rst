@@ -3,8 +3,8 @@ CHANGELOG
 
 6.2.7 (unreleased)
 ------------------
-
-- Nothing changed yet.
+- Return 401 if NoPermissionToAdd is raised in defaultPOST
+  [nilbacardit26]
 
 
 6.2.6 (2021-04-12)

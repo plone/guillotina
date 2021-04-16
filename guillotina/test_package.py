@@ -104,6 +104,7 @@ def foobar_accessor(ob):
 
 
 configure.permission("example.MyPermission", "example permission")
+configure.permission("foo.Permission", "Foo permission")
 configure.permission("example.MyPermissionOwner", "example permission owner")
 configure.grant(role="guillotina.Owner", permission="example.MyPermissionOwner")
 
@@ -199,6 +200,28 @@ configure.register_configuration(
         schema=IExample,
         type_name="Example",
         behaviors=["guillotina.behaviors.dublincore.IDublinCore"],
+    ),
+    "contenttype",
+)
+
+
+class IExampleAddPermission(IResource):
+    pass
+
+
+@implementer(IExampleAddPermission)
+class ExampleAddPermission(Resource):  # type: ignore
+    pass
+
+
+configure.register_configuration(
+    ExampleAddPermission,
+    dict(
+        context=IContainer,
+        schema=IExampleAddPermission,
+        type_name="ExampleAddPermission",
+        behaviors=["guillotina.behaviors.dublincore.IDublinCore"],
+        add_permission="foo.Permission",
     ),
     "contenttype",
 )
