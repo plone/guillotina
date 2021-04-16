@@ -24,7 +24,6 @@ from guillotina.events import ObjectPermissionsViewEvent
 from guillotina.events import ObjectRemovedEvent
 from guillotina.events import ObjectVisitedEvent
 from guillotina.exceptions import ComponentLookupError
-from guillotina.exceptions import NoPermissionToAdd
 from guillotina.exceptions import PreconditionFailed
 from guillotina.i18n import default_message_factory as _
 from guillotina.interfaces import IAnnotations
@@ -207,8 +206,6 @@ class DefaultPOST(Service):
             obj = await create_content_in_container(
                 self.context, type_, new_id, check_constraints=True, **options
             )
-        except NoPermissionToAdd as e:
-            raise HTTPUnauthorized(content={"text": e.__repr__()})
         except ValueError as e:
             return ErrorResponse("CreatingObject", str(e), status=412)
 

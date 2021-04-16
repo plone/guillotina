@@ -3,6 +3,7 @@ from guillotina import error_reasons
 from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import DeserializationError
 from guillotina.exceptions import InvalidContentType
+from guillotina.exceptions import NoPermissionToAdd
 from guillotina.exceptions import NotAllowedContentType
 from guillotina.exceptions import PreconditionFailed
 from guillotina.exceptions import Unauthorized
@@ -82,6 +83,12 @@ register_handler_factory(
 
 register_handler_factory(
     Unauthorized,
+    exception_handler_factory(
+        error_reasons.UNAUTHORIZED, "Unauthorized", serialize_exc=True, klass=HTTPUnauthorized
+    ),
+)
+register_handler_factory(
+    NoPermissionToAdd,
     exception_handler_factory(
         error_reasons.UNAUTHORIZED, "Unauthorized", serialize_exc=True, klass=HTTPUnauthorized
     ),

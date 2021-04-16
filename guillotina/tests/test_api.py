@@ -1697,4 +1697,4 @@ async def test_default_post_without_add_permission(container_requester):
             "POST", "/db/guillotina/", data=json.dumps({"@type": "ExampleAddPermission"})
         )
         assert status == 401
-        assert "Not permission to add ExampleAddPermission on" in resp["text"]
+        assert "Not permission to add ExampleAddPermission on" in resp["message"]
