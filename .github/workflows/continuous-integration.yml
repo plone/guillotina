@@ -71,6 +71,9 @@ jobs:
           pip install -e .[testdata]
 
       - name: Run tests
+        uses: niden/actions-memcached@v7
+        env:
+            MEMCACHED: "localhost:11211"
         run: |
           pytest -rfE --reruns 2 --cov=guillotina -s --tb=native -v --cov-report xml --cov-append guillotina
 
