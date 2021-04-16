@@ -487,9 +487,6 @@ class PGConnectionManager:
     class to manage pool of connections
     """
 
-    _next_tid_sql = "SELECT nextval('{schema}.tid_sequence');"
-    _max_tid_sql = "SELECT last_value FROM {schema}.tid_sequence;"
-
     def __init__(
         self,
         dsn=None,
@@ -503,7 +500,6 @@ class PGConnectionManager:
         self._dsn = dsn
         self._pool_size = pool_size
         self._pool = None
-        self._read_conn = None
         self._connection_options = connection_options or {}
         self._conn_acquire_timeout = conn_acquire_timeout
         self._lock = asyncio.Lock()
@@ -512,7 +508,6 @@ class PGConnectionManager:
         self._vacuum_task = None
         self._vacuum_class = vacuum_class
         self._autovacuum = autovacuum
-        self._stmt_next_tid = self._stmt_max_tid = None
         self._db_schema = db_schema
 
     @property
@@ -520,16 +515,8 @@ class PGConnectionManager:
         return self._vacuum
 
     @property
-    def read_conn(self):
-        return self._read_conn
-
-    @property
     def pool(self):
         return self._pool
-
-    @property
-    def stmt_next_tid(self):
-        return self._stmt_next_tid
 
     @property
     def stmt_max_tid(self):
@@ -553,25 +540,18 @@ class PGConnectionManager:
                 self._vacuum_task.cancel()
                 self._vacuum = self._vacuum_task = None
 
-            try:
-                with watch("release_connection"):
-                    await shield(self._pool.release(self._read_conn))
-            except asyncpg.exceptions.InterfaceError:
-                pass
             # terminate force closes all these
             # this step is happening at the end of application shutdown and
             # connections should not be staying open at this step
             self._pool.terminate()
-            self._pool = self._read_conn = None
+            self._pool = None
 
     async def _initialize_tid_statements(self, retried=False):
         try:
-            self._stmt_next_tid = await self._read_conn.prepare(
-                self._next_tid_sql.format(schema=self._db_schema)
-            )
-            self._stmt_max_tid = await self._read_conn.prepare(
-                self._max_tid_sql.format(schema=self._db_schema)
-            )
+            async with self.pool.acquire(timeout=self._conn_acquire_timeout) as conn:
+                await conn.execute(
+                    "CREATE SEQUENCE IF NOT EXISTS {schema}.tid_sequence;".format(schema=self._db_schema)
+                )
         except (asyncpg.exceptions.UndefinedTableError, asyncpg.exceptions.InvalidSchemaNameError):
             if retried:  # pragma: no cover
                 # always good to have prevention of infinity recursion
@@ -579,9 +559,6 @@ class PGConnectionManager:
             async with self.pool.acquire(timeout=self._conn_acquire_timeout) as conn:
                 if self._db_schema != "public":
                     await conn.execute(f"CREATE SCHEMA IF NOT EXISTS {self._db_schema}")
-                await conn.execute(
-                    "CREATE SEQUENCE IF NOT EXISTS {schema}.tid_sequence;".format(schema=self._db_schema)
-                )
             await self._initialize_tid_statements(True)
 
     async def initialize(self, loop=None, **kw):
@@ -602,7 +579,6 @@ class PGConnectionManager:
             )
 
             # shared read connection on all transactions
-            self._read_conn = await self._pool.acquire(timeout=self._conn_acquire_timeout)
             await self._initialize_tid_statements()
 
             if self._autovacuum:
@@ -627,8 +603,6 @@ class PGConnectionManager:
             **self._connection_options,
         )
 
-        # shared read connection on all transactions
-        self._read_conn = await self._pool.acquire(timeout=self._conn_acquire_timeout)
         await self._initialize_tid_statements()
 
 
@@ -643,6 +617,9 @@ class PostgresqlStorage(BaseStorage):
     _connection_manager_class = PGConnectionManager
     _objects_table_name = "objects"
     _blobs_table_name = "blobs"
+
+    _next_tid_sql = "SELECT nextval('{schema}.tid_sequence');"
+    _max_tid_sql = "SELECT last_value FROM {schema}.tid_sequence;"
 
     _object_schema = {
         "zoid": f"VARCHAR({MAX_UID_LENGTH}) NOT NULL PRIMARY KEY",
@@ -731,10 +708,6 @@ class PostgresqlStorage(BaseStorage):
         return self._sql
 
     @property
-    def read_conn(self):
-        return self._connection_manager.read_conn
-
-    @property
     def pool(self):
         return self._connection_manager.pool
 
@@ -747,10 +720,6 @@ class PostgresqlStorage(BaseStorage):
         return self._connection_manager.lock
 
     @property
-    def stmt_next_tid(self):
-        return self._connection_manager._stmt_next_tid
-
-    @property
     def stmt_max_tid(self):
         return self._connection_manager._stmt_max_tid
 
@@ -760,7 +729,13 @@ class PostgresqlStorage(BaseStorage):
 
     async def create(self, conn=None):
         if conn is None:
-            conn = self.read_conn
+            async with self.pool.acquire() as conn:
+                await self._create(conn)
+        else:
+            await self._create(conn)
+
+    async def _create(self, conn: asyncpg):
+
         # Check DB
         log.info("Creating initial database objects")
 
@@ -1019,15 +994,15 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
     @restart_conn_on_exception
     async def get_next_tid(self, txn):
-        async with watch_lock(self.lock, "shared_next_tid"):
-            with watch("next_tid"):
-                return await self.stmt_next_tid.fetchval()
+        with watch("next_tid"):
+            async with self.pool.acquire(timeout=self._manager._conn_acquire_timeout) as conn:
+                return await conn.fetchval(self._next_tid_sql.format(schema=self._db_schema))
 
     @restart_conn_on_exception
     async def get_current_tid(self, txn):
-        async with watch_lock(self.lock, "shared_current_tid"):
-            with watch("current_tid"):
-                return await self.stmt_max_tid.fetchval()
+        with watch("current_tid"):
+            async with self.pool.acquire(timeout=self._manager._conn_acquire_timeout) as conn:
+                return await conn.fetchval(self._max_tid_sql.format(schema=self._db_schema))
 
     async def get_one_row(self, txn, sql, *args, prepare=False, metric="get_one_row"):
         conn = await txn.get_connection()
@@ -1101,11 +1076,13 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                 modified_oids = [k for k in txn.modified.keys()]
                 sql = self._sql.get("TXN_CONFLICTS_ON_OIDS", self._objects_table_name)
                 with watch("get_conflicts_oids"):
-                    return await self.read_conn.fetch(sql, txn._tid, modified_oids)
+                    async with self.pool.acquire() as conn:
+                        return await conn.fetch(sql, txn._tid, modified_oids)
             else:
                 sql = self._sql.get("TXN_CONFLICTS", self._objects_table_name)
                 with watch("get_conflicts"):
-                    return await self.read_conn.fetch(sql, txn._tid)
+                    async with self.pool.acquire() as conn:
+                        return await conn.fetch(sql, txn._tid)
 
     async def commit(self, transaction):
         async with watch_lock(transaction._lock, "commit_txn"):
