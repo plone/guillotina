@@ -464,9 +464,6 @@ class PGConnectionManager:
     class to manage pool of connections
     """
 
-    _next_tid_sql = "SELECT nextval('{schema}.tid_sequence');"
-    _max_tid_sql = "SELECT last_value FROM {schema}.tid_sequence;"
-
     def __init__(
         self,
         dsn=None,
@@ -593,6 +590,9 @@ class PostgresqlStorage(BaseStorage):
     _connection_manager_class = PGConnectionManager
     _objects_table_name = "objects"
     _blobs_table_name = "blobs"
+
+    _next_tid_sql = "SELECT nextval('{schema}.tid_sequence');"
+    _max_tid_sql = "SELECT last_value FROM {schema}.tid_sequence;"
 
     _object_schema = {
         "zoid": f"VARCHAR({MAX_UID_LENGTH}) NOT NULL PRIMARY KEY",
