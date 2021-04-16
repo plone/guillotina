@@ -4,7 +4,8 @@ CHANGELOG
 5.3.68 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- No longer have dedicated read connection and do not use any prepared statements
+  [vangheem]
 
 
 5.3.67 (2021-02-03)

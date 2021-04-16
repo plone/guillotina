@@ -140,13 +140,14 @@ def get_db_settings(pytest_node=None):
         "user": "postgres",
         "host": annotations.get("pg_host", "localhost"),
         "port": annotations.get("pg_port", 5432),
-        "password": "",
+        "password": annotations.get("pg_password", ""),
     }
 
     options = dict(
         host=annotations.get("pg_host", "localhost"),
         port=annotations.get("pg_port", 5432),
         dbname=annotations.get("pg_db", "guillotina"),
+        password=annotations.get("pg_password", ""),
     )
 
     if annotations["testdatabase"] == "cockroachdb":
@@ -182,6 +183,7 @@ def db():
 
         annotations["pg_host"] = host
         annotations["pg_port"] = port
+        annotations["pg_password"] = os.environ.get("POSTGRES_PASSWORD", "")
 
         yield host, port  # provide the fixture value
 
@@ -477,7 +479,8 @@ def container_command(db):
     settings = get_db_settings()
     host = settings["databases"]["db"]["dsn"]["host"]
     port = settings["databases"]["db"]["dsn"]["port"]
-    conn = psycopg2.connect(f"dbname=guillotina user=postgres host={host} port={port}")
+    password = settings["databases"]["db"]["dsn"]["password"]
+    conn = psycopg2.connect(f"dbname=guillotina user=postgres host={host} port={port} password={password}")
     cur = conn.cursor()
     cur.execute(open(os.path.join(_dir, "data/tables.sql"), "r").read())
     cur.execute("COMMIT;")
@@ -485,7 +488,7 @@ def container_command(db):
     conn.close()
     yield {"settings": settings}
 
-    conn = psycopg2.connect(f"dbname=guillotina user=postgres host={host} port={port}")
+    conn = psycopg2.connect(f"dbname=guillotina user=postgres host={host} port={port} password={password}")
     cur = conn.cursor()
     cur.execute(
         """
@@ -508,13 +511,19 @@ def redis_container():
 
 @pytest.fixture(scope="session")
 def memcached_container():
-    import pytest_docker_fixtures
+    if os.environ.get("MEMCACHED"):
+        host, port = os.environ["MEMCACHED"].split(":")
+        annotations["memcached"] = (host, port)
+        yield host, port
+        annotations["memcached"] = None
+    else:
+        import pytest_docker_fixtures
 
-    host, port = pytest_docker_fixtures.memcached_image.run()
-    annotations["memcached"] = (host, port)
-    yield host, port  # provide the fixture value
-    pytest_docker_fixtures.memcached_image.stop()
-    annotations["memcached"] = None
+        host, port = pytest_docker_fixtures.memcached_image.run()
+        annotations["memcached"] = (host, port)
+        yield host, port  # provide the fixture value
+        pytest_docker_fixtures.memcached_image.stop()
+        annotations["memcached"] = None
 
 
 class DBUsersRequester(ContainerRequesterAsyncContextManager):

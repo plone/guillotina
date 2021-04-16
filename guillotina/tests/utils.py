@@ -113,8 +113,8 @@ class ContainerRequesterAsyncContextManager:
         return self.requester
 
     async def __aexit__(self, exc_type, exc, tb):
-        _, status = await self.requester("DELETE", "/db/guillotina")
-        assert status in (200, 404)
+        resp, status = await self.requester("DELETE", "/db/guillotina")
+        assert status in (200, 404), f"{status}: {resp}"
 
 
 class wrap_request:

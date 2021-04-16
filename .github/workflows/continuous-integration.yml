@@ -69,10 +69,14 @@ jobs:
           pip install -r contrib-requirements.txt
           pip install -e .[test]
           pip install -e .[testdata]
+      
+      - name: memcache
+        uses: niden/actions-memcached@v7
 
       - name: Run tests
         run: |
-          pytest -rfE --reruns 2 --cov=guillotina -s --tb=native -v --cov-report xml --cov-append guillotina
+          MEMCACHED=localhost:11211 pytest -rfE --reruns 2 --cov=guillotina -s \
+          --tb=native -v --cov-report xml --cov-append guillotina
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
