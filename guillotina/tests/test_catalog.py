@@ -238,30 +238,30 @@ async def test_query_stored_json(container_requester):
             "POST", "/db/guillotina/", data=json.dumps({"@type": "Item", "title": "Item2", "id": "item2"})
         )
 
-        conn = requester.db.storage.read_conn
-        result = await conn.fetch(
-            """
-select json from {0}
-where json->>'type_name' = 'Item' AND json->>'container_id' = 'guillotina'
-order by json->>'id'
-""".format(
-                requester.db.storage._objects_table_name
+        async with requester.db.storage.pool.acquire() as conn:
+            result = await conn.fetch(
+                """
+    select json from {0}
+    where json->>'type_name' = 'Item' AND json->>'container_id' = 'guillotina'
+    order by json->>'id'
+    """.format(
+                    requester.db.storage._objects_table_name
+                )
             )
-        )
-        print(f"{result}")
-        assert len(result) == 2
-        assert json.loads(result[0]["json"])["id"] == "item1"
-        assert json.loads(result[1]["json"])["id"] == "item2"
+            print(f"{result}")
+            assert len(result) == 2
+            assert json.loads(result[0]["json"])["id"] == "item1"
+            assert json.loads(result[1]["json"])["id"] == "item2"
 
-        result = await conn.fetch(
-            """
-select json from {0}
-where json->>'id' = 'item1' AND json->>'container_id' = 'guillotina'
-""".format(
-                requester.db.storage._objects_table_name
+            result = await conn.fetch(
+                """
+    select json from {0}
+    where json->>'id' = 'item1' AND json->>'container_id' = 'guillotina'
+    """.format(
+                    requester.db.storage._objects_table_name
+                )
             )
-        )
-        assert len(result) == 1
+            assert len(result) == 1
 
 
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)

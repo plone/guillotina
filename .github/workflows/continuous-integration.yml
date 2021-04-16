@@ -74,10 +74,9 @@ jobs:
         uses: niden/actions-memcached@v7
 
       - name: Run tests
-        env:
-            MEMCACHED: "localhost:11211"
         run: |
-          pytest -rfE --reruns 2 --cov=guillotina -s --tb=native -v --cov-report xml --cov-append guillotina
+          MEMCACHED=localhost:11211 pytest -rfE --reruns 2 --cov=guillotina -s \
+          --tb=native -v --cov-report xml --cov-append guillotina
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
