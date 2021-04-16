@@ -69,9 +69,11 @@ jobs:
           pip install -r contrib-requirements.txt
           pip install -e .[test]
           pip install -e .[testdata]
+      
+      - name: memcache
+        uses: niden/actions-memcached@v7
 
       - name: Run tests
-        uses: niden/actions-memcached@v7
         env:
             MEMCACHED: "localhost:11211"
         run: |
