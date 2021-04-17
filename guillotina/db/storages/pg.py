@@ -477,7 +477,6 @@ class PGConnectionManager:
         self._dsn = dsn
         self._pool_size = pool_size
         self._pool = None
-        self._read_conn = None
         self._connection_options = connection_options or {}
         self._conn_acquire_timeout = conn_acquire_timeout
         self._lock = asyncio.Lock()
@@ -709,8 +708,6 @@ class PostgresqlStorage(BaseStorage):
             await self._create(conn)
 
     async def _create(self, conn):
-        if conn is None:
-            conn = self.read_conn
         # Check DB
         log.info("Creating initial database objects")
 
