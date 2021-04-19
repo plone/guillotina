@@ -114,7 +114,7 @@ class PGSearchUtility(DefaultSearchUtility):
                     return
                 raise
 
-    def get_default_where_clauses(self, context: IResource) -> typing.List[str]:
+    def get_default_where_clauses(self, context: IBaseObject) -> typing.List[str]:
         users = []
         principal = get_authenticated_user()
         if principal is None:
@@ -141,7 +141,7 @@ class PGSearchUtility(DefaultSearchUtility):
 
     def build_query(
         self,
-        context: IResource,
+        context: IBaseObject,
         query: ParsedQueryInfo,
         select_fields: typing.List[str],
         distinct: typing.Optional[bool] = False,
