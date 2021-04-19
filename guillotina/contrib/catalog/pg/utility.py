@@ -19,7 +19,6 @@ from guillotina.db.uid import MAX_UID_LENGTH
 from guillotina.exceptions import ContainerNotFound
 from guillotina.exceptions import RequestNotFound
 from guillotina.exceptions import TransactionNotFound
-from guillotina.interfaces import IContainer
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IFolder
 from guillotina.interfaces import IPGCatalogUtility
