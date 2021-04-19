@@ -58,8 +58,7 @@ class ITransaction(Interface):
         """
 
     async def tpc_begin():
-        """
-        """
+        """"""
 
     async def get(oid: str) -> typing.Optional[IBaseObject]:
         """
@@ -332,31 +331,6 @@ class IPostgresStorage(IStorage):
     pool = Attribute("")
 
 
-class ICockroachStorage(IStorage):
-    pass
-
-
-class ITransactionStrategy(Interface):
-    async def tpc_begin():  # type: ignore
-        """
-        Begin transaction, should set ._tid on transaction if supports transactions
-        """
-
-    async def tpc_vote():  # type: ignore
-        """
-        Returns true if no conflicts, false if conflicts
-        """
-
-    async def tpc_finish():  # type: ignore
-        """
-        Finish the transaction, committing transaction
-        """
-
-
-class IDBTransactionStrategy(ITransactionStrategy):
-    pass
-
-
 class IDatabaseManager(Interface):
     async def get_names() -> list:  # type: ignore
         """
@@ -385,8 +359,7 @@ class IDatabaseManager(Interface):
 
 
 class IJSONDBSerializer(ICatalogDataAdapter):
-    """
-    """
+    """"""
 
 
 class IVacuumProvider(Interface):

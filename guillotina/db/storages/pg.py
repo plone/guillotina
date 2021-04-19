@@ -621,7 +621,7 @@ class TransactionConnectionContextManager:
     async def __aenter__(self):
         if self.txn.connection_reserved:
             return self.txn._db_conn
-        self.connection = await self.storage.pool.acquire(timeout=self.storage._conn_acquire_timeout.timeout)
+        self.connection = await self.storage.pool.acquire(timeout=self.storage._conn_acquire_timeout)
         return self.connection
 
     async def __aexit__(self, *exc):
@@ -902,8 +902,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
     async def load(self, txn, oid):
         sql = self._sql.get("GET_OID", self._objects_table_name)
-        async with watch_lock(txn._lock, "load_object_by_oid"):
-            objects = await self.get_one_row(txn, sql, oid, metric="load_object_by_oid")
+        objects = await self.get_one_row(txn, sql, oid, metric="load_object_by_oid")
         if objects is None:
             raise KeyError(oid)
         return objects
@@ -995,7 +994,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
         if self._connection_manager._vacuum is not None:
             await self._connection_manager._vacuum.add_to_queue(oid, self._objects_table_name)
 
-    async def acquire(self, txn):
+    def acquire(self, txn):
         return TransactionConnectionContextManager(self, txn)
 
     async def delete(self, txn, oid):
@@ -1085,22 +1084,21 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                 return await self.start_transaction(txn, retries + 1)
 
     async def get_conflicts(self, txn):
-        async with watch_lock(self.lock, "shared_conflicts"):
-            if len(txn.modified) == 0:
-                return []
-            # use storage lock instead of transaction lock
-            if len(txn.modified) < 1000:
-                # if it's too large, we're not going to check on object ids
-                modified_oids = [k for k in txn.modified.keys()]
-                sql = self._sql.get("TXN_CONFLICTS_ON_OIDS", self._objects_table_name)
-                with watch("get_conflicts_oids"):
-                    async with self.pool.acquire() as conn:
-                        return await conn.fetch(sql, txn._tid, modified_oids)
-            else:
-                sql = self._sql.get("TXN_CONFLICTS", self._objects_table_name)
-                with watch("get_conflicts"):
-                    async with self.pool.acquire() as conn:
-                        return await conn.fetch(sql, txn._tid)
+        if len(txn.modified) == 0:
+            return []
+        # use storage lock instead of transaction lock
+        if len(txn.modified) < 1000:
+            # if it's too large, we're not going to check on object ids
+            modified_oids = [k for k in txn.modified.keys()]
+            sql = self._sql.get("TXN_CONFLICTS_ON_OIDS", self._objects_table_name)
+            with watch("get_conflicts_oids"):
+                async with self.pool.acquire() as conn:
+                    return await conn.fetch(sql, txn._tid, modified_oids)
+        else:
+            sql = self._sql.get("TXN_CONFLICTS", self._objects_table_name)
+            with watch("get_conflicts"):
+                async with self.pool.acquire() as conn:
+                    return await conn.fetch(sql, txn._tid)
 
     async def commit(self, transaction):
         async with watch_lock(transaction._lock, "commit_txn"):
@@ -1197,8 +1195,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
     async def write_blob_chunk(self, txn, bid, oid, chunk_index, data):
         sql = self._sql.get("HAS_OBJECT", self._objects_table_name)
-        async with watch_lock(txn._lock, "has_object"):
-            result = await self.get_one_row(txn, sql, oid, metric="has_object")
+        result = await self.get_one_row(txn, sql, oid, metric="has_object")
         if result is None:
             # check if we have a referenced ob, could be new and not in db yet.
             # if so, create a stub for it here...
@@ -1217,8 +1214,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
     async def read_blob_chunk(self, txn, bid, chunk=0):
         sql = self._sql.get("READ_BLOB_CHUNK", self._blobs_table_name)
-        async with watch_lock(txn._lock, "load_blob_chunk"):
-            return await self.get_one_row(txn, sql, bid, chunk, metric="load_blob_chunk")
+        return await self.get_one_row(txn, sql, bid, chunk, metric="load_blob_chunk")
 
     async def read_blob_chunks(self, txn, bid):
         with watch("read_blob_chunks"):

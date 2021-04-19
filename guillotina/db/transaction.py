@@ -1,14 +1,12 @@
 from collections import OrderedDict
 from guillotina import task_vars
 from guillotina._settings import app_settings
-from guillotina.component import get_adapter
 from guillotina.component import query_adapter
 from guillotina.const import ROOT_ID
 from guillotina.content import Container
 from guillotina.db.db import Root
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.interfaces import ITransactionCache
-from guillotina.db.interfaces import ITransactionStrategy
 from guillotina.db.interfaces import IWriter
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.exceptions import ConflictError
@@ -186,9 +184,6 @@ class Transaction:
         self._after_commit = []
 
         self._cache = cache or query_adapter(self, ITransactionCache, name=app_settings["cache"]["strategy"])
-        self._strategy = strategy or get_adapter(
-            self, ITransactionStrategy, name=self._manager._storage._transaction_strategy
-        )
         self._query_count_start = self._query_count_end = 0
 
     def get_query_count(self):
@@ -219,10 +214,6 @@ class Transaction:
     @property
     def lock(self):
         return self._lock
-
-    @property
-    def strategy(self):
-        return self._strategy
 
     @property
     def manager(self):
@@ -283,7 +274,6 @@ class Transaction:
         conn is a real db that will be got by db.open()
         """
         self._txn_time = time.time()
-        await self._strategy.tpc_begin()
         # make sure this is reset on retries
         self._after_commit = []
         self._before_commit = []
@@ -450,11 +440,21 @@ class Transaction:
         if obj.__txn__ is None:
             obj.__txn__ = self
 
+    async def initialize_tid(self) -> None:
+        if not self.read_only:
+            tid = await self.storage.get_next_tid(self)
+            if tid is not None:
+                self._tid = tid
+
     @profilable
     async def tpc_commit(self):
         """Commit changes to an object"""
 
-        await self._strategy.tpc_commit()
+        await self.initialize_tid()
+
+        if self._db_txn is None:
+            await self.storage.start_transaction(self)
+
         for oid, obj in self.deleted.items():
             await self._manager._storage.delete(self, oid)
         for oid, obj in self.added.items():
@@ -466,14 +466,25 @@ class Transaction:
     @profilable
     async def tpc_vote(self):
         """Verify that a data manager can commit the transaction."""
-        ok = await self._strategy.tpc_vote()
-        if ok is False:
-            raise ConflictError(self)
+        # potential conflict error, get changes
+        # Check if there is any commit bigger than the one we already have
+        conflicts = await self.storage.get_conflicts(self)
+        for conflict in conflicts:
+            # both writing to same object...
+            if conflict["zoid"] in self.modified and conflict["zoid"] not in (ROOT_ID,):
+                modified_keys = [k for k in self.modified.keys()]
+                logger.warning(
+                    f"Could not resolve conflicts in TID: {self._tid}\n"
+                    f'Conflicted TID: {conflict["tid"]}\n'
+                    f"IDs: {modified_keys}"
+                )
+                raise ConflictError(self)
 
     @profilable
     async def tpc_finish(self):
         """Indicate confirmation that the transaction is done."""
-        await self._strategy.tpc_finish()
+        if not self.read_only:
+            await self.storage.commit(self)
         await self._cache.close()
         self.tpc_cleanup()
 

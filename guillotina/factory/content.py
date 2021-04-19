@@ -172,7 +172,7 @@ class Database:
         txn = await tm.begin()
 
         try:
-            await txn._strategy.retrieve_tid()
+            await txn.initialize_tid()
             root = await tm._storage.load(txn, ROOT_ID)
             if root is not None:
                 root = app_settings["object_reader"](root)
@@ -189,8 +189,7 @@ class Database:
             await tm.commit(txn=txn)
 
     async def open(self):
-        """Return a database Connection for use by application code.
-        """
+        """Return a database Connection for use by application code."""
         return await self._storage.open()
 
     async def close(self, conn):
