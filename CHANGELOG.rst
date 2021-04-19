@@ -3,8 +3,12 @@ CHANGELOG
 
 6.2.7 (unreleased)
 ------------------
+
 - Return 401 if NoPermissionToAdd is raised in defaultPOST
   [nilbacardit26]
+
+- No longer have dedicated read connection and do not use any prepared statements
+  [vangheem]
 
 
 6.2.6 (2021-04-12)

@@ -10,6 +10,7 @@ from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.tests import mocks
 from guillotina.tests.utils import create_content
 from unittest.mock import Mock
+from unittest.mock import patch
 from uuid import uuid4
 
 import asyncio
@@ -124,16 +125,15 @@ async def test_restart_connection_pg(db, dummy_guillotina):
         # Simulate connection was initialized a long time ago
         tm._storage._connection_initialized_on = 0
 
-        async def fetchval_conn_closed():
-            raise asyncpg.exceptions.InterfaceError(
-                "cannot call PreparedStatement.fetchval(): the underlying connection is closed"
-            )
+        with patch(
+            "asyncpg.connection.Connection.fetchval",
+            side_effect=asyncpg.exceptions.InterfaceError(
+                "cannot call Connection.fetchval(): the underlying connection is closed"
+            ),
+        ):
 
-        # Simulate underlying connection is closed
-        tm._storage._connection_manager._stmt_next_tid = Mock(**{"fetchval": fetchval_conn_closed})
-
-        with pytest.raises(ConflictError):
-            await tm._storage.get_next_tid(Mock())
+            with pytest.raises(ConflictError):
+                await tm._storage.get_next_tid(Mock())
 
         # Test works again
         await tm._storage.get_next_tid(Mock())
@@ -527,7 +527,7 @@ async def test_using_gather_with_queries_after_prepare(db, dummy_guillotina):
 @pytest.mark.skipif(DATABASE == "DUMMY", reason="Not for dummy db")
 async def test_exhausting_pool_size(db, dummy_guillotina):
     # base aps uses 1 connection from the pool for starting transactions
-    aps = await get_aps(db, pool_size=2)
+    aps = await get_aps(db, pool_size=1)
     with TransactionManager(aps) as tm, await tm.begin() as txn:
         await txn.get_connection()
 

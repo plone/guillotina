@@ -217,7 +217,7 @@ class Command(object):
                 logger.info(f"Waiting for {task._coro.__qualname__} to finish")
                 try:
                     await asyncio.wait_for(asyncio.shield(task), 1)
-                except asyncio.TimeoutError:
+                except (asyncio.TimeoutError, asyncio.CancelledError):
                     logger.warning(f"Timeout for {task._coro.__qualname__}")
             except (AttributeError, KeyError):
                 pass
