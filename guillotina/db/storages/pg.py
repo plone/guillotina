@@ -1037,7 +1037,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
         # make sure asycpg knows this is a new transaction
         if txn._db_conn._con is not None:
             txn._db_conn._con._top_xact = None
-        return txn._db_conn.transaction(readonly=txn._manager._storage._read_only)
+        return txn._db_conn.transaction(readonly=self._read_only)
 
     @restart_conn_on_exception
     async def _async_db_transaction_factory(self, txn):
