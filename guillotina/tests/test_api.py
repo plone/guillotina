@@ -1689,3 +1689,12 @@ async def test_default_post_and_patch_handles_wrong_json_payload(container_reque
 
         _, status = await requester("PATCH", "/db/guillotina/", data=json.dumps("foobar"))
         assert status == 412
+
+
+async def test_default_post_without_add_permission(container_requester):
+    async with container_requester as requester:
+        resp, status = await requester(
+            "POST", "/db/guillotina/", data=json.dumps({"@type": "ExampleAddPermission"})
+        )
+        assert status == 401
+        assert "Not permission to add ExampleAddPermission on" in resp["message"]
