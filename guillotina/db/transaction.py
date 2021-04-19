@@ -213,6 +213,10 @@ class Transaction:
         return self._db_conn
 
     @property
+    def connection_reserved(self):
+        return self._db_conn is not None
+
+    @property
     def lock(self):
         return self._lock
 
@@ -229,26 +233,22 @@ class Transaction:
         return self._manager._storage
 
     def get_before_commit_hooks(self):
-        """ See ITransaction.
-        """
+        """See ITransaction."""
         return iter(self._before_commit)
 
     def add_before_commit_hook(self, hook, *real_args, args=None, kws=None, **kwargs):
-        """ See ITransaction.
-        """
+        """See ITransaction."""
         args = args or []
         kws = kws or {}
         kwargs.update(kws)
         self._before_commit.append((hook, real_args + tuple(args), kwargs))
 
     def get_after_commit_hooks(self):
-        """ See ITransaction.
-        """
+        """See ITransaction."""
         return iter(self._after_commit)
 
     def add_after_commit_hook(self, hook, *real_args, args=None, kws=None, **kwargs):
-        """ See ITransaction.
-        """
+        """See ITransaction."""
         args = args or []
         kws = kws or {}
         kwargs.update(kws)
@@ -472,8 +472,7 @@ class Transaction:
 
     @profilable
     async def tpc_finish(self):
-        """Indicate confirmation that the transaction is done.
-        """
+        """Indicate confirmation that the transaction is done."""
         await self._strategy.tpc_finish()
         await self._cache.close()
         self.tpc_cleanup()

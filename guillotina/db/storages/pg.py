@@ -606,6 +606,29 @@ class PGConnectionManager:
         await self._initialize_tid_statements()
 
 
+class TransactionConnectionContextManager:
+    """
+    Connection manager to either use reserved
+    transaction connection or use a connection
+    from pool
+    """
+
+    def __init__(self, storage, txn):
+        self.storage = storage
+        self.txn = txn
+        self.connection = None
+
+    async def __aenter__(self):
+        if self.txn.connection_reserved:
+            return self.txn._db_conn
+        self.connection = await self.storage.pool._acquire(self.timeout)
+        return self.connection
+
+    async def __aexit__(self, *exc):
+        if self.connection is None:
+            await self.storage.pool.release(self.connection)
+
+
 @implementer(IPostgresStorage)
 class PostgresqlStorage(BaseStorage):
     """Storage to a relational database, based on invalidation polling"""
@@ -972,10 +995,12 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
         if self._connection_manager._vacuum is not None:
             await self._connection_manager._vacuum.add_to_queue(oid, self._objects_table_name)
 
+    async def acquire(self, txn):
+        return TransactionConnectionContextManager(self, txn)
+
     async def delete(self, txn, oid):
-        conn = await txn.get_connection()
         sql = self._sql.get("TRASH_PARENT_ID", self._objects_table_name)
-        async with watch_lock(txn._lock, "delete_object"):
+        async with self.acquire(txn) as conn:
             # for delete, we reassign the parent id and delete in the vacuum task
             with watch("delete_object"):
                 await conn.execute(sql, oid)
@@ -1005,10 +1030,10 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
                 return await conn.fetchval(self._max_tid_sql.format(schema=self._db_schema))
 
     async def get_one_row(self, txn, sql, *args, prepare=False, metric="get_one_row"):
-        conn = await txn.get_connection()
         # Helper function to provide easy adaptation to cockroach
         with watch(metric):
-            return await conn.fetchrow(sql, *args)
+            async with self.acquire(txn) as conn:
+                return await conn.fetchrow(sql, *args)
 
     def _db_transaction_factory(self, txn):
         # make sure asycpg knows this is a new transaction
@@ -1101,74 +1126,67 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
     # Introspection
     async def get_page_of_keys(self, txn, oid, page=1, page_size=1000):
-        conn = await txn.get_connection()
         keys = []
         sql = self._sql.get("BATCHED_GET_CHILDREN_KEYS", self._objects_table_name)
         with watch("page_of_keys"):
-            for record in await conn.fetch(sql, oid, page_size, (page - 1) * page_size):
-                keys.append(record["id"])
+            async with self.acquire(txn) as conn:
+                for record in await conn.fetch(sql, oid, page_size, (page - 1) * page_size):
+                    keys.append(record["id"])
         return keys
 
     async def keys(self, txn, oid):
-        conn = await txn.get_connection()
         sql = self._sql.get("GET_CHILDREN_KEYS", self._objects_table_name)
-        async with watch_lock(txn._lock, "keys"):
-            with watch("keys"):
+        with watch("keys"):
+            async with self.acquire(txn) as conn:
                 result = await conn.fetch(sql, oid)
         return result
 
     async def get_child(self, txn, parent_oid, id):
         sql = self._sql.get("GET_CHILD", self._objects_table_name)
-        async with watch_lock(txn._lock, "get_child"):
-            result = await self.get_one_row(txn, sql, parent_oid, id, metric="get_child")
+        result = await self.get_one_row(txn, sql, parent_oid, id, metric="get_child")
         return result
 
     async def get_children(self, txn, parent_oid, ids):
-        conn = await txn.get_connection()
         sql = self._sql.get("GET_CHILDREN_BATCH", self._objects_table_name)
-        async with watch_lock(txn._lock, "get_children"):
+        async with self.acquire(txn) as conn:
             with watch("get_children"):
                 return await conn.fetch(sql, parent_oid, ids)
 
     async def has_key(self, txn, parent_oid, id):
         sql = self._sql.get("EXIST_CHILD", self._objects_table_name)
-        async with watch_lock(txn._lock, "has_key"):
-            result = await self.get_one_row(txn, sql, parent_oid, id, metric="has_key")
+        result = await self.get_one_row(txn, sql, parent_oid, id, metric="has_key")
         if result is None:
             return False
         else:
             return True
 
     async def len(self, txn, oid):
-        conn = await txn.get_connection()
         sql = self._sql.get("NUM_CHILDREN", self._objects_table_name)
-        async with watch_lock(txn._lock, "num_children"):
+        async with self.acquire(txn) as conn:
             with watch("num_children"):
                 result = await conn.fetchval(sql, oid)
         return result
 
     async def items(self, txn, oid):
-        conn = await txn.get_connection()
         sql = self._sql.get("GET_CHILDREN", self._objects_table_name)
         with watch("items"):
-            # not going to be accurate measure but will tell you if it is abused
-            async for record in conn.cursor(sql, oid):
-                # locks are dangerous in cursors since comsuming code might do
-                # sub-queries and they you end up with a deadlock
-                yield record
+            async with self.acquire(txn) as conn:
+                # not going to be accurate measure but will tell you if it is abused
+                async for record in conn.cursor(sql, oid):
+                    # locks are dangerous in cursors since comsuming code might do
+                    # sub-queries and they you end up with a deadlock
+                    yield record
 
     async def get_annotation(self, txn, oid, id):
         sql = self._sql.get("GET_ANNOTATION", self._objects_table_name)
-        async with watch_lock(txn._lock, "load_annotation"):
-            result = await self.get_one_row(txn, sql, oid, id, metric="load_annotation")
-            if result is not None and result["parent_id"] == TRASHED_ID:
-                result = None
+        result = await self.get_one_row(txn, sql, oid, id, metric="load_annotation")
+        if result is not None and result["parent_id"] == TRASHED_ID:
+            result = None
         return result
 
     async def get_annotation_keys(self, txn, oid):
-        conn = await txn.get_connection()
         sql = self._sql.get("GET_ANNOTATIONS_KEYS", self._objects_table_name)
-        async with watch_lock(txn._lock, "load_annotation_keys"):
+        async with self.acquire(txn) as conn:
             with watch("load_annotation_keys"):
                 result = await conn.fetch(sql, oid)
         items = []
@@ -1184,8 +1202,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
         if result is None:
             # check if we have a referenced ob, could be new and not in db yet.
             # if so, create a stub for it here...
-            conn = await txn.get_connection()
-            async with watch_lock(txn._lock, "store_blob_stub"):
+            async with self.acquire(txn) as conn:
                 with watch("store_blob_stub"):
                     await conn.execute(
                         f"""INSERT INTO {self._objects_table_name}
@@ -1193,9 +1210,8 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     VALUES ($1::varchar({MAX_UID_LENGTH}), -1, 0, 0, TRUE, 'stub')""",
                         oid,
                     )
-        conn = await txn.get_connection()
         sql = self._sql.get("INSERT_BLOB_CHUNK", self._blobs_table_name)
-        async with watch_lock(txn._lock, "store_blob_chunk"):
+        async with self.acquire(txn) as conn:
             with watch("store_blob_chunk"):
                 return await conn.execute(sql, bid, oid, chunk_index, data)
 
@@ -1205,49 +1221,44 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
             return await self.get_one_row(txn, sql, bid, chunk, metric="load_blob_chunk")
 
     async def read_blob_chunks(self, txn, bid):
-        conn = await txn.get_connection()
         with watch("read_blob_chunks"):
-            # again, not accurate through an iterator
-            async for record in conn.cursor(bid):
-                # locks are dangerous in cursors since comsuming code might do
-                # sub-queries and they you end up with a deadlock
-                yield record
+            async with self.acquire(txn) as conn:
+                # again, not accurate through an iterator
+                async for record in conn.cursor(bid):
+                    # locks are dangerous in cursors since comsuming code might do
+                    # sub-queries and they you end up with a deadlock
+                    yield record
 
     async def del_blob(self, txn, bid):
-        conn = await txn.get_connection()
         sql = self._sql.get("DELETE_BLOB", self._blobs_table_name)
-        async with watch_lock(txn._lock, "delete_blob_chunk"):
+        async with self.acquire(txn) as conn:
             with watch("delete_blob_chunk"):
                 await conn.execute(sql, bid)
 
     async def get_total_number_of_objects(self, txn):
-        conn = await txn.get_connection()
         sql = self._sql.get("NUM_ROWS", self._objects_table_name)
-        async with watch_lock(txn._lock, "total_objects"):
+        async with self.acquire(txn) as conn:
             with watch("total_objects"):
                 result = await conn.fetchval(sql)
         return result
 
     async def get_total_number_of_resources(self, txn):
-        conn = await txn.get_connection()
         sql = self._sql.get("NUM_RESOURCES", self._objects_table_name)
-        async with watch_lock(txn._lock, "total_resources"):
+        async with self.acquire(txn) as conn:
             with watch("total_resources"):
                 result = await conn.fetchval(sql)
         return result
 
     async def get_total_resources_of_type(self, txn, type_):
-        conn = await txn.get_connection()
         sql = self._sql.get("NUM_RESOURCES_BY_TYPE", self._objects_table_name)
-        async with watch_lock(txn._lock, "total_objects_by_type"):
+        async with self.acquire(txn) as conn:
             with watch("total_objects_by_type"):
                 result = await conn.fetchval(sql, type_)
         return result
 
     # Massive treatment without security
     async def _get_page_resources_of_type(self, txn, type_, page, page_size):
-        conn = await txn.get_connection()
-        async with txn._lock:
+        async with self.acquire(txn) as conn:
             keys = []
             sql = self._sql.get("RESOURCES_BY_TYPE", self._objects_table_name)
             for record in await conn.fetch(sql, type_, page_size, (page - 1) * page_size):
