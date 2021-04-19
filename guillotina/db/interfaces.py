@@ -110,11 +110,6 @@ class ITransaction(Interface):
         Get current connection object
         """
 
-    async def acquire() -> typing.AsyncContextManager[typing.Any]:
-        """
-        Return context manager for getting current connection
-        """
-
 
 class ITransactionManager(Interface):
     db_id: str
@@ -327,11 +322,6 @@ class IStorage(Interface):
     async def terminate(conn):
         """
         terminate conn object
-        """
-
-    def acquire():
-        """
-        Return context manager for connection
         """
 
 

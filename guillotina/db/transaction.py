@@ -135,24 +135,6 @@ class cache:
         return _wrapper
 
 
-class TransactionConnectionContextManager:
-    """
-    Connection manager to either use reserved
-    transaction connection or use a connection
-    from pool
-    """
-
-    def __init__(self, txn):
-        self.txn = txn
-        self.connection = None
-
-    async def __aenter__(self):
-        return self.txn._db_conn
-
-    async def __aexit__(self, *exc):
-        ...
-
-
 @implementer(ITransaction)
 class Transaction:
     _status = "empty"
@@ -224,11 +206,6 @@ class Transaction:
             self._db_conn = await self._manager._storage.open()
             self._query_count_start = self.get_query_count()
         return self._db_conn
-
-    def acquire(self):
-        if self._db_conn is None:
-            return self.storage.acquire()
-        return TransactionConnectionContextManager(self)
 
     @property
     def connection_reserved(self):
