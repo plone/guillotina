@@ -621,11 +621,11 @@ class TransactionConnectionContextManager:
     async def __aenter__(self):
         if self.txn.connection_reserved:
             return self.txn._db_conn
-        self.connection = await self.storage.pool._acquire(self.timeout)
+        self.connection = await self.storage.pool.acquire(timeout=self.storage._conn_acquire_timeout.timeout)
         return self.connection
 
     async def __aexit__(self, *exc):
-        if self.connection is None:
+        if self.connection is not None:
             await self.storage.pool.release(self.connection)
 
 
