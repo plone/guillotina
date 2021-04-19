@@ -7,7 +7,6 @@ from guillotina.directives import index
 from guillotina.directives import merged_tagged_value_dict
 from guillotina.directives import merged_tagged_value_list
 from guillotina.directives import metadata
-from guillotina.exceptions import ContainerNotFound
 from guillotina.exceptions import NoIndexField
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import ICatalogDataAdapter
@@ -21,7 +20,6 @@ from guillotina.security.security_code import role_permission_manager
 from guillotina.security.utils import get_principals_with_access_content
 from guillotina.security.utils import get_roles_with_access_content
 from guillotina.utils import apply_coroutine
-from guillotina.utils import find_container
 from guillotina.utils import get_content_depth
 from guillotina.utils import get_content_path
 from zope.interface import implementer
@@ -48,10 +46,7 @@ class DefaultSearchUtility:
         Search query, uses parser to transform query
         """
         parsed_query = parse_query(context, query, self)
-        container = find_container(context)
-        if container is not None:
-            return await self.search_raw(container, parsed_query)
-        raise ContainerNotFound()
+        return await self.search_raw(context, parsed_query)
 
     async def search_raw(self, container: IContainer, query: typing.Any):
         """
@@ -70,10 +65,7 @@ class DefaultSearchUtility:
         Raw search query, uses parser to transform query
         """
         parsed_query = parse_query(context, query, self)
-        container = find_container(context)
-        if container is not None:
-            return await self.aggregation(container, parsed_query)
-        raise ContainerNotFound()
+        return await self.aggregation(context, parsed_query)
 
     async def index(self, container: IContainer, datas):
         """

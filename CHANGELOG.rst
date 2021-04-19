@@ -4,6 +4,9 @@ CHANGELOG
 6.2.7 (unreleased)
 ------------------
 
+- Use Context on default catalog security checks
+  [bloodbare]
+
 - No longer have dedicated read connection and do not use any prepared statements
   [vangheem]
 
