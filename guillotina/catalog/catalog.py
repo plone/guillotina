@@ -48,13 +48,13 @@ class DefaultSearchUtility:
         parsed_query = parse_query(context, query, self)
         return await self.search_raw(context, parsed_query)
 
-    async def search_raw(self, container: IContainer, query: typing.Any):
+    async def search_raw(self, context: IBaseObject, query: typing.Any):
         """
         Search raw query
         """
         return {"items": [], "items_total": 0}
 
-    async def aggregation(self, container: IContainer, parsed_query: typing.Any):
+    async def aggregation(self, context: IBaseObject, parsed_query: typing.Any):
         """
         Search aggregation
         """

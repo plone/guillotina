@@ -267,7 +267,7 @@ class PGSearchUtility(DefaultSearchUtility):
             total = records[0]["count"]
         return {"items": results, "items_total": total}
 
-    async def search_raw(self, container: IContainer, query: typing.Any):
+    async def search_raw(self, context: IBaseObject, query: typing.Any):
         """
         Search raw query
         """

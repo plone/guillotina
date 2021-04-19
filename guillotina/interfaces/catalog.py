@@ -16,7 +16,7 @@ class ICatalogUtility(Interface):
         Search query, uses parser to transform query
         """
 
-    async def search_raw(container: IContainer, query: typing.Any):
+    async def search_raw(context: IBaseObject, query: typing.Any):
         """
         Search raw query
         """
