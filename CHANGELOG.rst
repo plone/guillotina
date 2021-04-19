@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.2.7 (unreleased)
+6.3.0 (unreleased)
 ------------------
 
 - Use Context on default catalog security checks
