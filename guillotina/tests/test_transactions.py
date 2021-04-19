@@ -1,31 +1,15 @@
 from guillotina import task_vars
 from guillotina.content import create_content_in_container
 from guillotina.db import ROOT_ID
-from guillotina.db.transaction import Transaction
 from guillotina.exceptions import TransactionClosedException
 from guillotina.exceptions import TransactionNotFound
 from guillotina.exceptions import TransactionObjectRegistrationMismatchException
-from guillotina.tests import mocks
 from guillotina.tests import utils
 from guillotina.transactions import transaction
 from guillotina.utils import get_database
 from guillotina.utils import get_object_by_uid
 
 import pytest
-
-
-async def test_no_tid_created_for_reads(dummy_request, loop):
-    tm = mocks.MockTransactionManager()
-    trns = Transaction(tm, loop=loop, read_only=True)
-    await trns.tpc_begin()
-    assert trns._tid is None
-
-
-async def test_tid_created_for_writes(dummy_request, loop):
-    tm = mocks.MockTransactionManager()
-    trns = Transaction(tm, loop=loop)
-    await trns.tpc_begin()
-    assert trns._tid == 1
 
 
 async def test_managed_transaction_with_adoption(container_requester):

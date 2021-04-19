@@ -693,7 +693,6 @@ class PostgresqlStorage(BaseStorage):
         read_only=False,
         name=None,
         pool_size=13,
-        transaction_strategy="resolve_readcommitted",
         conn_acquire_timeout=20,
         conn_release_timeout=60,
         db_schema="public",
@@ -704,7 +703,7 @@ class PostgresqlStorage(BaseStorage):
         autovacuum=True,
         **options,
     ):
-        super(PostgresqlStorage, self).__init__(read_only, transaction_strategy=transaction_strategy)
+        super(PostgresqlStorage, self).__init__(read_only)
         self._dsn = dsn
         self._pool_size = pool_size
         self._partition_class = partition
@@ -1105,7 +1104,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
             if transaction._db_txn is not None:
                 with watch("commit_txn"):
                     await transaction._db_txn.commit()
-            elif self._transaction_strategy not in ("none", "tidonly") and not transaction._skip_commit:
+            elif not transaction._skip_commit:
                 log.warning("Do not have db transaction to commit")
             return transaction._tid
 
