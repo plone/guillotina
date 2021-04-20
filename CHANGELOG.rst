@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-5.4.0 (unreleased)
+5.4.0 (2021-04-20)
 ------------------
 
 - Remove db transaction strategy support
