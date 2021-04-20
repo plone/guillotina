@@ -1,14 +1,8 @@
 CHANGELOG
 =========
 
-5.3.70 (unreleased)
--------------------
-
-- Nothing changed yet.
-
-
-5.3.69 (2021-04-20)
--------------------
+5.4.0 (unreleased)
+------------------
 
 - Remove db transaction strategy support
 - Remove CockroachDB support
