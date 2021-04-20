@@ -19,7 +19,6 @@ from guillotina.db.uid import MAX_UID_LENGTH
 from guillotina.exceptions import ContainerNotFound
 from guillotina.exceptions import RequestNotFound
 from guillotina.exceptions import TransactionNotFound
-from guillotina.interfaces import IContainer
 from guillotina.interfaces import IDatabase
 from guillotina.interfaces import IFolder
 from guillotina.interfaces import IPGCatalogUtility
@@ -115,7 +114,7 @@ class PGSearchUtility(DefaultSearchUtility):
                     return
                 raise
 
-    def get_default_where_clauses(self, context: IResource) -> typing.List[str]:
+    def get_default_where_clauses(self, context: IBaseObject) -> typing.List[str]:
         users = []
         principal = get_authenticated_user()
         if principal is None:
@@ -142,7 +141,7 @@ class PGSearchUtility(DefaultSearchUtility):
 
     def build_query(
         self,
-        context: IResource,
+        context: IBaseObject,
         query: ParsedQueryInfo,
         select_fields: typing.List[str],
         distinct: typing.Optional[bool] = False,
@@ -240,11 +239,11 @@ class PGSearchUtility(DefaultSearchUtility):
                 del metadata[k]
         return metadata
 
-    async def aggregation(self, container: IContainer, query: ParsedQueryInfo):
+    async def aggregation(self, context: IBaseObject, query: ParsedQueryInfo):
         select_fields = [
             "json->'" + sqlq(field) + "' as " + sqlq(field) for field in query["metadata"] or []
         ]  # noqa
-        sql, arguments = self.build_query(container, query, select_fields, True)
+        sql, arguments = self.build_query(context, query, select_fields, True)
 
         txn = get_transaction()
         if txn is None:
@@ -260,14 +259,14 @@ class PGSearchUtility(DefaultSearchUtility):
 
         total = len(results)
         if total >= query["size"] or query["_from"] != 0:
-            sql, arguments = self.build_count_query(container, query)
+            sql, arguments = self.build_count_query(context, query)
             logger.debug(f"Running search:\n{sql}\n{arguments}")
             async with txn.lock:
                 records = await conn.fetch(sql, *arguments)
             total = records[0]["count"]
         return {"items": results, "items_total": total}
 
-    async def search_raw(self, container: IContainer, query: typing.Any):
+    async def search_raw(self, context: IBaseObject, query: typing.Any):
         """
         Search raw query
         """
