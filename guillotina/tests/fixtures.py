@@ -8,9 +8,7 @@ from guillotina.component import globalregistry
 from guillotina.const import ROOT_ID
 from guillotina.const import TRASHED_ID
 from guillotina.content import load_cached_schema
-from guillotina.db.interfaces import ICockroachStorage
 from guillotina.db.interfaces import IPostgresStorage
-from guillotina.db.storages.cockroach import CockroachStorage
 from guillotina.factory import make_app
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
@@ -149,15 +147,9 @@ def get_db_settings(pytest_node=None):
         dbname=annotations.get("pg_db", "guillotina"),
         password=annotations.get("pg_password", ""),
     )
-
-    if annotations["testdatabase"] == "cockroachdb":
-        configure_db(settings["databases"]["db"], **options, user="root", storage="cockroach")
-        configure_db(settings["databases"]["db-custom"], **options, user="root", storage="cockroach")
-        configure_db(settings["storages"]["db"], **options, user="root", storage="cockroach")
-    else:
-        configure_db(settings["databases"]["db"], **options)
-        configure_db(settings["databases"]["db-custom"], **options)
-        configure_db(settings["storages"]["db"], **options)
+    configure_db(settings["databases"]["db"], **options)
+    configure_db(settings["databases"]["db-custom"], **options)
+    configure_db(settings["storages"]["db"], **options)
 
     return settings
 
@@ -170,26 +162,23 @@ def db():
     if annotations["testdatabase"] == "DUMMY":
         yield
     else:
-        import pytest_docker_fixtures
-
-        if annotations["testdatabase"] == "cockroachdb":
-            host, port = pytest_docker_fixtures.cockroach_image.run()
+        if os.environ.get("POSTGRESQL"):
+            host, port = os.environ["POSTGRESQL"].split(":")
         else:
+            import pytest_docker_fixtures
+
             if not annotations["travis"]:
                 host, port = pytest_docker_fixtures.pg_image.run()
             else:
                 host = "localhost"
                 port = int(os.environ.get("PGPORT", 5432))
 
-        annotations["pg_host"] = host
-        annotations["pg_port"] = port
+        annotations["pg_host"], annotations["pg_port"] = host, port
         annotations["pg_password"] = os.environ.get("POSTGRES_PASSWORD", "")
 
         yield host, port  # provide the fixture value
 
-        if annotations["testdatabase"] == "cockroachdb":
-            pytest_docker_fixtures.cockroach_image.stop()
-        elif not annotations["travis"]:
+        if not annotations["travis"] and not os.environ.get("POSTGRESQL"):
             pytest_docker_fixtures.pg_image.stop()
 
 
@@ -370,7 +359,7 @@ async def _clear_dbs(root):
         if not IDatabase.providedBy(db):
             continue
         storage = db.storage
-        if IPostgresStorage.providedBy(storage) or ICockroachStorage.providedBy(storage):
+        if IPostgresStorage.providedBy(storage):
             async with storage.pool.acquire() as conn:
                 await conn.execute(
                     """
@@ -433,34 +422,6 @@ async def _bomb_shelter(future, timeout=2):
         return await asyncio.shield(asyncio.wait_for(future, timeout))
     except asyncio.TimeoutError:
         pass
-
-
-class CockroachStorageAsyncContextManager(object):
-    def __init__(self, request, loop, db):
-        self.loop = loop
-        self.request = request
-        self.storage = None
-        self.db = db
-
-    async def __aenter__(self):
-        dsn = "postgres://root:@{}:{}/guillotina?sslmode=disable".format(self.db[0], self.db[1])
-        self.storage = CockroachStorage(dsn=dsn, name="db", pool_size=25, conn_acquire_timeout=0.1)
-        await self.storage.initialize(self.loop)
-        return self.storage
-
-    async def __aexit__(self, exc_type, exc, tb):
-        async with self.storage.pool.acquire() as conn:
-            await _bomb_shelter(conn.execute("DROP DATABASE IF EXISTS guillotina;"))
-            await _bomb_shelter(conn.execute("CREATE DATABASE guillotina;"))
-            try:
-                await self.storage.finalize()
-            except asyncio.CancelledError:  # pragma: no cover
-                pass
-
-
-@pytest.fixture(scope="function")
-def cockroach_storage(db, dummy_request, loop):
-    return CockroachStorageAsyncContextManager(dummy_request, loop, db)
 
 
 @pytest.fixture(scope="function")

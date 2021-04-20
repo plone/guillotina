@@ -25,7 +25,7 @@ import os
 import pytest
 
 
-NOT_POSTGRES = os.environ.get("DATABASE", "DUMMY") in ("cockroachdb", "DUMMY")
+NOT_POSTGRES = os.environ.get("DATABASE", "DUMMY") in ("DUMMY",)
 PG_CATALOG_SETTINGS = {
     "applications": ["guillotina.contrib.catalog.pg"],
     "load_utilities": {

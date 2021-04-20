@@ -1,11 +1,9 @@
 from collections import OrderedDict
 from guillotina import app_settings
 from guillotina import task_vars
-from guillotina.component import query_adapter
 from guillotina.db.cache.dummy import DummyCache
 from guillotina.db.interfaces import IStorage
 from guillotina.db.interfaces import ITransaction
-from guillotina.db.interfaces import ITransactionStrategy
 from guillotina.db.interfaces import IWriter
 from zope.interface import implementer
 
@@ -34,9 +32,6 @@ class MockTransaction:  # type: ignore
         self.added = OrderedDict()
         self.deleted = OrderedDict()
         self.request = None
-        self._strategy = query_adapter(
-            self, ITransactionStrategy, name=manager._storage._transaction_strategy
-        )
         self._cache = DummyCache(self)
         self._lock = asyncio.Lock()
         self._status = "started"
@@ -79,8 +74,7 @@ class MockTransaction:  # type: ignore
         return self
 
     def __exit__(self, *args):
-        """
-        """
+        """"""
 
 
 @implementer(IStorage)
@@ -88,12 +82,10 @@ class MockStorage:  # type: ignore
 
     _cache: dict = {}
     _read_only = False
-    _transaction_strategy = "resolve"
     _options: dict = {}
     supports_unique_constraints = False
 
-    def __init__(self, transaction_strategy="resolve"):
-        self._transaction_strategy = transaction_strategy
+    def __init__(self):
         self._transaction = None
         self._objects = {}
         self._parent_objs = {}
@@ -171,8 +163,7 @@ class MockTransactionManager:  # type: ignore
         task_vars.tm.set(self)
 
     def __exit__(self, *args):
-        """
-        """
+        """"""
 
 
 class FakeConnection:

@@ -1,10 +1,13 @@
 CHANGELOG
 =========
 
-5.3.69 (unreleased)
--------------------
+5.4.0 (unreleased)
+------------------
 
-- Nothing changed yet.
+- Remove db transaction strategy support
+- Remove CockroachDB support
+- Try not to reserve connection when possible
+  [vangheem]
 
 
 5.3.68 (2021-04-16)

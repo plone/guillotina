@@ -7,12 +7,7 @@ from guillotina.transactions import transaction
 from guillotina.utils import get_database
 from uuid import uuid4
 
-import os
-import pytest
 import time
-
-
-pytest.mark.skipif(os.environ.get("DATABASE") == "cockroachdb", reason="Flaky cockroachdb test")
 
 
 async def test_create_annotation(db, guillotina_main):

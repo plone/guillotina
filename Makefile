@@ -21,14 +21,7 @@ run-postgres: ## Run PostgreSQL
 	@echo ""
 	@echo "$(YELLOW)==> Running PostgreSQL $(VERSION)$(RESET)"
 	@docker run --rm -e POSTGRES_DB=guillotina -e POSTGRES_USER=postgres \
-		-p 127.0.0.1:5432:5432 --name postgres postgres:9.6
-
-.PHONY: run-cockroachdb
-run-cockroachdb: ## Run CockroachDB
-	@echo ""
-	@echo "$(YELLOW)==> Running CockroachDB $(VERSION)$(RESET)"
-	@docker run -p 127.0.0.1:26257:26257 -p 127.0.0.1:9080:8080 \
-		--rm cockroachdb/cockroach:v2.0.0 start --insecure
+		-p 127.0.0.1:5432:5432 --name postgres postgres:9.6.15
 
 .PHONY: run-redis
 run-redis: ## Run Redis
@@ -36,8 +29,3 @@ run-redis: ## Run Redis
 	@echo "$(YELLOW)==> Running Redis"
 	@docker run -p 127.0.0.1:32958:6379 --rm redis:5.0.7
 
-.PHONY: create-cockroachdb
-create-cockroachdb: ## Create CockroachDB
-	@echo ""
-	@echo "$(YELLOW)==> Creating CockroachDB $(VERSION)$(RESET)"
-	./bin/python _cockroachdb-createdb.py
