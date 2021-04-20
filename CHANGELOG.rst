@@ -4,6 +4,11 @@ CHANGELOG
 6.4.0rc1 (unreleased)
 ---------------------
 
+- Port the following changes:
+  - Remove db transaction strategy support
+  - Try not to reserve connection when possible
+    [vangheem]
+
 - Black to 21.10b0 version
   [bloodbare]
 

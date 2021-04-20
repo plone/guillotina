@@ -275,13 +275,11 @@ class CockroachStorage(pg.PostgresqlStorage):
                 except asyncpg.exceptions.SerializationError as ex:
                     if ex.sqlstate == "40001":
                         raise RestartCommit(ex.args[0])
-        elif self._transaction_strategy not in ("none", "tidonly"):
-            logger.info("Do not have db transaction to commit")
 
         return transaction._tid
 
     # Cockroach cant use at version 1.0.3 row count (no fetch)
-    async def get_one_row(self, txn, sql, *args, prepare=False):
+    async def get_one_row(self, txn, sql, *args, prepare=False, metric="has_key"):
         # Helper function to provide easy adaptation to cockroach
         conn = await txn.get_connection()
         try:
