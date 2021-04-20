@@ -1017,20 +1017,20 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
     @restart_conn_on_exception
     async def get_next_tid(self, txn):
-        with watch("next_tid"):
-            async with self.pool.acquire(timeout=self._conn_acquire_timeout) as conn:
+        async with self.pool.acquire(timeout=self._conn_acquire_timeout) as conn:
+            with watch("next_tid"):
                 return await conn.fetchval(self._next_tid_sql.format(schema=self._db_schema))
 
     @restart_conn_on_exception
     async def get_current_tid(self, txn):
-        with watch("current_tid"):
-            async with self.pool.acquire(timeout=self._conn_acquire_timeout) as conn:
+        async with self.pool.acquire(timeout=self._conn_acquire_timeout) as conn:
+            with watch("current_tid"):
                 return await conn.fetchval(self._max_tid_sql.format(schema=self._db_schema))
 
     async def get_one_row(self, txn, sql, *args, prepare=False, metric="get_one_row"):
         # Helper function to provide easy adaptation to cockroach
-        with watch(metric):
-            async with self.acquire(txn) as conn:
+        async with self.acquire(txn) as conn:
+            with watch(metric):
                 return await conn.fetchrow(sql, *args)
 
     def _db_transaction_factory(self, txn):
@@ -1125,16 +1125,16 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def get_page_of_keys(self, txn, oid, page=1, page_size=1000):
         keys = []
         sql = self._sql.get("BATCHED_GET_CHILDREN_KEYS", self._objects_table_name)
-        with watch("page_of_keys"):
-            async with self.acquire(txn) as conn:
+        async with self.acquire(txn) as conn:
+            with watch("page_of_keys"):
                 for record in await conn.fetch(sql, oid, page_size, (page - 1) * page_size):
                     keys.append(record["id"])
         return keys
 
     async def keys(self, txn, oid):
         sql = self._sql.get("GET_CHILDREN_KEYS", self._objects_table_name)
-        with watch("keys"):
-            async with self.acquire(txn) as conn:
+        async with self.acquire(txn) as conn:
+            with watch("keys"):
                 result = await conn.fetch(sql, oid)
         return result
 
@@ -1166,8 +1166,8 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
 
     async def items(self, txn, oid):
         sql = self._sql.get("GET_CHILDREN", self._objects_table_name)
-        with watch("items"):
-            async with self.acquire(txn) as conn:
+        async with self.acquire(txn) as conn:
+            with watch("items"):
                 # not going to be accurate measure but will tell you if it is abused
                 async for record in conn.cursor(sql, oid):
                     # locks are dangerous in cursors since comsuming code might do
@@ -1216,8 +1216,8 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
         return await self.get_one_row(txn, sql, bid, chunk, metric="load_blob_chunk")
 
     async def read_blob_chunks(self, txn, bid):
-        with watch("read_blob_chunks"):
-            async with self.acquire(txn) as conn:
+        async with self.acquire(txn) as conn:
+            with watch("read_blob_chunks"):
                 # again, not accurate through an iterator
                 async for record in conn.cursor(bid):
                     # locks are dangerous in cursors since comsuming code might do
