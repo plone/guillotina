@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.3.0 (unreleased)
+6.3.0 (2021-04-21)
 ------------------
 
 - Use Context on default catalog security checks
