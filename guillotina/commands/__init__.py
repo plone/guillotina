@@ -142,7 +142,7 @@ class Command(object):
             loop_policy = resolve_dotted_name(settings["loop_policy"])
             asyncio.set_event_loop_policy(loop_policy())
 
-        app = make_app(settings)
+        app = make_app(settings=settings)
 
         if self.arguments.line_profiler:
             if not HAS_LINE_PROFILER:
