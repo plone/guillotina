@@ -12,7 +12,6 @@ import asyncio
 import cProfile
 import json
 import os
-import signal
 import sys
 import yaml
 
@@ -143,7 +142,7 @@ class Command(object):
             loop_policy = resolve_dotted_name(settings["loop_policy"])
             asyncio.set_event_loop_policy(loop_policy())
 
-        app = self.make_app(settings)
+        app = make_app(settings)
 
         if self.arguments.line_profiler:
             if not HAS_LINE_PROFILER:
@@ -182,7 +181,6 @@ class Command(object):
     async def __run(self, app, settings):
         await app.startup()
         if asyncio.iscoroutinefunction(self.run):
-            # Blocking call which returns when finished
             await self.run(self.arguments, settings, app)
         else:
             await run_async(self.run, self.arguments, settings, app)
@@ -219,26 +217,6 @@ class Command(object):
                     logger.warning(f"Timeout for {task._coro.__qualname__}")
             except (AttributeError, KeyError):
                 pass
-
-    def get_loop(self):
-        if self.loop is None:
-            try:
-                self.loop = asyncio.get_event_loop()
-            except RuntimeError:
-                # attempt to recover by making new loop
-                self.loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(self.loop)
-        if self.loop.is_closed():
-            self.loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(self.loop)
-        return self.loop
-
-    def signal_handler(self, signal, frame):
-        sys.exit(0)
-
-    def make_app(self, settings):
-        signal.signal(signal.SIGINT, self.signal_handler)
-        return make_app(settings=settings)
 
     def get_parser(self):
         parser = argparse.ArgumentParser(description=self.description)
@@ -330,5 +308,8 @@ Available commands:
 
     app_settings["__run_command__"] = arguments.command
     # finally, run it...
-    command = Command()
-    command.run_command()
+    try:
+        command = Command()
+        command.run_command()
+    except KeyboardInterrupt:
+        pass
