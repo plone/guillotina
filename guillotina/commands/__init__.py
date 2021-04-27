@@ -175,7 +175,8 @@ class Command(object):
             asyncio.run(run_func(app, settings))
 
     async def __run_with_monitor(self, app, settings):
-        with aiomonitor.start_monitor():
+        loop = asyncio.get_event_loop()
+        with aiomonitor.start_monitor(loop):
             await self.__run(app, settings)
 
     async def __run(self, app, settings):
