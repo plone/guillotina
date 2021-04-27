@@ -5,6 +5,7 @@ from guillotina._settings import app_settings
 from guillotina.factory import make_app
 from guillotina.utils import get_dotted_name
 from guillotina.utils import resolve_dotted_name
+from guillotina.utils import run_async
 
 import argparse
 import asyncio
@@ -170,25 +171,22 @@ class Command(object):
 
         if self.arguments.profile:
             self.profiler = cProfile.Profile()
-            self.profiler.runcall(run_func, app, settings)
+            self.profiler.runcall(asyncio.run, run_func(app, settings))
         else:
-            run_func(app, settings)
+            asyncio.run(run_func(app, settings))
 
-    def __run_with_monitor(self, app, settings):
-        loop = self.get_loop()
-        with aiomonitor.start_monitor(loop=loop):
-            self.__run(app, settings)
+    async def __run_with_monitor(self, app, settings):
+        with aiomonitor.start_monitor():
+            await self.__run(app, settings)
 
-    def __run(self, app, settings):
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(app.startup())
+    async def __run(self, app, settings):
+        await app.startup()
         if asyncio.iscoroutinefunction(self.run):
             # Blocking call which returns when finished
-            loop.run_until_complete(self.run(self.arguments, settings, app))
+            await self.run(self.arguments, settings, app)
         else:
-            self.run(self.arguments, settings, app.app)
-        loop.run_until_complete(self.cleanup(app))
-        loop.close()
+            await run_async(self.run, self.arguments, settings, app)
+        await self.cleanup(app)
 
         if self.profiler is not None:
             if self.arguments.profile_output:
@@ -240,8 +238,7 @@ class Command(object):
 
     def make_app(self, settings):
         signal.signal(signal.SIGINT, self.signal_handler)
-        loop = self.get_loop()
-        return make_app(settings=settings, loop=loop)
+        return make_app(settings=settings)
 
     def get_parser(self):
         parser = argparse.ArgumentParser(description=self.description)

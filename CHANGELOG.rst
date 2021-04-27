@@ -4,7 +4,8 @@ CHANGELOG
 6.3.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Use asyncio.run to run commands
+  [masipcat]
 
 
 6.3.0 (2021-04-21)
