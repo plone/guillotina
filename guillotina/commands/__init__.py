@@ -12,6 +12,7 @@ import asyncio
 import cProfile
 import json
 import os
+import signal
 import sys
 import yaml
 
@@ -142,7 +143,7 @@ class Command(object):
             loop_policy = resolve_dotted_name(settings["loop_policy"])
             asyncio.set_event_loop_policy(loop_policy())
 
-        app = make_app(settings=settings)
+        app = self.make_app(settings)
 
         if self.arguments.line_profiler:
             if not HAS_LINE_PROFILER:
@@ -170,35 +171,40 @@ class Command(object):
 
         if self.arguments.profile:
             self.profiler = cProfile.Profile()
-            self.profiler.runcall(asyncio.run, run_func(app, settings))
-        else:
-            asyncio.run(run_func(app, settings))
-
-    async def __run_with_monitor(self, app, settings):
-        loop = asyncio.get_event_loop()
-        with aiomonitor.start_monitor(loop):
-            await self.__run(app, settings)
-
-    async def __run(self, app, settings):
-        await app.startup()
-        if asyncio.iscoroutinefunction(self.run):
-            await self.run(self.arguments, settings, app)
-        else:
-            await run_async(self.run, self.arguments, settings, app)
-        await self.cleanup(app)
-
-        if self.profiler is not None:
+            self.profiler.runcall(run_func, app, settings)
             if self.arguments.profile_output:
                 self.profiler.dump_stats(self.arguments.profile_output)
             else:
                 # dump to screen
                 self.profiler.print_stats(-1)
+        else:
+            run_func(app, settings)
+
         if self.line_profiler is not None:
             self.line_profiler.disable_by_count()
             if self.arguments.line_profiler_output:
                 self.line_profiler.dump_stats(self.arguments.line_profiler_output)
             else:
                 self.line_profiler.print_stats()
+
+    def __run_with_monitor(self, app, settings):
+        with aiomonitor.start_monitor(self.get_loop()):
+            self.__run(app, settings)
+
+    def __run(self, app, settings):
+        if asyncio.iscoroutinefunction(self.run):
+            self.loop.run_until_complete(self.__run_async(app, settings))
+        else:
+            self.loop.run_until_complete(app.startup())
+            self.run(self.arguments, settings, app)
+            self.loop.run_until_complete(self.startup(app))
+
+        self.loop.close()
+
+    async def __run_async(self, app, settings):
+        await app.startup()
+        await self.run(self.arguments, settings, app)
+        await self.cleanup(app)
 
     async def cleanup(self, app):
         try:
@@ -218,6 +224,27 @@ class Command(object):
                     logger.warning(f"Timeout for {task._coro.__qualname__}")
             except (AttributeError, KeyError):
                 pass
+
+    def get_loop(self):
+        if self.loop is None:
+            try:
+                self.loop = asyncio.get_event_loop()
+            except RuntimeError:
+                # attempt to recover by making new loop
+                self.loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(self.loop)
+        if self.loop.is_closed():
+            self.loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(self.loop)
+        return self.loop
+
+    def signal_handler(self, signal, frame):
+        sys.exit(0)
+
+    def make_app(self, settings):
+        signal.signal(signal.SIGINT, self.signal_handler)
+        loop = self.get_loop()
+        return make_app(settings=settings, loop=loop)
 
     def get_parser(self):
         parser = argparse.ArgumentParser(description=self.description)
@@ -309,8 +336,5 @@ Available commands:
 
     app_settings["__run_command__"] = arguments.command
     # finally, run it...
-    try:
-        command = Command()
-        command.run_command()
-    except KeyboardInterrupt:
-        pass
+    command = Command()
+    command.run_command()

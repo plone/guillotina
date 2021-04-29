@@ -4,7 +4,7 @@ CHANGELOG
 6.3.1 (unreleased)
 ------------------
 
-- Use asyncio.run to run commands
+- Command: run the startup/shutdown and main logic inside the loop
   [masipcat]
 
 
