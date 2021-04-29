@@ -5,7 +5,6 @@ from guillotina._settings import app_settings
 from guillotina.factory import make_app
 from guillotina.utils import get_dotted_name
 from guillotina.utils import resolve_dotted_name
-from guillotina.utils import run_async
 
 import argparse
 import asyncio
