@@ -4,7 +4,8 @@ CHANGELOG
 6.3.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Command: fix typo introduced in #1125
+  [masipcat]
 
 
 6.3.1 (2021-04-30)
