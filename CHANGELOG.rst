@@ -4,7 +4,8 @@ CHANGELOG
 6.3.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Command: run the startup/shutdown and main logic inside the loop
+  [masipcat]
 
 
 6.3.0 (2021-04-21)

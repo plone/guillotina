@@ -171,37 +171,39 @@ class Command(object):
         if self.arguments.profile:
             self.profiler = cProfile.Profile()
             self.profiler.runcall(run_func, app, settings)
-        else:
-            run_func(app, settings)
-
-    def __run_with_monitor(self, app, settings):
-        loop = self.get_loop()
-        with aiomonitor.start_monitor(loop=loop):
-            self.__run(app, settings)
-
-    def __run(self, app, settings):
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(app.startup())
-        if asyncio.iscoroutinefunction(self.run):
-            # Blocking call which returns when finished
-            loop.run_until_complete(self.run(self.arguments, settings, app))
-        else:
-            self.run(self.arguments, settings, app.app)
-        loop.run_until_complete(self.cleanup(app))
-        loop.close()
-
-        if self.profiler is not None:
             if self.arguments.profile_output:
                 self.profiler.dump_stats(self.arguments.profile_output)
             else:
                 # dump to screen
                 self.profiler.print_stats(-1)
+        else:
+            run_func(app, settings)
+
         if self.line_profiler is not None:
             self.line_profiler.disable_by_count()
             if self.arguments.line_profiler_output:
                 self.line_profiler.dump_stats(self.arguments.line_profiler_output)
             else:
                 self.line_profiler.print_stats()
+
+    def __run_with_monitor(self, app, settings):
+        with aiomonitor.start_monitor(self.get_loop()):
+            self.__run(app, settings)
+
+    def __run(self, app, settings):
+        if asyncio.iscoroutinefunction(self.run):
+            self.loop.run_until_complete(self.__run_async(app, settings))
+        else:
+            self.loop.run_until_complete(app.startup())
+            self.run(self.arguments, settings, app)
+            self.loop.run_until_complete(self.startup(app))
+
+        self.loop.close()
+
+    async def __run_async(self, app, settings):
+        await app.startup()
+        await self.run(self.arguments, settings, app)
+        await self.cleanup(app)
 
     async def cleanup(self, app):
         try:
