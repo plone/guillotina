@@ -4,6 +4,9 @@ CHANGELOG
 6.3.1 (unreleased)
 ------------------
 
+- On workflow change also trigger object modification
+  [bloodbare]
+
 - Command: run the startup/shutdown and main logic inside the loop
   [masipcat]
 
