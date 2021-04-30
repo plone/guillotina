@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.3.1 (unreleased)
+6.3.1 (2021-04-30)
 ------------------
 
 - On workflow change also trigger object modification
