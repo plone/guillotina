@@ -196,7 +196,7 @@ class Command(object):
         else:
             self.loop.run_until_complete(app.startup())
             self.run(self.arguments, settings, app)
-            self.loop.run_until_complete(self.startup(app))
+            self.loop.run_until_complete(self.cleanup(app))
 
         self.loop.close()
 
