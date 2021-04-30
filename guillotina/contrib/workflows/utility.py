@@ -1,3 +1,4 @@
+from guillotina.events import ObjectModifiedEvent
 from guillotina import app_settings
 from guillotina import configure
 from guillotina.component import provide_adapter
@@ -95,6 +96,7 @@ def create_workflow_factory(proto_name, proto_definition):
             workflow_behavior.register()
 
             await notify(WorkflowChangedEvent(self.context, self, action, comments))
+            await notify(ObjectModifiedEvent(self.context, payload={'review_state': new_state}))
             return history
 
     return Workflow

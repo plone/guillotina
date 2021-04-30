@@ -4,7 +4,8 @@ CHANGELOG
 6.3.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- On workflow change also trigger object modification
+  [bloodbare]
 
 
 6.3.0 (2021-04-21)
