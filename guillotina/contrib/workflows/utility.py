@@ -1,4 +1,3 @@
-from guillotina.events import ObjectModifiedEvent
 from guillotina import app_settings
 from guillotina import configure
 from guillotina.component import provide_adapter
@@ -9,6 +8,7 @@ from guillotina.contrib.workflows.interfaces import IWorkflow
 from guillotina.contrib.workflows.interfaces import IWorkflowBehavior
 from guillotina.contrib.workflows.interfaces import IWorkflowUtility
 from guillotina.event import notify
+from guillotina.events import ObjectModifiedEvent
 from guillotina.response import HTTPPreconditionFailed
 from guillotina.response import HTTPUnauthorized
 from guillotina.security.utils import apply_sharing
@@ -96,7 +96,7 @@ def create_workflow_factory(proto_name, proto_definition):
             workflow_behavior.register()
 
             await notify(WorkflowChangedEvent(self.context, self, action, comments))
-            await notify(ObjectModifiedEvent(self.context, payload={'review_state': new_state}))
+            await notify(ObjectModifiedEvent(self.context, payload={"review_state": new_state}))
             return history
 
     return Workflow
