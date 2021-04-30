@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.3.2 (unreleased)
+6.3.2 (2021-04-30)
 ------------------
 
 - Command: fix typo introduced in #1125
