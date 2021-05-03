@@ -203,7 +203,6 @@ class Command(object):
             try:
                 self._cancel_all_tasks(self.loop)
                 self.loop.run_until_complete(self.loop.shutdown_asyncgens())
-                self.loop.run_until_complete(self.loop.shutdown_default_executor())
             finally:
                 self.loop.close()
 
