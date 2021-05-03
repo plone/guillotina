@@ -11,7 +11,6 @@ import asyncio
 import cProfile
 import json
 import os
-import signal
 import sys
 import yaml
 
@@ -191,14 +190,22 @@ class Command(object):
             self.__run(app, settings)
 
     def __run(self, app, settings):
-        if asyncio.iscoroutinefunction(self.run):
-            self.loop.run_until_complete(self.__run_async(app, settings))
-        else:
-            self.loop.run_until_complete(app.startup())
-            self.run(self.arguments, settings, app)
-            self.loop.run_until_complete(self.cleanup(app))
-
-        self.loop.close()
+        try:
+            if asyncio.iscoroutinefunction(self.run):
+                self.loop.run_until_complete(self.__run_async(app, settings))
+            else:
+                self.loop.run_until_complete(app.startup())
+                self.run(self.arguments, settings, app)
+                self.loop.run_until_complete(self.cleanup(app))
+        finally:
+            # This code is based on asyncio.run()
+            # https://github.com/python/cpython/blob/7f7dc673540c47db544878bb32d20d9bd1445b94/Lib/asyncio/runners.py#L45-L52
+            try:
+                self._cancel_all_tasks(self.loop)
+                self.loop.run_until_complete(self.loop.shutdown_asyncgens())
+                self.loop.run_until_complete(self.loop.shutdown_default_executor())
+            finally:
+                self.loop.close()
 
     async def __run_async(self, app, settings):
         # We run app.startup() in another task to prevent assigning values to the contextvars in the 'main task'
@@ -226,6 +233,31 @@ class Command(object):
             except (AttributeError, KeyError):
                 pass
 
+    def _cancel_all_tasks(self, loop):
+        # https://github.com/python/cpython/blob/7f7dc673540c47db544878bb32d20d9bd1445b94/Lib/asyncio/runners.py#L55
+        from asyncio import tasks
+
+        to_cancel = tasks.all_tasks(loop)
+        if not to_cancel:
+            return
+
+        for task in to_cancel:
+            task.cancel()
+
+        loop.run_until_complete(tasks.gather(*to_cancel, loop=loop, return_exceptions=True))
+
+        for task in to_cancel:
+            if task.cancelled():
+                continue
+            if task.exception() is not None:
+                loop.call_exception_handler(
+                    {
+                        "message": "unhandled exception during asyncio.run() shutdown",
+                        "exception": task.exception(),
+                        "task": task,
+                    }
+                )
+
     def get_loop(self):
         if self.loop is None:
             try:
@@ -239,11 +271,7 @@ class Command(object):
             asyncio.set_event_loop(self.loop)
         return self.loop
 
-    def signal_handler(self, signal, frame):
-        sys.exit(0)
-
     def make_app(self, settings):
-        signal.signal(signal.SIGINT, self.signal_handler)
         loop = self.get_loop()
         return make_app(settings=settings, loop=loop)
 

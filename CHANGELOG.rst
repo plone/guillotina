@@ -4,7 +4,10 @@ CHANGELOG
 6.3.3 (unreleased)
 ------------------
 
-- Fix same txn copied to all tasks/requests
+- Command: Implement graceful stop (like in asyncio.run())
+  [masipcat]
+
+- Command: Fix same txn copied to all tasks/requests
   [masipcat]
 
 
