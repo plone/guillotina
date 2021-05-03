@@ -201,7 +201,9 @@ class Command(object):
         self.loop.close()
 
     async def __run_async(self, app, settings):
-        await app.startup()
+        # We run app.startup() in another task to prevent assigning values to the contextvars in the 'main task'
+        # Without this change the 'txn' (and all other ctxvars) are copied and shared to all requests
+        await asyncio.create_task(app.startup())
         await self.run(self.arguments, settings, app)
         await self.cleanup(app)
 

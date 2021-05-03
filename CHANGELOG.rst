@@ -4,7 +4,8 @@ CHANGELOG
 6.3.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix same txn copied to all tasks/requests
+  [masipcat]
 
 
 6.3.2 (2021-04-30)
