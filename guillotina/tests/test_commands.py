@@ -1,10 +1,13 @@
 from contextlib import redirect_stdout
 from guillotina import testing
+from guillotina.commands import Command
 from guillotina.commands import get_settings
 from guillotina.commands.crypto import CryptoCommand
 from guillotina.commands.migrate import MigrateCommand
 from guillotina.commands.run import RunCommand
 from guillotina.commands.vacuum import VacuumCommand
+from guillotina.exceptions import TransactionNotFound
+from guillotina.utils import get_current_transaction
 from tempfile import mkstemp
 
 import io
@@ -70,6 +73,25 @@ def test_run_vacuum_with_container(command_arguments, container_command):
 def test_run_migration(command_arguments, container_command):
     command = MigrateCommand(command_arguments)
     command.run_command(settings=container_command["settings"])
+
+
+@pytest.mark.asyncio
+async def test_startup_doesnt_write_txn_contextvar_in_main_task(command_arguments):
+    with pytest.raises(TransactionNotFound):
+        get_current_transaction()
+
+    async def run(args, settings, app):
+        with pytest.raises(TransactionNotFound):
+            get_current_transaction()
+
+    settings = testing.get_settings()
+    command = Command(command_arguments)
+    command.run = run
+    app = command.make_app(settings)
+    await command._run_async(app, settings)
+
+    with pytest.raises(TransactionNotFound):
+        get_current_transaction()
 
 
 def test_get_settings():

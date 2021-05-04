@@ -4,7 +4,11 @@ CHANGELOG
 6.3.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Command: Implement graceful stop (like in asyncio.run())
+  [masipcat]
+
+- Command: Fix same txn copied to all tasks/requests
+  [masipcat]
 
 
 6.3.2 (2021-04-30)
