@@ -192,7 +192,7 @@ class Command(object):
     def __run(self, app, settings):
         try:
             if asyncio.iscoroutinefunction(self.run):
-                self.loop.run_until_complete(self.__run_async(app, settings))
+                self.loop.run_until_complete(self._run_async(app, settings))
             else:
                 self.loop.run_until_complete(app.startup())
                 self.run(self.arguments, settings, app)
@@ -206,7 +206,7 @@ class Command(object):
             finally:
                 self.loop.close()
 
-    async def __run_async(self, app, settings):
+    async def _run_async(self, app, settings):
         # We run app.startup() in another task to prevent assigning values to the contextvars in the 'main task'
         # Without this change the 'txn' (and all other ctxvars) are copied and shared to all requests
         await asyncio.create_task(app.startup())
