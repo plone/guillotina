@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.3.3 (unreleased)
+6.3.3 (2021-05-04)
 ------------------
 
 - Command: Implement graceful stop (like in asyncio.run())
