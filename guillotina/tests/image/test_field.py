@@ -1,17 +1,17 @@
-import pytest
+from guillotina.contrib.image.behaviors import IImageAttachment
+from guillotina.contrib.image.behaviors import IMultiImageAttachment
+from guillotina.tests.image import TEST_DATA_LOCATION
+
 import json
 import os
-from guillotina.tests.image import TEST_DATA_LOCATION
-from guillotina.contrib.image.behaviors import IImageAttachment, IMultiImageAttachment
+import pytest
+
 
 pytestmark = pytest.mark.asyncio
 
 
 @pytest.mark.app_settings(
-    {
-        "applications": ["guillotina", "guillotina.contrib.image"],
-        "cloud_datamanager": "db"
-    }
+    {"applications": ["guillotina", "guillotina.contrib.image"], "cloud_datamanager": "db"}
 )
 async def test_image_field_with_behavior(redis_container, container_requester):
     async with container_requester as requester:
@@ -21,7 +21,9 @@ async def test_image_field_with_behavior(redis_container, container_requester):
         response, status = await requester(
             "POST",
             "/db/guillotina/",
-            data=json.dumps({"@type": "Item", "@behaviors": [IImageAttachment.__identifier__], "id": "foobar"}),
+            data=json.dumps(
+                {"@type": "Item", "@behaviors": [IImageAttachment.__identifier__], "id": "foobar"}
+            ),
         )
         assert status == 201
 
@@ -33,10 +35,7 @@ async def test_image_field_with_behavior(redis_container, container_requester):
             size = len(data)
 
         response, status = await requester(
-            "PATCH",
-            "/db/guillotina/foobar/@upload/image",
-            data=data,
-            headers={"x-upload-size": f"{size}"},
+            "PATCH", "/db/guillotina/foobar/@upload/image", data=data, headers={"x-upload-size": f"{size}"},
         )
         assert status == 200
 
@@ -73,10 +72,7 @@ async def test_image_field_with_behavior(redis_container, container_requester):
             size = len(data)
 
         response, status = await requester(
-            "PATCH",
-            "/db/guillotina/foobar/@upload/image",
-            data=data,
-            headers={"x-upload-size": f"{size}"},
+            "PATCH", "/db/guillotina/foobar/@upload/image", data=data, headers={"x-upload-size": f"{size}"},
         )
         assert status == 200
 
@@ -97,10 +93,7 @@ async def test_image_field_with_behavior(redis_container, container_requester):
 
 
 @pytest.mark.app_settings(
-    {
-        "applications": ["guillotina", "guillotina.contrib.image"],
-        "cloud_datamanager": "db"
-    }
+    {"applications": ["guillotina", "guillotina.contrib.image"], "cloud_datamanager": "db"}
 )
 async def test_multiimage_field_with_behavior(redis_container, container_requester):
     async with container_requester as requester:
@@ -115,7 +108,6 @@ async def test_multiimage_field_with_behavior(redis_container, container_request
             ),
         )
         assert status == 201
-
 
         with open(os.path.join(TEST_DATA_LOCATION, "profile.jpg"), "rb") as image:
             data = image.read()
@@ -137,4 +129,3 @@ async def test_multiimage_field_with_behavior(redis_container, container_request
 
         response, status = await requester("GET", "/db/guillotina/foobar/@images/images/key1/thumb")
         assert status == 200
-

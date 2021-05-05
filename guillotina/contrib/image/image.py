@@ -1,5 +1,5 @@
-from guillotina.interfaces.files import ICloudFileField
 from guillotina.contrib.image.interfaces import IImageFile
+from guillotina.interfaces.files import ICloudFileField
 from guillotina.schema import Object
 from zope.interface import implementer
 
@@ -15,8 +15,6 @@ class CloudImageFileField(Object):
     def __init__(self, **kw):
         super().__init__(schema=self.schema, **kw)
 
-
-
     def set(self, object, value):
         if self.readonly:
             raise TypeError(
@@ -24,6 +22,6 @@ class CloudImageFileField(Object):
                 "(name=%s, class=%s.%s)"
                 % (self.__name__, object.__class__.__module__, object.__class__.__name__)
             )
-        if hasattr(value, 'previews'):
+        if hasattr(value, "previews"):
             value.previews = {}
         setattr(object, self.__name__, value)

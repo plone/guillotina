@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 # Code from plone.scale
+from io import BytesIO
+
+import math
 import PIL.Image
 import PIL.ImageFile
-import math
 import sys
 import warnings
-
-
-from io import BytesIO
 
 
 def none_as_int(the_int):
@@ -27,8 +26,7 @@ PIL.ImageFile.MAXBLOCK = 1000000
 MAX_PIXELS = 8192 * 8192
 
 
-def scaleImage(image, width=None, height=None, mode='contain',
-               quality=88, result=None, direction=None):
+def scaleImage(image, width=None, height=None, mode="contain", quality=88, result=None, direction=None):
     """Scale the given image data to another size and return the result
     as a string or optionally write in to the file-like `result` object.
     The `image` parameter can either be the raw image data (ie a `str`
@@ -50,35 +48,35 @@ def scaleImage(image, width=None, height=None, mode='contain',
     # When we create a new image during scaling we loose the format
     # information, so remember it here.
     format_ = image.format
-    if format_ not in ('PNG', 'GIF'):
+    if format_ not in ("PNG", "GIF"):
         # Always generate JPEG, except if format is PNG or GIF.
-        format_ = 'JPEG'
-    elif format_ == 'GIF':
+        format_ = "JPEG"
+    elif format_ == "GIF":
         # GIF scaled looks better if we have 8-bit alpha and no palette
-        format_ = 'PNG'
+        format_ = "PNG"
 
-    icc_profile = image.info.get('icc_profile')
+    icc_profile = image.info.get("icc_profile")
     image = scalePILImage(image, width, height, mode, direction=direction)
 
     # convert to simpler mode if possible
     colors = image.getcolors(maxcolors=256)
-    if image.mode not in ('P', 'L') and colors:
-        if format_ == 'JPEG':
+    if image.mode not in ("P", "L") and colors:
+        if format_ == "JPEG":
             # check if it's all grey
             if all(rgb[0] == rgb[1] == rgb[2] for c, rgb in colors):
-                image = image.convert('L')
-        elif format_ == 'PNG':
-            image = image.convert('P')
+                image = image.convert("L")
+        elif format_ == "PNG":
+            image = image.convert("P")
 
-    if image.mode == 'RGBA' and format_ == 'JPEG':
+    if image.mode == "RGBA" and format_ == "JPEG":
         extrema = dict(zip(image.getbands(), image.getextrema()))
-        if extrema.get('A') == (255, 255):
+        if extrema.get("A") == (255, 255):
             # no alpha used, just change the mode, which causes the alpha band
             # to be dropped on save
             image.mode = "RGB"
         else:
             # switch to PNG, which supports alpha
-            format_ = 'PNG'
+            format_ = "PNG"
 
     new_result = False
 
@@ -86,14 +84,7 @@ def scaleImage(image, width=None, height=None, mode='contain',
         result = BytesIO()
         new_result = True
 
-    image.save(
-        result,
-        format_,
-        quality=quality,
-        optimize=True,
-        progressive=True,
-        icc_profile=icc_profile
-    )
+    image.save(result, format_, quality=quality, optimize=True, progressive=True, icc_profile=icc_profile)
 
     if new_result:
         result = result.getvalue()
@@ -109,29 +100,21 @@ def _scale_thumbnail(image, width=None, height=None):
     If target aspect ratio is different, either width or height is smaller
     than the given target width or height. No cropping!
     """
-    dimensions = _calculate_all_dimensions(
-        image.size[0], image.size[1],
-        width, height, 'scale')
+    dimensions = _calculate_all_dimensions(image.size[0], image.size[1], width, height, "scale")
 
     if (dimensions.target_width * dimensions.target_height) > MAX_PIXELS:
         # The new image would be excessively large and eat up all memory while
         # scaling, so return the potentially pre cropped image
         return image
 
-    image.draft(
-        image.mode,
-        (dimensions.target_width, dimensions.target_height))
-    image = image.resize(
-        (dimensions.target_width, dimensions.target_height),
-        PIL.Image.ANTIALIAS)
+    image.draft(image.mode, (dimensions.target_width, dimensions.target_height))
+    image = image.resize((dimensions.target_width, dimensions.target_height), PIL.Image.ANTIALIAS)
     return image
 
 
 def get_scale_mode(mode, direction):
     if direction is not None:
-        warnings.warn(
-            "the 'direction' option is deprecated, use 'mode' instead",
-            DeprecationWarning)
+        warnings.warn("the 'direction' option is deprecated, use 'mode' instead", DeprecationWarning)
         mode = direction
 
     if mode in ("scale-crop-to-fit", "down"):
@@ -148,7 +131,7 @@ class ScaledDimensions(object):
     pass
 
 
-def _calculate_all_dimensions(original_width, original_height, width, height, mode='contain'):
+def _calculate_all_dimensions(original_width, original_height, width, height, mode="contain"):
     """ Calculate all dimensions we need for scaling.
     final_width and final_height are the dimensions of the resulting image and
     are always present.
@@ -157,12 +140,12 @@ def _calculate_all_dimensions(original_width, original_height, width, height, mo
     if width is None and height is None:
         raise ValueError("Either width or height need to be given.")
 
-    if mode not in ('contain', 'cover', 'scale'):
+    if mode not in ("contain", "cover", "scale"):
         raise ValueError("Unknown scale mode '%s'" % mode)
 
     dimensions = ScaledDimensions()
 
-    if mode == 'scale':
+    if mode == "scale":
         # first store original size, as it is possible that we won't scale at all
         dimensions.final_width = original_width
         dimensions.final_height = original_height
@@ -200,9 +183,9 @@ def _calculate_all_dimensions(original_width, original_height, width, height, mo
     # Determine scale factors needed
     factor_height = factor_width = None
     if height is not None:
-        factor_height = (float(height) / float(original_height))
+        factor_height = float(height) / float(original_height)
     if width is not None:
-        factor_width = (float(width) / float(original_width))
+        factor_width = float(width) / float(original_width)
 
     dimensions.factor_width = factor_width
     dimensions.factor_height = factor_height
@@ -215,22 +198,22 @@ def _calculate_all_dimensions(original_width, original_height, width, height, mo
 
     # figure out which axis to scale. One of the factors can still be None!
     use_height = none_as_int(factor_width) > none_as_int(factor_height)
-    if mode == 'cover':  # for 'cover': invert
+    if mode == "cover":  # for 'cover': invert
         use_height = not use_height
 
     # keep aspect ratio
-    if (height is None or (use_height and width is not None)):
+    if height is None or (use_height and width is not None):
         target_width = width
         target_height = int(round(original_height * factor_width))
 
-    if (width is None or (height is not None and not use_height)):
+    if width is None or (height is not None and not use_height):
         target_width = int(round(original_width * factor_height))
         target_height = height
 
     # determine whether we need to crop before scaling
-    pre_scale_crop = (
-        (width is not None and target_width > width) or
-        (height is not None and target_height > height))
+    pre_scale_crop = (width is not None and target_width > width) or (
+        height is not None and target_height > height
+    )
     dimensions.pre_scale_crop = pre_scale_crop
 
     if pre_scale_crop:
@@ -238,20 +221,16 @@ def _calculate_all_dimensions(original_width, original_height, width, height, mo
         if use_height:
             left = 0
             right = original_width
-            top = int(math.floor(
-                ((target_height - height) / 2.0) / factor_width))
-            bottom = int(math.ceil(
-                (((target_height - height) / 2.0) + height) / factor_width))
+            top = int(math.floor(((target_height - height) / 2.0) / factor_width))
+            bottom = int(math.ceil((((target_height - height) / 2.0) + height) / factor_width))
             pre_scale_crop_height = bottom - top
             # set new height in case we abort
             dimensions.final_height = pre_scale_crop_height
             # calculate new scale target_height from cropped height
             target_height = int(round(pre_scale_crop_height * factor_width))
         else:
-            left = int(math.floor(
-                ((target_width - width) / 2.0) / factor_height))
-            right = int(math.ceil(
-                (((target_width - width) / 2.0) + width) / factor_height))
+            left = int(math.floor(((target_width - width) / 2.0) / factor_height))
+            right = int(math.ceil((((target_width - width) / 2.0) + width) / factor_height))
             top = 0
             bottom = original_height
             pre_scale_crop_width = right - left
@@ -273,9 +252,9 @@ def _calculate_all_dimensions(original_width, original_height, width, height, mo
     dimensions.final_height = target_height
 
     # determine whether we have to crop after scaling due to rounding
-    post_scale_crop = (
-        (width is not None and target_width > width) or
-        (height is not None and target_height > height))
+    post_scale_crop = (width is not None and target_width > width) or (
+        height is not None and target_height > height
+    )
     dimensions.post_scale_crop = post_scale_crop
 
     if post_scale_crop:
@@ -296,17 +275,15 @@ def _calculate_all_dimensions(original_width, original_height, width, height, mo
     return dimensions
 
 
-def calculate_scaled_dimensions(original_width, original_height, width, height, mode='contain'):
+def calculate_scaled_dimensions(original_width, original_height, width, height, mode="contain"):
     """ Calculate the scaled image dimensions from the originals using the
     same logic as scalePILImage """
-    dimensions = _calculate_all_dimensions(
-        original_width, original_height,
-        width, height, mode)
+    dimensions = _calculate_all_dimensions(original_width, original_height, width, height, mode)
 
     return (dimensions.final_width, dimensions.final_height)
 
 
-def scalePILImage(image, width=None, height=None, mode='contain', direction=None):
+def scalePILImage(image, width=None, height=None, mode="contain", direction=None):
     """Scale a PIL image to another size.
     This is all about scaling for the display in a web browser.
     Either width or height - or both - must be given.
@@ -357,24 +334,18 @@ def scalePILImage(image, width=None, height=None, mode='contain', direction=None
         image = image.convert("RGB")
 
     # for scale we're done:
-    if mode == 'scale':
+    if mode == "scale":
         return _scale_thumbnail(image, width, height)
 
-    dimensions = _calculate_all_dimensions(
-        image.size[0], image.size[1],
-        width, height, mode)
+    dimensions = _calculate_all_dimensions(image.size[0], image.size[1], width, height, mode)
 
     if dimensions.factor_height == dimensions.factor_width:
         # The original already has the right aspect ratio, so we only need
         # to scale.
-        if mode == 'contain':
-            image.thumbnail(
-                (dimensions.final_width, dimensions.final_height),
-                PIL.Image.ANTIALIAS)
+        if mode == "contain":
+            image.thumbnail((dimensions.final_width, dimensions.final_height), PIL.Image.ANTIALIAS)
             return image
-        return image.resize(
-            (dimensions.final_width, dimensions.final_height),
-            PIL.Image.ANTIALIAS)
+        return image.resize((dimensions.final_width, dimensions.final_height), PIL.Image.ANTIALIAS)
 
     if dimensions.pre_scale_crop:
         # crop image before scaling to avoid excessive memory use
@@ -386,12 +357,8 @@ def scalePILImage(image, width=None, height=None, mode='contain', direction=None
         # scaling, so return the potentially pre cropped image
         return image
 
-    image.draft(
-        image.mode,
-        (dimensions.target_width, dimensions.target_height))
-    image = image.resize(
-        (dimensions.target_width, dimensions.target_height),
-        PIL.Image.ANTIALIAS)
+    image.draft(image.mode, (dimensions.target_width, dimensions.target_height))
+    image = image.resize((dimensions.target_width, dimensions.target_height), PIL.Image.ANTIALIAS)
 
     if dimensions.post_scale_crop:
         # crop off remains due to rounding before scaling

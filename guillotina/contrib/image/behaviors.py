@@ -1,5 +1,5 @@
-from guillotina.contrib.image.image import CloudImageFileField
 from guillotina import configure
+from guillotina.contrib.image.image import CloudImageFileField
 from guillotina.schema import Dict
 from guillotina.schema import TextLine
 from zope.interface import Interface
@@ -21,7 +21,9 @@ class IImageAttachment(Interface):
 
 
 @configure.behavior(
-    title="MultiImageAttachment behavior", marker=IMultiImageAttachmentMarker, for_="guillotina.interfaces.IResource"
+    title="MultiImageAttachment behavior",
+    marker=IMultiImageAttachmentMarker,
+    for_="guillotina.interfaces.IResource",
 )
 class IMultiImageAttachment(Interface):
     images = Dict(

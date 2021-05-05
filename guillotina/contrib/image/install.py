@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from guillotina import configure
 from guillotina.addons import Addon
-from guillotina.utils import get_registry
 from guillotina.contrib.image.interfaces import IImagingSettings
+from guillotina.utils import get_registry
 
 
 @configure.addon(name="image", title="Guillotina Image field")

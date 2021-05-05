@@ -1,4 +1,5 @@
-from guillotina.interfaces.files import ICloudFileField, IFileField
+from guillotina.interfaces.files import ICloudFileField
+from guillotina.interfaces.files import IFileField
 from guillotina.schema import Object
 from zope.interface import implementer
 
@@ -12,11 +13,11 @@ class CloudPreviewImageFileField(Object):
     schema = IFileField
 
     def __init__(self, **kw):
-        self.file = kw.get('file', None)
+        self.file = kw.get("file", None)
         super().__init__(schema=self.schema, **kw)
 
     def get(self, object):
-        if hasattr(self.file, 'previews') and self.__name__ in self.file.previews:
+        if hasattr(self.file, "previews") and self.__name__ in self.file.previews:
             return self.file.previews[self.__name__]
 
     def set(self, object, value):
@@ -29,7 +30,7 @@ class CloudPreviewImageFileField(Object):
         if self.file is None:
             return
 
-        if not hasattr(self.file, 'previews'):
+        if not hasattr(self.file, "previews"):
             self.file.previews = {}
-            
+
         self.file.previews[self.__name__] = value

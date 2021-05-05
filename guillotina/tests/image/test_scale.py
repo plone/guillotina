@@ -2,6 +2,7 @@
 from guillotina.contrib.image.scale import scaleImage
 from guillotina.contrib.image.scale import scalePILImage
 from guillotina.tests.image import TEST_DATA_LOCATION
+from io import BytesIO
 from unittest import TestCase
 
 import os.path
@@ -10,23 +11,19 @@ import PIL.ImageDraw
 import warnings
 
 
-from io import BytesIO
-
-
-with open(os.path.join(TEST_DATA_LOCATION, "logo.png"), 'rb') as fio:
+with open(os.path.join(TEST_DATA_LOCATION, "logo.png"), "rb") as fio:
     PNG = fio.read()
-with open(os.path.join(TEST_DATA_LOCATION, "logo.gif"), 'rb') as fio:
+with open(os.path.join(TEST_DATA_LOCATION, "logo.gif"), "rb") as fio:
     GIF = fio.read()
-with open(os.path.join(TEST_DATA_LOCATION, "logo.tiff"), 'rb') as fio:
+with open(os.path.join(TEST_DATA_LOCATION, "logo.tiff"), "rb") as fio:
     TIFF = fio.read()
-with open(os.path.join(TEST_DATA_LOCATION, "cmyk.jpg"), 'rb') as fio:
+with open(os.path.join(TEST_DATA_LOCATION, "cmyk.jpg"), "rb") as fio:
     CMYK = fio.read()
-with open(os.path.join(TEST_DATA_LOCATION, "profile.jpg"), 'rb') as fio:
+with open(os.path.join(TEST_DATA_LOCATION, "profile.jpg"), "rb") as fio:
     PROFILE = fio.read()
 
 
 class ScalingTests(TestCase):
-
     def testNewSizeReturned(self):
         (imagedata, format, size) = scaleImage(PNG, 42, 51, "contain")
         input = BytesIO(imagedata)
@@ -73,14 +70,14 @@ class ScalingTests(TestCase):
         (imagedata, format, size) = scaleImage(PROFILE, 42, 51, "contain")
         input = BytesIO(imagedata)
         image = PIL.Image.open(input)
-        self.assertIsNotNone(image.info.get('icc_profile'))
+        self.assertIsNotNone(image.info.get("icc_profile"))
 
     def testScaleWithFewColorsStaysColored(self):
         (imagedata, format, size) = scaleImage(PROFILE, 16, None, "contain")
         image = PIL.Image.open(BytesIO(imagedata))
         self.assertEqual(max(image.size), 16)
-        self.assertEqual(image.mode, 'RGB')
-        self.assertEqual(image.format, 'JPEG')
+        self.assertEqual(image.mode, "RGB")
+        self.assertEqual(image.format, "JPEG")
 
     def testAutomaticGreyscale(self):
         src = PIL.Image.new("RGB", (256, 256), (255, 255, 255))
@@ -92,29 +89,29 @@ class ScalingTests(TestCase):
         (imagedata, format, size) = scaleImage(result, 200, None, "contain")
         image = PIL.Image.open(BytesIO(imagedata))
         self.assertEqual(max(image.size), 200)
-        self.assertEqual(image.mode, 'L')
-        self.assertEqual(image.format, 'JPEG')
+        self.assertEqual(image.mode, "L")
+        self.assertEqual(image.format, "JPEG")
 
     def testAutomaticPalette(self):
         # get a JPEG with more than 256 colors
         jpeg = PIL.Image.open(BytesIO(PROFILE))
-        self.assertEqual(jpeg.mode, 'RGB')
-        self.assertEqual(jpeg.format, 'JPEG')
+        self.assertEqual(jpeg.mode, "RGB")
+        self.assertEqual(jpeg.format, "JPEG")
         self.assertIsNone(jpeg.getcolors(maxcolors=256))
         # convert to PNG
         dst = BytesIO()
         jpeg.save(dst, "PNG")
         dst.seek(0)
         png = PIL.Image.open(dst)
-        self.assertEqual(png.mode, 'RGB')
-        self.assertEqual(png.format, 'PNG')
+        self.assertEqual(png.mode, "RGB")
+        self.assertEqual(png.format, "PNG")
         self.assertIsNone(png.getcolors(maxcolors=256))
         # scale it to a size where we get less than 256 colors
         (imagedata, format, size) = scaleImage(dst.getvalue(), 24, None, "contain")
         image = PIL.Image.open(BytesIO(imagedata))
         # we should now have an image in palette mode
-        self.assertEqual(image.mode, 'P')
-        self.assertEqual(image.format, 'PNG')
+        self.assertEqual(image.mode, "P")
+        self.assertEqual(image.format, "PNG")
 
     def testSameSizeDownScale(self):
         self.assertEqual(scaleImage(PNG, 84, 103, "contain")[2], (84, 103))
@@ -211,8 +208,8 @@ class ScalingTests(TestCase):
         img1 = scaleImage(PNG, 84, 103)[0]
         result = BytesIO()
         img2 = scaleImage(PNG, 84, 103, result=result)[0]
-        self.assertEqual(result, img2)      # the return value _is_ the buffer
-        self.assertEqual(result.getvalue(), img1)   # but with the same value
+        self.assertEqual(result, img2)  # the return value _is_ the buffer
+        self.assertEqual(result.getvalue(), img1)  # but with the same value
 
     def testAlternativeSpellings(self):
         """Test alternative and deprecated mode spellings and the old
@@ -220,40 +217,40 @@ class ScalingTests(TestCase):
         """
 
         # scale-crop-to-fit
-        img = PIL.Image.new('RGB', (20, 20), (0, 0, 0))
-        img_scaled = scalePILImage(img, 10, 5, direction='scale-crop-to-fit')
+        img = PIL.Image.new("RGB", (20, 20), (0, 0, 0))
+        img_scaled = scalePILImage(img, 10, 5, direction="scale-crop-to-fit")
         self.assertEqual(img_scaled.size, (10, 5))
         # down
-        img = PIL.Image.new('RGB', (20, 20), (0, 0, 0))
-        img_scaled = scalePILImage(img, 10, 5, direction='down')
+        img = PIL.Image.new("RGB", (20, 20), (0, 0, 0))
+        img_scaled = scalePILImage(img, 10, 5, direction="down")
         self.assertEqual(img_scaled.size, (10, 5))
 
         # Test mode cover
         # scale-crop-to-fill
-        img = PIL.Image.new('RGB', (20, 20), (0, 0, 0))
-        img_scaled = scalePILImage(img, 40, 30, direction='scale-crop-to-fill')
+        img = PIL.Image.new("RGB", (20, 20), (0, 0, 0))
+        img_scaled = scalePILImage(img, 40, 30, direction="scale-crop-to-fill")
         self.assertEqual(img_scaled.size, (30, 30))
         # up
-        img = PIL.Image.new('RGB', (20, 20), (0, 0, 0))
-        img_scaled = scalePILImage(img, 40, 30, direction='up')
+        img = PIL.Image.new("RGB", (20, 20), (0, 0, 0))
+        img_scaled = scalePILImage(img, 40, 30, direction="up")
         self.assertEqual(img_scaled.size, (30, 30))
 
         # Test mode scale
         # keep A
-        img = PIL.Image.new('RGB', (20, 20), (0, 0, 0))
-        img_scaled = scalePILImage(img, 20, 10, direction='keep')
+        img = PIL.Image.new("RGB", (20, 20), (0, 0, 0))
+        img_scaled = scalePILImage(img, 20, 10, direction="keep")
         self.assertEqual(img_scaled.size, (10, 10))
         # keep B
-        img = PIL.Image.new('RGB', (20, 20), (0, 0, 0))
-        img_scaled = scalePILImage(img, 40, 80, direction='keep')
+        img = PIL.Image.new("RGB", (20, 20), (0, 0, 0))
+        img_scaled = scalePILImage(img, 40, 80, direction="keep")
         self.assertEqual(img_scaled.size, (20, 20))
         # thumbnail A
-        img = PIL.Image.new('RGB', (20, 20), (0, 0, 0))
-        img_scaled = scalePILImage(img, 20, 10, direction='thumbnail')
+        img = PIL.Image.new("RGB", (20, 20), (0, 0, 0))
+        img_scaled = scalePILImage(img, 20, 10, direction="thumbnail")
         self.assertEqual(img_scaled.size, (10, 10))
         # thumbnail B
-        img = PIL.Image.new('RGB', (20, 20), (0, 0, 0))
-        img_scaled = scalePILImage(img, 40, 80, direction='thumbnail')
+        img = PIL.Image.new("RGB", (20, 20), (0, 0, 0))
+        img_scaled = scalePILImage(img, 40, 80, direction="thumbnail")
         self.assertEqual(img_scaled.size, (20, 20))
 
     def testModes(self):
@@ -262,65 +259,66 @@ class ScalingTests(TestCase):
         # Mode contain
         # v
         # A
-        img = PIL.Image.new('RGB', (20, 40), (0, 0, 0))
-        img_scaled = scalePILImage(img, 10, 10, mode='contain')
+        img = PIL.Image.new("RGB", (20, 40), (0, 0, 0))
+        img_scaled = scalePILImage(img, 10, 10, mode="contain")
         self.assertEqual(img_scaled.size, (10, 10))
         # B
-        img = PIL.Image.new('RGB', (40, 20), (0, 0, 0))
-        img_scaled = scalePILImage(img, 10, 10, mode='contain')
+        img = PIL.Image.new("RGB", (40, 20), (0, 0, 0))
+        img_scaled = scalePILImage(img, 10, 10, mode="contain")
         self.assertEqual(img_scaled.size, (10, 10))
         # ^
         # A
-        img = PIL.Image.new('RGB', (20, 40), (0, 0, 0))
-        img_scaled = scalePILImage(img, 60, 60, mode='contain')
+        img = PIL.Image.new("RGB", (20, 40), (0, 0, 0))
+        img_scaled = scalePILImage(img, 60, 60, mode="contain")
         self.assertEqual(img_scaled.size, (60, 60))
         # B
-        img = PIL.Image.new('RGB', (40, 20), (0, 0, 0))
-        img_scaled = scalePILImage(img, 60, 60, mode='contain')
+        img = PIL.Image.new("RGB", (40, 20), (0, 0, 0))
+        img_scaled = scalePILImage(img, 60, 60, mode="contain")
         self.assertEqual(img_scaled.size, (60, 60))
 
         # Mode cover
         # v
         # A
-        img = PIL.Image.new('RGB', (20, 40), (0, 0, 0))
-        img_scaled = scalePILImage(img, 10, 10, mode='cover')
+        img = PIL.Image.new("RGB", (20, 40), (0, 0, 0))
+        img_scaled = scalePILImage(img, 10, 10, mode="cover")
         self.assertEqual(img_scaled.size, (5, 10))
         # B
-        img = PIL.Image.new('RGB', (40, 20), (0, 0, 0))
-        img_scaled = scalePILImage(img, 10, 10, mode='cover')
+        img = PIL.Image.new("RGB", (40, 20), (0, 0, 0))
+        img_scaled = scalePILImage(img, 10, 10, mode="cover")
         self.assertEqual(img_scaled.size, (10, 5))
         # ^
         # A
-        img = PIL.Image.new('RGB', (20, 40), (0, 0, 0))
-        img_scaled = scalePILImage(img, 60, 60, mode='cover')
+        img = PIL.Image.new("RGB", (20, 40), (0, 0, 0))
+        img_scaled = scalePILImage(img, 60, 60, mode="cover")
         self.assertEqual(img_scaled.size, (30, 60))
         # B
-        img = PIL.Image.new('RGB', (40, 20), (0, 0, 0))
-        img_scaled = scalePILImage(img, 60, 60, mode='cover')
+        img = PIL.Image.new("RGB", (40, 20), (0, 0, 0))
+        img_scaled = scalePILImage(img, 60, 60, mode="cover")
         self.assertEqual(img_scaled.size, (60, 30))
 
         # Mode scale
         # v
         # A
-        img = PIL.Image.new('RGB', (20, 40), (0, 0, 0))
-        img_scaled = scalePILImage(img, 10, 10, mode='scale')
+        img = PIL.Image.new("RGB", (20, 40), (0, 0, 0))
+        img_scaled = scalePILImage(img, 10, 10, mode="scale")
         self.assertEqual(img_scaled.size, (5, 10))
         # B
-        img = PIL.Image.new('RGB', (40, 20), (0, 0, 0))
-        img_scaled = scalePILImage(img, 10, 10, mode='scale')
+        img = PIL.Image.new("RGB", (40, 20), (0, 0, 0))
+        img_scaled = scalePILImage(img, 10, 10, mode="scale")
         self.assertEqual(img_scaled.size, (10, 5))
         # ^
         # A
-        img = PIL.Image.new('RGB', (20, 40), (0, 0, 0))
-        img_scaled = scalePILImage(img, 60, 60, mode='scale')
+        img = PIL.Image.new("RGB", (20, 40), (0, 0, 0))
+        img_scaled = scalePILImage(img, 60, 60, mode="scale")
         self.assertEqual(img_scaled.size, (20, 40))
         # B
-        img = PIL.Image.new('RGB', (40, 20), (0, 0, 0))
-        img_scaled = scalePILImage(img, 60, 60, mode='scale')
+        img = PIL.Image.new("RGB", (40, 20), (0, 0, 0))
+        img_scaled = scalePILImage(img, 60, 60, mode="scale")
         self.assertEqual(img_scaled.size, (40, 20))
 
     def testDeprecations(self):
         import guillotina.contrib.image.scale
+
         # clear warnings registry, so the test actually sees the warning
         guillotina.contrib.image.scale.__warningregistry__.clear()
         with warnings.catch_warnings(record=True) as w:
@@ -328,11 +326,10 @@ class ScalingTests(TestCase):
             scaleImage(PNG, 16, 16, direction="keep")
             self.assertEqual(len(w), 1)
             self.assertIs(w[0].category, DeprecationWarning)
-            self.assertIn(
-                "the 'direction' option is deprecated",
-                str(w[0].message))
+            self.assertIn("the 'direction' option is deprecated", str(w[0].message))
 
 
 def test_suite():
     from unittest import defaultTestLoader
+
     return defaultTestLoader.loadTestsFromName(__name__)

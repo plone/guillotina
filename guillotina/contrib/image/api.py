@@ -1,18 +1,18 @@
-from guillotina.contrib.image.preview import CloudPreviewImageFileField
-from guillotina.interfaces.content import IResource
-from guillotina import app_settings
-from guillotina import configure
-from guillotina.api.files import DownloadFile
-from guillotina.api.files import _traversed_file_doc
-from guillotina.api.service import DictFieldProxy, TraversableFieldService
-from guillotina.component import get_multi_adapter
-from guillotina.interfaces import IFileManager
-from guillotina.response import HTTPNoContent, HTTPNotFound
-from guillotina.utils import get_registry
-from guillotina.contrib.image.interfaces import IImagingSettings
-from guillotina.utils import run_async
-from guillotina.contrib.image.scale import scaleImage
 from functools import partial
+from guillotina import configure
+from guillotina.api.files import _traversed_file_doc
+from guillotina.api.files import DownloadFile
+from guillotina.api.service import TraversableFieldService
+from guillotina.component import get_multi_adapter
+from guillotina.contrib.image.interfaces import IImagingSettings
+from guillotina.contrib.image.preview import CloudPreviewImageFileField
+from guillotina.contrib.image.scale import scaleImage
+from guillotina.interfaces import IFileManager
+from guillotina.interfaces.content import IResource
+from guillotina.response import HTTPNoContent
+from guillotina.response import HTTPNotFound
+from guillotina.utils import get_registry
+from guillotina.utils import run_async
 from io import BytesIO
 
 
@@ -44,8 +44,7 @@ class DownloadImageFile(DownloadFile):
     name="@images/{field_name}/{file_key}/{scale}",
     **_traversed_file_doc("Download the image scale"),
 )
-
-class DownloadImageScale(TraversableFieldService):
+class UpdateImageScale(TraversableFieldService):
     async def __call__(self):
         registry = await get_registry()
         settings = registry.for_interface(IImagingSettings)
@@ -84,7 +83,9 @@ class DownloadImageScale(TraversableFieldService):
         if not hasattr(file, "previews"):
             file.previews = {}
 
-        new_field = CloudPreviewImageFileField(__name__=scale_name, file=file).bind(self.behavior or self.context)
+        new_field = CloudPreviewImageFileField(__name__=scale_name, file=file).bind(
+            self.behavior or self.context
+        )
         adapter = get_multi_adapter((self.context, self.request, new_field), IFileManager)
 
         await adapter.save_file(
@@ -125,7 +126,9 @@ class DownloadImageScale(TraversableFieldService):
             raise HTTPNotFound(content={"message": "File or custom filename required to download"})
 
         if hasattr(file, "previews") and file.previews is not None and scale_name in file.previews:
-            new_field = CloudPreviewImageFileField(__name__=scale_name, file=file).bind(self.behavior or self.context)
+            new_field = CloudPreviewImageFileField(__name__=scale_name, file=file).bind(
+                self.behavior or self.context
+            )
             adapter = get_multi_adapter((self.context, self.request, new_field), IFileManager)
             return await adapter.download()
         else:
