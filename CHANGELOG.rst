@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.3.4 (unreleased)
+6.3.4 (2021-05-06)
 ------------------
 
 - Adding image with scale previews field
