@@ -4,7 +4,8 @@ CHANGELOG
 6.3.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Adding image with scale previews field
+  [bloodbare]
 
 
 6.3.3 (2021-05-04)
