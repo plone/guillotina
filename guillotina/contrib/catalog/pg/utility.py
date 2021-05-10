@@ -127,10 +127,12 @@ class PGSearchUtility(DefaultSearchUtility):
             users.extend(principal.groups)
             roles = get_roles_principal(context)
 
-            clauses.extend([
-                "json->'access_users' ?| array['{}']".format("','".join([sqlq(u) for u in users])),
-                "json->'access_roles' ?| array['{}']".format("','".join([sqlq(r) for r in roles])),
-            ])
+            clauses.extend(
+                [
+                    "json->'access_users' ?| array['{}']".format("','".join([sqlq(u) for u in users])),
+                    "json->'access_roles' ?| array['{}']".format("','".join([sqlq(r) for r in roles])),
+                ]
+            )
         container = find_container(context)
         if container is None:
             raise ContainerNotFound()
@@ -186,7 +188,7 @@ class PGSearchUtility(DefaultSearchUtility):
 
         order = (
             order_by_index.order_by_score(query["sort_dir"])
-            if query["sort_on_fields"] and hasattr(order_by_index, 'order_by_score')
+            if query["sort_on_fields"] and hasattr(order_by_index, "order_by_score")
             else order_by_index.order_by(query["sort_dir"])
         )
         sql = """select {} {}
@@ -286,7 +288,7 @@ class PGSearchUtility(DefaultSearchUtility):
         """
         Search query without restriction, uses parser to transform query
         """
-        return await self._query(context, parsed_query, True)  # type: ignore
+        return await self._query(context, query, True)  # type: ignore
 
     async def _query(self, context: IResource, query: ParsedQueryInfo, unrestricted: bool = False):
         sql, arguments = self.build_query(context, query, ["id", "zoid", "json"], unrestricted=unrestricted)
