@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.3.5 (unreleased)
+6.3.5 (2021-05-10)
 ------------------
 
 - PG Catalog unrestricted search
