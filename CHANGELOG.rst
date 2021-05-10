@@ -4,7 +4,8 @@ CHANGELOG
 6.3.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- PG Catalog unrestricted search
+  [bloodbare]
 
 
 6.3.4 (2021-05-06)
