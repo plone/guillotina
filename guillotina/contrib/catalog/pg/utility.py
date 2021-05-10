@@ -284,11 +284,12 @@ class PGSearchUtility(DefaultSearchUtility):
         parsed_query = parse_query(context, query, self)
         return await self._query(context, parsed_query)  # type: ignore
 
-    async def unrestrictedSearch(self, context: IBaseObject, query: ParsedQueryInfo):
+    async def unrestrictedSearch(self, context: IBaseObject, query: typing.Any):
         """
         Search query without restriction, uses parser to transform query
         """
-        return await self._query(context, query, True)  # type: ignore
+        parsed_query = parse_query(context, query, self)
+        return await self._query(context, parsed_query, True)  # type: ignore
 
     async def _query(self, context: IResource, query: ParsedQueryInfo, unrestricted: bool = False):
         sql, arguments = self.build_query(context, query, ["id", "zoid", "json"], unrestricted=unrestricted)
