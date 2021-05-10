@@ -186,7 +186,7 @@ class PGSearchUtility(DefaultSearchUtility):
 
         order = (
             order_by_index.order_by_score(query["sort_dir"])
-            if query["sort_on_fields"]
+            if query["sort_on_fields"] and hasattr(order_by_index, 'order_by_score')
             else order_by_index.order_by(query["sort_dir"])
         )
         sql = """select {} {}
