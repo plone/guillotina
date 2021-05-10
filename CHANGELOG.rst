@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.3.6 (unreleased)
+6.3.6 (2021-05-10)
 ------------------
 
 - Fix error on unrestricted Search
