@@ -114,21 +114,23 @@ class PGSearchUtility(DefaultSearchUtility):
                     return
                 raise
 
-    def get_default_where_clauses(self, context: IBaseObject) -> typing.List[str]:
-        users = []
-        principal = get_authenticated_user()
-        if principal is None:
-            # assume anonymous then
-            principal = AnonymousUser()
+    def get_default_where_clauses(self, context: IBaseObject, unrestricted: bool = False) -> typing.List[str]:
+        clauses = []
+        if unrestricted is False:
+            users = []
+            principal = get_authenticated_user()
+            if principal is None:
+                # assume anonymous then
+                principal = AnonymousUser()
 
-        users.append(principal.id)
-        users.extend(principal.groups)
-        roles = get_roles_principal(context)
+            users.append(principal.id)
+            users.extend(principal.groups)
+            roles = get_roles_principal(context)
 
-        clauses = [
-            "json->'access_users' ?| array['{}']".format("','".join([sqlq(u) for u in users])),
-            "json->'access_roles' ?| array['{}']".format("','".join([sqlq(r) for r in roles])),
-        ]
+            clauses.extend([
+                "json->'access_users' ?| array['{}']".format("','".join([sqlq(u) for u in users])),
+                "json->'access_roles' ?| array['{}']".format("','".join([sqlq(r) for r in roles])),
+            ])
         container = find_container(context)
         if container is None:
             raise ContainerNotFound()
@@ -145,6 +147,7 @@ class PGSearchUtility(DefaultSearchUtility):
         query: ParsedQueryInfo,
         select_fields: typing.List[str],
         distinct: typing.Optional[bool] = False,
+        unrestricted: bool = False,
     ) -> typing.Tuple[str, typing.List[typing.Any]]:
         if query["sort_on"] is None:
             # always need a sort otherwise paging never works
@@ -179,7 +182,7 @@ class PGSearchUtility(DefaultSearchUtility):
         txn = get_transaction()
         if txn is None:
             raise TransactionNotFound()
-        sql_wheres.extend(self.get_default_where_clauses(context))
+        sql_wheres.extend(self.get_default_where_clauses(context, unrestricted=unrestricted))
 
         order = (
             order_by_index.order_by_score(query["sort_dir"])
@@ -279,8 +282,14 @@ class PGSearchUtility(DefaultSearchUtility):
         parsed_query = parse_query(context, query, self)
         return await self._query(context, parsed_query)  # type: ignore
 
-    async def _query(self, context: IResource, query: ParsedQueryInfo):
-        sql, arguments = self.build_query(context, query, ["id", "zoid", "json"])
+    async def unrestrictedSearch(self, context: IBaseObject, query: ParsedQueryInfo):
+        """
+        Search query without restriction, uses parser to transform query
+        """
+        return await self._query(context, parsed_query, True)  # type: ignore
+
+    async def _query(self, context: IResource, query: ParsedQueryInfo, unrestricted: bool = False):
+        sql, arguments = self.build_query(context, query, ["id", "zoid", "json"], unrestricted=unrestricted)
         txn = get_current_transaction()
         conn = await txn.get_connection()
         results = []
