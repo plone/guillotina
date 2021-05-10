@@ -4,7 +4,8 @@ CHANGELOG
 6.3.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix error on unrestricted Search
+  [bloodbare]
 
 
 6.3.5 (2021-05-10)
