@@ -4,7 +4,9 @@ CHANGELOG
 6.3.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- PG Catalog unrestricted search build count query
+- PG Catalog __or, __and operators
+  [rboixaderg]
 
 
 6.3.6 (2021-05-10)
