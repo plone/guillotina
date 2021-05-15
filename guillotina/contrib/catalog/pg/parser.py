@@ -34,7 +34,7 @@ class Parser(BaseParser):
         wheres = []
         arguments = []
         selects = []
-        for _, (sfield, svalue) in enumerate(parsed_value):
+        for sfield, svalue in parsed_value:
             result = self.process_queried_field(sfield, svalue)
             if result is not None:
                 wheres.append(result[0])
