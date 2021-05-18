@@ -11,6 +11,7 @@ from guillotina.interfaces import ISearchParser
 from guillotina.interfaces.catalog import ICatalogUtility
 
 import typing
+import urllib
 
 
 _type_mapping = {"int": int, "float": float}
@@ -27,19 +28,20 @@ class ParsedQueryInfo(BasicParsedQueryInfo):
 @configure.adapter(for_=(ICatalogUtility, IResource), provides=ISearchParser, name="default")
 class Parser(BaseParser):
     def process_compound_field(self, field, value, operator):
-        if not isinstance(value, dict):
+        parsed_value = urllib.parse.parse_qsl(urllib.parse.unquote(value))
+        if not isinstance(parsed_value, list):
             return None
         wheres = []
         arguments = []
         selects = []
-        for sfield, svalue in value.items():
+        for sfield, svalue in parsed_value:
             result = self.process_queried_field(sfield, svalue)
             if result is not None:
                 wheres.append(result[0])
                 arguments.extend(result[1])
                 selects.extend(result[2])
         if len(wheres) > 0:
-            return (operator, wheres), arguments, selects
+            return (operator, wheres), arguments, selects, field
 
     def process_queried_field(
         self, field: str, value

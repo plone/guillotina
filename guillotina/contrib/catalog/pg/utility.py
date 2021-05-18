@@ -207,7 +207,10 @@ class PGSearchUtility(DefaultSearchUtility):
         return sql, sql_arguments
 
     def build_count_query(
-        self, context, query: ParsedQueryInfo
+        self,
+        context,
+        query: ParsedQueryInfo,
+        unrestricted: bool = False,
     ) -> typing.Tuple[str, typing.List[typing.Any]]:
         sql_arguments = []
         sql_wheres = []
@@ -218,7 +221,7 @@ class PGSearchUtility(DefaultSearchUtility):
             sql_arguments.append(query["wheres_arguments"][idx])
             arg_index += 1
 
-        sql_wheres.extend(self.get_default_where_clauses(context))
+        sql_wheres.extend(self.get_default_where_clauses(context, unrestricted=unrestricted))
 
         txn = get_transaction()
         if txn is None:
@@ -330,7 +333,7 @@ class PGSearchUtility(DefaultSearchUtility):
         # also do count...
         total = len(results)
         if total >= query["size"] or query["_from"] != 0:
-            sql, arguments = self.build_count_query(context, query)
+            sql, arguments = self.build_count_query(context, query, unrestricted=unrestricted)
             logger.debug(f"Running search:\n{sql}\n{arguments}")
             async with txn.lock:
                 records = await conn.fetch(sql, *arguments)
