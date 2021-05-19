@@ -4,6 +4,7 @@ CHANGELOG
 6.3.7 (unreleased)
 ------------------
 
+- Fix potential pg connection leaks
 - PG Catalog unrestricted search build count query
 - PG Catalog __or, __and operators
   [rboixaderg]

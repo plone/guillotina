@@ -432,9 +432,11 @@ class Transaction:
     @profilable
     async def abort(self):
         self.status = Status.ABORTED
-        await self._manager._storage.abort(self)
-        await self._cache.close(invalidate=False)
-        self.tpc_cleanup()
+        try:
+            await self._manager._storage.abort(self)
+            await self._cache.close(invalidate=False)
+        finally:
+            self.tpc_cleanup()
 
     async def _call_before_commit_hooks(self):
         for hook, args, kws in self._before_commit:
