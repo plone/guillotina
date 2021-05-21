@@ -108,12 +108,12 @@ class TransactionManager:
         if txn is not None:
             try:
                 await txn.commit()
-                await self._close_txn(txn)
             except (ConflictError, TIDConflictError):
                 # we're okay with ConflictError being handled...
                 txn.status = Status.CONFLICT
-                await self._close_txn(txn)
                 raise
+            finally:
+                await self._close_txn(txn)
         else:
             await self._close_txn(txn)
 
@@ -163,8 +163,10 @@ class TransactionManager:
         if txn is None:
             txn = self.get()
         if txn is not None:
-            await txn.abort()
-        await self._close_txn(txn)
+            try:
+                await txn.abort()
+            finally:
+                await self._close_txn(txn)
 
     def get(self) -> typing.Optional[ITransaction]:
         """Return the current request specific transaction

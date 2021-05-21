@@ -207,10 +207,7 @@ class PGSearchUtility(DefaultSearchUtility):
         return sql, sql_arguments
 
     def build_count_query(
-        self,
-        context,
-        query: ParsedQueryInfo,
-        unrestricted: bool = False,
+        self, context, query: ParsedQueryInfo, unrestricted: bool = False,
     ) -> typing.Tuple[str, typing.List[typing.Any]]:
         sql_arguments = []
         sql_wheres = []

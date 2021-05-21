@@ -1,7 +1,18 @@
+import weakref
+
+
 class BaseStrategy:
     def __init__(self, transaction):
-        self._storage = transaction._manager._storage
-        self._transaction = transaction
+        self.__transaction = weakref.ref(transaction)
+        self.__storage = weakref.ref(transaction._manager._storage)
+
+    @property
+    def _transaction(self):
+        return self.__transaction()
+
+    @property
+    def _storage(self):
+        return self.__storage()
 
     @property
     def writable_transaction(self):

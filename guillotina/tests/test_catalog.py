@@ -334,8 +334,7 @@ async def test_query_pg_catalog(container_requester):
             assert results["items"][0][1][0] == "root"
 
         resp, status = await requester(
-            "GET",
-            "/db/guillotina/@aggregation?title__eq=Item2&_metadata=title,creators",
+            "GET", "/db/guillotina/@aggregation?title__eq=Item2&_metadata=title,creators",
         )
         assert status == 200
         assert resp == {
