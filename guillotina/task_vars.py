@@ -18,7 +18,7 @@ import weakref
 
 # This global dictionary keeps all the contextvars for each task.
 # When a task finishes and is destroyed, the context is destroyed as well
-_context = weakref.WeakKeyDictionary()
+_context = weakref.WeakKeyDictionary()  # type: ignore
 
 
 class FakeTask:
