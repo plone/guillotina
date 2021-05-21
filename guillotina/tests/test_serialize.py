@@ -1103,9 +1103,6 @@ async def test_patch_dict_validation(dummy_guillotina):
 
 async def test_bucket_list_max_ops(dummy_guillotina, mock_txn):
     mock_txn()
-    import pdb
-
-    pdb.set_trace()
     field = fields.BucketListField(bucket_len=10, required=False, max_ops=1, value_type=schema.Text())
     field.__name__ = "foobar"
     content = create_content()
