@@ -14,6 +14,7 @@ from guillotina.db.interfaces import IWriter
 from guillotina.db.transaction_manager import TransactionManager
 from guillotina.interfaces import IApplication
 from guillotina.interfaces import IDatabase
+from guillotina.task_vars import copy_context
 from guillotina.transactions import get_transaction
 from guillotina.utils import apply_coroutine
 from guillotina.utils import import_class
@@ -71,7 +72,7 @@ class ApplicationRoot:  # type: ignore
         if hasattr(utility_object, "initialize"):
             func = lazy_apply(utility_object.initialize, app=self.app)
 
-            task = asyncio.ensure_future(notice_on_error(key, func), loop=loop or self._loop)
+            task = asyncio.ensure_future(copy_context(notice_on_error(key, func)), loop=loop or self._loop)
             self.add_async_task(key, task, config)
             return utility_object, task
         else:

@@ -1,5 +1,4 @@
 from async_asgi_testclient import TestClient
-from contextvars import copy_context
 from guillotina import task_vars
 from guillotina import testing
 from guillotina.component import get_utility

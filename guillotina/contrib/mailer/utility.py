@@ -9,6 +9,7 @@ from guillotina.contrib.mailer import encoding
 from guillotina.contrib.mailer.exceptions import NoEndpointDefinedException
 from guillotina.interfaces import IMailEndpoint
 from guillotina.interfaces import IMailer
+from guillotina.task_vars import copy_context
 from guillotina.utils import get_random_string
 from zope.interface import implementer
 
@@ -135,7 +136,7 @@ class MailerUtility:
                 else:
                     raise NoEndpointDefinedException("{} mail endpoint not defined".format(endpoint_name))
             utility.from_settings(settings)
-            asyncio.ensure_future(utility.initialize())
+            asyncio.ensure_future(copy_context(utility.initialize()))
             self._endpoints[endpoint_name] = utility
         return self._endpoints[endpoint_name]
 

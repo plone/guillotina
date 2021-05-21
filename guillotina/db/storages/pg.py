@@ -16,6 +16,7 @@ from guillotina.exceptions import ConflictError
 from guillotina.exceptions import ConflictIdOnContainer
 from guillotina.exceptions import TIDConflictError
 from guillotina.profile import profilable
+from guillotina.task_vars import copy_context
 from zope.interface import implementer
 
 import asyncio
@@ -555,7 +556,7 @@ class PGConnectionManager:
 
             if self._autovacuum:
                 self._vacuum = self._vacuum_class(self, loop)
-                self._vacuum_task = asyncio.Task(self._vacuum.initialize(), loop=loop)
+                self._vacuum_task = asyncio.Task(copy_context(self._vacuum.initialize()), loop=loop)
 
     async def restart(self, timeout=2):
         # needs to be used with lock

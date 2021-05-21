@@ -1,5 +1,6 @@
 from guillotina.contrib.pubsub.exceptions import NoPubSubDriver
 from guillotina.profile import profilable
+from guillotina.task_vars import copy_context
 from guillotina.utils import resolve_dotted_name
 from typing import Any
 from typing import Callable
@@ -90,7 +91,7 @@ class PubSubUtility:
             self._subscribers[channel_name][rid] = callback
         else:
             self._subscribers[channel_name] = {rid: callback}
-            task = asyncio.ensure_future(self.real_subscribe(channel_name))
+            task = asyncio.ensure_future(copy_context(self.real_subscribe(channel_name)))
             self._tasks[channel_name] = task
 
     async def unsubscribe(self, channel_name: str, req_id: str):

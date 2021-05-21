@@ -4,6 +4,8 @@ CHANGELOG
 6.3.13 (unreleased)
 -------------------
 
+- Use custom implementation of ContextVar that is not copied automatically to new tasks
+  [masipcat]
 - Fix navigate_to() crashes with 'AttributeError' when traversing to a non-folderish object
   [masipcat]
 
