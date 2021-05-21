@@ -171,3 +171,9 @@ def make_mocked_request(
     return Request(
         "http", method, path, query_string, raw_hdrs, client_max_size=client_max_size, receive=q.get
     )
+
+
+def copy_global_ctx():
+    task = asyncio.current_task()
+    global_ctx = task_vars._context[task_vars._no_task_fallback]
+    task_vars._context[task] = global_ctx.copy()

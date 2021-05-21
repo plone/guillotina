@@ -10,13 +10,16 @@ from typing import Dict
 from typing import Generic
 from typing import Optional
 from typing import TypeVar
+
 import asyncio
 import contextvars
 import weakref
 
+
 # This global dictionary keeps all the contextvars for each task.
 # When a task finishes and is destroyed, the context is destroyed as well
 _context = weakref.WeakKeyDictionary()
+
 
 class FakeTask:
     """
@@ -147,9 +150,7 @@ request: ShyContextVar[Optional[IRequest]] = ShyContextVar("g_request", default=
 txn: ShyContextVar[Optional[ITransaction]] = ShyContextVar("g_txn", default=None)
 tm: ShyContextVar[Optional[ITransactionManager]] = ShyContextVar("g_tm", default=None)
 futures: ShyContextVar[Optional[Dict]] = ShyContextVar("g_futures", default=None)
-authenticated_user: ShyContextVar[Optional[IPrincipal]] = ShyContextVar(
-    "g_authenticated_user", default=None
-)
+authenticated_user: ShyContextVar[Optional[IPrincipal]] = ShyContextVar("g_authenticated_user", default=None)
 security_policies: ShyContextVar[Optional[Dict[str, ISecurityPolicy]]] = ShyContextVar(
     "g_security_policy", default=None
 )
