@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.3.7 (unreleased)
+6.3.7 (2021-05-21)
 ------------------
 
 - Fix potential pg connection leaks
