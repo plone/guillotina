@@ -81,7 +81,7 @@ class FileManager(object):
             headers["Accept-Ranges"] = "none"
 
         download_resp = Response(
-            status=200,
+            status=status,
             headers=headers,
             content_type=content_type or file.guess_content_type(),
             content_length=size or file.size,
