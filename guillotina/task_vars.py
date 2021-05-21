@@ -57,9 +57,12 @@ def copy_context(coro):
         nonlocal from_task
         task = asyncio.current_task()
         assert task != from_task
-        # The _context value type is a dict so we need to copy the dict to avoid
-        # sharing the same context in different tasks
-        _context[task] = _context[from_task].copy()
+        if from_task in _context:
+            # The _context value type is a dict so we need to copy the dict to avoid
+            # sharing the same context in different tasks
+            _context[task] = _context[from_task].copy()
+        else:
+            _context[task] = {}
         del from_task
         return await coro
 

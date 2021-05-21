@@ -29,7 +29,7 @@ async def test_trns_retries_with_app(container_requester):
 @pytest.mark.asyncio
 async def test_async_util_started_and_stopped(dummy_guillotina):
     util = get_utility(ITestAsyncUtility)
-    util.state == "init"
+    assert util.state == "init"
 
     config_utility = {
         "provides": "guillotina.test_package.ITestAsyncUtility",
