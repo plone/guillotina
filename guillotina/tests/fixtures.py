@@ -444,11 +444,13 @@ async def dummy_txn_root(dummy_request):
 
 
 @pytest.fixture(scope="function")
-def mock_txn():
-    txn = mocks.MockTransaction()
-    task_vars.txn.set(txn)
-    yield txn
-    task_vars.txn.set(None)
+async def mock_txn():
+    def _mock():
+        txn = mocks.MockTransaction()
+        task_vars.txn.set(txn)
+        return txn
+
+    return _mock
 
 
 async def _clear_dbs(root):

@@ -12,6 +12,7 @@ from guillotina.exceptions import RequestNotFound
 from guillotina.exceptions import TIDConflictError
 from guillotina.exceptions import TransactionNotFound
 from guillotina.profile import profilable
+from guillotina.task_vars import copy_context
 from guillotina.transactions import transaction
 from guillotina.utils import get_authenticated_user_id
 from zope.interface import implementer
@@ -98,7 +99,7 @@ class TransactionManager:
         return txn
 
     async def commit(self, *, txn: typing.Optional[ITransaction] = None) -> None:
-        return await shield(self._commit(txn=txn))
+        return await shield(copy_context(self._commit(txn=txn)))
 
     async def _commit(self, *, txn: typing.Optional[ITransaction] = None) -> None:
         """ Commit the last transaction
@@ -153,7 +154,7 @@ class TransactionManager:
 
     async def abort(self, *, txn: typing.Optional[ITransaction] = None) -> None:
         try:
-            return await shield(self._abort(txn=txn))
+            return await shield(copy_context(self._abort(txn=txn)))
         except asyncio.CancelledError:
             pass
 
