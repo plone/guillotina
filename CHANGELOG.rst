@@ -4,7 +4,8 @@ CHANGELOG
 6.3.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fixing status code on range request
+  [bloodbare]
 
 
 6.3.7 (2021-05-21)
