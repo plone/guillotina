@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.3.8 (unreleased)
+6.3.8 (2021-05-21)
 ------------------
 
 - Fixing status code on range request
