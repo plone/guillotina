@@ -4,8 +4,8 @@ CHANGELOG
 6.3.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
-
+- Allow to define custom validate url and custom template on email actions
+  [bloodbare]
 
 6.3.8 (2021-05-21)
 ------------------

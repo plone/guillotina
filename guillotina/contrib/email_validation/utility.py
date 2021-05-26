@@ -74,6 +74,14 @@ class EmailValidationUtility:
             logger.error(f"Task {task_id} unavailable")
             raise HTTPServiceUnavailable()
 
+        custom_template = app_settings["auth_validation_tasks"][task_id].get("custom_template")
+        if custom_template is not None:
+            template_name = custom_template
+
+        custom_validate_url = app_settings["auth_validation_tasks"][task_id].get("custom_validate_url")
+        if custom_validate_url is not None:
+            validate_url = custom_validate_url
+
         if data is None:
             data = {}
 
