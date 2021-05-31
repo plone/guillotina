@@ -14,7 +14,7 @@ username_regex = re.compile(
     (?!_$)                  # no only _
     (?![-.])                # no - or . at the beginning
     (?!.*[_.-]{2})          # no __ or _. or ._ or .. or -- inside
-    [a-z0-9_.-]+            # allowed characters, atleast one must be present
+    [a-z0-9_.-@]+           # allowed characters, atleast one must be present
     (?<![.-])               # no - or . at the end
     $                       # end of string
     """,
