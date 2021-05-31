@@ -6,6 +6,9 @@ CHANGELOG
 
 - Allow to define custom validate url and custom template on email actions
   [bloodbare]
+- Add @ in allowed chars in IIDChecker
+  [rboixaderg]
+
 
 6.3.8 (2021-05-21)
 ------------------

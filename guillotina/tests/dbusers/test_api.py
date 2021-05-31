@@ -23,6 +23,21 @@ async def test_add_user(dbusers_requester):
 
 
 @pytest.mark.app_settings(settings.DEFAULT_SETTINGS)
+async def test_add_user_id_email(dbusers_requester):
+    async with dbusers_requester as requester:
+        # Create a user
+        _, status_code = await requester(
+            "POST", "/db/guillotina/users", data=json.dumps(settings.user_data_id_email)
+        )
+        assert status_code == 201
+
+        # Check user is created in the apropriate folder
+        container = await get_container(requester=requester)
+        users = await container.async_get("users")
+        assert await users.async_contains("foo@bar.com")
+
+
+@pytest.mark.app_settings(settings.DEFAULT_SETTINGS)
 async def test_user_auth(dbusers_requester):
     async with dbusers_requester as requester:
         await requester("POST", "/db/guillotina/users", data=json.dumps(settings.user_data))
