@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.3.9 (unreleased)
+6.3.9 (2021-05-31)
 ------------------
 
 - Allow to define custom validate url and custom template on email actions
