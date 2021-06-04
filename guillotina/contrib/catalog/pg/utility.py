@@ -168,19 +168,25 @@ class PGSearchUtility(DefaultSearchUtility):
             arg_index += 1
 
         where_arg_index = 0
+        where_arg_iter = 0
+        # Skip None arguments
         for where in query["wheres"]:
             if isinstance(where, tuple):
                 operator, sub_wheres = where
                 sub_result = []
                 for sub_where in sub_wheres:
                     sub_result.append(sub_where.format(arg=arg_index + where_arg_index))
-                    sql_arguments.append(query["wheres_arguments"][where_arg_index])
-                    where_arg_index += 1
+                    if query["wheres_arguments"][where_arg_iter] is not None:
+                        sql_arguments.append(query["wheres_arguments"][where_arg_iter])
+                        where_arg_index += 1
+                    where_arg_iter += 1
                 sql_wheres.append("(" + operator.join(sub_result) + ")")
             else:
                 sql_wheres.append(where.format(arg=arg_index + where_arg_index))
-                sql_arguments.append(query["wheres_arguments"][where_arg_index])
-                where_arg_index += 1
+                if query["wheres_arguments"][where_arg_iter] is not None:
+                    sql_arguments.append(query["wheres_arguments"][where_arg_iter])
+                    where_arg_index += 1
+                where_arg_iter += 1
 
         txn = get_transaction()
         if txn is None:

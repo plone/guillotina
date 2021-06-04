@@ -125,6 +125,10 @@ class Parser(BaseParser):
         elif operator == "NOT ?" and isinstance(result, list):
             operator = "NOT ?|"
 
+        if value == "null":
+            result = None
+            operator = "is null"
+
         pg_index = get_pg_index(field)
         return pg_index.where(result, operator), [result], pg_index.select(), field
 

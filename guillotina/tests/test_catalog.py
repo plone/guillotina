@@ -225,6 +225,18 @@ async def test_search_endpoint_or_operator(container_requester):
         assert len(response["items"]) == 2
 
 
+@pytest.mark.app_settings(PG_CATALOG_SETTINGS)
+@pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
+async def test_search_endpoint_null_operator(container_requester):
+    async with container_requester as requester:
+        await requester("POST", "/db/guillotina", data=json.dumps({"@type": "Item", "title": "First item"}))
+        await requester("POST", "/db/guillotina", data=json.dumps({"@type": "Item", "title": None}))
+        await requester("POST", "/db/guillotina", data=json.dumps({"@type": "Item", "title": "Third item"}))
+        response, status = await requester("GET", "/db/guillotina/@search?title=null")
+        assert status == 200
+        assert len(response["items"]) == 1
+
+
 async def test_search_post_endpoint(container_requester):
     async with container_requester as requester:
         response, status = await requester("POST", "/db/guillotina/@search", data="{}")
@@ -334,7 +346,8 @@ async def test_query_pg_catalog(container_requester):
             assert results["items"][0][1][0] == "root"
 
         resp, status = await requester(
-            "GET", "/db/guillotina/@aggregation?title__eq=Item2&_metadata=title,creators",
+            "GET",
+            "/db/guillotina/@aggregation?title__eq=Item2&_metadata=title,creators",
         )
         assert status == 200
         assert resp == {
