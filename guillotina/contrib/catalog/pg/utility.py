@@ -116,6 +116,7 @@ class PGSearchUtility(DefaultSearchUtility):
 
     def get_default_where_clauses(self, context: IBaseObject, unrestricted: bool = False) -> typing.List[str]:
         clauses = []
+        sql_wheres = []
         if unrestricted is False:
             users = []
             principal = get_authenticated_user()
@@ -133,11 +134,11 @@ class PGSearchUtility(DefaultSearchUtility):
                     "json->'access_roles' ?| array['{}']".format("','".join([sqlq(r) for r in roles])),
                 ]
             )
+            sql_wheres.append("({})".format(" OR ".join(clauses)))
         container = find_container(context)
         if container is None:
             raise ContainerNotFound()
 
-        sql_wheres = ["({})".format(" OR ".join(clauses))]
         sql_wheres.append(f"""json->>'container_id' = '{sqlq(container.id)}'""")
         sql_wheres.append("""type != 'Container'""")
         sql_wheres.append(f"""parent_id != '{sqlq(TRASHED_ID)}'""")
@@ -207,7 +208,10 @@ class PGSearchUtility(DefaultSearchUtility):
         return sql, sql_arguments
 
     def build_count_query(
-        self, context, query: ParsedQueryInfo, unrestricted: bool = False,
+        self,
+        context,
+        query: ParsedQueryInfo,
+        unrestricted: bool = False,
     ) -> typing.Tuple[str, typing.List[typing.Any]]:
         sql_arguments = []
         sql_wheres = []
