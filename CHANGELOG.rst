@@ -4,7 +4,9 @@ CHANGELOG
 6.3.10 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix unrestricted Search pgcatalog
+- Add filter is null Search pgcatalog
+  [rboixaderg]
 
 
 6.3.9 (2021-05-31)
