@@ -64,7 +64,6 @@ class BaseObject:
         object.__setattr__(inst, "_BaseObject__name", None)
         object.__setattr__(inst, "_BaseObject__immutable_cache", False)
         object.__setattr__(inst, "_BaseObject__volatile", {})
-        object.__setattr__(inst, "_BaseObject__volatile", {})
         return inst
 
     def __repr__(self):
