@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.3.10 (unreleased)
+6.3.10 (2021-06-07)
 -------------------
 
 - Fix unrestricted Search pgcatalog
