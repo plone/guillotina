@@ -404,7 +404,7 @@ class PGVacuum:
             try:
                 oid, table_name = await self._queue.get()
                 self._active = True
-                await shield(self.vacuum(oid, table_name))
+                await shield(copy_context(self.vacuum(oid, table_name)))
             except (concurrent.futures.CancelledError, RuntimeError):
                 raise
             except Exception:

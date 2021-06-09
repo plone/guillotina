@@ -390,6 +390,7 @@ async def dummy_guillotina(event_loop, request):
     task_vars._no_task_fallback = task_vars.FakeTask()
     app = make_app(settings=get_dummy_settings(request.node), loop=event_loop)
     async with TestClient(app):
+        copy_global_ctx()
         yield app
     logout()
     clear_task_vars()

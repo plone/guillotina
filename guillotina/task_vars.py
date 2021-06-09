@@ -34,7 +34,7 @@ _no_task_fallback = FakeTask()
 
 def copy_context(coro):
     """
-    This function it's similar contextvars.copy_context() but has a slightly different
+    This function it's similar to contextvars.copy_context() but has a slightly different
     signature and it's not called by default when a new task/future is created.
 
     To copy the context from the current task to a new one you need to call this
@@ -53,17 +53,18 @@ def copy_context(coro):
         assert _no_task_fallback is not None
         from_task = _no_task_fallback
 
+    if from_task in _context:
+        # The _context value type is a dict so we need to copy the dict to avoid
+        # sharing the same context value in different tasks
+        new_context = _context[from_task].copy()
+    else:
+        new_context = {}
+
     async def _wrapper():
-        nonlocal from_task
+        nonlocal new_context
         task = asyncio.current_task()
-        assert task != from_task
-        if from_task in _context:
-            # The _context value type is a dict so we need to copy the dict to avoid
-            # sharing the same context in different tasks
-            _context[task] = _context[from_task].copy()
-        else:
-            _context[task] = {}
-        del from_task
+        _context[task] = new_context
+        del new_context
         return await coro
 
     return _wrapper()
@@ -144,6 +145,7 @@ class ShyContextVar(Generic[_T]):
         try:
             data = _context[task]
         except KeyError:
+            # Initialize _context value for this task
             data = {}
             _context[task] = data
         return data
