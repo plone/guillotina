@@ -4,7 +4,9 @@ CHANGELOG
 6.3.11 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Add is not null operator Search pgcatalog
+- Fix order by int and float Search pgcatalog
+  [rboixaderg]
 
 
 6.3.10 (2021-06-07)
