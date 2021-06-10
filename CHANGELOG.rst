@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.3.11 (unreleased)
+6.3.11 (2021-06-10)
 -------------------
 
 - Add is not null operator Search pgcatalog
