@@ -78,6 +78,13 @@ class IExample(IResource):
 
     textline_field = schema.TextLine(title="kk", widget="testing", required=False)
     text_field = schema.Text(required=False)
+
+    index_field("float_field", type="float")
+    float_field = schema.Float(required=False)
+
+    index_field("int_field", type="int")
+    int_field = schema.Int(required=False)
+
     dict_value = schema.Dict(key_type=schema.TextLine(), value_type=schema.TextLine(), required=False)
     datetime = schema.Datetime(required=False)
     jsonfield_value = schema.JSONField(schema={"type": "array"}, required=False)

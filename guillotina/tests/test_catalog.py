@@ -206,6 +206,54 @@ async def test_search_endpoint_no_pg(container_requester):
 
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)
 @pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
+async def test_search_endpoint_order_by(container_requester):
+    async with container_requester as requester:
+        await requester(
+            "POST",
+            "/db/guillotina",
+            data=json.dumps({"@type": "Example", "title": "title1", "int_field": 400, "float_field": 200.5}),
+        )
+        await requester(
+            "POST",
+            "/db/guillotina",
+            data=json.dumps({"@type": "Example", "title": "title2", "int_field": 20, "float_field": 70.5}),
+        )
+        await requester(
+            "POST",
+            "/db/guillotina",
+            data=json.dumps({"@type": "Example", "title": "title3", "int_field": 60, "float_field": 9.5}),
+        )
+        response, status = await requester("GET", "/db/guillotina/@search?_sort_asc=int_field")
+        assert status == 200
+        assert len(response["items"]) == 3
+        assert response["items"][0]["title"] == "title2"
+        assert response["items"][1]["title"] == "title3"
+        assert response["items"][2]["title"] == "title1"
+
+        response, status = await requester("GET", "/db/guillotina/@search?_sort_des=int_field")
+        assert status == 200
+        assert len(response["items"]) == 3
+        assert response["items"][0]["title"] == "title1"
+        assert response["items"][1]["title"] == "title3"
+        assert response["items"][2]["title"] == "title2"
+
+        response, status = await requester("GET", "/db/guillotina/@search?_sort_asc=float_field")
+        assert status == 200
+        assert len(response["items"]) == 3
+        assert response["items"][0]["title"] == "title3"
+        assert response["items"][1]["title"] == "title2"
+        assert response["items"][2]["title"] == "title1"
+
+        response, status = await requester("GET", "/db/guillotina/@search?_sort_des=float_field")
+        assert status == 200
+        assert len(response["items"]) == 3
+        assert response["items"][0]["title"] == "title1"
+        assert response["items"][1]["title"] == "title2"
+        assert response["items"][2]["title"] == "title3"
+
+
+@pytest.mark.app_settings(PG_CATALOG_SETTINGS)
+@pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
 async def test_search_endpoint_or_operator(container_requester):
     async with container_requester as requester:
         await requester("POST", "/db/guillotina", data=json.dumps({"@type": "Item", "title": "First item"}))

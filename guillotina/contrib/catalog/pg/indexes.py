@@ -102,6 +102,9 @@ using btree(CAST(json->>'{sqlq(self.name)}' AS {sqlq(self.cast_type)}))"""
         return f"""
 CAST(json->>'{sqlq(self.name)}' AS {sqlq(self.cast_type)}) {sqlq(operator)} ${{arg}}::{sqlq(self.cast_type)}"""  # noqa
 
+    def order_by(self, direction="ASC") -> str:
+        return f"order by json->'{sqlq(self.name)}' {sqlq(direction)}"
+
 
 class CastFloatIndex(CastIntIndex):
     cast_type = "float"
