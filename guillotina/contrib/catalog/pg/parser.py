@@ -57,7 +57,10 @@ class Parser(BaseParser):
 
         operator = "="
         if field.endswith("__not"):
-            operator = "!="
+            if value == "null":
+                operator = "is not null"
+            else:
+                operator = "!="
             field = field[: -len("__not")]
         elif field.endswith("__in"):
             operator = "?|"
@@ -99,19 +102,19 @@ class Parser(BaseParser):
                 result = True
             else:
                 result = False
-        elif _type == "keyword" and operator not in ("?", "?|"):
+        elif _type == "keyword" and operator not in ("?", "?|", "is not null"):
             if operator == "!=":
                 operator = "NOT ?"
             else:
                 operator = "?"
-        elif _type in ("text", "searchabletext"):
+        elif _type in ("text", "searchabletext") and operator != "is not null":
             if " " in value:
                 operator = "phrase"
                 result = "&".join(to_list(value))
             else:
                 operator = "="
                 result = f"{value}:*"
-        if _type == "path":
+        if _type == "path" and operator != "is not null":
             if operator != "starts":
                 # we do not currently support other search types
                 logger.warning(f"Unsupported search {field}: {value}")
@@ -127,7 +130,8 @@ class Parser(BaseParser):
 
         if value == "null":
             result = None
-            operator = "is null"
+            if operator != "is not null":
+                operator = "is null"
 
         pg_index = get_pg_index(field)
         return pg_index.where(result, operator), [result], pg_index.select(), field

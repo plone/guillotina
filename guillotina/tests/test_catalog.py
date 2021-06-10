@@ -284,6 +284,10 @@ async def test_search_endpoint_null_operator(container_requester):
         assert status == 200
         assert len(response["items"]) == 1
 
+        response, status = await requester("GET", "/db/guillotina/@search?title__not=null")
+        assert status == 200
+        assert len(response["items"]) == 2
+
 
 async def test_search_post_endpoint(container_requester):
     async with container_requester as requester:

@@ -4,6 +4,7 @@ CHANGELOG
 6.3.11 (unreleased)
 -------------------
 
+- Add is not null operator Search pgcatalog
 - Fix order by int and float Search pgcatalog
   [rboixaderg]
 
