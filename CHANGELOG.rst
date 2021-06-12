@@ -4,7 +4,7 @@ CHANGELOG
 6.3.12 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- shell: import 'app_settings'. Fix typo
 
 
 6.3.11 (2021-06-10)

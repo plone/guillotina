@@ -36,7 +36,7 @@ class reify(object):
 
     .. doctest::
 
-        >>> from pyramid.decorator import reify
+        >>> from guillotina.request import reify
 
         >>> class Foo(object):
         ...     @reify
