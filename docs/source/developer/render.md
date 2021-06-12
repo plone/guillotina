@@ -26,7 +26,7 @@ from guillotina.response import Response
     method='GET', permission='guillotina.Public',
     allow_access=True)
 async def custom_status(context, request):
-    return {'foo': 'bar'}, 201
+    return Response(content={'foo': 'bar'}, status=201)
 
 
 @configure.service(
@@ -34,7 +34,7 @@ async def custom_status(context, request):
     method='GET', permission='guillotina.Public',
     allow_access=True)
 async def custom_headers(context, request):
-    return Response(content={'foo': 'bar'}, status=200, headers={'X-Foobar', 'foobar'})
+    return Response(content={'foo': 'bar'}, status=200, headers={'X-Foobar': 'foobar'})
 
 ```
 
@@ -65,7 +65,7 @@ Here is a yaml example:
 
 ```python
 from guillotina import configure
-from guillotina.renderer import Renderer
+from guillotina.renderers import Renderer
 import yaml
 
 # yaml is known to have a lot of different content types, it's okay!

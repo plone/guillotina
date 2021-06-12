@@ -54,7 +54,7 @@ pip install aiomonitor
 Then, run guillotina with `--monitor`:
 
 ```bash
-g server --monitor
+g serve --monitor
 ```
 
 Finally, connect to it:

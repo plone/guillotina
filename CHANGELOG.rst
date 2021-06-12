@@ -4,7 +4,9 @@ CHANGELOG
 6.3.12 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- shell: import 'app_settings'. Fix typo
+- doc: Fix example app and other small fixes
+  [jianaijun]
 
 
 6.3.11 (2021-06-10)

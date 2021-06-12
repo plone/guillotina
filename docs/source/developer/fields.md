@@ -217,7 +217,7 @@ Update:
 {
     "field": {
         "op": "update",
-        "field": [{
+        "value": [{
             "key": "foo",
             "value": "bar"
         }, {
@@ -390,25 +390,6 @@ Clear:
 {
     "field": {
         "op": "clear"
-    }
-}
-```
-
-Multi:
-
-Group multiple operations into one
-
-```json
-{
-    "field": {
-        "op": "multi",
-        "value": [{
-            "op": "assign",
-            "value": {
-                "key": "foo",
-                "value": "bar"
-            }
-        }]
     }
 }
 ```

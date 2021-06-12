@@ -1,3 +1,4 @@
+from guillotina import app_settings  # noqa
 from guillotina import task_vars
 from guillotina import utils
 from guillotina.commands import Command
