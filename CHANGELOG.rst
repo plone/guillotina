@@ -1,7 +1,21 @@
 CHANGELOG
 =========
 
-6.3.10 (unreleased)
+6.3.12 (unreleased)
+-------------------
+
+- Nothing changed yet.
+
+
+6.3.11 (2021-06-10)
+-------------------
+
+- Add is not null operator Search pgcatalog
+- Fix order by int and float Search pgcatalog
+  [rboixaderg]
+
+
+6.3.10 (2021-06-07)
 -------------------
 
 - Fix unrestricted Search pgcatalog

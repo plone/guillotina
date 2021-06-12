@@ -6,7 +6,7 @@ import typing
 
 
 class BasicJsonIndex:
-    operators: typing.List[str] = ["=", "!=", "?", "?|", "is null"]
+    operators: typing.List[str] = ["=", "!=", "?", "?|", "is null", "is not null"]
 
     def __init__(self, name: str):
         self.name = name
@@ -27,7 +27,7 @@ class BasicJsonIndex:
         assert operator in self.operators
         if operator in ("?", "?|"):
             return f"""json->'{sqlq(self.name)}' {sqlq(operator)} ${{arg}} """
-        if operator == "is null":
+        if operator in ("is null", "is not null"):
             return f"""(json->>'{sqlq(self.name)}') {sqlq(operator)} """
         else:
             return f"""json->>'{sqlq(self.name)}' {sqlq(operator)} ${{arg}} """
@@ -53,7 +53,7 @@ ON {sqlq(storage.objects_table_name)} (((json->>'{sqlq(self.name)}')::boolean));
 
 
 class KeywordIndex(BasicJsonIndex):
-    operators = ["?", "?|", "NOT ?", "is null"]
+    operators = ["?", "?|", "NOT ?", "is null", "is not null"]
 
     def get_index_sql(self, storage: IPostgresStorage):
         return [
@@ -65,7 +65,7 @@ ON {sqlq(storage.objects_table_name)} USING gin ((json->'{sqlq(self.name)}'))"""
     def where(self, value, operator="?"):
         assert operator in self.operators
         not_value = ""
-        if operator == "is null":
+        if operator in ("is null", "is not null"):
             return f"""(json->>'{sqlq(self.name)}') {sqlq(operator)} """
         if "NOT" in operator:
             operator = operator.split()[1]
@@ -102,6 +102,9 @@ using btree(CAST(json->>'{sqlq(self.name)}' AS {sqlq(self.cast_type)}))"""
         return f"""
 CAST(json->>'{sqlq(self.name)}' AS {sqlq(self.cast_type)}) {sqlq(operator)} ${{arg}}::{sqlq(self.cast_type)}"""  # noqa
 
+    def order_by(self, direction="ASC") -> str:
+        return f"order by json->'{sqlq(self.name)}' {sqlq(direction)}"
+
 
 class CastFloatIndex(CastIntIndex):
     cast_type = "float"
@@ -130,7 +133,7 @@ f_cast_isots(json->>'{sqlq(self.name)}') {sqlq(operator)} ${{arg}}::{sqlq(self.c
 
 
 class FullTextIndex(BasicJsonIndex):
-    operators = ["?", "?|", "=", "is null"]
+    operators = ["?", "?|", "=", "is null", "is not null"]
 
     def get_index_sql(self, storage: IPostgresStorage):
         return [
@@ -145,7 +148,7 @@ using gin(to_tsvector('simple', json->>'{sqlq(self.name)}'));"""
         to_tsvector(json->>'text') @@ to_tsquery('python & ruby')
         operator is ignored for now...
         """
-        if operator == "is null":
+        if operator in ("is null", "is not null"):
             return f"""(json->>'{sqlq(self.name)}') {sqlq(operator)} """
         if operator == "phrase":
             return f"""
