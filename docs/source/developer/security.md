@@ -83,7 +83,7 @@ Let's grant "Bob" view permission for this `db/todo/` resource tree node:
         "prinperm": [
             {
                 "permission": "guillotina.ViewContent",
-                "principal": "Bob",
+                "principal": "bob",
                 "setting": "Allow"
             }
         ]
@@ -393,7 +393,7 @@ id):
     {
         "prinrole": [
             {
-                "principal": "Alice",
+                "principal": "alice",
                 "role": "guillotina.Editor",
                 "setting": "Allow"
             }

@@ -12,15 +12,7 @@ from zope.interface import Interface
 from guillotina.schema import Textline
 
 class IMyLovedBehavior(Interface):
-    text = Textline(
-        title=u'Text line field',
-        required=False
-    )
-
-    text2 = Textline(
-        title=u'Text line field',
-        required=False
-    )
+    foobar = schema.TextLine()
 
 ```
 
@@ -50,7 +42,15 @@ class IMarkerBehavior(Interface):
 
 
 class IMyBehavior(Interface):
-    foobar = schema.TextLine()
+    text = Textline(
+        title=u'Text line field',
+        required=False
+    )
+
+    text2 = Textline(
+        title=u'Text line field',
+        required=False
+    )
 
 @configure.behavior(
     title="Attachment",
@@ -100,7 +100,7 @@ CREATE an ITEM with the expires : POST on parent:
     {
         "@type": "Item",
         "guillotina.behaviors.dublincore.IDublinCore": {
-            "expires": "1/10/2017"
+            "expiration_date": "1/10/2017"
         }
     }
 ```
@@ -110,7 +110,7 @@ MODIFY an ITEM with the expires : PATCH on the object:
 ```json
     {
         "guillotina.behaviors.dublincore.IDublinCore": {
-            "expires": "1/10/2017"
+            "expiration_date": "1/10/2017"
         }
     }
 ```
@@ -125,8 +125,8 @@ GET an ITEM : GET on the object:
     {
         "@id": "http://localhost:8080/zodb/guillotina/item1",
         "guillotina.behaviors.dublincore.IDublinCore": {
-            "expires": "2017-10-01T00:00:00.000000+00:00",
-            "modified": "2016-12-02T14:14:49.859953+00:00",
+            "expiration_date": "2017-10-01T00:00:00.000000+00:00",
+            "modification_date": "2016-12-02T14:14:49.859953+00:00",
         }
     }
 ```
@@ -168,7 +168,7 @@ MODIFY an ITEM with the expires : PATCH on the object:
 
     {
         "guillotina.behaviors.dublincore.IDublinCore": {
-            "expires": "1/10/2017"
+            "expiration_date": "1/10/2017"
         }
     }
 ```

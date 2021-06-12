@@ -30,7 +30,7 @@ async def modified_object(obj, event):
 You are also able to create your own events to notify on:
 
 ```python
-from guillotina.interfaces import IObjectEvent
+from guillotina.component.interfaces import IObjectEvent
 from zope.interface import implementer
 from guillotina.event import notify
 
@@ -49,7 +49,7 @@ await notify(CustomEvent(ob))
 
 ## Events
 
-- guillotina.interfaces.IObjectEvent: every time anything happens to an object
+- guillotina.component.interfaces.IObjectEvent: every time anything happens to an object
 - guillotina.interfaces.IFileStartedUpload
 - guillotina.interfaces.IFileFinishUploaded
 - guillotina.interfaces.IFileBeforeFinishUploaded

@@ -203,19 +203,19 @@ jwk:
 ## Miscellaneous settings
 
 - `port` (number): Port to bind to. _defaults to `8080`_
-- `store_json` (boolean): Serialize object into json field in database. _defaults to `false`_
-- `host` (string): Where to host the server. _defaults to `"0.0.0.0"`_
+- `store_json` (boolean): Serialize object into json field in database. _defaults to `true`_
+- `host` (string): Where to host the server. _defaults to `"127.0.0.1"`_
 - `port` (number): Port to bind to. _defaults to `8080`_
 - `conflict_retry_attempts` (number): Number of times to retry database conflict errors. _defaults to `3`_
 - `cloud_storage` (string): Dotted path to cloud storage field type. _defaults to `"guillotina.interfaces.IDBFileField"`_
 - `loop_policy`: (string): Be able to customize the event loop policy used. For example, to use
   uvloop, set this value to `uvloop.EventLoopPolicy`.
 - `router`: be able to customize the main Router class
-- `oid_generator`: be able to customize the function used to generate oids on the system.
-  defaults to `guillotina.db.oid.generate_oid`
+- `uid_generator`: be able to customize the function used to generate uids on the system.
+  defaults to `guillotina.db.uid.generate_uid`
 - `cors_renderer`: customize the cors renderer, defaults to `guillotina.cors.DefaultCorsRenderer`
-- `request_indexer`: customize the class used to index content, defaults to
-  `guillotina.catalog.index.RequestIndexer`
+- `indexer`: customize the class used to index content, defaults to
+  `guillotina.catalog.index.Indexer`
 
 
 ## Transaction strategy

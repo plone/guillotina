@@ -64,18 +64,18 @@ Creating users is just creating a user object.
         "@type": "User",
         "email": "bob@domain.io",
         "password": "secret",
-        "username": "Bob",
+        "username": "bob",
         "user_roles": ["guillotina.Member"]
     }
 
 
     HTTP/1.1 201 Created
     Content-Type: application/json
-    Location: http://localhost:8080/db/container/users/Bob
+    Location: http://localhost:8080/db/container/users/bob
 
     {
-        "@id": "http://localhost:8080/db/container/users/Bob",
-        "@name": "Bob",
+        "@id": "http://localhost:8080/db/container/users/bob",
+        "@name": "bob",
         "@type": "User",
         "@uid": "6e6|753|05893a69ee6e4f56b540248b5728c4a4",
         "UID": "6e6|753|05893a69ee6e4f56b540248b5728c4a4"
@@ -95,7 +95,7 @@ Logging in can be done with the `@login` endpoint which returns a jwt token.
 
     {
         "password": "secret",
-        "username": "Bob"
+        "username": "bob"
     }
 
 
