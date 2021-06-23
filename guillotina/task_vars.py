@@ -41,8 +41,7 @@ def copy_context(coro):
     funcion explicitly, like this:
 
         async def worker():
-            pass
-            # ...
+            ...
 
         asyncio.create_task(copy_context(worker()))
 
@@ -60,14 +59,13 @@ def copy_context(coro):
     else:
         new_context = {}
 
-    async def _wrapper():
-        nonlocal new_context
-        task = asyncio.current_task()
-        _context[task] = new_context
-        del new_context
-        return await coro
+    return _run_coro_with_ctx(coro, new_context)
 
-    return _wrapper()
+
+async def _run_coro_with_ctx(coro, new_context):
+    task = asyncio.current_task()
+    _context[task] = new_context
+    return await coro
 
 
 _T = TypeVar("_T")
