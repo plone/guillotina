@@ -7,6 +7,8 @@ CHANGELOG
 - shell: import 'app_settings'. Fix typo
 - doc: Fix example app and other small fixes
   [jianaijun]
+- feat: Add null and not null operator in int, float and timestamp types in pgcatalog
+  [rboixaderg]
 
 
 6.3.11 (2021-06-10)
