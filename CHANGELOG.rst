@@ -4,7 +4,8 @@ CHANGELOG
 6.3.13 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix navigate_to() crashes with 'AttributeError' when traversing to a non-folderish object
+  [masipcat]
 
 
 6.3.12 (2021-07-01)
