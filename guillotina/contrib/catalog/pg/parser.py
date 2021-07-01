@@ -91,7 +91,8 @@ class Parser(BaseParser):
         _type = index["type"]
         if _type in _type_mapping:
             try:
-                result = _type_mapping[_type](value)
+                if value != "null":
+                    result = _type_mapping[_type](value)
             except ValueError:
                 # invalid, can't continue... We could throw query parse error?
                 return None

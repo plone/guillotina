@@ -84,7 +84,7 @@ substring(json->>'{sqlq(self.name)}', 0, {len(value) + 1}) {sqlq(operator)} ${{a
 
 class CastIntIndex(BasicJsonIndex):
     cast_type = "integer"
-    operators = ["=", "!=", ">", "<", ">=", "<="]
+    operators = ["=", "!=", ">", "<", ">=", "<=", "is null", "is not null"]
 
     def get_index_sql(self, storage: IPostgresStorage):
         return [
@@ -99,6 +99,9 @@ using btree(CAST(json->>'{sqlq(self.name)}' AS {sqlq(self.cast_type)}))"""
         where CAST(json->>'favorite_count' AS integer) > 5;
         """
         assert operator in self.operators
+        if operator in ("is null", "is not null"):
+            return f"""(json->>'{sqlq(self.name)}') {sqlq(operator)} """
+
         return f"""
 CAST(json->>'{sqlq(self.name)}' AS {sqlq(self.cast_type)}) {sqlq(operator)} ${{arg}}::{sqlq(self.cast_type)}"""  # noqa
 
@@ -125,6 +128,10 @@ ON {sqlq(storage.objects_table_name)} (f_cast_isots(json->>'{sqlq(self.name)}'))
         where CAST(json->>'favorite_count' AS integer) > 5;
         """
         assert operator in self.operators
+
+        if operator in ("is null", "is not null"):
+            return f"""(json->>'{sqlq(self.name)}') {sqlq(operator)} """
+
         return f"""
 f_cast_isots(json->>'{sqlq(self.name)}') {sqlq(operator)} ${{arg}}::{sqlq(self.cast_type)}"""
 

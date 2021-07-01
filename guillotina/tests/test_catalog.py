@@ -280,11 +280,48 @@ async def test_search_endpoint_null_operator(container_requester):
         await requester("POST", "/db/guillotina", data=json.dumps({"@type": "Item", "title": "First item"}))
         await requester("POST", "/db/guillotina", data=json.dumps({"@type": "Item", "title": None}))
         await requester("POST", "/db/guillotina", data=json.dumps({"@type": "Item", "title": "Third item"}))
+
+        await requester(
+            "POST",
+            "/db/guillotina",
+            data=json.dumps({"@type": "Example", "title": "title1", "int_field": None, "float_field": 200.5}),
+        )
+        await requester(
+            "POST",
+            "/db/guillotina",
+            data=json.dumps({"@type": "Example", "title": None, "int_field": 20, "float_field": None}),
+        )
+        await requester(
+            "POST",
+            "/db/guillotina",
+            data=json.dumps({"@type": "Example", "title": "title3", "int_field": 20, "float_field": 70.5}),
+        )
+
         response, status = await requester("GET", "/db/guillotina/@search?title=null")
+        assert status == 200
+        assert len(response["items"]) == 2
+
+        response, status = await requester("GET", "/db/guillotina/@search?title__not=null")
+        assert status == 200
+        assert len(response["items"]) == 4
+
+        response, status = await requester("GET", "/db/guillotina/@search?type_name=Example&int_field=null")
         assert status == 200
         assert len(response["items"]) == 1
 
-        response, status = await requester("GET", "/db/guillotina/@search?title__not=null")
+        response, status = await requester(
+            "GET", "/db/guillotina/@search?type_name=Example&int_field__not=null"
+        )
+        assert status == 200
+        assert len(response["items"]) == 2
+
+        response, status = await requester("GET", "/db/guillotina/@search?type_name=Example&float_field=null")
+        assert status == 200
+        assert len(response["items"]) == 1
+
+        response, status = await requester(
+            "GET", "/db/guillotina/@search?type_name=Example&float_field__not=null"
+        )
         assert status == 200
         assert len(response["items"]) == 2
 
