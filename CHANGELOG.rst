@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.3.13 (unreleased)
+6.3.13 (2021-07-05)
 -------------------
 
 - Mask Textline field to recover masked values on get
