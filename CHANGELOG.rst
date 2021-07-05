@@ -4,7 +4,8 @@ CHANGELOG
 6.3.13 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Mask Textline field to recover masked values on get
+  [bloodbare]
 
 
 6.3.12 (2021-07-01)
