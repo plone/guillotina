@@ -695,3 +695,11 @@ class IUnionField(IField):
 
     This is sort of to mirror mypy's union type hint
     """
+
+
+class IMaskTextLine(IField):
+    """
+    A field that masks the get response.
+
+    Implements a TextLine value
+    """

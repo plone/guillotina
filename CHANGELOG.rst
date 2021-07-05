@@ -4,6 +4,9 @@ CHANGELOG
 6.3.13 (unreleased)
 -------------------
 
+- Mask Textline field to recover masked values on get
+  [bloodbare]
+
 - Fix navigate_to() crashes with 'AttributeError' when traversing to a non-folderish object
   [masipcat]
 
