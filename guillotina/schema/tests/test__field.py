@@ -2167,6 +2167,32 @@ class UnionFieldTests(unittest.TestCase):
         self.assertRaises(ValidationError, self._makeOne, default=1.2)
 
 
+class MaskTextLineTests(unittest.TestCase):
+    def _getTargetClass(self):
+        from guillotina.schema._field import MaskTextLine
+
+        return MaskTextLine
+
+    def _makeOne(self, *args, **kw):
+        return self._getTargetClass()(*args, **kw)
+
+    def test_set_normal(self):
+        field = self._makeOne(__name__="password")
+        context = DummyInstance()
+        field2 = field.bind(context)
+        field2.set(context, "PASSWORD")
+        self.assertEqual(context.password, "PASSWORD")
+        self.assertEqual(field2.get(context), "******")
+
+    def test_set_masked(self):
+        field = self._makeOne(__name__="password", unmask_len=3, mask_len=2)
+        context = DummyInstance()
+        field2 = field.bind(context)
+        field2.set(context, "PASSWORD")
+        self.assertEqual(context.password, "PASSWORD")
+        self.assertEqual(field2.get(context), "PAS**")
+
+
 class DummyInstance(object):
     pass
 

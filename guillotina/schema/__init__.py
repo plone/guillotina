@@ -36,6 +36,7 @@ from guillotina.schema._field import InterfaceField
 from guillotina.schema._field import Iterable
 from guillotina.schema._field import JSONField
 from guillotina.schema._field import List
+from guillotina.schema._field import MaskTextLine
 from guillotina.schema._field import MinMaxLen
 from guillotina.schema._field import NativeString
 from guillotina.schema._field import NativeStringLine
@@ -67,7 +68,7 @@ getFieldsInOrder = get_fields_in_order  # b/w
 # pep 8 friendlyness
 ASCII, ASCIILine, Bool, Bytes, BytesLine, Choice, Container, Date, Datetime
 Decimal, Dict, DottedName, Field, Float, FrozenSet, Id, Int, InterfaceField
-Iterable, List, MinMaxLen, NativeString, NativeStringLine, Object, Orderable
+Iterable, List, MaskTextLine, MinMaxLen, NativeString, NativeStringLine, Object, Orderable
 Password, Set, SourceText, Text, TextLine, Time, Timedelta, Tuple, URI, UnionField
 get_fields, get_fields_in_order, getFieldNames, getFieldNamesInOrder,
 getValidationErrors, getSchemaValidationErrors, JSONField

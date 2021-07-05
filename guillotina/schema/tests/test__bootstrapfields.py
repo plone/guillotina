@@ -695,30 +695,6 @@ class PasswordTests(unittest.TestCase):
         self.assertEqual(field.constraint("abc\ndef"), False)
 
 
-class MaskTextLineTests(unittest.TestCase):
-    def _getTargetClass(self):
-        from guillotina.schema._bootstrapfields import MaskTextLine
-
-        return MaskTextLine
-
-    def _makeOne(self, *args, **kw):
-        return self._getTargetClass()(*args, **kw)
-
-    def test_set_normal(self):
-        pw = self._makeOne(__name__="password")
-        inst = DummyInst()
-        pw.set(inst, "PASSWORD")
-        self.assertEqual(inst.password, "PASSWORD")
-        self.assertEqual(pw.get(inst), "******")
-
-    def test_set_masked(self):
-        pw = self._makeOne(__name__="password", unmask_len=3, mask_len=2)
-        inst = DummyInst()
-        pw.set(inst, "PASSWORD")
-        self.assertEqual(inst.password, "PASSWORD")
-        self.assertEqual(pw.get(inst), "PAS**")
-
-
 class BoolTests(unittest.TestCase):
     def _getTargetClass(self):
         from guillotina.schema._bootstrapfields import Bool

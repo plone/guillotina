@@ -61,6 +61,7 @@ from guillotina.schema.interfaces import IInt
 from guillotina.schema.interfaces import IInterfaceField
 from guillotina.schema.interfaces import IJSONField
 from guillotina.schema.interfaces import IList
+from guillotina.schema.interfaces import IMaskTextLine
 from guillotina.schema.interfaces import IMinMaxLen
 from guillotina.schema.interfaces import IObject
 from guillotina.schema.interfaces import IObjectJSONField
@@ -742,3 +743,16 @@ class UnionField(Field):
         field = self.validate(value)
         field.__name__ = self.__name__
         field.set(object, value)
+
+
+@implementer(IMaskTextLine)
+class MaskTextLine(TextLine):
+    """A text field containing a text used as a configuration."""
+
+    def get(self, object):
+        value = super(MaskTextLine, self).get(object)
+        unmask_len = self.extra_values.get("unmask_len", 0)
+        mask_len = self.extra_values.get("mask_len", 6)
+        if value is not None and unmask_len < len(value):
+            value = value[:unmask_len] + "*" * mask_len
+        return value

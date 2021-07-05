@@ -455,15 +455,3 @@ class Int(Orderable, Field):
             raise InvalidValue(str, self.__name__)
         self.validate(v)
         return v
-
-
-class MaskTextLine(TextLine):
-    """A text field containing a text used as a configuration."""
-
-    def get(self, object):
-        value = super(MaskTextLine, self).get(object)
-        unmask_len = self.extra_values.get("unmask_len", 0)
-        mask_len = self.extra_values.get("mask_len", 6)
-        if value is not None and unmask_len < len(value):
-            value = value[:unmask_len] + "*" * mask_len
-        return value
