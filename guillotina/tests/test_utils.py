@@ -160,6 +160,9 @@ async def test_object_utils(container_requester):
         ob2 = await utils.navigate_to(container, "item1")
         assert ob2.__uuid__ == ob.__uuid__
 
+        with pytest.raises(KeyError):
+            await utils.navigate_to(container, "item1/inexistent-child")
+
         url = utils.get_object_url(ob, request)
         assert url.endswith("item1")
 

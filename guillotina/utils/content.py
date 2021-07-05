@@ -141,9 +141,12 @@ async def navigate_to(obj: IAsyncContainer, path: str):
     path_components = path.strip("/").split("/")
     for p in path_components:
         if p != "":
-            item = await actual.async_get(p)
+            try:
+                item = await actual.async_get(p)
+            except AttributeError:  # 'actual' doesn't has method `async_get()`
+                item = None
             if item is None:
-                raise KeyError("No %s in %s" % (p, actual))
+                raise KeyError(f"No {p} in {actual}")
             else:
                 actual = item
     return actual
