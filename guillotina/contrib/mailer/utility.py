@@ -150,7 +150,7 @@ class MailerUtility:
             except Exception:
                 pass
 
-        textual_message = MIMEMultipart('alternative')
+        textual_message = MIMEMultipart("alternative")
 
         if text is not None:
             textual_message.attach(MIMEText(text, "plain"))
