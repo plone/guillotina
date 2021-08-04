@@ -4,7 +4,9 @@ CHANGELOG
 6.3.14 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- feat: Change MIMEMultipart 'alternative' to 'mixed'. Outlook and Thunderbird not recieve attachment when use 'alternative'
+- chore: fix version aioredis 1.3.1
+  [rboixaderg]
 
 
 6.3.13 (2021-07-05)

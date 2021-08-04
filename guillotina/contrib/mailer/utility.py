@@ -159,7 +159,7 @@ class MailerUtility:
         self, recipient, subject, sender, message=None, text=None, html=None, message_id=None, attachments=[]
     ):
         if message is None:
-            message = MIMEMultipart("alternative")
+            message = MIMEMultipart("mixed")
             self.build_message(message, text, html)
 
         message["Subject"] = subject
