@@ -5,6 +5,7 @@ CHANGELOG
 -------------------
 
 - feat: Change MIMEMultipart 'alternative' to 'mixed'. Outlook and Thunderbird not recieve attachment when use 'alternative'
+- chore: fix version aioredis 1.3.1
   [rboixaderg]
 
 
