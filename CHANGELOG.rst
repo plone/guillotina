@@ -4,8 +4,8 @@ CHANGELOG
 6.3.15 (unreleased)
 -------------------
 
-- Nothing changed yet.
-
+- fix: Add MIMEMultipart('alternative') to attach message in parent MIMEMultipart to render only html body. 
+  [rboixaderg]
 
 6.3.14 (2021-08-04)
 -------------------

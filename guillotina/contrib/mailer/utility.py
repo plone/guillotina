@@ -150,10 +150,13 @@ class MailerUtility:
             except Exception:
                 pass
 
+        textual_message = MIMEMultipart('alternative')
+
         if text is not None:
-            message.attach(MIMEText(text, "plain"))
+            textual_message.attach(MIMEText(text, "plain"))
         if html is not None:
-            message.attach(MIMEText(html, "html"))
+            textual_message.attach(MIMEText(html, "html"))
+        message.attach(textual_message)
 
     def get_message(
         self, recipient, subject, sender, message=None, text=None, html=None, message_id=None, attachments=[]
