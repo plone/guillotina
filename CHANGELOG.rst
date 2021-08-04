@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.3.14 (unreleased)
+6.3.14 (2021-08-04)
 -------------------
 
 - feat: Change MIMEMultipart 'alternative' to 'mixed'. Outlook and Thunderbird not recieve attachment when use 'alternative'
