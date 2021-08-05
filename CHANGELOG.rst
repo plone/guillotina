@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.3.15 (unreleased)
+6.3.15 (2021-08-05)
 -------------------
 
 - fix: Add MIMEMultipart('alternative') to attach message in parent MIMEMultipart to render only html body. 
