@@ -3,7 +3,7 @@ from guillotina import configure
 
 _countries = {
     "AF": "Afghanistan",
-    "AN": "Andorra",
+    "AN": "Netherlands Antilles",
     "AX": "\xc5land Islands",
     "AL": "Albania",
     "DZ": "Algeria",

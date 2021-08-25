@@ -4,7 +4,7 @@ CHANGELOG
 6.3.16 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Fix vocabulray country code AN
 
 
 6.3.15 (2021-08-05)
