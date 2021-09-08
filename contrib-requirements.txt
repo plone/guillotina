@@ -12,4 +12,4 @@ jinja2==2.11.3
 pytz==2020.1
 emcache==0.4.1
 pymemcache==3.4.0
-pillow==8.2.0
+pillow==8.3.2
