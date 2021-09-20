@@ -25,7 +25,7 @@ class watch:
         *,
         counter: Optional[Counter] = None,
         histogram: Optional[Histogram] = None,
-        error_mappings: Dict[str, Type[Exception]] = None,
+        error_mappings: Dict[str, Type[BaseException]] = None,
         labels: Optional[Dict[str, str]] = None,
     ):
         self.counter = counter
@@ -39,7 +39,7 @@ class watch:
 
     def __exit__(
         self,
-        exc_type: Optional[Type[Exception]],
+        exc_type: Optional[Type[BaseException]],
         exc_value: Optional[Exception],
         exc_traceback: Optional[traceback.StackSummary],
     ):

@@ -508,7 +508,7 @@ class Request(object):
 
     @reify
     def cookies(self) -> dict:
-        cookie_jar = SimpleCookie(self.headers.get("cookie") or "")
+        cookie_jar = SimpleCookie(self.headers.get("cookie") or "")  # type: ignore
         return {name: value.value for name, value in cookie_jar.items()}
 
     @property

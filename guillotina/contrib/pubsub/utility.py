@@ -55,10 +55,9 @@ class PubSubUtility:
         self._initialized = False
         await asyncio.sleep(0.1)
 
-    async def real_subscribe(self, channel_name):
+    async def real_subscribe(self, channel, channel_name):
         while channel_name in self._subscribers:
             try:
-                channel = await self._driver.subscribe(channel_name)
                 async for msg in channel:
                     try:
                         try:
@@ -76,10 +75,14 @@ class PubSubUtility:
                 return
             except Exception:
                 logger.error(f"Unhandled exception with pubsub. Sleeping before trying again", exc_info=True)
+                # TODO: maybe we should call the callback with a disconnected event or do it on reconnect,
+                # so the callback has a chance to perform the logic to recover.
                 await asyncio.sleep(1)
             finally:
                 try:
+                    # Restart subscription
                     await self._driver.unsubscribe(channel_name)
+                    channel = await self._driver.subscribe(channel_name)
                 except Exception:
                     pass
 
@@ -90,8 +93,9 @@ class PubSubUtility:
             self._subscribers[channel_name][rid] = callback
         else:
             self._subscribers[channel_name] = {rid: callback}
-            task = asyncio.ensure_future(self.real_subscribe(channel_name))
-            self._tasks[channel_name] = task
+            # Moved the subscribe command outside the future to ensure we are subscribed after returning
+            channel = await self._driver.subscribe(channel_name)
+            self._tasks[channel_name] = asyncio.ensure_future(self.real_subscribe(channel, channel_name))
 
     async def unsubscribe(self, channel_name: str, req_id: str):
         if self._driver is None:

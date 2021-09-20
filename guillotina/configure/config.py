@@ -133,7 +133,7 @@ class ConfigurationExecutionError(ConfigurationError):
         self.etype, self.evalue = etype, evalue
 
     def __str__(self):  # pragma NO COVER
-        return "%s: %s\n  in:\n  %s" % (self.etype, self.evalue)
+        return "%s: %s" % (self.etype, self.evalue)
 
 
 ##############################################################################

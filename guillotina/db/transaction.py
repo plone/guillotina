@@ -34,6 +34,7 @@ import asyncio
 import logging
 import sys
 import time
+import warnings
 
 
 _EMPTY = "__<EMPTY VALUE>__"
@@ -146,6 +147,9 @@ class Transaction:
     def __init__(
         self, manager, loop=None, read_only: bool = False, cache=None, strategy=None,
     ):
+        if loop is not None:
+            warnings.warn("Argument 'loop' is deprecated and ignored", DeprecationWarning)
+
         # Transaction Manager
         self._manager = manager
 
@@ -161,7 +165,7 @@ class Transaction:
         # some databases need to lock during queries
         # this provides a lock for each transaction
         # which would correspond with one connection
-        self._lock = asyncio.Lock(loop=loop)
+        self._lock = asyncio.Lock()
 
     def initialize(
         self, read_only, cache=None, strategy=None,

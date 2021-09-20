@@ -1,4 +1,3 @@
-from dateutil.tz import tzutc
 from guillotina import logger
 from guillotina import task_vars
 from guillotina.db.transaction import Status
@@ -18,9 +17,6 @@ import asyncio
 import typing
 
 
-_zone = tzutc()
-
-
 class QueueUtility(object):
     def __init__(self, settings=None, loop=None):
         self._queue = None
@@ -31,7 +27,7 @@ class QueueUtility(object):
     @property
     def queue(self):
         if self._queue is None:
-            self._queue = asyncio.Queue(loop=self._loop)
+            self._queue = asyncio.Queue()
         return self._queue
 
     async def initialize(self, app=None):

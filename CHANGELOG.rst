@@ -1,16 +1,21 @@
 CHANGELOG
 =========
 
-6.3.16 (unreleased)
+6.4.0 (unreleased)
 -------------------
 
+- Add support for Python 3.10
+  [masipcat]
+- Reimplemented IRedisUtility to adapt to aioredis v2.0 breaking changes
+  [masipcat]
+- Upgraded dev dependencies
+  [masipcat]
 - Fix vocabulray country code AN
-
 
 6.3.15 (2021-08-05)
 -------------------
 
-- fix: Add MIMEMultipart('alternative') to attach message in parent MIMEMultipart to render only html body. 
+- fix: Add MIMEMultipart('alternative') to attach message in parent MIMEMultipart to render only html body.
   [rboixaderg]
 
 6.3.14 (2021-08-04)

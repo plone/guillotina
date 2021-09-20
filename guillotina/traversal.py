@@ -84,7 +84,7 @@ async def traverse(
             if context is None:
                 return parent, path
         else:
-            context = parent[path[0]]
+            context = parent[path[0]]  # type: ignore
     except (TypeError, KeyError, AttributeError):
         return parent, path
 
@@ -104,7 +104,10 @@ async def traverse(
         # there is an existing registry object set on task_vars
         task_vars.registry.set(None)
         registry = await get_registry(context)
-        layers = registry.get(ACTIVE_LAYERS_KEY, [])
+        if registry:
+            layers = registry.get(ACTIVE_LAYERS_KEY, [])
+        else:
+            layers = []
         for layer in layers:
             try:
                 alsoProvides(request, import_class(layer))

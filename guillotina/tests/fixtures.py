@@ -26,7 +26,6 @@ import aiohttp
 import asyncio
 import json
 import os
-import prometheus_client.registry
 import pytest
 
 
@@ -399,13 +398,13 @@ class DummyRequestAsyncContextManager(object):
         self.loop = loop
 
     async def __aenter__(self):
-        task = asyncio.Task.current_task(loop=self.loop)
+        task = asyncio.current_task(loop=self.loop)
         if task is not None:
             task.request = self.request
         return self.request
 
     async def __aexit__(self, exc_type, exc, tb):
-        task = asyncio.Task.current_task(loop=self.loop)
+        task = asyncio.current_task(loop=self.loop)
         del task.request
 
 
@@ -651,6 +650,8 @@ async def dbusers_requester(guillotina):
 
 @pytest.fixture(scope="function")
 async def metrics_registry():
+    import prometheus_client.registry
+
     for collector in prometheus_client.registry.REGISTRY._names_to_collectors.values():
         if not hasattr(collector, "_metrics"):
             continue

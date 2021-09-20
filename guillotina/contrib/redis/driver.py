@@ -1,14 +1,14 @@
 try:
     import aioredis
-    import aioredis.errors
 except ImportError:
     print("If you add guillotina.contrib.redis you need to add aioredis on your requirements")
     raise
 
+from aioredis.client import PubSub
 from guillotina import app_settings
 from guillotina import metrics
 from guillotina.contrib.redis.exceptions import NoRedisConfigured
-from typing import Any
+from typing import Dict
 from typing import List
 from typing import Optional
 
@@ -63,6 +63,7 @@ class RedisDriver:
                 while True:
                     try:
                         await self._connect()
+                        assert await self._pool.ping() is True
                         self.initialized = True
                         break
                     except Exception:  # pragma: no cover
@@ -71,18 +72,12 @@ class RedisDriver:
     @backoff.on_exception(backoff.expo, (OSError,), max_time=30, max_tries=4)
     async def _connect(self):
         settings = app_settings["redis"]
-        with watch("create_pool"):
-            self._pool = await aioredis.create_pool(
-                (settings["host"], settings["port"]), **settings["pool"], loop=self._loop
-            )
-        with watch("acquire_conn"):
-            self._conn = await self._pool.acquire()
-        self._pubsub_subscriptor = aioredis.Redis(self._conn)
+        self._conn_pool = aioredis.ConnectionPool.from_url(f"redis://{settings['host']}:{settings['port']}")
+        self._pool = aioredis.Redis(connection_pool=self._conn_pool)
+        self._pubsub_channels: Dict[str, PubSub] = {}
 
     async def finalize(self):
-        if self._pool is not None:
-            self._pool.close()
-        await self._pool.wait_closed()
+        await self._conn_pool.disconnect()
         self.initialized = False
 
     @property
@@ -90,25 +85,27 @@ class RedisDriver:
         return self._pool
 
     async def info(self):
-        return await self._pool.execute(b"COMMAND", b"INFO", "get")
+        if self._pool is None:
+            raise NoRedisConfigured()
+        return await self._pool.info("get")
 
     # VALUE API
 
     async def set(self, key: str, data: str, *, expire: Optional[int] = None):
         if self._pool is None:
             raise NoRedisConfigured()
-        args: List[Any] = []
+        kwargs = {}
         if expire is not None:
-            args[:] = [b"EX", expire]
+            kwargs["ex"] = expire
         with watch("set"):
-            ok = await self._pool.execute(b"SET", key, data, *args)
-        assert ok == b"OK", ok
+            ok = await self._pool.set(key, data, **kwargs)
+        assert ok is True, ok
 
     async def get(self, key: str) -> str:
         if self._pool is None:
             raise NoRedisConfigured()
         with watch("get") as w:
-            val = await self._pool.execute(b"GET", key)
+            val = await self._pool.get(key)
             if not val:
                 w.labels["type"] = "get_miss"
             return val
@@ -117,17 +114,17 @@ class RedisDriver:
         if self._pool is None:
             raise NoRedisConfigured()
         with watch("delete"):
-            await self._pool.execute(b"DEL", key)
+            await self._pool.delete(key)
 
     async def expire(self, key: str, expire: int):
         if self._pool is None:
             raise NoRedisConfigured()
-        await self._pool.execute(b"EXPIRE", key, expire)
+        await self._pool.expire(key, expire)
 
     async def keys_startswith(self, key: str):
         if self._pool is None:
             raise NoRedisConfigured()
-        return await self._pool.execute(b"KEYS", f"{key}*")
+        return await self._pool.keys(f"{key}*")
 
     async def delete_all(self, keys: List[str]):
         if self._pool is None:
@@ -135,55 +132,48 @@ class RedisDriver:
         for key in keys:
             try:
                 with watch("delete_many"):
-                    await self._pool.execute(b"DEL", key)
+                    await self._pool.delete(key)
                 logger.debug("Deleted cache keys {}".format(keys))
             except Exception:
                 logger.warning("Error deleting cache keys {}".format(keys), exc_info=True)
 
-    async def flushall(self, *, async_op: Optional[bool] = False):
+    async def flushall(self, *, async_op: bool = False):
         if self._pool is None:
             raise NoRedisConfigured()
-        ops = [b"FLUSHDB"]
-        if async_op:
-            ops.append(b"ASYNC")
         with watch("flush"):
-            await self._pool.execute(*ops)
+            await self._pool.flushdb(asynchronous=async_op)
 
     # PUBSUB API
 
     async def publish(self, channel_name: str, data: str):
         if self._pool is None:
             raise NoRedisConfigured()
+
         with watch("publish"):
-            await self._pool.execute(b"publish", channel_name, data)
+            await self._pool.publish(channel_name, data)
 
     async def unsubscribe(self, channel_name: str):
-        if self._pubsub_subscriptor is None:
+        if self._pool is None:
             raise NoRedisConfigured()
+
+        p = self._pubsub_channels[channel_name]
         try:
-            await self._pubsub_subscriptor.unsubscribe(channel_name)
-        except aioredis.errors.ConnectionClosedError:
-            if self.initialized:
-                raise
+            await p.unsubscribe(channel_name)
+        finally:
+            await p.__aexit__(None, None, None)
+            del self._pubsub_channels[channel_name]
 
     async def subscribe(self, channel_name: str):
-        if self._pubsub_subscriptor is None:
+        if self._pool is None:
             raise NoRedisConfigured()
-        try:
-            (channel,) = await self._pubsub_subscriptor.subscribe(channel_name)
-        except aioredis.errors.ConnectionClosedError:  # pragma: no cover
-            # closed in middle
-            try:
-                self._pool.close(self._conn)
-            except Exception:
-                pass
-            self._conn = await self._pool.acquire()
-            self._pubsub_subscriptor = aioredis.Redis(self._conn)
-            (channel,) = await self._pubsub_subscriptor.subscribe(channel_name)
 
-        return self._listener(channel)
+        p: PubSub = await self._pool.pubsub().__aenter__()
+        self._pubsub_channels[channel_name] = p
+        await p.subscribe(channel_name)
+        return self._listener(p)
 
-    async def _listener(self, channel: aioredis.Channel):
-        while await channel.wait_message():
-            msg = await channel.get()
-            yield msg
+    async def _listener(self, p: PubSub):
+        while True:
+            message = await p.get_message(ignore_subscribe_messages=True, timeout=1)
+            if message is not None:
+                yield message["data"]

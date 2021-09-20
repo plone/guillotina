@@ -17,16 +17,16 @@ import pytest
 pytestmark = pytest.mark.asyncio
 
 
-async def test_no_tid_created_for_reads(dummy_request, event_loop):
+async def test_no_tid_created_for_reads(dummy_request):
     tm = mocks.MockTransactionManager()
-    trns = Transaction(tm, loop=event_loop, read_only=True)
+    trns = Transaction(tm, read_only=True)
     await trns.tpc_begin()
     assert trns._tid is None
 
 
-async def test_tid_created_for_writes(dummy_request, event_loop):
+async def test_tid_created_for_writes(dummy_request):
     tm = mocks.MockTransactionManager()
-    trns = Transaction(tm, loop=event_loop)
+    trns = Transaction(tm)
     await trns.tpc_begin()
     assert trns._tid == 1
 

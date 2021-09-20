@@ -117,7 +117,7 @@ DELETE_DB = """DROP DATABASE "{}";"""
 
 
 def _safe_db_name(name):
-    return "".join([l for l in name if l in string.digits + string.ascii_lowercase + "-_"])
+    return "".join([l for l in name if l in string.digits + string.ascii_lowercase + "-_"])  # noqa: E741
 
 
 @configure.adapter(for_=IApplication, provides=IDatabaseManager, name="postgresql")  # noqa: N801
