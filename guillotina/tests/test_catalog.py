@@ -328,7 +328,7 @@ async def test_search_endpoint_null_operator(container_requester):
 
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)
 @pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
-async def test_search_endpoint_null_operator(container_requester):
+async def test_search_searchable_text(container_requester):
     async with container_requester as requester:
         await requester("POST", "/db/guillotina", data=json.dumps({"@type": "Item", "title": "First item"}))
         await requester("POST", "/db/guillotina", data=json.dumps({"@type": "Item", "title": "Second item"}))
