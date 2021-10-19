@@ -42,8 +42,9 @@ class PubSubUtility:
     @backoff.on_exception(backoff.expo, (OSError,), max_time=30, max_tries=4)
     async def _connect(self):
         klass = resolve_dotted_name(self._settings["driver"])
+        loop = asyncio.get_event_loop()
         self._driver = await klass.get_driver()
-        await self._driver.initialize()
+        await self._driver.initialize(loop)
         self._initialized = True
 
     async def finalize(self, app):

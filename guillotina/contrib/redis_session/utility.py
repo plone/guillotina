@@ -1,5 +1,6 @@
 from guillotina import app_settings
 
+import asyncio
 import logging
 import uuid
 
@@ -8,8 +9,7 @@ logger = logging.getLogger("guillotina")
 
 
 class RedisSessionManagerUtility:
-    def __init__(self, settings=None, loop=None):
-        self._loop = loop
+    def __init__(self, settings=None):
         self._ttl = app_settings.get("jwt", {}).get("token_expiration", 3660)
         self._prefix = settings.get("prefix", "session")
         self._driver = None
@@ -18,8 +18,9 @@ class RedisSessionManagerUtility:
     async def initialize(self, app=None):
         from guillotina.contrib import redis
 
+        loop = asyncio.get_event_loop()
         self._driver = await redis.get_driver()
-        await self._driver.initialize(self._loop)
+        await self._driver.initialize(loop)
         self._initialized = True
 
     async def finalize(self):
