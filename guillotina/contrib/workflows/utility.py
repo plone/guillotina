@@ -107,8 +107,7 @@ class WorkflowUtility:
 
     index_count = 0
 
-    def __init__(self, settings={}, loop=None):
-        self.loop = loop
+    def __init__(self, settings={}):
         self.workflows = app_settings["workflows"]
         self.workflows_content = app_settings["workflows_content"]
         self.factories = {}

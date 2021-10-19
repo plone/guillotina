@@ -222,7 +222,7 @@ class MailerUtility:
 
 @implementer(IMailer)
 class PrintingMailerUtility(MailerUtility):
-    def __init__(self, settings=None, loop=None):
+    def __init__(self, settings=None):
         self._queue = asyncio.Queue()
         self._settings = settings or {}
 
@@ -232,7 +232,7 @@ class PrintingMailerUtility(MailerUtility):
 
 @implementer(IMailer)
 class TestMailerUtility(MailerUtility):
-    def __init__(self, settings=None, loop=None):
+    def __init__(self, settings=None):
         self._queue = asyncio.Queue()
         self.mail = []
 

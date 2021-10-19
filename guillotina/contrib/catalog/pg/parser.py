@@ -28,9 +28,12 @@ class ParsedQueryInfo(BasicParsedQueryInfo):
 @configure.adapter(for_=(ICatalogUtility, IResource), provides=ISearchParser, name="default")
 class Parser(BaseParser):
     def process_compound_field(self, field, value, operator):
-        parsed_value = urllib.parse.parse_qsl(urllib.parse.unquote(value))
-        if not isinstance(parsed_value, list):
-            return None
+        if isinstance(value, dict):
+            parsed_value = value.items()
+        else:
+            parsed_value = urllib.parse.parse_qsl(urllib.parse.unquote(value))
+            if not isinstance(parsed_value, list):
+                return None
         wheres = []
         arguments = []
         selects = []

@@ -14,8 +14,7 @@ logger = logging.getLogger("guillotina")
 
 
 class PubSubUtility:
-    def __init__(self, settings=None, loop=None):
-        self._loop = loop
+    def __init__(self, settings=None):
         self._settings = settings
         self._subscribers = {}
         self._initialized = False
@@ -44,7 +43,7 @@ class PubSubUtility:
     async def _connect(self):
         klass = resolve_dotted_name(self._settings["driver"])
         self._driver = await klass.get_driver()
-        await self._driver.initialize(self._loop)
+        await self._driver.initialize()
         self._initialized = True
 
     async def finalize(self, app):

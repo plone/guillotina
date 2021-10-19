@@ -293,7 +293,7 @@ class ITestAsyncUtility(IAsyncUtility):
 
 @configure.utility(provides=ITestAsyncUtility)
 class AsyncUtility:
-    def __init__(self, settings=None, loop=None):
+    def __init__(self, settings=None):
         self.state = "init"
 
     async def initialize(self):

@@ -8,8 +8,14 @@ CHANGELOG
   [masipcat]
 - Reimplemented IRedisUtility to adapt to aioredis v2.0 breaking changes
   [masipcat]
+- Removed argument 'loop' from utilities initialization (following Python 3.10 changes)
+  [masipcat]
 - Upgraded dev dependencies
   [masipcat]
+
+- Fix searching by SearchableText
+  [frapell]
+
 - Fix vocabulray country code AN
 
 6.3.15 (2021-08-05)
