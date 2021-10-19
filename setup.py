@@ -49,7 +49,6 @@ setup(
     ],
     url="https://github.com/plone/guillotina",
     license="BSD",
-    setup_requires=["pytest-runner"],
     zip_safe=False,
     include_package_data=True,
     ext_modules=[lru_module],
