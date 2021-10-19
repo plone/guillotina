@@ -4,6 +4,9 @@ CHANGELOG
 6.3.16 (unreleased)
 -------------------
 
+- Fix searching by SearchableText
+  [frapell]
+
 - Fix vocabulray country code AN
 
 
