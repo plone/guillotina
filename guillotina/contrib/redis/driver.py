@@ -63,7 +63,8 @@ class RedisDriver:
                 while True:
                     try:
                         await self._connect()
-                        assert await self._pool.ping() is True
+                        with watch("acquire_conn"):
+                            assert await self._pool.ping() is True
                         self.initialized = True
                         break
                     except Exception:  # pragma: no cover
