@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.4.0 (unreleased)
+6.4.0rc0 (unreleased)
 -------------------
 
 - Add support for Python 3.10
