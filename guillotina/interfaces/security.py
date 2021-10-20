@@ -64,7 +64,7 @@ class PermissionSetting:
 # register PermissionSettings to be symbolic constants by identity,
 # even when pickled and unpickled.
 copyreg.constructor(PermissionSetting)
-copyreg.pickle(PermissionSetting, PermissionSetting.get_name, PermissionSetting)
+copyreg.pickle(PermissionSetting, PermissionSetting.get_name, PermissionSetting)  # type: ignore
 
 
 Allow = PermissionSetting("Allow", "Explicit allow setting for permissions")

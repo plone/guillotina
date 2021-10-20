@@ -30,8 +30,7 @@ class CacheUtility:
     _subscriber: Optional[IPubSubUtility]
     _uid: str
 
-    def __init__(self, settings=None, loop=None):
-        self._loop = loop
+    def __init__(self, settings=None):
         self._settings = {}
         self._ignored_tids = []
         self._subscriber = None

@@ -77,7 +77,7 @@ class BaseCache:
             - tid: transaction id for ob
             - id
         """
-        raise NotImplemented()
+        raise NotImplementedError
 
     async def set(
         self, value, keyset: List[Dict[str, Any]] = None, oid=None, container=None, id=None, variant=None
@@ -85,16 +85,16 @@ class BaseCache:
         """
         Use params to build cache key
         """
-        raise NotImplemented()
+        raise NotImplementedError
 
     async def clear(self):
-        raise NotImplemented()
+        raise NotImplementedError
 
     async def delete(self, key):
-        raise NotImplemented()
+        raise NotImplementedError
 
     async def delete_all(self, keys):
-        raise NotImplemented()
+        raise NotImplementedError
 
     async def store_object(self, obj, pickled):
         pass

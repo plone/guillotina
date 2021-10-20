@@ -222,8 +222,8 @@ class MailerUtility:
 
 @implementer(IMailer)
 class PrintingMailerUtility(MailerUtility):
-    def __init__(self, settings=None, loop=None):
-        self._queue = asyncio.Queue(loop=loop)
+    def __init__(self, settings=None):
+        self._queue = asyncio.Queue()
         self._settings = settings or {}
 
     async def _send(self, sender, recipients, message, endpoint_name="default"):
@@ -232,8 +232,8 @@ class PrintingMailerUtility(MailerUtility):
 
 @implementer(IMailer)
 class TestMailerUtility(MailerUtility):
-    def __init__(self, settings=None, loop=None):
-        self._queue = asyncio.Queue(loop=loop)
+    def __init__(self, settings=None):
+        self._queue = asyncio.Queue()
         self.mail = []
 
     async def send(

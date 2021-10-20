@@ -9,28 +9,23 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8]
+        python-version: [3.7, 3.8, 3.9, '3.10']
 
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v2
 
       - name: Setup Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Install package
         run: |
-          pip install flake8==3.7.7
-          pip install mypy==0.720
-          pip install mypy-zope==0.2.0
-          pip install black==19.10b0
-          pip install isort==4.3.21
+          pip install $(grep -P 'flake8|black|isort' contrib-requirements.txt)
       - name: Run pre-checks
         run: |
           flake8 guillotina --config=setup.cfg
-          mypy guillotina/ --ignore-missing-imports
           isort -c -rc guillotina/
           black --check --verbose guillotina
   # Job to run tests
@@ -39,7 +34,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [3.7, 3.8]
+        python-version: [3.7, 3.8, 3.9, '3.10']
         database: ["DUMMY", "postgres", "cockroachdb"]
         db_schema: ["custom", "public"]
         exclude:
@@ -59,7 +54,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Setup Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -73,6 +68,10 @@ jobs:
 
       - name: Start memcached image
         uses: niden/actions-memcached@v7
+
+      - name: Check mypy
+        run: |
+          mypy guillotina/
 
       - name: Run tests
         run: |

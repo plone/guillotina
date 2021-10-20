@@ -384,7 +384,7 @@ class PGVacuum:
     def __init__(self, manager, loop):
         self._manager = manager
         self._loop = loop
-        self._queue = asyncio.Queue(loop=loop)
+        self._queue = asyncio.Queue()
         self._closed = False
         self._active = False
         self._sql = SQLStatements()

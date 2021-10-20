@@ -1,5 +1,9 @@
+try:
+    from guillotina.contrib.memcached.driver import MemcachedDriver
+except ModuleNotFoundError:
+    MemcachedDriver = None  # type: ignore
+
 from asyncmock import AsyncMock
-from guillotina.contrib.memcached.driver import MemcachedDriver
 
 import pytest
 
@@ -7,6 +11,7 @@ import pytest
 pytestmark = pytest.mark.asyncio
 
 
+@pytest.mark.skipif(MemcachedDriver is None, reason="emcache not installed")
 class TestMemcachedMetrics:
     async def test_connect_metric(self, metrics_registry, event_loop):
         driver = MemcachedDriver()

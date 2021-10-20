@@ -18,7 +18,7 @@ async def test_jwt_auth(container_requester):
             {"exp": datetime.utcnow() + timedelta(seconds=60), "id": ROOT_USER_ID},
             app_settings["jwt"]["secret"],
             algorithm=app_settings["jwt"]["algorithm"],
-        ).decode("utf-8")
+        )
 
         response, status = await requester(
             "GET", "/db/guillotina/@addons", token=jwt_token, auth_type="Bearer"
@@ -43,7 +43,7 @@ async def test_cookie_auth(container_requester):
             {"exp": datetime.utcnow() + timedelta(seconds=60), "id": ROOT_USER_ID},
             app_settings["jwt"]["secret"],
             algorithm=app_settings["jwt"]["algorithm"],
-        ).decode("utf-8")
+        )
 
         response, status = await requester(
             "GET", "/db/guillotina/@addons", authenticated=False, cookies={"auth_token": jwt_token}

@@ -1,11 +1,15 @@
-from guillotina.contrib.memcached.driver import MemcachedDriver
-from guillotina.contrib.memcached.driver import safe_key
-from guillotina.contrib.memcached.driver import update_connection_pool_metrics
+try:
+    import emcache
+    from guillotina.contrib.memcached.driver import MemcachedDriver
+    from guillotina.contrib.memcached.driver import safe_key
+    from guillotina.contrib.memcached.driver import update_connection_pool_metrics
+except ModuleNotFoundError:
+    emcache = None
+
 from guillotina.utils import resolve_dotted_name
 from unittest import mock
 
 import asyncio
-import emcache
 import pytest
 
 
@@ -32,6 +36,7 @@ def mocked_create_client():
         yield create_client
 
 
+@pytest.mark.skipif(emcache is None, reason="emcache not installed")
 async def test_create_client_returns_emcache_client(memcached_container, guillotina_main):
     driver = MemcachedDriver()
     assert driver.client is None
@@ -41,6 +46,7 @@ async def test_create_client_returns_emcache_client(memcached_container, guillot
     assert isinstance(client, emcache.Client)
 
 
+@pytest.mark.skipif(emcache is None, reason="emcache not installed")
 async def test_client_is_initialized_with_configured_hosts(mocked_create_client):
     settings = {"hosts": MOCK_HOSTS}
     driver = MemcachedDriver()
@@ -48,6 +54,7 @@ async def test_client_is_initialized_with_configured_hosts(mocked_create_client)
     assert len(mocked_create_client.call_args[0][0]) == 1
 
 
+@pytest.mark.skipif(emcache is None, reason="emcache not installed")
 async def test_create_client_ignores_invalid_params(mocked_create_client):
     settings = {"hosts": MOCK_HOSTS}
     driver = MemcachedDriver()
@@ -55,6 +62,7 @@ async def test_create_client_ignores_invalid_params(mocked_create_client):
     assert mocked_create_client.call_args[1] == {}
 
 
+@pytest.mark.skipif(emcache is None, reason="emcache not installed")
 @pytest.mark.parametrize(
     "param,values",
     [
@@ -74,6 +82,7 @@ async def test_create_client_sets_configured_params(mocked_create_client, param,
         assert mocked_create_client.call_args[1][param] == value
 
 
+@pytest.mark.skipif(emcache is None, reason="emcache not installed")
 @pytest.mark.app_settings(MEMCACHED_SETTINGS)
 async def test_memcached_ops(memcached_container, guillotina_main, dont_probe_metrics):
     driver = await resolve_dotted_name("guillotina.contrib.memcached").get_driver()
@@ -114,6 +123,7 @@ async def test_memcached_ops(memcached_container, guillotina_main, dont_probe_me
 unsafe_keys = ["a" * 255, "foo bar", b"\x130".decode()]
 
 
+@pytest.mark.skipif(emcache is None, reason="emcache not installed")
 @pytest.mark.app_settings(MEMCACHED_SETTINGS)
 @pytest.mark.parametrize("unsafe_key", unsafe_keys)
 async def test_memcached_ops_are_safe_key(
@@ -126,6 +136,7 @@ async def test_memcached_ops_are_safe_key(
     await driver.delete_all([unsafe_key])
 
 
+@pytest.mark.skipif(emcache is None, reason="emcache not installed")
 @pytest.mark.parametrize("unsafe_key", unsafe_keys)
 async def test_safe_key(unsafe_key):
     key = safe_key(unsafe_key)
@@ -136,6 +147,7 @@ async def test_safe_key(unsafe_key):
         assert char <= 126
 
 
+@pytest.mark.skipif(emcache is None, reason="emcache not installed")
 async def test_delete_all():
     with mock.patch("guillotina.contrib.memcached.driver.watch") as watch_mocked:
         with mock.patch("guillotina.contrib.memcached.driver.MEMCACHED_OPS_DELETE_ALL_NUM_KEYS") as all_keys:
@@ -149,6 +161,7 @@ async def test_delete_all():
             )
 
 
+@pytest.mark.skipif(emcache is None, reason="emcache not installed")
 async def test_delete_all_empty_keys():
     with mock.patch("guillotina.contrib.memcached.driver.watch") as watch_mocked:
         with mock.patch("guillotina.contrib.memcached.driver.MEMCACHED_OPS_DELETE_ALL_NUM_KEYS") as all_keys:
@@ -159,6 +172,7 @@ async def test_delete_all_empty_keys():
             watch_mocked.assert_not_called()
 
 
+@pytest.mark.skipif(emcache is None, reason="emcache not installed")
 class TestUpdateConnectionPoolMetrics:
     @pytest.fixture
     def avg(self):

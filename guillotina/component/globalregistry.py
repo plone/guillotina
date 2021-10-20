@@ -129,7 +129,7 @@ class GuillotinaAdapterRegistry(AdapterRegistry):
 
 
 @implementer(IComponentLookup)
-class GlobalComponents(Components):
+class GlobalComponents(Components):  # type: ignore
     def _init_registries(self):
         self.adapters = GuillotinaAdapterRegistry(self, "adapters")
         self.utilities = GuillotinaAdapterRegistry(self, "utilities")

@@ -109,7 +109,7 @@ class Refresh(Service):
 
         jwt_token = jwt.encode(
             data, app_settings["jwt"]["secret"], algorithm=app_settings["jwt"]["algorithm"]
-        ).decode("utf-8")
+        )
 
         await notify(UserRefreshToken(user, jwt_token))
 

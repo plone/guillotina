@@ -272,7 +272,7 @@ async def startup_app(config_file=None, settings=None, loop=None, server_app=Non
 
     for key, dbconfig in list_or_dict_items(app_settings["databases"]):
         factory = get_utility(IDatabaseConfigurationFactory, name=dbconfig["storage"])
-        root[key] = await factory(key, dbconfig, loop)
+        root[key] = await factory(key, dbconfig)
         await notify(DatabaseInitializedEvent(root[key]))
 
     for key, file_path in list_or_dict_items(app_settings["static"]):
@@ -320,7 +320,7 @@ async def startup_app(config_file=None, settings=None, loop=None, server_app=Non
     for key, util in app_settings["load_utilities"].items():
         app_logger.info("Adding " + key + " : " + util["provides"])
         await notify(BeforeAsyncUtilityLoadedEvent(key, util))
-        result = root.add_async_utility(key, util, loop=loop)
+        result = root.add_async_utility(key, util)
         if result is not None:
             await notify(AfterAsyncUtilityLoadedEvent(key, util, *result))
 

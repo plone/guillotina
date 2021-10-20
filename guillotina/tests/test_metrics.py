@@ -23,7 +23,7 @@ class TestRedisMetrics:
     async def test_set_redis_metric(self, metrics_registry):
         driver = RedisDriver()
         driver._pool = AsyncMock()
-        driver._pool.execute.return_value = b"OK"
+        driver._pool.set.return_value = True
         await driver.set("foo", "bar")
 
         assert (
@@ -59,7 +59,7 @@ class TestRedisMetrics:
     async def test_get_miss_redis_metric(self, metrics_registry):
         driver = RedisDriver()
         driver._pool = AsyncMock()
-        driver._pool.execute.return_value = None
+        driver._pool.get.return_value = None
         await driver.get("foo")
         assert (
             metrics_registry.get_sample_value(

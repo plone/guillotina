@@ -218,7 +218,7 @@ class Command(object):
             await app.shutdown()
         except Exception:
             logger.warning("Unhandled error cleanup tasks", exc_info=True)
-        for task in asyncio.Task.all_tasks():
+        for task in asyncio.all_tasks():
             if task.done():
                 continue
             if "cleanup" in task._coro.__qualname__:
@@ -243,7 +243,7 @@ class Command(object):
         for task in to_cancel:
             task.cancel()
 
-        loop.run_until_complete(tasks.gather(*to_cancel, loop=loop, return_exceptions=True))
+        loop.run_until_complete(tasks.gather(*to_cancel, return_exceptions=True))
 
         for task in to_cancel:
             if task.cancelled():
