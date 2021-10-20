@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-6.4.0rc0 (unreleased)
--------------------
+6.4.0rc0 (2021-10-20)
+---------------------
 
 - Add support for Python 3.10
   [masipcat]
