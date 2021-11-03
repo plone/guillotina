@@ -120,7 +120,13 @@ class TestPGMetrics:
         ob.__new_marker__ = False
         ob.__serial__ = 1
         txn = self._make_txn()
-        txn.get_connection.return_value.fetch.return_value = [{"count": 1}]
+
+        conn = AsyncMock()
+        conn.fetch.return_value = [{"count": 1}]
+
+        txn.connection_reserved = True
+        txn._db_conn = conn
+
         await storage.store("foobar", 1, MagicMock(), ob, txn)
         assert (
             metrics_registry.get_sample_value(

@@ -885,8 +885,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
             statement_sql = self._sql.get("UPDATE", self.objects_table_name)
             update = True
 
-        conn = await txn.get_connection()
-        async with watch_lock(txn._lock, "store_object"):
+        async with watch_lock(txn._lock, "store_object"), self.acquire(txn) as conn:
             try:
                 with watch("store_object"):
                     result = await conn.fetch(
