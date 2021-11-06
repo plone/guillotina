@@ -11,6 +11,8 @@ CHANGELOG
   using app_settings["ttl_email_validation"] in the utility of the
   email_validation. By default is 3660s.
   [nilbacardit26]
+- Fix docs: Create group with id/name
+  [ksuess]
 
 - doc: installation: fix duplicated line and link to contrib/dbusers
   [jotare]
