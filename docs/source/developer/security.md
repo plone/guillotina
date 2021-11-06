@@ -217,7 +217,8 @@ Let's add a group named `todo_viewer`:
 
     {
         "@type": "Group",
-        "name": "todo_viewer"
+        "id": "todo_viewer",
+        "title": "TODO Viewer"
     }
 
 
