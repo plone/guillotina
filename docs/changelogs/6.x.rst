@@ -1,0 +1,8 @@
+CHANGELOG
+=========
+
+6.4.0 (2021-11.06)
+-------------------
+
+- Fix docs: Create group with id/name
+  [ksuess]
