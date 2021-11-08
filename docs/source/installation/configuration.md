@@ -202,7 +202,6 @@ jwk:
 
 ## Miscellaneous settings
 
-- `port` (number): Port to bind to. _defaults to `8080`_
 - `store_json` (boolean): Serialize object into json field in database. _defaults to `true`_
 - `host` (string): Where to host the server. _defaults to `"127.0.0.1"`_
 - `port` (number): Port to bind to. _defaults to `8080`_
@@ -319,8 +318,8 @@ Available:
 users against an extracted credential.
 
 For example, this is the main part of what
-[guillotina_dbusers](https://github.com/guillotinaweb/guillotina_dbusers) does
-and the only configuration setting it needs/provides.
+[guillotina_dbusers](https://github.com/plone/guillotina/blob/master/guillotina/contrib/dbusers)
+does and the only configuration setting it needs/provides.
 
 By default, guillotina does not provide a user identifier plugin and only authenticates
 the root user/password.
