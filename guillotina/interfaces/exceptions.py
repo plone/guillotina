@@ -3,8 +3,7 @@ from zope.interface.common.interfaces import IException
 
 
 class IUnauthorized(IException):
-    """
-    """
+    """ """
 
 
 class IErrorResponseException(Interface):

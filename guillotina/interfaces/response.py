@@ -18,9 +18,7 @@ class IResponse(Interface):
         content_type: str = None,
         content_length: int = None,
     ):
-        """
-        """
+        """ """
 
     def set_body(body):
-        """
-        """
+        """ """

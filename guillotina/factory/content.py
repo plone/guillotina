@@ -189,8 +189,7 @@ class Database:
             await tm.commit(txn=txn)
 
     async def open(self):
-        """Return a database Connection for use by application code.
-        """
+        """Return a database Connection for use by application code."""
         return await self._storage.open()
 
     async def close(self, conn):

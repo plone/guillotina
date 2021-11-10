@@ -27,7 +27,7 @@ def get_view_permission(cls):
 
 
 def get_roles_with_access_content(obj, request=None):
-    """ Return the roles that has access to the content that are global roles"""
+    """Return the roles that has access to the content that are global roles"""
     if obj is None:
         return []
     roles = cached_roles(obj, "guillotina.AccessContent", "o")
@@ -53,8 +53,7 @@ def get_principals_with_access_content(obj, request=None):
 
 
 def settings_for_object(ob):
-    """Analysis tool to show all of the grants to a process
-    """
+    """Analysis tool to show all of the grants to a process"""
     result = []
 
     locked_permissions = []

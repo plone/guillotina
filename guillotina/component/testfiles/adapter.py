@@ -72,8 +72,7 @@ a4 = A4()
 
 @implementer(I1, I2)
 class A5:  # type: ignore
-    """
-    """
+    """ """
 
 
 a5 = A5()

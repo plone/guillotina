@@ -14,7 +14,10 @@ configure.grant(permission="dbusers.SeeTopSecret", role="dbusers.DoubleO")
 
 
 @configure.service(
-    context=IFolder, method="GET", permission="dbusers.SeeTopSecret", name="@top-secret",
+    context=IFolder,
+    method="GET",
+    permission="dbusers.SeeTopSecret",
+    name="@top-secret",
 )
 async def top_secret(context, request):
     return {"documents": ["abcd"]}
@@ -74,13 +77,18 @@ async def test_roles_in_groups(dbusers_requester):
 
         # Create folder 'secrets'
         resp, status = await requester(
-            "POST", "/db/guillotina/", data=json.dumps({"@type": "Folder", "id": "secrets"}),
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps({"@type": "Folder", "id": "secrets"}),
         )
         assert status == 201
 
         # Check the default user can't access the endpoint
         # (doesn't have permission 'dbusers.SeeTopSecret')
-        resp, status = await requester("GET", "/db/guillotina/secrets/@top-secret",)
+        resp, status = await requester(
+            "GET",
+            "/db/guillotina/secrets/@top-secret",
+        )
         assert status == 401
 
         # Login as James Bond

@@ -33,8 +33,7 @@ _MISSING = object()
 
 @hookable
 def get_component_registry(context=None):
-    """ See IComponentArchitecture.
-    """
+    """See IComponentArchitecture."""
     if context is None:
         return globalregistry.base
     else:
@@ -275,8 +274,7 @@ def get_factory_interfaces(name, context=None):
 
 
 def get_factories_for(interface, context=None):
-    """Return info on all factories implementing the given interface.
-    """
+    """Return info on all factories implementing the given interface."""
     utils = get_component_registry(context)
     for (name, factory) in utils.getUtilitiesFor(IFactory):
         interfaces = factory.get_interfaces()

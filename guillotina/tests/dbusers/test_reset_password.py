@@ -90,7 +90,9 @@ async def test_change_password(container_install_requester):
         assert status_code == 401
 
         resp, status_code = await requester(
-            "POST", "/db/guillotina/@login", data=json.dumps({"username": "foobar", "password": "password"}),
+            "POST",
+            "/db/guillotina/@login",
+            data=json.dumps({"username": "foobar", "password": "password"}),
         )
         assert status_code == 200
         token = resp["token"]

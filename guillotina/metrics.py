@@ -69,7 +69,10 @@ class watch:
 
 class watch_lock:
     def __init__(
-        self, histogram: Histogram, lock: asyncio.Lock, labels: Optional[Dict[str, str]] = None,
+        self,
+        histogram: Histogram,
+        lock: asyncio.Lock,
+        labels: Optional[Dict[str, str]] = None,
     ):
         self.histogram = histogram
         self.lock = lock

@@ -281,7 +281,9 @@ async def test_deny_inherit_accesscontent(container_requester):
 
         # The owner of item 'testing' is 'root'
         response, status = await requester(
-            "POST", "/db/guillotina/", data=json.dumps({"@type": "Item", "id": "testing"}),
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps({"@type": "Item", "id": "testing"}),
         )
         assert status == 201
 
@@ -582,6 +584,8 @@ async def test_set_owner_field(container_requester):
         assert status == 200
 
         response, status = await requester(
-            "POST", "/db/guillotina/", data=json.dumps({"@type": "Example", "default_factory_test": "text"}),
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps({"@type": "Example", "default_factory_test": "text"}),
         )
         assert status == 201

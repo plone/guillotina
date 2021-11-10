@@ -28,7 +28,9 @@ try:
     class watch(metrics.watch):
         def __init__(self, operation: str):
             super().__init__(
-                counter=REDIS_OPS, histogram=REDIS_OPS_PROCESSING_TIME, labels={"type": operation},
+                counter=REDIS_OPS,
+                histogram=REDIS_OPS_PROCESSING_TIME,
+                labels={"type": operation},
             )
 
 

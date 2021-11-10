@@ -79,8 +79,7 @@ class MockTransaction:  # type: ignore
         return self
 
     def __exit__(self, *args):
-        """
-        """
+        """ """
 
 
 @implementer(IStorage)
@@ -171,8 +170,7 @@ class MockTransactionManager:  # type: ignore
         task_vars.tm.set(self)
 
     def __exit__(self, *args):
-        """
-        """
+        """ """
 
 
 class FakeConnection:

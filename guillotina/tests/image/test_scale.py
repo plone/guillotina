@@ -254,8 +254,7 @@ class ScalingTests(TestCase):
         self.assertEqual(img_scaled.size, (20, 20))
 
     def testModes(self):
-        """Test modes to actually behavie like documented.
-        """
+        """Test modes to actually behavie like documented."""
         # Mode contain
         # v
         # A

@@ -12,8 +12,7 @@ class Permission(object):
 
 
 def get_all_permissions(context=None):
-    """Get the ids of all defined permissions
-    """
+    """Get the ids of all defined permissions"""
     for id, permission in get_utilities_for(IPermission, context):
         if id != "zope.Public":
             yield id

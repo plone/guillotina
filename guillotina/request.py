@@ -27,7 +27,7 @@ import uuid
 
 
 class reify(object):
-    """ Use as a class method decorator.  It operates almost exactly like the
+    """Use as a class method decorator.  It operates almost exactly like the
     Python ``@property`` decorator, but it puts the result of the method it
     decorates into the instance dict after the first call, effectively
     replacing the function it decorates with an instance variable.  It is, in
@@ -452,14 +452,12 @@ class Request(object):
 
     @reify
     def version(self) -> str:
-        """Read only property for getting HTTP version of request.
-        """
+        """Read only property for getting HTTP version of request."""
         return self.scope["http_version"]
 
     @reify
     def host(self) -> str:
-        """Hostname of the request.
-        """
+        """Hostname of the request."""
         return self.headers.get("host")
 
     @reify

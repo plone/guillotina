@@ -116,8 +116,7 @@ class IPrincipalRoleMap(Interface):  # pylint: disable=E0239
         """
 
     def get_setting(role_id, principal_id, default=Unset):  # noqa: N805
-        """Return the setting for this principal, role combination
-        """
+        """Return the setting for this principal, role combination"""
 
     def get_principals_and_roles():
         """Get all settings.
@@ -188,19 +187,16 @@ class IRolePermissionManager(IRolePermissionMap):
     """Management interface for mappings between roles and permissions."""
 
     def grant_permission_to_role(permission_id, role_id):  # noqa: N805
-        """Bind the permission to the role.
-        """
+        """Bind the permission to the role."""
 
     def grant_permission_to_role_no_inherit(permission_id, role_id):  # noqa: N805
         """Assign the role to the principal without local inherit."""
 
     def deny_permission_to_role(permission_id, role_id):  # noqa: N805
-        """Deny the permission to the role
-        """
+        """Deny the permission to the role"""
 
     def unset_permission_from_role(permission_id, role_id):  # noqa: N805
-        """Clear the setting of the permission to the role.
-        """
+        """Clear the setting of the permission to the role."""
 
 
 class IPrincipalPermissionMap(Interface):  # pylint: disable=E0239
@@ -246,15 +242,13 @@ class IPrincipalPermissionManager(IPrincipalPermissionMap):
     """Management interface for mappings between principals and permissions."""
 
     def grant_permission_to_principal(permission_id, principal_id):  # noqa: N805
-        """Assert that the permission is allowed for the principal.
-        """
+        """Assert that the permission is allowed for the principal."""
 
     def grant_permission_to_principal_no_inherit(role_id, principal_id):  # noqa: N805
         """Assign the role to the principal without local inherit."""
 
     def deny_permission_to_principal(permission_id, principal_id):  # noqa: N805
-        """Assert that the permission is denied to the principal.
-        """
+        """Assert that the permission is denied to the principal."""
 
     def unset_permission_for_principal(permission_id, principal_id):  # noqa: N805
         """Remove the permission (either denied or allowed) from the
@@ -266,29 +260,24 @@ class IInheritPermissionMap(Interface):  # pylint: disable=E0239
     """Mappings between permissions and inheritance."""
 
     def get_locked_permissions():  # noqa: N805
-        """Returns the list of permissions that are blocked to be inherited
-        """
+        """Returns the list of permissions that are blocked to be inherited"""
 
     def get_inheritance(permission_id):  # noqa: N805
-        """Returns a boolen if inheritance is blocked
-        """
+        """Returns a boolen if inheritance is blocked"""
 
 
 class IInheritPermissionManager(IInheritPermissionMap):
     """Management interface for mappings between inheritance and permissions."""
 
     def deny_inheritance(permission_id):
-        """Set inheritance for the permission.
-        """
+        """Set inheritance for the permission."""
 
     def allow_inheritance(permission_id):
-        """Unset inheritance for the permission.
-        """
+        """Unset inheritance for the permission."""
 
 
 class IGrantInfo(Interface):  # pylint: disable=E0239
-    """Get grant info needed for checking access
-    """
+    """Get grant info needed for checking access"""
 
     def principal_permission_grant(principal, permission):  # noqa: N805
         """Return the principal-permission grant if any
@@ -366,8 +355,7 @@ SettingType = typing.Union[bool, None, str]
 
 class ISecurityPolicy(Interface):  # pylint: disable=E0239
     def __init__(IPrincipal):
-        """
-        """
+        """ """
 
     def invalidate_cache():
         """
@@ -380,24 +368,20 @@ class ISecurityPolicy(Interface):  # pylint: disable=E0239
         """
 
     def cached_decision(parent: IBaseObject, principal: str, groups: typing.List[str], permission: str):
-        """
-        """
+        """ """
 
     def cached_principal_permission(
         parent: IBaseObject, principal: str, groups: typing.List[str], permission: str, level: str
     ) -> SettingType:
-        """
-        """
+        """ """
 
     def global_principal_roles(principal: str, groups: typing.List[str]) -> typing.Dict[str, bool]:
-        """
-        """
+        """ """
 
     def cached_principal_roles(
         parent: IBaseObject, principal: str, groups: typing.List[str], level: str
     ) -> typing.Dict[str, SettingType]:
-        """
-        """
+        """ """
 
 
 class IPasswordHasher(Interface):
@@ -416,8 +400,7 @@ class IPasswordChecker(Interface):
 
 class IAuthExtractor(Interface):
     def __call__(request: IRequest) -> typing.Optional[typing.Dict]:
-        """
-        """
+        """ """
 
 
 class IGroups(Interface):

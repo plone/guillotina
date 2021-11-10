@@ -15,8 +15,7 @@ def non_native_string(x):
 
 
 def get_default_from_schema(context, schema, fieldname, default=None):
-    """helper to lookup default value of a field
-    """
+    """helper to lookup default value of a field"""
     if schema is None:
         return default
     field = schema.get(fieldname, None)

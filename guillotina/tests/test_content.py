@@ -311,7 +311,9 @@ async def test_context_property_default_schema_value(container_requester):
 async def test_missing_value_is_set(container_requester):
     async with container_requester as requester:
         response, status = await requester(
-            "POST", "/db/guillotina/", data=json.dumps({"@type": "CustomContentType", "id": "item1"}),
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps({"@type": "CustomContentType", "id": "item1"}),
         )
         assert status == 201, response
 

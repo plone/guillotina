@@ -41,8 +41,7 @@ specifications.  Write accessors are solely method specifications.
 
 
 class FieldReadAccessor(Method):
-    """Field read accessor
-    """
+    """Field read accessor"""
 
     # A read field accessor is a method and a field.
     # A read accessor is a decorator of a field, using the given

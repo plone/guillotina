@@ -35,7 +35,10 @@ async def test_image_field_with_behavior(redis_container, container_requester):
             size = len(data)
 
         response, status = await requester(
-            "PATCH", "/db/guillotina/foobar/@upload/image", data=data, headers={"x-upload-size": f"{size}"},
+            "PATCH",
+            "/db/guillotina/foobar/@upload/image",
+            data=data,
+            headers={"x-upload-size": f"{size}"},
         )
         assert status == 200
 
@@ -72,7 +75,10 @@ async def test_image_field_with_behavior(redis_container, container_requester):
             size = len(data)
 
         response, status = await requester(
-            "PATCH", "/db/guillotina/foobar/@upload/image", data=data, headers={"x-upload-size": f"{size}"},
+            "PATCH",
+            "/db/guillotina/foobar/@upload/image",
+            data=data,
+            headers={"x-upload-size": f"{size}"},
         )
         assert status == 200
 

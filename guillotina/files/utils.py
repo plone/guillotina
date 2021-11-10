@@ -52,8 +52,7 @@ async def read_request_data(request, chunk_size):
 
 
 def get_contenttype(file=None, filename=None, default="application/octet-stream"):
-    """Get the MIME content type of the given file and/or filename.
-    """
+    """Get the MIME content type of the given file and/or filename."""
 
     file_type = getattr(file, "content_type", None)
     if file_type:

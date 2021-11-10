@@ -19,7 +19,7 @@ class GuillotinaGroup(GuillotinaUser):
 
 @configure.utility(provides=IGroups)
 class GroupsUtility:
-    """ Class used to get groups. """
+    """Class used to get groups."""
 
     def get_principal(self, ident: str, principal: typing.Optional[IPrincipal]) -> IPrincipal:
         if principal is not None:

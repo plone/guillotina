@@ -17,7 +17,7 @@ class PrincipalRoleManager(SecurityMap):
     """Code mappings between principals and roles."""
 
     def assign_role_to_principal(self, role_id, principal_id, check=True):
-        """ See the interface IPrincipalRoleManager """
+        """See the interface IPrincipalRoleManager"""
 
         if check:
             check_role(None, role_id)
@@ -30,7 +30,7 @@ class PrincipalRoleManager(SecurityMap):
         self.add_cell(role_id, principal_id, AllowSingle)
 
     def remove_role_from_principal(self, role_id, principal_id, check=True):
-        """ See the interface IPrincipalRoleManager """
+        """See the interface IPrincipalRoleManager"""
 
         if check:
             check_role(None, role_id)
@@ -38,7 +38,7 @@ class PrincipalRoleManager(SecurityMap):
         self.add_cell(role_id, principal_id, Deny)
 
     def unset_role_for_principal(self, role_id, principal_id):
-        """ See the interface IPrincipalRoleManager """
+        """See the interface IPrincipalRoleManager"""
 
         # Don't check validity intentionally.
         # After all, we certainly want to unset invalid ids.
@@ -46,19 +46,19 @@ class PrincipalRoleManager(SecurityMap):
         self.del_cell(role_id, principal_id)
 
     def get_principals_for_role(self, role_id):
-        """ See the interface IPrincipalRoleMap """
+        """See the interface IPrincipalRoleMap"""
         return self.get_row(role_id)
 
     def get_roles_for_principal(self, principal_id):
-        """ See the interface IPrincipalRoleMap """
+        """See the interface IPrincipalRoleMap"""
         return self.get_col(principal_id)
 
     def get_setting(self, role_id, principal_id, default=Unset):
-        """ See the interface IPrincipalRoleMap """
+        """See the interface IPrincipalRoleMap"""
         return self.query_cell(role_id, principal_id, default)
 
     def get_principals_and_roles(self):
-        """ See the interface IPrincipalRoleMap """
+        """See the interface IPrincipalRoleMap"""
         return self.get_all_cells()
 
 
@@ -71,23 +71,23 @@ class PrincipalPermissionManager(SecurityMap):
     """Mappings between principals and permissions."""
 
     def grant_permission_to_principal(self, permission_id, principal_id, check=True, mode=Allow):
-        """ See the interface IPrincipalPermissionManager """
+        """See the interface IPrincipalPermissionManager"""
 
         self.add_cell(permission_id, principal_id, mode)
 
     def grant_all_permissions_to_principal(self, principal_id):
-        """ See the interface IPrincipalPermissionManager """
+        """See the interface IPrincipalPermissionManager"""
 
         for permission_id in get_all_permissions(None):
             self.grant_permission_to_principal(permission_id, principal_id, False)
 
     def deny_permission_to_principal(self, permission_id, principal_id, check=True):
-        """ See the interface IPrincipalPermissionManager """
+        """See the interface IPrincipalPermissionManager"""
 
         self.add_cell(permission_id, principal_id, Deny)
 
     def unset_permission_for_principal(self, permission_id, principal_id):
-        """ See the interface IPrincipalPermissionManager """
+        """See the interface IPrincipalPermissionManager"""
 
         # Don't check validity intentionally.
         # After all, we certianly want to unset invalid ids.
@@ -95,19 +95,19 @@ class PrincipalPermissionManager(SecurityMap):
         self.del_cell(permission_id, principal_id)
 
     def get_principals_for_permission(self, permission_id):
-        """ See the interface IPrincipalPermissionManager """
+        """See the interface IPrincipalPermissionManager"""
         return self.get_row(permission_id)
 
     def get_permissions_for_principal(self, principal_id):
-        """ See the interface IPrincipalPermissionManager """
+        """See the interface IPrincipalPermissionManager"""
         return self.get_col(principal_id)
 
     def get_setting(self, permission_id, principal_id, default=Unset):
-        """ See the interface IPrincipalPermissionManager """
+        """See the interface IPrincipalPermissionManager"""
         return self.query_cell(permission_id, principal_id, default)
 
     def get_principals_and_permissions(self):
-        """ See the interface IPrincipalPermissionManager """
+        """See the interface IPrincipalPermissionManager"""
         return self.get_all_cells()
 
     def grant_permission_to_principal_no_inherit(self, permission_id, principal_id):

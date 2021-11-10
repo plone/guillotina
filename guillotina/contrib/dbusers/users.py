@@ -49,7 +49,7 @@ class DBUserIdentifier:
 
 
 class EmailDBUserIdentifier:
-    """ Identifier of users by email.
+    """Identifier of users by email.
     This method only works with pgcatalog active.
     """
 

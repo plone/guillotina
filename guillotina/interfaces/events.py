@@ -25,8 +25,7 @@ class IObjectMovedEvent(IObjectLocationEvent):
 
 
 class IBeforeObjectMovedEvent(IObjectLocationEvent):
-    """
-    """
+    """ """
 
 
 class IObjectAddedEvent(IObjectLocationEvent):
@@ -66,8 +65,7 @@ class IObjectPermissionsModifiedEvent(interfaces.IObjectEvent):
 
 
 class IFileUploadEvent(interfaces.IObjectEvent):
-    """
-    """
+    """ """
 
 
 class IFileStartedUpload(interfaces.IObjectEvent):
@@ -156,8 +154,7 @@ class IDatabaseInitializedEvent(Interface):
 
 
 class IBeforeRenderViewEvent(Interface):
-    """Right before the view gets rendered
-    """
+    """Right before the view gets rendered"""
 
 
 class IRegistryEditedEvent(interfaces.IObjectEvent):

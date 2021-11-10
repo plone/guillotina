@@ -200,5 +200,4 @@ class IDBFileField(ICloudFileField):
 
 
 class IDBFile(IFile):
-    """Marker for a DBFile
-    """
+    """Marker for a DBFile"""

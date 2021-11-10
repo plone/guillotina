@@ -184,7 +184,10 @@ class TestPGMetrics:
 
 async def test_lock_metric():
     lock = asyncio.Lock()
-    metric = prometheus_client.Histogram("test_metric", "Test",)
+    metric = prometheus_client.Histogram(
+        "test_metric",
+        "Test",
+    )
     assert metric.collect()[0].samples[0].value == 0
     async with metrics.watch_lock(metric, lock):
         assert lock.locked()

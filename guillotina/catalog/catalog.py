@@ -83,16 +83,13 @@ class DefaultSearchUtility:
         """
 
     async def reindex_all_content(self, context: IBaseObject, security=False):
-        """ For all content add a queue task that reindex the object
-        """
+        """For all content add a queue task that reindex the object"""
 
     async def initialize_catalog(self, container: IContainer):
-        """ Creates an index
-        """
+        """Creates an index"""
 
     async def remove_catalog(self, container: IContainer):
-        """ Deletes an index
-        """
+        """Deletes an index"""
 
     async def get_data(self, content, indexes=None, schemas=None):
         data = {}
@@ -108,7 +105,7 @@ class DefaultSecurityInfoAdapter(object):
         self.content = content
 
     def __call__(self):
-        """ access_users and access_roles """
+        """access_users and access_roles"""
         return {
             "id": self.content.id,
             "path": get_content_path(self.content),

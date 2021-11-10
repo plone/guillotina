@@ -153,7 +153,7 @@ class SimpleVocabulary(object):
 
 
 def _createTermTree(ttree, dict_):
-    """ Helper method that creates a tree-like dict with ITokenizedTerm
+    """Helper method that creates a tree-like dict with ITokenizedTerm
     objects as keys from a similar tree with tuples as keys.
 
     See fromDict for more details.
@@ -167,8 +167,7 @@ def _createTermTree(ttree, dict_):
 
 @implementer(ITreeVocabulary)
 class TreeVocabulary(object):
-    """ Vocabulary that relies on a tree (i.e nested) structure.
-    """
+    """Vocabulary that relies on a tree (i.e nested) structure."""
 
     # The default implementation uses a dict to create the tree structure. This
     # can however be overridden in a subclass by any other IEnumerableMapping
@@ -200,7 +199,7 @@ class TreeVocabulary(object):
             directlyProvides(self, *interfaces)  # noqa
 
     def __contains__(self, value):
-        """ See guillotina.schema.interfaces.IBaseVocabulary
+        """See guillotina.schema.interfaces.IBaseVocabulary
 
         D.__contains__(k) -> True if D has a key k, else False
         """
@@ -211,8 +210,7 @@ class TreeVocabulary(object):
             return False
 
     def __getitem__(self, key):
-        """x.__getitem__(y) <==> x[y]
-        """
+        """x.__getitem__(y) <==> x[y]"""
         return self._terms.__getitem__(key)
 
     def __iter__(self):
@@ -223,8 +221,7 @@ class TreeVocabulary(object):
         return self._terms.__iter__()
 
     def __len__(self):
-        """x.__len__() <==> len(x)
-        """
+        """x.__len__() <==> len(x)"""
         return self._terms.__len__()
 
     def get(self, key, default=None):
@@ -235,18 +232,15 @@ class TreeVocabulary(object):
         return self._terms.get(key, default)
 
     def keys(self):
-        """Return the keys of the mapping object.
-        """
+        """Return the keys of the mapping object."""
         return self._terms.keys()
 
     def values(self):
-        """Return the values of the mapping object.
-        """
+        """Return the values of the mapping object."""
         return self._terms.values()
 
     def items(self):
-        """Return the items of the mapping object.
-        """
+        """Return the items of the mapping object."""
         return self._terms.items()
 
     @classmethod
@@ -277,7 +271,7 @@ class TreeVocabulary(object):
         return cls(_createTermTree(cls.terms_factory(), dict_), *interfaces)
 
     def _populateIndexes(self, tree):
-        """ The TreeVocabulary contains three helper indexes for quick lookups.
+        """The TreeVocabulary contains three helper indexes for quick lookups.
         They are: term_by_value, term_by_token and path_by_value
 
         This method recurses through the tree and populates these indexes.

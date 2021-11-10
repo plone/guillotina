@@ -6,8 +6,7 @@ import sys
 
 
 class DirectiveClass(type):
-    """A Directive is used to apply tagged values to a Schema
-    """
+    """A Directive is used to apply tagged values to a Schema"""
 
     def __init__(self, name, bases, attrs):
         attrs.setdefault("finalize", None)
@@ -39,8 +38,7 @@ Directive: Any = DirectiveClass("Directive", (), dict(__module__="guillotina.dir
 
 
 class MetadataListDirective(Directive):
-    """Store a list value in the tagged value under the key.
-    """
+    """Store a list value in the tagged value under the key."""
 
     key: str
 
@@ -61,8 +59,7 @@ def merged_tagged_value_list(schema, name):
 
 
 class MetadataDictDirective(Directive):
-    """Store a dict value in the tagged value under the key.
-    """
+    """Store a dict value in the tagged value under the key."""
 
     key: str
 
@@ -83,8 +80,7 @@ def merged_tagged_value_dict(schema, name):
 
 
 class read_permission(MetadataDictDirective):  # noqa: N801
-    """Directive used to set a field read permission
-    """
+    """Directive used to set a field read permission"""
 
     key = "guillotina.directives.read-permissions"
 
@@ -93,8 +89,7 @@ class read_permission(MetadataDictDirective):  # noqa: N801
 
 
 class write_permission(read_permission):  # noqa: N801
-    """Directive used to set a field write permission
-    """
+    """Directive used to set a field write permission"""
 
     key = "guillotina.directives.write-permissions"
 

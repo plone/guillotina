@@ -132,7 +132,7 @@ class ScaledDimensions(object):
 
 
 def _calculate_all_dimensions(original_width, original_height, width, height, mode="contain"):
-    """ Calculate all dimensions we need for scaling.
+    """Calculate all dimensions we need for scaling.
     final_width and final_height are the dimensions of the resulting image and
     are always present.
     The other values are required for cropping and scaling."""
@@ -276,8 +276,8 @@ def _calculate_all_dimensions(original_width, original_height, width, height, mo
 
 
 def calculate_scaled_dimensions(original_width, original_height, width, height, mode="contain"):
-    """ Calculate the scaled image dimensions from the originals using the
-    same logic as scalePILImage """
+    """Calculate the scaled image dimensions from the originals using the
+    same logic as scalePILImage"""
     dimensions = _calculate_all_dimensions(original_width, original_height, width, height, mode)
 
     return (dimensions.final_width, dimensions.final_height)

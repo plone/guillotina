@@ -2,8 +2,7 @@ from zope.interface import Interface
 
 
 class IMapping(Interface):
-    """Simplest readable mapping object
-    """
+    """Simplest readable mapping object"""
 
     def __getitem__(key):  # noqa: N805
         """Get a value for a key
@@ -27,24 +26,19 @@ class IMapping(Interface):
         """Set a new item in the mapping."""
 
     def keys():  # type: ignore
-        """Return the keys of the mapping object.
-        """
+        """Return the keys of the mapping object."""
 
     def __iter__():  # type: ignore
-        """Return an iterator for the keys of the mapping object.
-        """
+        """Return an iterator for the keys of the mapping object."""
 
     def values():  # type: ignore
-        """Return the values of the mapping object.
-        """
+        """Return the values of the mapping object."""
 
     def items():  # type: ignore
-        """Return the items of the mapping object.
-        """
+        """Return the items of the mapping object."""
 
     def __len__():  # type: ignore
-        """Return the number of items.
-        """
+        """Return the number of items."""
 
     def iterkeys():  # type: ignore
         "iterate over keys; equivalent to __iter__"
@@ -65,7 +59,7 @@ class IMapping(Interface):
         "delete all items"
 
     def update(*others):  # noqa: N805
-        " Update D from E: for k in E.keys(): D[k] = E[k]"
+        "Update D from E: for k in E.keys(): D[k] = E[k]"
 
     def setdefault(key, default=None):  # noqa: N805
         "D.setdefault(k[,d]) -> D.get(k,d), also set D[k]=d if k not in D"

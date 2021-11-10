@@ -51,21 +51,21 @@ _cached_indexes: typing.Dict[str, typing.Dict] = {}
 
 def iter_indexes(invalidate=False) -> typing.Iterator[typing.Tuple[str, typing.Dict]]:
     """
-{
-    "access_users": ["root"],
-    "uuid":"a037df9fa3624b5fb09dbda1480f8210",
-    "contributors":null,
-    "created":"2017-03-16T08:46:00.633690-05:00",
-    "portal_type":"Folder",
-    "title":"Posts",
-    "modified":"2017-03-16T08:46:00.633690-05:00",
-    "depth":2,
-    "subjects":null,
-    "path":"/container/posts",
-    "creators":null,
-    "access_roles":["guillotina.SiteAdmin"],
-    "parent_uuid":"8406d8b94d0e47bfa6cb0a82e531216b"
-}
+    {
+        "access_users": ["root"],
+        "uuid":"a037df9fa3624b5fb09dbda1480f8210",
+        "contributors":null,
+        "created":"2017-03-16T08:46:00.633690-05:00",
+        "portal_type":"Folder",
+        "title":"Posts",
+        "modified":"2017-03-16T08:46:00.633690-05:00",
+        "depth":2,
+        "subjects":null,
+        "path":"/container/posts",
+        "creators":null,
+        "access_roles":["guillotina.SiteAdmin"],
+        "parent_uuid":"8406d8b94d0e47bfa6cb0a82e531216b"
+    }
     """
     if invalidate:
         _cached_indexes.clear()

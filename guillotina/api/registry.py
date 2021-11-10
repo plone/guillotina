@@ -114,7 +114,7 @@ class Register(Service):
     """Register an Interface on the Registry."""
 
     async def __call__(self):
-        """ data input : { 'interface': 'INTERFACE' }"""
+        """data input : { 'interface': 'INTERFACE' }"""
         registry = await get_registry()
         if registry is None:
             return ErrorResponse("BadRequest", _("Not in a container request"), status=412)

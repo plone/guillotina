@@ -33,8 +33,7 @@ from guillotina.utils.auth import get_authenticated_user
     },
 )
 async def get_user_info(context, request):
-    """Return information about the logged in user.
-    """
+    """Return information about the logged in user."""
     result = {}
     groups = set()
     principal = get_authenticated_user()

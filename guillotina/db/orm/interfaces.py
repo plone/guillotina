@@ -7,8 +7,7 @@ OID_TYPE = SERIAL_TYPE = bytes
 
 
 class IBaseObject(Interface):
-    """Python base object interface
-    """
+    """Python base object interface"""
 
     __name__ = Attribute("")
     __parent__ = Attribute("")
@@ -52,8 +51,7 @@ class IBaseObject(Interface):
 
     # Attribute access protocol
     def __getattribute__(name):  # type: ignore
-        """
-        """
+        """ """
 
     # Pickling protocol.
     def __getstate__():  # type: ignore

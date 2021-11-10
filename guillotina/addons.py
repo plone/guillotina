@@ -9,8 +9,7 @@ from zope.interface import implementer
 
 @implementer(IAddOn)
 class Addon:
-    """ Prototype of an Addon plugin
-    """
+    """Prototype of an Addon plugin"""
 
     @classmethod
     def install(cls, container, request):

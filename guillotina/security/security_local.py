@@ -14,8 +14,7 @@ from guillotina.security.securitymap import GuillotinaSecurityMap
 
 @configure.adapter(for_=IResource, provides=IRolePermissionManager)
 class GuillotinaRolePermissionManager(GuillotinaSecurityMap):
-    """Provide adapter that manages role permission data in an object attribute
-    """
+    """Provide adapter that manages role permission data in an object attribute"""
 
     # the annotation key is a holdover from this module's old
     # location, but cannot change without breaking existing databases

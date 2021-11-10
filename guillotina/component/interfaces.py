@@ -225,12 +225,10 @@ class IComponentArchitecture(Interface):
 
 
 class IRegistry(Interface):
-    """Object that supports component registry
-    """
+    """Object that supports component registry"""
 
     def registrations():  # type: ignore
-        """Return an iterable of component registrations
-        """
+        """Return an iterable of component registrations"""
 
 
 class IComponentRegistrationConvenience(Interface):
@@ -320,8 +318,7 @@ class ISite(Interface):
     """Marker interface to indicate that we have a site"""
 
     def setSiteManager(sitemanager):
-        """Sets the site manager for this object.
-        """
+        """Sets the site manager for this object."""
 
     def get_component_registry():  # type: ignore
         """Returns the site manager contained in this object.

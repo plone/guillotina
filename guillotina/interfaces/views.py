@@ -3,12 +3,10 @@ from zope.interface import Interface
 
 class IView(Interface):
     def __init__(context, request):  # noqa: N805
-        """
-        """
+        """ """
 
     async def __call__():
-        """
-        """
+        """ """
 
 
 class IGET(IView):

@@ -44,7 +44,7 @@ def get_security_policy(user: Optional[IPrincipal] = None) -> ISecurityPolicy:
 
 
 def get_roles_principal(obj):
-    """ Return the roles that has access to the content that are global roles"""
+    """Return the roles that has access to the content that are global roles"""
     if obj is None:
         return []
 

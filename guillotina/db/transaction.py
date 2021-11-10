@@ -145,7 +145,12 @@ class Transaction:
     user = None
 
     def __init__(
-        self, manager, loop=None, read_only: bool = False, cache=None, strategy=None,
+        self,
+        manager,
+        loop=None,
+        read_only: bool = False,
+        cache=None,
+        strategy=None,
     ):
         if loop is not None:
             warnings.warn("Argument 'loop' is deprecated and ignored", DeprecationWarning)
@@ -168,7 +173,10 @@ class Transaction:
         self._lock = asyncio.Lock()
 
     def initialize(
-        self, read_only, cache=None, strategy=None,
+        self,
+        read_only,
+        cache=None,
+        strategy=None,
     ):
         self._read_only = read_only
         self._txn_time = None
@@ -234,26 +242,22 @@ class Transaction:
         return self._manager._storage
 
     def get_before_commit_hooks(self):
-        """ See ITransaction.
-        """
+        """See ITransaction."""
         return iter(self._before_commit)
 
     def add_before_commit_hook(self, hook, *real_args, args=None, kws=None, **kwargs):
-        """ See ITransaction.
-        """
+        """See ITransaction."""
         args = args or []
         kws = kws or {}
         kwargs.update(kws)
         self._before_commit.append((hook, real_args + tuple(args), kwargs))
 
     def get_after_commit_hooks(self):
-        """ See ITransaction.
-        """
+        """See ITransaction."""
         return iter(self._after_commit)
 
     def add_after_commit_hook(self, hook, *real_args, args=None, kws=None, **kwargs):
-        """ See ITransaction.
-        """
+        """See ITransaction."""
         args = args or []
         kws = kws or {}
         kwargs.update(kws)
@@ -485,8 +489,7 @@ class Transaction:
 
     @profilable
     async def tpc_finish(self):
-        """Indicate confirmation that the transaction is done.
-        """
+        """Indicate confirmation that the transaction is done."""
         await self._strategy.tpc_finish()
         await self._cache.close()
         self.tpc_cleanup()

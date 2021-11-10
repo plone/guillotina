@@ -69,7 +69,12 @@ class UpdateImageScale(TraversableFieldService):
         width, _, height = allowed_sizes[scale_name].partition(":")
 
         result, format_, size = await run_async(
-            scaleImage, data, int(width), int(height), quality=settings["quality"], direction="thumbnail",
+            scaleImage,
+            data,
+            int(width),
+            int(height),
+            quality=settings["quality"],
+            direction="thumbnail",
         )
 
         async def generator(data):
