@@ -88,6 +88,7 @@ class EmailValidationUtility:
         data.update(
             {"v_user": as_user, "v_querier": from_user, "v_task": task_id, "v_redirect_url": redirect_url}
         )
+        ttl = app_settings.get("ttl_email_validation", ttl)
 
         token, last_date = await generate_validation_token(data, ttl=ttl)
 
