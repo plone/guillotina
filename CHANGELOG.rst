@@ -4,7 +4,10 @@ CHANGELOG
 6.4.0rc1 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Add the possibility of configuring the ttl of the email_validation
+  using app_settings["ttl_email_validation"] in the utility of the
+  email_validation. By default is 3660s.
+  [nilbacardit26]
 
 
 6.4.0rc0 (2021-10-20)
