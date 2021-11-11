@@ -12,6 +12,9 @@ CHANGELOG
   email_validation. By default is 3660s.
   [nilbacardit26]
 
+- doc: installation: fix duplicated line and link to contrib/dbusers
+  [jotare]
+
 
 6.4.0rc0 (2021-10-20)
 ---------------------
