@@ -4,6 +4,9 @@ CHANGELOG
 6.4.0rc1 (unreleased)
 ---------------------
 
+- Some fixes and improvements to the new TransactionConnectionContextManager
+  [masipcat]
+
 - Port the following changes:
   - Remove db transaction strategy support
   - Try not to reserve connection when possible
