@@ -147,7 +147,8 @@ class TransactionManager:
                         pass
                     else:
                         raise
-            txn._db_conn = None
+            finally:
+                txn._db_conn = None
 
     async def abort(self, *, txn: typing.Optional[ITransaction] = None) -> None:
         try:

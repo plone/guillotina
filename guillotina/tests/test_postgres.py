@@ -289,7 +289,7 @@ async def test_should_resolve_conflict_error(db, dummy_guillotina):
         await cleanup(aps)
 
 
-@pytest.mark.skipif(DATABASE in ("cockroachdb", "DUMMY"), reason="DUMMY not support simple...")
+@pytest.mark.skipif(DATABASE in ("DUMMY",), reason="DUMMY not support simple...")
 async def test_should_raise_conflict_error_on_concurrent_insert(db, container_requester):
     async with container_requester as requester:
         with requester.db.get_transaction_manager() as tm:
@@ -311,8 +311,12 @@ async def test_should_raise_conflict_error_on_concurrent_insert(db, container_re
             with pytest.raises(ConflictIdOnContainer):
                 await tm.commit(txn=txn1)
 
+            aps = tm.storage
+            await aps.remove()
+            await cleanup(aps)
 
-@pytest.mark.skipif(DATABASE in ("cockroachdb", "DUMMY"), reason="DUMMY not support simple...")
+
+@pytest.mark.skipif(DATABASE in ("DUMMY",), reason="DUMMY not support simple...")
 async def test_should_raise_conflict_error_on_concurrent_update(db, container_requester):
     async with container_requester as requester:
         with requester.db.get_transaction_manager() as tm:
