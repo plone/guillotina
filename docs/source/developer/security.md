@@ -224,7 +224,7 @@ Let's add a group named `todo_viewer`:
 
     HTTP/1.1 201 Created
     Content-Type: application/json
-    Location: http://localhost:8071/db/todo/groups/todo_viewer
+    Location: http://localhost:8080/db/todo/groups/todo_viewer
 
     {
         "@id": "http://localhost:8080/db/todo/groups/todo_viewer",
