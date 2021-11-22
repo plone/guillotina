@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.4.0rc2 (unreleased)
+6.4.0rc2 (2021-11-22)
 ---------------------
 
 - Nothing changed yet.
