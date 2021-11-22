@@ -7,16 +7,14 @@ JSON configuration file or yaml to the start script.
 By default, the startup script looks for a `config.yaml` file. You can use a different
 file by using the `-c` option for the script like this: `./bin/guillotina -c myconfig.yaml`.
 
-
 ## Applications
 
 To load guillotina applications into your application, use the `applications` setting:
 
 ```yaml
 applications:
-- guillotina_elasticsearch
+  - guillotina_elasticsearch
 ```
-
 
 ## Databases
 
@@ -48,17 +46,15 @@ Currently supported database drivers are:
 - `DUMMY`: in-memory database, useful in testing
 - `DUMMY_FILE`: simple file storage, useful in testing
 
-
 ### Database configuration options
 
 - `pool_size`: Size of connection pool. (defaults to `13`)
-- `transaction_strategy`: Connection strategy to use. See `Transaction strategy`_ for details. (defaults to `resolve_readcommitted`)
+- `transaction_strategy`: Connection strategy to use. See `Transaction strategy`\_ for details. (defaults to `resolve_readcommitted`)
 - `conn_acquire_timeout`: How long to wait for connection to be freed up from pool. (defaults to `20`)
 - `objects_table_name`: Table name to store object data. (defaults to `objects`)
 - `blobs_table_name`: Table name to store blob data. (defaults to `blobs`)
 - `autovacuum`: Default vacuum relies on pg referential integrity to delete all objects. If you have extremely large databases,
   this can be very heavy on pg. Set this to `false` and run the `dbvacuum` command in a cronjob. (defaults to `true`)
-
 
 ### Storages
 
@@ -76,7 +72,6 @@ storages:
 
 Notice how it's missing the database part of the dsn.
 
-
 ## Static files
 
 ```yaml
@@ -86,7 +81,6 @@ static:
 ```
 
 These files will then be available on urls `/favicon.ico` and `/static_files`.
-
 
 ## JavaScript Applications
 
@@ -114,7 +108,7 @@ root_user:
 ```yaml
 cors:
   allow_origin:
-    - "*"
+    - '*'
   allow_methods:
     - GET
     - POST
@@ -123,12 +117,13 @@ cors:
     - PATCH
     - PUT
   allow_headers:
-    - "*"
+    - '*'
   expose_headers:
-    - "*"
+    - '*'
   allow_credentials: true
   max_age: 3660
 ```
+
 
 ## Applications
 
@@ -140,7 +135,6 @@ applications:
   - guillotina_elasticsearch
 ```
 
-
 ## Async utilities
 
 Guillotina has support for injecting dependencies from configuration with
@@ -149,7 +143,6 @@ asynchronous utility.
 An async utility is a class that implements `initialize` and `finalize` method.
 The `initialize` method is run at application start as a task. This gives
 you the power to hook async tasks into guillotina.
-
 
 ```yaml
 load_utilities:
@@ -216,7 +209,6 @@ jwk:
 - `indexer`: customize the class used to index content, defaults to
   `guillotina.catalog.index.Indexer`
 
-
 ## Transaction strategy
 
 Guillotina provides a few different modes to operate in to customize the level
@@ -254,12 +246,10 @@ Available options:
   you might be in an inconsistent state on `tid` conflicts.
 - `dbresolve`:
   Use db transaction but do not perform any voting when writing(no conflict resolution).
-  (likely only use with cockroach db + serialized transactions)
 - `dbresolve_readcommitted`:
   Same as no vote; however, db transaction only started at commit phase. This
   should provide better performance; however, you'll need to consider the side
   affects of this for reading data.
-  (likely only use with cockroach db + serialized transactions)
 - `simple`:
   Detect concurrent transactions and error if another transaction id is committed
   to the db ahead of the current transaction id. This is the safest mode to operate
@@ -272,9 +262,7 @@ Available options:
   should provide better performance; however, you'll need to consider the side
   affects of this for reading data.
 
-
 Warning: not all storages are compatible with all transaction strategies.
-
 
 ## Connection class
 
@@ -285,9 +273,7 @@ a way to override it with a custom class or a provided lighter one:
 pg_connection_class: guillotina.db.storages.pg.LightweightConnection
 ```
 
-
 ## Authentication and Authorization
-
 
 ### Extractors
 
@@ -310,7 +296,7 @@ Available:
 
 - guillotina.auth.extractors.BearerAuthPolicy: Looks for `Bearer` Authorization header
 - guillotina.auth.extractors.BasicAuthPolicy: Looks for `Basic` Authorization header
-- guillotina.auth.extractors.WSTokenAuthPolicy:  Looks for `ws_token` query param
+- guillotina.auth.extractors.WSTokenAuthPolicy: Looks for `ws_token` query param
 
 ### Identifiers
 
@@ -332,7 +318,6 @@ credentials and identified users against.
 - guillotina.auth.validators.JWTValidator: Validate extract jwt token
 - guillotina.auth.validators.SaltedHashPasswordValidator: Validate extracted password against
   stored salted and hashed password
-
 
 ## Configuration life cycle
 

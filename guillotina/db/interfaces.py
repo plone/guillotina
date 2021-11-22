@@ -352,10 +352,6 @@ class ITransactionStrategy(Interface):
         """
 
 
-class IDBTransactionStrategy(ITransactionStrategy):
-    pass
-
-
 class IDatabaseManager(Interface):
     async def get_names() -> list:  # type: ignore
         """

@@ -199,12 +199,11 @@ class CockroachStorage(pg.PostgresqlStorage):
         return False
 
     async def delete(self, txn, oid):
-        conn = await txn.get_connection()
         sql = self._sql.get("CR_TRASH_PARENT_ID", self.objects_table_name)
         # XXX since CR does not support WHERE clause in constraint, we have
         # to do this trick here to be able to mark object as deleted
         deleted_id = uuid.uuid4().hex
-        async with txn._lock:
+        async with self.acquire(txn, "store_object") as conn:
             # for delete, we reassign the parent id and delete in the vacuum task
             await conn.execute(sql, oid, deleted_id)
         if self._autovacuum:
@@ -227,8 +226,7 @@ class CockroachStorage(pg.PostgresqlStorage):
             statement_sql = self._sql.get("CR_UPDATE", self._objects_table_name)
             update = True
 
-        conn = await txn.get_connection()
-        async with txn._lock:
+        async with self.acquire(txn, "store_object") as conn:
             try:
                 result = await conn.fetch(
                     statement_sql,
@@ -275,23 +273,21 @@ class CockroachStorage(pg.PostgresqlStorage):
                 except asyncpg.exceptions.SerializationError as ex:
                     if ex.sqlstate == "40001":
                         raise RestartCommit(ex.args[0])
-        elif self._transaction_strategy not in ("none", "tidonly"):
-            logger.info("Do not have db transaction to commit")
 
         return transaction._tid
 
     # Cockroach cant use at version 1.0.3 row count (no fetch)
-    async def get_one_row(self, txn, sql, *args, prepare=False):
+    async def get_one_row(self, txn, sql, *args, prepare=False, metric="has_key"):
         # Helper function to provide easy adaptation to cockroach
-        conn = await txn.get_connection()
         try:
-            # Helper function to provide easy adaptation to cockroach
-            if prepare:
-                # latest version of asyncpg has prepare bypassing statement cache
-                smt = await conn.prepare(sql)
-                result = await smt.fetch(*args)
-            else:
-                result = await conn.fetch(sql, *args)
+            async with self.acquire(txn, metric) as conn:
+                # Helper function to provide easy adaptation to cockroach
+                if prepare:
+                    # latest version of asyncpg has prepare bypassing statement cache
+                    smt = await conn.prepare(sql)
+                    result = await smt.fetch(*args)
+                else:
+                    result = await conn.fetch(sql, *args)
         except asyncpg.exceptions.SerializationError as ex:
             if ex.sqlstate == "40001":
                 # these are not handled with the ROLLBACK TO SAVEPOINT COCKROACH_RESTART
