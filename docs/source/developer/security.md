@@ -217,20 +217,28 @@ Let's add a group named `todo_viewer`:
 
     {
         "@type": "Group",
-        "name": "todo_viewer"
+        "id": "todo_viewer",
+        "title": "TODO Viewer"
     }
 
 
     HTTP/1.1 201 Created
     Content-Type: application/json
-    Location: http://localhost:8080/db/todo/groups/14f624ef23094362961df0e083cd77e4
+    Location: http://localhost:8080/db/todo/groups/todo_viewer
 
     {
-        "@id": "http://localhost:8080/db/todo/groups/14f624ef23094362961df0e083cd77e4",
-        "@name": "14f624ef23094362961df0e083cd77e4",
+        "@id": "http://localhost:8080/db/todo/groups/todo_viewer",
+        "@name": "todo_viewer",
         "@type": "Group",
         "@uid": "6e6|ff3|14f624ef23094362961df0e083cd77e4",
-        "UID": "6e6|ff3|14f624ef23094362961df0e083cd77e4"
+        "groupname": null,
+        "id": "todo_viewer",
+        "title": null,
+        "roles": [],
+        "users": {
+            "items": [],
+            "items_total": 0
+        }
     }
 ```
 
