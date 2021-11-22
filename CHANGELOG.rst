@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.4.0rc1 (unreleased)
+6.4.0rc1 (2021-11-22)
 ---------------------
 
 - Some fixes and improvements to the new TransactionConnectionContextManager
