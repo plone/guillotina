@@ -128,7 +128,7 @@ class TransactionManager:
                 except AttributeError:
                     pass
 
-                if txn._db_txn is not None:
+                if txn._db_txn is not None:  # type: ignore
                     raise RuntimeError("db txn is not none and we are about to release the db connection")
 
                 conn = txn._db_conn
