@@ -113,6 +113,12 @@ class TestPGMetrics:
             )
             > 0
         )
+        assert (
+            metrics_registry.get_sample_value(
+                "guillotina_db_pg_lock_time_seconds_sum", {"type": "load_object_by_oid"}
+            )
+            > 0
+        )
 
     async def test_store_object(self, metrics_registry):
         storage = PostgresqlStorage(store_json=False)
@@ -140,6 +146,18 @@ class TestPGMetrics:
             )
             > 0
         )
+        assert (
+            metrics_registry.get_sample_value(
+                "guillotina_db_pg_lock_time_seconds_sum", {"type": "store_object"}
+            )
+            > 0
+        )
+        assert (
+            metrics_registry.get_sample_value(
+                "guillotina_db_pg_lock_time_seconds_sum", {"type": "store_object"}
+            )
+            > 0
+        )
 
     async def test_delete_object(self, metrics_registry):
         storage = PostgresqlStorage(autovacuum=False)
@@ -153,6 +171,18 @@ class TestPGMetrics:
         assert (
             metrics_registry.get_sample_value(
                 "guillotina_db_pg_ops_processing_time_seconds_sum", {"type": "delete_object"}
+            )
+            > 0
+        )
+        assert (
+            metrics_registry.get_sample_value(
+                "guillotina_db_pg_lock_time_seconds_sum", {"type": "delete_object"}
+            )
+            > 0
+        )
+        assert (
+            metrics_registry.get_sample_value(
+                "guillotina_db_pg_lock_time_seconds_sum", {"type": "delete_object"}
             )
             > 0
         )
