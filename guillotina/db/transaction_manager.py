@@ -120,7 +120,8 @@ class TransactionManager:
         if txn is not None:
             # Since we are about to release the connection to the pool, we need to ensure
             # that there isn't any other task using the same connection during the process.
-            # Otherwise, this would produce the exception "InterfaceError: cannot perform operation: another operation is in progress"
+            # Otherwise, this would produce the exception:
+            #  InterfaceError: cannot perform operation: another operation is in progress
             async with txn.lock:
                 try:
                     txn._query_count_end = txn.get_query_count()
