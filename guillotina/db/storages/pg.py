@@ -1,4 +1,6 @@
 from asyncio import shield
+from contextlib import asynccontextmanager
+from contextlib import contextmanager
 from guillotina import glogging
 from guillotina import metrics
 from guillotina._settings import app_settings
@@ -578,46 +580,28 @@ class PGConnectionManager:
         await self._initialize_tid_statements()
 
 
-class TransactionConnectionContextManager:
+@contextmanager
+def noop_watch():
+    yield
+
+
+@asynccontextmanager
+async def TransactionConnectionContextManager(storage, txn, op):
     """
     Connection manager to either use reserved
     transaction connection or use a connection
     from pool
     """
+    watch_db = watch(op) if op else noop_watch()
 
-    def __init__(self, storage, txn, op):
-        self.storage = storage
-        self.txn = txn
-        self.connection = None
-        self.op = op
-        self.watch_db = watch(op) if op else None
-        self.watch_lock = None
-
-    async def __aenter__(self):
-        if self.txn.connection_reserved:
-            self._watch_lock = watch_lock(self.txn._lock, self.op)
-            await self._watch_lock.__aenter__()
-            conn = self.txn._db_conn
-        else:
-            conn = self.connection = await self.storage.pool.acquire(
-                timeout=self.storage._conn_acquire_timeout
-            )
-
-        if self.watch_db is not None:
-            self.watch_db.__enter__()
-
-        return conn
-
-    async def __aexit__(self, *exc):
-        if self.watch_db is not None:
-            self.watch_db.__exit__(*exc)
-            self.watch_db = None
-
-        if self.txn.connection_reserved:
-            await self._watch_lock.__aexit__(*exc)
-            self._watch_lock = None
-        elif self.connection is not None:
-            await self.storage.pool.release(self.connection)
+    if txn.connection_reserved:
+        async with watch_lock(txn._lock, op):
+            with watch_db:
+                yield txn._db_conn
+    else:
+        async with storage.pool.acquire(timeout=storage._conn_acquire_timeout) as conn:
+            with watch_db:
+                yield conn
 
 
 @implementer(IPostgresStorage)
