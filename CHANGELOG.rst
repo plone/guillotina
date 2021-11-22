@@ -8,9 +8,9 @@ CHANGELOG
   [masipcat]
 
 - Port the following changes:
-  - Remove db transaction strategy support
-  - Try not to reserve connection when possible
-    [vangheem]
+- Remove db transaction strategy support
+- Try not to reserve connection when possible
+  [vangheem]
 
 - Black to 21.10b0 version
   [bloodbare]
