@@ -5,6 +5,7 @@ from guillotina.exceptions import TransactionNotFound
 from guillotina.interfaces import IAsyncJobPool
 from guillotina.interfaces import IQueueUtility
 from guillotina.profile import profilable
+from guillotina.task_vars import txn
 from guillotina.transactions import get_transaction
 from typing import Any
 from typing import Callable
@@ -196,12 +197,21 @@ def execute_futures(scope: str = "", futures=None, task=None) -> Optional[asynci
         futures = task_vars.futures.get() or {}
     if scope not in futures:
         return None
-    found = []
-    for fut_data in futures[scope].values():
-        fut = fut_data["fut"]
-        if not asyncio.iscoroutine(fut):
-            fut = fut(*fut_data.get("args") or [], **fut_data.get("kwargs") or {})
-        found.append(fut)
+
+    # Force each future to create a new txn to avoid multiple futures to use
+    # the same txn and generate conflicts or unexpected behavior
+    token = txn.set(None)
+    try:
+        found = []
+        for fut_data in futures[scope].values():
+            fut = fut_data["fut"]
+            if not asyncio.iscoroutine(fut):
+                fut = fut(*fut_data.get("args") or [], **fut_data.get("kwargs") or {})
+            found.append(fut)
+    finally:
+        # Restore the original value
+        txn.reset(token)
+
     futures[scope] = {}
     if len(found) > 0:
         task = asyncio.ensure_future(asyncio.gather(*found))

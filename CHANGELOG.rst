@@ -4,7 +4,8 @@ CHANGELOG
 6.4.0rc3 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Breaking change: guillotina futures won't have the txn set anymore.
+  [masipcat]
 
 
 6.4.0rc2 (2021-11-22)
