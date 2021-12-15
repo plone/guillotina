@@ -4,7 +4,8 @@ CHANGELOG
 6.4.0rc3 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Improve error logging in futures
+  [masipcat]
 
 
 6.4.0rc2 (2021-11-22)
