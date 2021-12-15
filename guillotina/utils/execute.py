@@ -6,7 +6,7 @@ from guillotina.interfaces import IAsyncJobPool
 from guillotina.interfaces import IQueueUtility
 from guillotina.profile import profilable
 from guillotina.transactions import get_transaction
-from guillotina.utils import notice_on_error2
+from guillotina.utils import notice_on_error_internal
 from typing import Any
 from typing import Callable
 from typing import Coroutine
@@ -206,7 +206,7 @@ def execute_futures(scope: str = "", futures=None, task=None) -> Optional[asynci
     futures[scope] = {}
     if len(found) > 0:
         task = asyncio.ensure_future(
-            notice_on_error2("Error during after_request futures", asyncio.gather(*found))
+            notice_on_error_internal("Error during after_request futures", asyncio.gather(*found))
         )
         return task
     return None

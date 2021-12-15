@@ -409,10 +409,10 @@ def get_request_scheme(req) -> str:
 
 
 async def notice_on_error(key: str, func_to_await):
-    return await notice_on_error2(f"Error on initialize utility {key}", func_to_await)
+    return await notice_on_error_internal(f"Error on initialize utility {key}", func_to_await)
 
 
-async def notice_on_error2(msg: str, func_to_await):
+async def notice_on_error_internal(msg: str, func_to_await):
     try:
         await func_to_await
     except (asyncio.CancelledError, RuntimeError):

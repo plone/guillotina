@@ -8,7 +8,7 @@ from guillotina.exceptions import NoChannelConfigured
 from guillotina.exceptions import NoPubSubUtility
 from guillotina.interfaces import ICacheUtility
 from guillotina.profile import profilable
-from guillotina.utils import notice_on_error2
+from guillotina.utils import notice_on_error_internal
 from typing import Any
 from typing import Dict
 from typing import List
@@ -131,7 +131,7 @@ class BasicCache(BaseCache):
                     if len(self._keys_to_publish) > 0 and self._utility._subscriber is not None:
                         keys = self._keys_to_publish
                         asyncio.ensure_future(
-                            notice_on_error2("Error on cache synchronize", self.synchronize(keys))
+                            notice_on_error_internal("Error on cache synchronize", self.synchronize(keys))
                         )
                     else:
                         self._stored_objects.clear()
