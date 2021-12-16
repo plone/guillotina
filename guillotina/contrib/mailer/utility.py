@@ -136,7 +136,9 @@ class MailerUtility:
                 else:
                     raise NoEndpointDefinedException("{} mail endpoint not defined".format(endpoint_name))
             utility.from_settings(settings)
-            asyncio.ensure_future(notice_on_error(utility.initialize()))
+            asyncio.ensure_future(
+                notice_on_error(f'IMailEndpoint name={settings["type"]}', utility.initialize())
+            )
             self._endpoints[endpoint_name] = utility
         return self._endpoints[endpoint_name]
 
