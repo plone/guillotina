@@ -101,6 +101,156 @@ Addons
    :body: {"id": "docaddon"}
 
 
+Metadata
+--------
+
+.. http:gapi::
+   :path_spec: /(db)/(container)/@metadata
+   :path: /db/container/@metadata
+   :basic_auth: root:root
+
+Example:
+
+.. code-block:: json
+
+   {
+      "@id": "http://localhost:8070/db/container",
+      "types": {
+         "Item": {
+               "uuid": "keyword",
+               "type_name": "keyword",
+               "title": "text",
+               "modification_date": "date",
+               "creation_date": "date",
+               "access_roles": "keyword",
+               "id": "keyword",
+               "access_users": "keyword",
+               "path": "path",
+               "depth": "int",
+               "parent_uuid": "keyword",
+               "tid": "keyword"
+         },
+         "Folder": {
+               "uuid": "keyword",
+               "type_name": "keyword",
+               "title": "text",
+               "modification_date": "date",
+               "creation_date": "date",
+               "access_roles": "keyword",
+               "id": "keyword",
+               "access_users": "keyword",
+               "path": "path",
+               "depth": "int",
+               "parent_uuid": "keyword",
+               "tid": "keyword"
+         },
+         "Container": {
+               "uuid": "keyword",
+               "type_name": "keyword",
+               "title": "text",
+               "modification_date": "date",
+               "creation_date": "date",
+               "access_roles": "keyword",
+               "id": "keyword",
+               "access_users": "keyword",
+               "path": "path",
+               "depth": "int",
+               "parent_uuid": "keyword",
+               "tid": "keyword"
+         },
+         "Customer": {
+               "uuid": "keyword",
+               "type_name": "keyword",
+               "title": "text",
+               "modification_date": "date",
+               "creation_date": "date",
+               "access_roles": "keyword",
+               "id": "keyword",
+               "access_users": "keyword",
+               "path": "path",
+               "depth": "int",
+               "parent_uuid": "keyword",
+               "tid": "keyword",
+               "archived": "boolean",
+               "ratehourly": "int"
+         },
+         "User": {
+               "uuid": "keyword",
+               "type_name": "keyword",
+               "title": "text",
+               "modification_date": "date",
+               "creation_date": "date",
+               "access_roles": "keyword",
+               "id": "keyword",
+               "access_users": "keyword",
+               "path": "path",
+               "depth": "int",
+               "parent_uuid": "keyword",
+               "tid": "keyword",
+               "email": "keyword",
+               "name": "textkeyword",
+               "user_roles": "textkeyword",
+               "disabled": "boolean"
+         },
+         "UserManager": {
+               "uuid": "keyword",
+               "type_name": "keyword",
+               "title": "text",
+               "modification_date": "date",
+               "creation_date": "date",
+               "access_roles": "keyword",
+               "id": "keyword",
+               "access_users": "keyword",
+               "path": "path",
+               "depth": "int",
+               "parent_uuid": "keyword",
+               "tid": "keyword"
+         },
+         "Group": {
+               "uuid": "keyword",
+               "type_name": "keyword",
+               "title": "text",
+               "modification_date": "date",
+               "creation_date": "date",
+               "access_roles": "keyword",
+               "id": "keyword",
+               "access_users": "keyword",
+               "path": "path",
+               "depth": "int",
+               "parent_uuid": "keyword",
+               "tid": "keyword",
+               "name": "textkeyword",
+               "user_roles": "textkeyword",
+               "users": "textkeyword"
+         },
+         "GroupManager": {
+               "uuid": "keyword",
+               "type_name": "keyword",
+               "title": "text",
+               "modification_date": "date",
+               "creation_date": "date",
+               "access_roles": "keyword",
+               "id": "keyword",
+               "access_users": "keyword",
+               "path": "path",
+               "depth": "int",
+               "parent_uuid": "keyword",
+               "tid": "keyword"
+         }
+      },
+      "behaviors": {
+         "guillotina.behaviors.attachment.IAttachment": {},
+         "guillotina.behaviors.attachment.IMultiAttachment": {},
+         "guillotina.behaviors.dublincore.IDublinCore": {
+               "creators": "keyword",
+               "tags": "keyword",
+               "contributors": "keyword"
+         },
+         "guillotina.behaviors.dynamic.IDynamicFields": {},
+         "guillotina.behaviors.dynamic.IDynamicFieldValues": {}
+      }
+   }
+
 
 Dynamic Fields
 --------------
@@ -180,49 +330,3 @@ Update dynamic field values
    :path: /db/container/foobar-fields?include=guillotina.behaviors.dynamic.IDynamicFieldValues
    :method: GET
    :basic_auth: root:root
-
-
-Search
-------
-
-(Requires `guillotina.contrib.catalog.pg` application activated with PostgreSQL)
-
-The `@search` endpoint accepts both `POST` and `GET` requests. The default search
-parser and query syntax is flat and does not support nested queries.
-
-`POST` works with a json body while `GET` works on query params.
-
-Supported params:
-
-- `[term]`: Generic search term support. See modifier list below for usage.
-- `_from`: start from a point in search results
-- `_size`: How large of result set. Max of 50.
-- `_sort_asc`: How ascending field
-- `_sort_des`: How descending field
-- `_metadata`: list of metadata fields to include
-- `_metadata_not`: list of metadata fields to exclude
-
-- `__eq`: also the default functionality
-- `__not`
-- `__gt`
-- `__gte`
-- `__lte`
-- `__lt`
-- `__in`
-- `__and`: nested AND queries
-- `__or`: nested OR queries
-
-
-.. http:gapi::
-   :path_spec: /(db)/(container)/@search
-   :path: /db/container/@search
-   :method: POST
-   :basic_auth: root:root
-   :body: {
-         "type_name": "Item",
-         "_from": 10,
-         "_size": 5,
-         "modification_date__gt": "2019-06-15T18:37:31.008359+00:00",
-         "_sort_asc": "modification_date",
-         "_metadata": "title,description"
-      }

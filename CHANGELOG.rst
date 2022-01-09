@@ -6,6 +6,8 @@ CHANGELOG
 
 - Improve error logging in futures
   [masipcat]
+- Documentation: Enhance search endpoint documentation
+  [ksuess]
 
 
 6.4.0rc2 (2021-11-22)
