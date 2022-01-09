@@ -8,6 +8,8 @@ CHANGELOG
   [masipcat]
 - Documentation: Enhance search endpoint documentation
   [ksuess]
+- Documentation: Add info about catalog_max_results
+  [ksuess]
 
 
 6.4.0rc2 (2021-11-22)

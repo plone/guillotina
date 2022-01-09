@@ -30,7 +30,7 @@ QUERY_PARAMETERS = [
         "in": "query",
         "required": False,
         "name": "_size",
-        "description": "Size of result set. Max to 50.",
+        "description": "Size of result set. Max to 50 (app_settings.catalog_max_results).",
         "schema": {"type": "string"},
     },
     {
