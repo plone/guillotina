@@ -148,15 +148,6 @@ Guillotina call::
   
   GET @search?title_in=lorem&portal_type=Document
 
-Plone call::
-
-  GET /plone/@search?Title=lorem&portal_type=Document&review_state=published&facet=true&facet_field:list=portal_type&facet_field:list=review_state
-
-Guillotina call::
-
-  GET @search?title_in=lorem&portal_type=Document&review_state=published&_aggregations=portal_type+review_state
-
-
 
 Aggregation
 -----------
