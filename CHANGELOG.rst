@@ -4,6 +4,9 @@ CHANGELOG
 6.4.0rc3 (unreleased)
 ---------------------
 
+- Fix previous change in mailer utility
+  [masipcat]
+
 - Improve error logging in futures
   [masipcat]
 - Documentation: Enhance search endpoint documentation
