@@ -142,6 +142,7 @@ The endpoints available around these objects are detailed below:
    rest/container
    rest/item
    rest/folder
+   rest/search
 ```
 
 ## Developer Documentation
