@@ -43,6 +43,7 @@ class EmailValidationUtility:
         context_description=None,
         ttl=3660,
         data=None,
+        render_options={},
     ):
         # from_user will be mostly anonymous
         registry = await get_registry()
@@ -99,6 +100,7 @@ class EmailValidationUtility:
             link=link,
             last_date=last_date,
             task=task_description,
+            **render_options,
         )
         await util.send(recipient=email, sender=from_email, subject=task_description, html=template)
 

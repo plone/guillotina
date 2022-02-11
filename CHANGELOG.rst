@@ -14,6 +14,9 @@ CHANGELOG
 - Documentation: Add info about catalog_max_results
   [ksuess]
 
+- Add a dict parameter `render_options` to pass custom values to
+  rendered template in EmailValidationUtility
+  [jotare]
 
 6.4.0rc2 (2021-11-22)
 ---------------------
