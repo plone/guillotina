@@ -26,7 +26,6 @@ from guillotina.interfaces import IResource
 from guillotina.interfaces.content import IApplication
 from guillotina.response import HTTPNotImplemented
 from guillotina.transactions import get_transaction
-from guillotina.transactions import transaction
 from guillotina.utils import find_container
 from guillotina.utils import get_authenticated_user
 from guillotina.utils import get_content_path

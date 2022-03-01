@@ -209,17 +209,17 @@ def execute_futures(scope: str = "", futures=None, task=None) -> Optional[asynci
             if not asyncio.iscoroutine(fut):
                 fut = fut(*fut_data.get("args") or [], **fut_data.get("kwargs") or {})
             found.append(fut)
+
+        futures[scope] = {}
+        task = None
+        if len(found) > 0:
+            task = asyncio.ensure_future(
+                notice_on_error_internal("Error during after_request futures", asyncio.gather(*found))
+            )
     finally:
         # Restore the original value
         txn.reset(token)
-
-    futures[scope] = {}
-    if len(found) > 0:
-        task = asyncio.ensure_future(
-            notice_on_error_internal("Error during after_request futures", asyncio.gather(*found))
-        )
-        return task
-    return None
+    return task
 
 
 def clear_futures():

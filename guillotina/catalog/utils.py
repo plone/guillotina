@@ -48,7 +48,7 @@ def reindex_in_future(context, security=False):
 
 
 async def _reindex_all_content(search, context, security):
-    async with transaction():
+    async with transaction(read_only=True):
         await search.reindex_all_content(context, security)
 
 
