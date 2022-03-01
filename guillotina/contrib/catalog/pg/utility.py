@@ -375,6 +375,7 @@ class PGSearchUtility(DefaultSearchUtility):
         await self._process_object(container, data)
         if IFolder.providedBy(container):
             await self._process_folder(container, data)
+        await data["tm"].commit(txn=txn)
 
     async def _process_folder(self, obj, data):
         for key in await obj.async_keys():
