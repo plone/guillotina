@@ -8,6 +8,7 @@ mypy-zope==0.3.2
 black==21.10b0
 isort==4.3.21
 jinja2==2.11.3
+MarkupSafe<2.1.0
 pytz==2020.1
 emcache==0.4.1; python_version < '3.10'
 pymemcache==3.4.0; python_version < '3.10'
