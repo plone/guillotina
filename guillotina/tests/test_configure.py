@@ -251,6 +251,26 @@ async def test_app_settings_are_overwritten_by_pytest_marks(container_requester)
     assert "storage" in app_settings["databases"]["db"]
 
 
+@pytest.mark.app_settings(
+    {
+        "applications": ["guillotina.contrib.dbusers"],
+        "auth_validation_tasks": {"custom_value": {}},
+    }
+)
+async def test_app_settings_mark_can_modify_another_package(dummy_guillotina):
+    from guillotina import app_settings
+
+    assert "custom_value" in app_settings["auth_validation_tasks"], app_settings["auth_validation_tasks"]
+
+
+@pytest.mark.app_settings({"applications": ["guillotina.contrib.dbusers"]})
+async def test_app_settings_mark_doesnt_affected_other_tests(dummy_guillotina):
+    from guillotina import app_settings
+
+    # This ensures the previous test did not mutate the app settings
+    assert "custom_value" not in app_settings["auth_validation_tasks"], app_settings["auth_validation_tasks"]
+
+
 async def test_register_service_with_path(container_requester):
     cur_count = len(configure.get_configurations("guillotina.tests", "service"))
 

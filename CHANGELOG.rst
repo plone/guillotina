@@ -7,6 +7,9 @@ CHANGELOG
 - Breaking change: guillotina futures won't have the txn set anymore.
   [masipcat]
 
+- Fix @pytest.mark.app_settings modified original settings dictionary
+  [masipcat]
+
 - Fix previous change in mailer utility
   [masipcat]
 
@@ -17,6 +20,9 @@ CHANGELOG
 - Documentation: Add info about catalog_max_results
   [ksuess]
 
+- Add a dict parameter `render_options` to pass custom values to
+  rendered template in EmailValidationUtility
+  [jotare]
 
 6.4.0rc2 (2021-11-22)
 ---------------------
