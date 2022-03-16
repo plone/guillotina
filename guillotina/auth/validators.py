@@ -79,7 +79,7 @@ def hash_password(password, salt=None, algorithm="argon2"):
 
 
 def check_password(token, password):
-    cache_key = token + hashlib.sha512(password.encode("utf-8")).hexdigest()
+    cache_key = token + hashlib.sha256(password.encode("utf-8")).hexdigest()
     if cache_key in _pw_auth_validator:
         return _pw_auth_validator[cache_key]
     split = token.split(":")
