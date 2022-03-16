@@ -1,8 +1,8 @@
 CHANGELOG
 =========
 
-6.4.0 (unreleased)
-------------------
+6.4.0rc3 (unreleased)
+---------------------
 
 - Fix Pillow dependency
   [bloodbare]
