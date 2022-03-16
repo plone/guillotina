@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.4.0rc3 (unreleased)
+6.4.0rc3 (2022-03-16)
 ---------------------
 
 - Fix Pillow dependency
