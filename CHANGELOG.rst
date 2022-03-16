@@ -4,6 +4,9 @@ CHANGELOG
 6.4.0rc3 (unreleased)
 ---------------------
 
+- Breaking change: guillotina futures won't have the txn set anymore.
+  [masipcat]
+
 - Fix @pytest.mark.app_settings modified original settings dictionary
   [masipcat]
 

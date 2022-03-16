@@ -361,8 +361,8 @@ class PGSearchUtility(DefaultSearchUtility):
         """
         recursively go through all content to reindex jsonb...
         """
-
-        data = {"count": 0, "transaction": None, "transactions": 0, "tm": get_current_transaction()._manager}
+        txn = get_current_transaction()
+        data = {"count": 0, "transaction": None, "transactions": 0, "tm": txn._manager}
 
         try:
             data["table_name"] = data["tm"]._storage._objects_table_name
@@ -370,12 +370,12 @@ class PGSearchUtility(DefaultSearchUtility):
             # Not supported DB
             return
 
-        data["transaction"] = await data["tm"].begin()
+        data["transaction"] = txn
         container.__txn__ = data["transaction"]
         await self._process_object(container, data)
         if IFolder.providedBy(container):
             await self._process_folder(container, data)
-        await data["tm"].commit(txn=data["transaction"])
+        await data["tm"].commit(txn=txn)
 
     async def _process_folder(self, obj, data):
         for key in await obj.async_keys():
