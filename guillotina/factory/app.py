@@ -40,7 +40,7 @@ logger = glogging.getLogger("guillotina")
 
 
 def update_app_settings(settings):
-    for key, value in settings.items():
+    for key, value in deepcopy(settings).items():
         if isinstance(app_settings.get(key), dict) and isinstance(value, dict):
             app_settings[key].update(value)
         else:

@@ -4,6 +4,9 @@ CHANGELOG
 6.4.0rc3 (unreleased)
 ---------------------
 
+- Fix @pytest.mark.app_settings modified original settings dictionary
+  [masipcat]
+
 - Fix previous change in mailer utility
   [masipcat]
 
