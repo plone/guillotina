@@ -4,6 +4,9 @@ CHANGELOG
 6.4.0rc3 (unreleased)
 ---------------------
 
+- Fix Pillow dependency
+  [bloodbare]
+
 - Breaking change: guillotina futures won't have the txn set anymore.
   [masipcat]
 

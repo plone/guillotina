@@ -62,13 +62,13 @@ async def test_image_field_with_behavior(redis_container, container_requester):
         assert status == 200
 
         assert len(response) < size
-        assert len(response) == 5270
+        assert len(response) == 5260
 
         response, status = await requester("GET", "/db/guillotina/foobar/@images/image/icon")
         assert status == 200
 
         assert len(response) < size
-        assert len(response) == 1920
+        assert len(response) == 1915
 
         with open(os.path.join(TEST_DATA_LOCATION, "logo.png"), "rb") as image:
             data = image.read()
