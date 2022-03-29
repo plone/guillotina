@@ -40,7 +40,6 @@ try:
                 labels={"type": operation},
             )
 
-
 except ImportError:
     watch = metrics.watch  # type: ignore
 

@@ -12,7 +12,7 @@ PyYaml>=5.1
 six==1.11.0
 orjson>=3,<4
 zope.interface==5.1.0
-uvicorn==0.13.1
+uvicorn==0.17.6
 argon2-cffi==18.3.0
 backoff==1.10.0
 prometheus-client==0.8.0

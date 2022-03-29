@@ -69,7 +69,6 @@ try:
             result_type += "_roots"
         CACHE_HITS.labels(type=name, result=result_type).inc()
 
-
 except ImportError:
 
     def record_cache_metric(
