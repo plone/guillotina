@@ -58,6 +58,12 @@ class PubSubUtility:
     async def real_subscribe(self, channel, channel_name):
         while channel_name in self._subscribers:
             try:
+                if channel is None:
+                    # wait 1 second and try to connect
+                    await asyncio.sleep(1)
+                    logger.warning(f"Reconnecting to channel {channel_name}")
+                    channel = await self._driver.subscribe(channel_name)
+
                 async for msg in channel:
                     try:
                         try:
@@ -74,17 +80,11 @@ class PubSubUtility:
                 # if we're cancelled, we don't want to attempt
                 return
             except Exception:
-                logger.error(f"Unhandled exception with pubsub. Sleeping before trying again", exc_info=True)
+                logger.error(f"Unhandled exception with pubsub", exc_info=True)
+                channel = None  # Force reconnect
+                await self._driver.unsubscribe(channel_name)
                 # TODO: maybe we should call the callback with a disconnected event or do it on reconnect,
                 # so the callback has a chance to perform the logic to recover.
-                await asyncio.sleep(1)
-            finally:
-                try:
-                    # Restart subscription
-                    await self._driver.unsubscribe(channel_name)
-                    channel = await self._driver.subscribe(channel_name)
-                except Exception:
-                    pass
 
     async def subscribe(self, channel_name: str, rid: str, callback: Callable[[str], None]):
         if self._driver is None:
