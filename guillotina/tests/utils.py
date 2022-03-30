@@ -155,7 +155,7 @@ def make_mocked_request(
     payload: bytes = b"",
     *,
     app=None,
-    client_max_size=1024 ** 2,
+    client_max_size=1024**2,
 ):
     if headers is None:
         headers = {}

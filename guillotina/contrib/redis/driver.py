@@ -5,6 +5,7 @@ except ImportError:
     raise
 
 from aioredis.client import PubSub
+from aioredis.exceptions import ConnectionError
 from guillotina import app_settings
 from guillotina import metrics
 from guillotina.contrib.redis.exceptions import NoRedisConfigured
@@ -38,7 +39,6 @@ try:
                 histogram=REDIS_OPS_PROCESSING_TIME,
                 labels={"type": operation},
             )
-
 
 except ImportError:
     watch = metrics.watch  # type: ignore
@@ -159,12 +159,14 @@ class RedisDriver:
         if self._pool is None:
             raise NoRedisConfigured()
 
-        p = self._pubsub_channels[channel_name]
-        try:
-            await p.unsubscribe(channel_name)
-        finally:
-            await p.__aexit__(None, None, None)
-            del self._pubsub_channels[channel_name]
+        p = self._pubsub_channels.pop(channel_name, None)
+        if p:
+            try:
+                await p.unsubscribe(channel_name)
+            except ConnectionError:
+                logger.error(f"Error unsubscribing channel {channel_name}", exc_info=True)
+            finally:
+                await p.__aexit__(None, None, None)
 
     async def subscribe(self, channel_name: str):
         if self._pool is None:

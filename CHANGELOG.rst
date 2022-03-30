@@ -4,7 +4,8 @@ CHANGELOG
 6.4.0rc4 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Fix PubSub utility stuck in infinite loop when Redis connection is interrupted
+  [masipcat]
 
 
 6.4.0rc3 (2022-03-16)

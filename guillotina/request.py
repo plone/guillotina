@@ -305,7 +305,7 @@ class Request(object):
         path,
         query_string,
         raw_headers,
-        client_max_size: int = 1024 ** 2,
+        client_max_size: int = 1024**2,
         send=None,
         receive=None,
         scope=None,
