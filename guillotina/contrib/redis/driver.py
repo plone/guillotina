@@ -4,8 +4,8 @@ except ImportError:
     print("If you add guillotina.contrib.redis you need to add aioredis on your requirements")
     raise
 
-from aioredis import ConnectionError
 from aioredis.client import PubSub
+from aioredis.exceptions import ConnectionError
 from guillotina import app_settings
 from guillotina import metrics
 from guillotina.contrib.redis.exceptions import NoRedisConfigured

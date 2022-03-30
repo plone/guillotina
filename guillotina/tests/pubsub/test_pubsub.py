@@ -1,6 +1,5 @@
 from guillotina.component import get_utility
 from guillotina.interfaces import IPubSubUtility
-from pytest_docker_fixtures.images import settings as img_settings
 
 import asyncio
 import pytest
@@ -48,6 +47,8 @@ async def test_pubsub(redis_container, guillotina_main):
 )
 @pytest.mark.asyncio
 async def test_pubsub_recovers_after_restarting_redis(redis_container, guillotina_main):
+    from pytest_docker_fixtures.images import settings  # type: ignore
+
     util = get_utility(IPubSubUtility)
     await util.initialize()
     RESULT = []
@@ -67,14 +68,14 @@ async def test_pubsub_recovers_after_restarting_redis(redis_container, guillotin
     assert len(RESULT) == 1
     assert RESULT[0] == "mydata"
 
-    original_options = img_settings["redis"].get("options", {})
+    original_options = settings["redis"].get("options", {})
     try:
         _, port = redis_container
-        img_settings["redis"]["options"] = {**original_options, "ports": {"6379/tcp": port}}
+        settings["redis"]["options"] = {**original_options, "ports": {"6379/tcp": port}}
         pytest_docker_fixtures.redis_image.stop()
         pytest_docker_fixtures.redis_image.run()
     finally:
-        img_settings["redis"]["options"] = original_options
+        settings["redis"]["options"] = original_options
 
     await asyncio.sleep(1.1)  # Wait for reconnection
 
