@@ -43,7 +43,7 @@ async def run2():
     writer = get_adapter(ob, IWriter)
     serialized = writer.serialize()
     for _ in range(ITERATIONS):
-        ob = reader({"state": serialized, "zoid": 0, "tid": 0, "id": "foobar"})
+        ob = await reader({"state": serialized, "zoid": 0, "tid": 0, "id": "foobar"})
     end = time.time()
     assert ob.foobar1 == "1"
     assert ob.foobar6 == "6"

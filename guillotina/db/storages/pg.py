@@ -867,7 +867,7 @@ WHERE tablename = '{}' AND indexname = '{}_parent_id_id_key';
     async def store(self, oid, old_serial, writer, obj, txn):
         assert oid is not None
 
-        pickled = writer.serialize()  # This calls __getstate__ of obj
+        pickled = await writer.serialize()  # This calls __getstate__ of obj
         if len(pickled) >= self._large_record_size:
             log.info(f"Large object {obj.__class__}: {len(pickled)}")
         if self._store_json:

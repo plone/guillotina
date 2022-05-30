@@ -212,7 +212,7 @@ class CockroachStorage(pg.PostgresqlStorage):
     async def store(self, oid, old_serial, writer, obj, txn):
         assert oid is not None
 
-        pickled = writer.serialize()  # This calls __getstate__ of obj
+        pickled = await writer.serialize()  # This calls __getstate__ of obj
         if len(pickled) >= self._large_record_size:
             logger.warning(f"Large object {obj.__class__}: {len(pickled)}")
         part = writer.part
