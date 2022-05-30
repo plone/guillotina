@@ -133,7 +133,9 @@ class TestPGMetrics:
         txn.connection_reserved = True
         txn._db_conn = conn
 
-        await storage.store("foobar", 1, MagicMock(), ob, txn)
+        writer = AsyncMock()
+        writer.serialize.return_value = b""
+        await storage.store("foobar", 1, writer, ob, txn)
         assert (
             metrics_registry.get_sample_value(
                 "guillotina_db_pg_ops_total", {"type": "store_object", "error": "none"}
