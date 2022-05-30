@@ -4,7 +4,10 @@ CHANGELOG
 6.4.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Deserialize pickles in a asyncio executor
+  [masipcat]
+- Converted db functions reader() and IWriter.serialize() to async
+  [masipcat]
 
 
 6.4.0 (2022-04-12)
