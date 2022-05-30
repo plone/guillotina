@@ -1,6 +1,6 @@
+from guillotina import app_settings
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.utils import run_async
-from guillotina import app_settings
 
 import pickle
 import typing
