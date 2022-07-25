@@ -259,18 +259,30 @@ async def test_search_endpoint_or_operator(container_requester):
         await requester("POST", "/db/guillotina", data=json.dumps({"@type": "Item", "title": "First item"}))
         await requester("POST", "/db/guillotina", data=json.dumps({"@type": "Item", "title": "Second item"}))
         await requester("POST", "/db/guillotina", data=json.dumps({"@type": "Item", "title": "Third item"}))
-        await requester(
-            "POST", "/db/guillotina", data=json.dumps({"@type": "Folder", "title": "First folder"})
-        )
+
+        for _ in range(20):
+            await requester(
+                "POST", "/db/guillotina", data=json.dumps({"@type": "Folder", "title": "Folder item"})
+            )
+
         response, status = await requester("GET", "/db/guillotina/@search")
         assert status == 200
-        assert len(response["items"]) == 4
+        assert len(response["items"]) == 20
+        assert response["items_total"] == 23
 
         response, status = await requester(
-            "GET", "/db/guillotina/@search?__or=title%3DFirst item%26title%3DSecond item"
+            "GET", "/db/guillotina/@search?title__or=title%3DFolder%26title%3DSecond item"
+        )
+        assert status == 200
+        assert len(response["items"]) == 20
+        assert response["items_total"] == 21
+
+        response, status = await requester(
+            "GET", "/db/guillotina/@search?title__or=title%3DFirst item%26title%3DSecond item"
         )
         assert status == 200
         assert len(response["items"]) == 2
+        assert response["items_total"] == 2
 
 
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)
