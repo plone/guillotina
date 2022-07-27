@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.4.1 (unreleased)
+6.4.1 (2022-07-27)
 ------------------
 
 - Fix build count query, PG catalog, ignore null and format tuple type. 
