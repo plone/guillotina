@@ -4,7 +4,8 @@ CHANGELOG
 6.4.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix build count query, PG catalog, ignore null and format tuple type. 
+  [rboixaderg]
 
 
 6.4.0 (2022-04-12)

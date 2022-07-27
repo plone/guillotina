@@ -144,31 +144,12 @@ class PGSearchUtility(DefaultSearchUtility):
         sql_wheres.append(f"""parent_id != '{sqlq(TRASHED_ID)}'""")
         return sql_wheres
 
-    def build_query(
-        self,
-        context: IBaseObject,
-        query: ParsedQueryInfo,
-        select_fields: typing.List[str],
-        distinct: typing.Optional[bool] = False,
-        unrestricted: bool = False,
-    ) -> typing.Tuple[str, typing.List[typing.Any]]:
-        if query["sort_on"] is None:
-            # always need a sort otherwise paging never works
-            order_by_index = get_pg_index("uuid")
-        else:
-            order_by_index = get_pg_index(query["sort_on"]) or BasicJsonIndex(query["sort_on"])
-
-        sql_arguments = []
+    def parse_sql_query_to_arguments_and_where_clauses(self, arg_index, query, sql_arguments):
         sql_wheres = []
-        arg_index = 1
-
-        for idx, select in enumerate(query["selects"]):
-            select_fields.append(select.format(arg=arg_index))
-            sql_arguments.append(query["selects_arguments"][idx])
-            arg_index += 1
 
         where_arg_index = 0
         where_arg_iter = 0
+
         # Skip None arguments
         for where in query["wheres"]:
             if isinstance(where, tuple):
@@ -187,6 +168,34 @@ class PGSearchUtility(DefaultSearchUtility):
                     sql_arguments.append(query["wheres_arguments"][where_arg_iter])
                     where_arg_index += 1
                 where_arg_iter += 1
+
+        return sql_arguments, sql_wheres
+
+    def build_query(
+        self,
+        context: IBaseObject,
+        query: ParsedQueryInfo,
+        select_fields: typing.List[str],
+        distinct: typing.Optional[bool] = False,
+        unrestricted: bool = False,
+    ) -> typing.Tuple[str, typing.List[typing.Any]]:
+        if query["sort_on"] is None:
+            # always need a sort otherwise paging never works
+            order_by_index = get_pg_index("uuid")
+        else:
+            order_by_index = get_pg_index(query["sort_on"]) or BasicJsonIndex(query["sort_on"])
+
+        sql_arguments = []
+        arg_index = 1
+
+        for idx, select in enumerate(query["selects"]):
+            select_fields.append(select.format(arg=arg_index))
+            sql_arguments.append(query["selects_arguments"][idx])
+            arg_index += 1
+
+        sql_arguments, sql_wheres = self.parse_sql_query_to_arguments_and_where_clauses(
+            arg_index, query, sql_arguments
+        )
 
         txn = get_transaction()
         if txn is None:
@@ -219,15 +228,9 @@ class PGSearchUtility(DefaultSearchUtility):
         query: ParsedQueryInfo,
         unrestricted: bool = False,
     ) -> typing.Tuple[str, typing.List[typing.Any]]:
-        sql_arguments = []
-        sql_wheres = []
-        select_fields = ["count(*)"]
-        arg_index = 1
-        for idx, where in enumerate(query["wheres"]):
-            sql_wheres.append(where.format(arg=arg_index))
-            sql_arguments.append(query["wheres_arguments"][idx])
-            arg_index += 1
 
+        select_fields = ["count(*)"]
+        sql_arguments, sql_wheres = self.parse_sql_query_to_arguments_and_where_clauses(1, query, [])
         sql_wheres.extend(self.get_default_where_clauses(context, unrestricted=unrestricted))
 
         txn = get_transaction()
