@@ -60,17 +60,18 @@ def create_workflow_factory(proto_name, proto_definition):
         def initial_state(self):
             return self._initial_state
 
-        async def do_action(self, action, comments):
+        async def do_action(self, action, comments, bypass_permission_check=False):
             available_actions = self.actions
             if action not in available_actions:
                 raise HTTPPreconditionFailed(content={"reason": "Unavailable action"})
 
             action_def = available_actions[action]
-            policy = get_security_policy()
-            if "check_permission" in action_def and not policy.check_permission(
-                action_def["check_permission"], self.context
-            ):
-                raise HTTPUnauthorized()
+            if bypass_permission_check is False:
+                policy = get_security_policy()
+                if "check_permission" in action_def and not policy.check_permission(
+                    action_def["check_permission"], self.context
+                ):
+                    raise HTTPUnauthorized()
 
             # Change permission
             new_state = action_def["to"]
