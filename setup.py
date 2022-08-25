@@ -78,7 +78,7 @@ setup(
     extras_require={
         "test": [
             "pytest>=3.8.0,<6.3.0",
-            "docker",
+            "docker>=5.0.0,<6.0.0",
             "backoff",
             "psycopg2-binary",
             "pytest-asyncio<=0.13.0",
