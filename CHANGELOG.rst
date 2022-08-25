@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.4.2 (unreleased)
+6.4.2 (2022-08-25)
 ------------------
 
 - Being able to call do_action with super powers in the Workflow
