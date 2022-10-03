@@ -5,6 +5,7 @@ CHANGELOG
 ------------------
 
 - Deps: replace aioredis with redis-py
+- Deps: updated flake8 so it won't depend on 'importlib-metadata<5'
   [masipcat]
 
 
