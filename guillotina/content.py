@@ -327,12 +327,12 @@ class Folder(Resource):
         try:
             txn = self._get_transaction()
             val = await txn.get_child(self, key)
-            if val is not None:
-                if not suppress_events:
-                    await notify(ObjectLoadedEvent(val))
-                return val
         except KeyError:
-            pass
+            val = None
+        if val is not None:
+            if not suppress_events:
+                await notify(ObjectLoadedEvent(val))
+            return val
         return default
 
     async def async_multi_get(

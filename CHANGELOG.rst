@@ -4,7 +4,8 @@ CHANGELOG
 6.4.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix content.async_get() catches KeyError exceptions unrelated to txn.get_child()
+  [masipcat]
 
 
 6.4.2 (2022-08-25)
