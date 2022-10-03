@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.4.3 (unreleased)
+6.5.0 (unreleased)
 ------------------
 
 - Deps: replace aioredis with redis-py
