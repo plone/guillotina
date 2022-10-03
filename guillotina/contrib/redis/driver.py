@@ -7,7 +7,7 @@ except ImportError:
 from guillotina import app_settings
 from guillotina import metrics
 from guillotina.contrib.redis.exceptions import NoRedisConfigured
-from redis.client import PubSub
+from redis.asyncio.client import PubSub
 from redis.exceptions import ConnectionError
 from typing import Dict
 from typing import List
