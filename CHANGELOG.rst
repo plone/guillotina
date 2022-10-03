@@ -4,7 +4,8 @@ CHANGELOG
 6.4.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Deps: replace aioredis with redis-py
+  [masipcat]
 
 
 6.4.2 (2022-08-25)

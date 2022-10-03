@@ -21,7 +21,7 @@ applications:
 
 This option is not recommended as they are not invalidating the memory objects.
 
-Its needed to add `aioredis` as a dependency on your project
+Its needed to add `redis` as a dependency on your project
 
 ### Configuration
 
@@ -37,7 +37,7 @@ cache:
 
 This option is the recommended one for more than one process running guillotina on the same DB.
 
-Its needed to add `aioredis` as a dependency on your project
+Its needed to add `redis` as a dependency on your project
 
 ### Configuration
 
