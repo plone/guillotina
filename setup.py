@@ -105,7 +105,7 @@ setup(
             'aiohttp>=3.0.0,<3.6.0;python_version<"3.8"',
             'aiohttp>=3.6.0,<4.0.0;python_version>="3.8"',
         ],
-        "redis": ['aioredis==2.0.0'],
+        "redis": ['redis>=4.3.0'],
         "mailer": ["html2text>=2018.1.9", "aiosmtplib>=1.0.6"],
         "memcached": ["emcache"],
         "validation": ["pytz==2020.1"],

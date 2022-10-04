@@ -26,3 +26,4 @@ types-pytz==2021.1.2
 types-PyYAML==5.4.6
 types-setuptools==57.0.2
 types-toml==0.1.5
+types-redis==4.3.21

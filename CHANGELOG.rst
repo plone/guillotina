@@ -1,10 +1,12 @@
 CHANGELOG
 =========
 
-6.4.3 (unreleased)
+6.5.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Deps: replace aioredis with redis-py
+- Deps: updated flake8 so it won't depend on 'importlib-metadata<5'
+  [masipcat]
 
 
 6.4.2 (2022-08-25)

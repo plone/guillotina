@@ -18,9 +18,9 @@ class BasicJsonIndex:
     def get_index_sql(self, storage: IPostgresStorage) -> typing.List[str]:
         return [
             f"""CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}_{sqlq(storage.objects_table_name.replace('.', '_'))}
-                ON {sqlq(storage.objects_table_name)} ((json->>'{sqlq(self.name)}'));""",
+                ON {sqlq(storage.objects_table_name)} ((json->>'{sqlq(self.name)}'));""",  # noqa: E501
             f"""CREATE INDEX CONCURRENTLY IF NOT EXISTS {sqlq(self.idx_name)}_{sqlq(storage.objects_table_name.replace('.', '_'))}
-                ON {sqlq(storage.objects_table_name)} USING gin ((json->'{sqlq(self.name)}'))""",
+                ON {sqlq(storage.objects_table_name)} USING gin ((json->'{sqlq(self.name)}'))""",  # noqa: E501
         ]
 
     def where(self, value, operator="=") -> str:
