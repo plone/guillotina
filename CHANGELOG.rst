@@ -1,10 +1,12 @@
 CHANGELOG
 =========
 
-6.4.3 (unreleased)
+6.5.0 (unreleased)
 ------------------
 
 - Fix content.async_get() catches KeyError exceptions unrelated to txn.get_child()
+- Deps: replace aioredis with redis-py
+- Deps: updated flake8 so it won't depend on 'importlib-metadata<5'
   [masipcat]
 
 
