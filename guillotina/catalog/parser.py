@@ -83,9 +83,11 @@ class BaseParser:
         # Path specific use case
         if "path__starts" in params:
             path = params.pop("path__starts")
-            path = "/" + path.strip("/")
+            path = "/" + path.lstrip("/")
         else:
             path = get_content_path(self.context)
+            if path.endswith("/") is False and path != "/":
+                path = path + "/"
         params["path__starts"] = path
 
         if "_size" in params:

@@ -8,6 +8,10 @@ CHANGELOG
 - Deps: replace aioredis with redis-py
 - Deps: updated flake8 so it won't depend on 'importlib-metadata<5'
   [masipcat]
+- Fix path__starts. Add a slash when parsing the path of the query if
+  the context of the search is not the container, to avoid getting the
+  results of contexts that starts with the same path.
+  [nbacardit26]
 
 
 6.4.2 (2022-08-25)

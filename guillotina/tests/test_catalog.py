@@ -194,6 +194,20 @@ async def test_search_endpoint(container_requester):
         response, status = await requester("GET", "/db/guillotina/@search")
         assert status == 200
         assert len(response["items"]) == 1
+        _, status = await requester(
+            "POST", "/db/guillotina", data=json.dumps({"@type": "Folder", "id": "folder"})
+        )
+        assert status == 201
+        _, status = await requester(
+            "POST", "/db/guillotina", data=json.dumps({"@type": "Folder", "id": "folder2"})
+        )
+        assert status == 201
+        await requester("POST", "/db/guillotina/folder", data=json.dumps({"@type": "Item"}))
+        await requester("POST", "/db/guillotina/folder2", data=json.dumps({"@type": "Item"}))
+        response, status = await requester("GET", "/db/guillotina/@search?type_name=Item")
+        assert response["items_total"] == 3
+        response, status = await requester("GET", "/db/guillotina/folder/@search?type_name=Item")
+        assert response["items_total"] == 1
 
 
 @pytest.mark.skipif(not NOT_POSTGRES, reason="Only not PG")
@@ -424,10 +438,22 @@ async def test_query_pg_catalog(container_requester):
 
     async with container_requester as requester:
         await requester(
-            "POST", "/db/guillotina/", data=json.dumps({"@type": "Item", "title": "Item1", "id": "item1"})
+            "POST", "/db/guillotina/", data=json.dumps({"@type": "Folder", "title": "Folder", "id": "folder"})
         )
         await requester(
-            "POST", "/db/guillotina/", data=json.dumps({"@type": "Item", "title": "Item2", "id": "item2"})
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps({"@type": "Folder", "title": "Folder2", "id": "folder2"}),
+        )
+        await requester(
+            "POST",
+            "/db/guillotina/folder",
+            data=json.dumps({"@type": "Item", "title": "Item1", "id": "item1"}),
+        )
+        await requester(
+            "POST",
+            "/db/guillotina/folder2",
+            data=json.dumps({"@type": "Item", "title": "Item2", "id": "item2"}),
         )
 
         async with requester.db.get_transaction_manager() as tm, await tm.begin():
@@ -446,11 +472,11 @@ async def test_query_pg_catalog(container_requester):
             assert len(results["items"]) == 1
 
             results = await util.query_aggregation(container, {"_metadata": "title"})
-            assert len(results["items"]) == 2
-            assert results["items"][0][0] == "Item1"
+            assert len(results["items"]) == 4
+            assert results["items"][0][0] == "Folder"
 
             results = await util.query_aggregation(container, {"_metadata": ["title", "creators"]})
-            assert len(results["items"]) == 2
+            assert len(results["items"]) == 4
             assert results["items"][0][1][0] == "root"
 
             results = await util.query_aggregation(container, {"_metadata": ["creators"]})
@@ -462,6 +488,15 @@ async def test_query_pg_catalog(container_requester):
             )
             assert len(results["items"]) == 1
             assert results["items"][0][1][0] == "root"
+            folder = await container.async_get("folder")
+            results = await util.search(folder, {"type_name": "Item"})
+            assert results["items_total"] == 1
+            results = await util.search(container, {"type_name": "Item"})
+            assert results["items_total"] == 2
+            results = await util.search(container, {"type_name": "Item", "path__starts": "/folder"})
+            assert results["items_total"] == 2
+            results = await util.search(container, {"type_name": "Item", "path__starts": "/folder/"})
+            assert results["items_total"] == 1
 
         resp, status = await requester(
             "GET",
@@ -651,6 +686,9 @@ async def test_parse_base():
     assert result["sort_on"] == "modification_date"
     assert result["sort_dir"] == "ASC"
     assert result["params"]["path__starts"] == "/foo/bar"
+
+    result = parser({"_from": 5, "_sort_asc": "modification_date", "path__starts": "foo/bar/"})
+    assert result["params"]["path__starts"] == "/foo/bar/"
 
     result = parser({"_sort_des": "modification_date"})
     assert result["sort_on"] == "modification_date"
