@@ -12,6 +12,7 @@ CHANGELOG
   the context of the search is not the container, to avoid getting the
   results of contexts that starts with the same path.
   [nbacardit26]
+- Adding render_options when registering a user.
 
 
 6.4.2 (2022-08-25)
