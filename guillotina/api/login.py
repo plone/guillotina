@@ -365,6 +365,7 @@ class RegisterUsers(Service):
                 context_description=self.context.title,
                 redirect_url=redirect_url,
                 data=payload,
+                render_options=payload.get("render_options", {}),
             )
         else:
             raise HTTPNotAcceptable()
