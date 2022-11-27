@@ -42,6 +42,9 @@ class ICatalogUtility(Interface):
     async def initialize_catalog(container: IContainer):
         """Creates an index"""
 
+    async def update_catalog(container: IContainer, datas):
+        """Updates an index"""
+
     async def remove_catalog(container: IContainer):
         """Deletes an index"""
 

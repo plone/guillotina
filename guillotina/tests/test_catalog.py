@@ -391,6 +391,8 @@ async def test_create_catalog(container_requester):
     async with container_requester as requester:
         response, status = await requester("POST", "/db/guillotina/@catalog", data="{}")
         assert status == 200
+        response, status = await requester("POST", "/db/guillotina/@update-catalog", data="{}")
+        assert status == 200
         response, status = await requester("DELETE", "/db/guillotina/@catalog")
         assert status == 200
 

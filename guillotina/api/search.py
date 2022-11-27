@@ -182,6 +182,23 @@ async def catalog_post(context, request):
 
 @configure.service(
     context=IResource,
+    method="POST",
+    permission="guillotina.ManageCatalog",
+    name="@update-catalog",
+    summary="Update catalog",
+    responses={"200": {"description": "Successfully updated catalog"}},
+)
+async def update_catalog(context, request):
+    search = query_utility(ICatalogUtility)
+    data = await request.json() or {}
+    if search is None:
+        raise HTTPServiceUnavailable()
+    await search.update_catalog(context, data)
+    return {}
+
+
+@configure.service(
+    context=IResource,
     method="DELETE",
     permission="guillotina.ManageCatalog",
     name="@catalog",
