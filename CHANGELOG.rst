@@ -4,6 +4,8 @@ CHANGELOG
 6.5.0 (unreleased)
 ------------------
 
+- Fix not checking if the ID is valid when duplicating a resource
+  [masipcat]
 - Fix content.async_get() catches KeyError exceptions unrelated to txn.get_child()
 - Deps: replace aioredis with redis-py
 - Deps: updated flake8 so it won't depend on 'importlib-metadata<5'

@@ -609,6 +609,13 @@ async def test_duplicate_content(container_requester):
         )
         folder_uid = response["@uid"]
 
+        _, status = await requester(
+            "POST",
+            "/db/guillotina/foobar1/@duplicate",
+            data=json.dumps({"new_id": "inva/id_path", "destination": "/folder"}),
+        )
+        assert status == 412
+
         await requester(
             "POST",
             "/db/guillotina/foobar1/@duplicate",
