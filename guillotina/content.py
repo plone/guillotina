@@ -710,6 +710,10 @@ async def duplicate(
             count += 1
             new_id = f"{context.id}-duplicate-{count}"
 
+    id_checker = get_adapter(context, IIDChecker)
+    if not isinstance(new_id, str) or not await id_checker(new_id, context.type_name):
+        raise PreconditionFailed(new_id, "Invalid id")
+
     from guillotina.content import create_content_in_container
 
     creators = context.creators
