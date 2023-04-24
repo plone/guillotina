@@ -13,8 +13,11 @@ CHANGELOG
 - Fix path__starts. Add a slash when parsing the path of the query if
   the context of the search is not the container, to avoid getting the
   results of contexts that starts with the same path.
-  [nbacardit26]
+  [nilbacardit26]
 - Adding render_options when registering a user.
+- Dropping zope.interfae.implements:
+  https://github.com/zopefoundation/zope.interface/blob/master/CHANGES.rst#60-2023-03-17
+  [nilbacardit26]
 
 
 6.4.2 (2022-08-25)

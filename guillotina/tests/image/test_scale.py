@@ -316,14 +316,12 @@ class ScalingTests(TestCase):
         self.assertEqual(img_scaled.size, (40, 20))
 
     def testDeprecations(self):
-        import guillotina.contrib.image.scale
-
         # clear warnings registry, so the test actually sees the warning
-        guillotina.contrib.image.scale.__warningregistry__.clear()
+        warnings.simplefilter("always")
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             scaleImage(PNG, 16, 16, direction="keep")
-            self.assertEqual(len(w), 1)
+            self.assertEqual(len(w), 2)
             self.assertIs(w[0].category, DeprecationWarning)
             self.assertIn("the 'direction' option is deprecated", str(w[0].message))
 
