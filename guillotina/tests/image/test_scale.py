@@ -321,7 +321,7 @@ class ScalingTests(TestCase):
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             scaleImage(PNG, 16, 16, direction="keep")
-            self.assertEqual(len(w), 2)
+            self.assertEqual(len(w), 1)
             self.assertIs(w[0].category, DeprecationWarning)
             self.assertIn("the 'direction' option is deprecated", str(w[0].message))
 
