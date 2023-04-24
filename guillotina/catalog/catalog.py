@@ -88,6 +88,9 @@ class DefaultSearchUtility:
     async def initialize_catalog(self, container: IContainer):
         """Creates an index"""
 
+    async def update_catalog(self, container: IContainer, datas):
+        """Updates an index"""
+
     async def remove_catalog(self, container: IContainer):
         """Deletes an index"""
 
