@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from collections import OrderedDict
 from datetime import date
 from datetime import datetime
 from datetime import time
@@ -68,6 +69,17 @@ def set_converter(value):
 
 @configure.value_serializer(dict)
 def dict_converter(value):
+    if value == {}:
+        return {}
+
+    keys, values = zip(*value.items())
+    keys = map(json_compatible, keys)
+    values = map(json_compatible, values)
+    return dict(zip(keys, values))
+
+
+@configure.value_serializer(OrderedDict)
+def ordered_dict_converter(value):
     if value == {}:
         return {}
 

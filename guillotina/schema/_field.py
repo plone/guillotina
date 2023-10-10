@@ -12,6 +12,7 @@
 #
 ##############################################################################
 from collections import namedtuple
+from collections import OrderedDict as NativeOrderedDict
 from datetime import date
 from datetime import datetime
 from datetime import time
@@ -65,6 +66,7 @@ from guillotina.schema.interfaces import IMaskTextLine
 from guillotina.schema.interfaces import IMinMaxLen
 from guillotina.schema.interfaces import IObject
 from guillotina.schema.interfaces import IObjectJSONField
+from guillotina.schema.interfaces import IOrderedDict
 from guillotina.schema.interfaces import IPassword
 from guillotina.schema.interfaces import ISet
 from guillotina.schema.interfaces import ISource
@@ -663,6 +665,25 @@ class Dict(MinMaxLen, Iterable):
         if clone.value_type is not None:
             clone.value_type = clone.value_type.bind(object)
         return clone
+
+
+@implementer(IOrderedDict)
+class OrderedDict(Dict):
+    """A field representing an OrderedDict."""
+
+    _type = NativeOrderedDict
+
+    def reorder_images(self, payload):
+        data_field = self.get(self.context)
+        # payload is an ordered list of the keys
+        if isinstance(payload, list):
+            if len(payload) != len(data_field):
+                raise ValueError("Length of the payload must be equal to the field")
+            for key in payload:
+                if key not in data_field:
+                    raise ValueError("Key not found")
+                data_field.move_to_end(key)
+            self.set(self.context, data_field)
 
 
 DEFAULT_JSON_SCHMEA = json.dumps({"type": "object", "properties": {}})
