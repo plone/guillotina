@@ -248,11 +248,12 @@ class TraversableFieldService(Service):
         if self.behavior is not None and IAsyncBehavior.implementedBy(self.behavior.__class__):
             # providedBy not working here?
             await self.behavior.load()
-
         if IDict.providedBy(field) and ICloudFileField.providedBy(field.value_type):
             key = self.request.matchdict.get("file_key")
             if key is not None:
                 self.field = CloudFileField(__name__=name).bind(DictFieldProxy(key, ctx, name))
+            else:
+                self.field = field.bind(ctx)
         elif ICloudFileField.providedBy(field):
             self.field = field.bind(ctx)
 

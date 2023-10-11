@@ -11,6 +11,7 @@ from guillotina.interfaces import IFileManager
 from guillotina.interfaces.content import IResource
 from guillotina.response import HTTPNoContent
 from guillotina.response import HTTPNotFound
+from guillotina.schema.interfaces import IOrderedDict
 from guillotina.utils import get_registry
 from guillotina.utils import run_async
 from io import BytesIO
@@ -138,3 +139,17 @@ class DownloadImageScale(TraversableFieldService):
             return await adapter.download()
         else:
             return HTTPNoContent()
+
+
+@configure.service(
+    context=IResource,
+    method="PATCH",
+    permission="guillotina.ViewContent",
+    name="@sort/{field_name}",
+    **_traversed_file_doc("Order the keys of a field"),
+)
+class OrderMultiImage(TraversableFieldService):
+    async def __call__(self):
+        if IOrderedDict.providedBy(self.field):
+            data = await self.request.json()
+            self.field.reorder_images(data)

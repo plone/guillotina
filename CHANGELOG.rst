@@ -13,8 +13,12 @@ CHANGELOG
 - Fix path__starts. Add a slash when parsing the path of the query if
   the context of the search is not the container, to avoid getting the
   results of contexts that starts with the same path.
-  [nbacardit26]
+  [nilbacardit26]
 - Adding render_options when registering a user.
+  [nilbacardit26]
+- Adding OrderedDict field, and exposing @orderImages to the images'
+  api to order the keys of a field
+  [nilbacardit26]
 
 
 6.4.2 (2022-08-25)

@@ -484,6 +484,10 @@ class IDict(IMinMaxLen, IIterable, IContainer):
     )
 
 
+class IOrderedDict(IDict):
+    """Object representing an ordered dict"""
+
+
 class ITerm(Interface):
     """Object representing a single value in a vocabulary."""
 

@@ -42,6 +42,7 @@ from guillotina.schema._field import NativeString
 from guillotina.schema._field import NativeStringLine
 from guillotina.schema._field import Object
 from guillotina.schema._field import Orderable
+from guillotina.schema._field import OrderedDict
 from guillotina.schema._field import Password
 from guillotina.schema._field import Set
 from guillotina.schema._field import SourceText
@@ -71,7 +72,7 @@ Decimal, Dict, DottedName, Field, Float, FrozenSet, Id, Int, InterfaceField
 Iterable, List, MaskTextLine, MinMaxLen, NativeString, NativeStringLine, Object, Orderable
 Password, Set, SourceText, Text, TextLine, Time, Timedelta, Tuple, URI, UnionField
 get_fields, get_fields_in_order, getFieldNames, getFieldNamesInOrder,
-getValidationErrors, getSchemaValidationErrors, JSONField
+getValidationErrors, getSchemaValidationErrors, JSONField, OrderedDict
 accessors
 ValidationError
 NO_VALUE
