@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.4.3 (unreleased)
+6.4.3 (2023-10-11)
 ------------------
 
 - Fix not checking if the ID is valid when duplicating a resource
