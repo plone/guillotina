@@ -8,8 +8,10 @@ CHANGELOG
   [masipcat]
 
 - Fix content.async_get() catches KeyError exceptions unrelated to txn.get_child()
+  [masipcat]
 
 - Deps: replace aioredis with redis-py
+  [masipcat]
 
 - Deps: updated flake8 so it won't depend on 'importlib-metadata<5'
   [masipcat]
