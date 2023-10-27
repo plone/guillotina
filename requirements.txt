@@ -17,6 +17,7 @@ argon2-cffi==18.3.0
 backoff==1.10.0
 prometheus-client==0.8.0
 typing_extensions==3.7.4.3
+redis==5.0.1
 
 types-chardet==0.1.5
 types-docutils==0.17.0
