@@ -105,7 +105,7 @@ async def test_get_registries(container_requester):
     async with container_requester as requester:
         response, status = await requester("GET", "/db/guillotina/@registry")
         assert status == 200
-        assert len(response["value"]) == 2
+        assert len(response["value"]) == 3
         assert "guillotina.interfaces.registry.ILayers.active_layers" in response["value"]
 
 

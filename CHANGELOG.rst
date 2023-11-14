@@ -1,10 +1,13 @@
 CHANGELOG
 =========
 
-6.4.4 (unreleased)
+
+6.4.4 (2023-11-14)
 ------------------
 
-- Nothing changed yet.
+- Adding audit contrib package. Indexing documents using ES. Exposing an API to search
+  among objects hat have been created, modified and deleted
+  [nilbacardit26]
 
 
 6.4.3 (2023-10-11)

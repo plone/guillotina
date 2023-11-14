@@ -18,6 +18,7 @@ configure.permission("guillotina.GetDatabases", "Get Databases")
 configure.permission("guillotina.UmountDatabase", "Umount a Database")
 
 configure.permission("guillotina.AccessPreflight", "Access Preflight View")
+configure.permission("guillotina.AccessAudit", "Access Audit entries")
 
 configure.permission("guillotina.ReadConfiguration", "Read a configuration")
 configure.permission("guillotina.WriteConfiguration", "Write a configuration")
@@ -107,6 +108,7 @@ configure.grant(permission="guillotina.ModifyContent", role="guillotina.Editor")
 configure.grant(permission="guillotina.MoveContent", role="guillotina.Editor")
 configure.grant(permission="guillotina.DuplicateContent", role="guillotina.Editor")
 configure.grant(permission="guillotina.ReindexContent", role="guillotina.Editor")
+configure.grant(permission="guillotina.AccessAudit", role="guillotina.Editor")
 
 # ContainerAdmin
 configure.grant(permission="guillotina.AccessContent", role="guillotina.ContainerAdmin")
@@ -118,6 +120,7 @@ configure.grant(permission="guillotina.ManageCatalog", role="guillotina.Containe
 configure.grant(permission="guillotina.RawSearchContent", role="guillotina.ContainerAdmin")
 configure.grant(permission="guillotina.CacheManage", role="guillotina.Manager")
 configure.grant(permission="guillotina.Manage", role="guillotina.Manager")
+configure.grant(permission="guillotina.AccessAudit", role="guillotina.Manager")
 
 # ContainerDeleter
 configure.grant(permission="guillotina.DeleteContainers", role="guillotina.ContainerDeleter")

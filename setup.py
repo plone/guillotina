@@ -91,6 +91,7 @@ setup(
             "aiohttp>=3.0.0,<4.0.0",
             "asyncmock",
             "prometheus-client",
+            "guillotina_elasticsearch"
         ],
         "docs": [
             "async-asgi-testclient<2.0.0",
@@ -110,6 +111,7 @@ setup(
         "memcached": ["emcache"],
         "validation": ["pytz==2020.1"],
         "recaptcha": ["aiohttp<4"],
+        "audit": ["elasticsearch[async]>=7.8.0"]
     },
     entry_points={
         "console_scripts": [
