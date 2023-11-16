@@ -4,7 +4,8 @@ CHANGELOG
 6.4.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Removing implements import in components/interfaces.py
+  [nilbacardit26]
 
 
 6.4.3 (2023-10-11)
