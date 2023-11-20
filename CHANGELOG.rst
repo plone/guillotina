@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-6.4.4 (unreleased)
+6.4.4 (2023-11-20)
 ------------------
 
 - Removing implements import in components/interfaces.py
