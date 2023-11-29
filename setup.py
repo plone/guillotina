@@ -103,7 +103,7 @@ setup(
         ],
         "testdata": [
             'aiohttp>=3.0.0,<3.6.0;python_version<"3.8"',
-            'aiohttp>=3.6.0,<3.9.0;python_version>="3.8"',
+            'aiohttp>=3.6.0,<4.0.0;python_version>="3.8"',
         ],
         "redis": ['redis>=4.3.0'],
         "mailer": ["html2text>=2018.1.9", "aiosmtplib>=1.0.6"],
