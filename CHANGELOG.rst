@@ -7,6 +7,9 @@ CHANGELOG
 - Fix: Index full object after move it
   [rboixaderg]
 
+- Chore: Update multidict dependency
+  [rboixaderg]
+
 
 6.4.4 (2023-11-20)
 ------------------
