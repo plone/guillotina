@@ -3,7 +3,7 @@ asyncpg==0.24.0
 cffi==1.14.6
 chardet==3.0.4
 jsonschema==2.6.0
-multidict==4.5.2
+multidict==6.0.4
 pycparser==2.20
 pycryptodome==3.6.6
 PyJWT~=2.1.0

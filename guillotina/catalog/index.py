@@ -50,7 +50,8 @@ class Indexer:
     async def reindex_security(self, obj):
         reindex_in_future(obj, True)
 
-    index_object_move = reindex_security
+    async def index_object_move(self, obj):
+        reindex_in_future(obj)
 
     async def remove_object(self, obj):
         self.remove.append(obj)
