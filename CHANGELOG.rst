@@ -10,6 +10,12 @@ CHANGELOG
 - Chore: Update multidict dependency
   [rboixaderg]
 
+- Fix: Update group in standard API
+  [rboixaderg]
+
+- Fix: Delete indexed_name property in indexes in User and Group interfaces
+  [rboixaderg]
+
 
 6.4.4 (2023-11-20)
 ------------------
