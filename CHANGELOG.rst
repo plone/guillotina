@@ -1,6 +1,14 @@
 CHANGELOG
 =========
 
+7.0.0 (2023-12-06)
+------------------
+
+- BREAKING CHANGE: Passging sql_copy_from_where and jit parameters to
+  asyncpg.connection.ServerCapabilities and pinning asyncpg in
+  requirements to 0.29.0. Dropping 3.7.0 python support
+  [nilbacardit26]
+
 6.4.5 (2023-11-28)
 ------------------
 

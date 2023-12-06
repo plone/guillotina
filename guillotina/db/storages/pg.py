@@ -373,6 +373,8 @@ class LightweightConnection(asyncpg.connection.Connection):
             sql_reset=False,
             sql_close_all=self._server_caps.sql_close_all,
             plpgsql=self._server_caps.plpgsql,
+            jit=self._server_caps.jit,
+            sql_copy_from_where=self._server_caps.sql_copy_from_where,
         )
 
     async def add_listener(self, channel, callback):
