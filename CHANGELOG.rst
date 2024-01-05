@@ -4,7 +4,7 @@ CHANGELOG
 7.0.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Being able to use schema.Time
 
 
 7.0.0 (2023-12-06)

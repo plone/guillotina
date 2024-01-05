@@ -1,4 +1,5 @@
 from datetime import datetime
+from datetime import time
 from dateutil.tz import tzutc
 from guillotina import fields
 from guillotina import schema
@@ -261,6 +262,12 @@ async def test_deserialize_union_of_obj(dummy_guillotina):
 async def test_deserialize_datetime(dummy_guillotina):
     now = datetime.utcnow()
     converted = schema_compatible(now.isoformat(), ITestSchema["datetime"])
+    assert converted.minute == now.minute
+
+
+async def test_deserialize_time(dummy_guillotina):
+    now = time.fromisoformat("10:00:00")
+    converted = schema_compatible(now, ITestSchema["time"])
     assert converted.minute == now.minute
 
 

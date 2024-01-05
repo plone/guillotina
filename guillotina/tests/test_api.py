@@ -1,4 +1,5 @@
 from datetime import datetime
+from datetime import time
 from guillotina import configure
 from guillotina import schema
 from guillotina.addons import Addon
@@ -1244,6 +1245,7 @@ class ITestSchema(Interface):
 
     object_a = schema.Object(IObjectA, required=False)
     list_object_a = PatchField(schema.List(value_type=schema.Object(IObjectA), required=False))
+    time_ = schema.Time(min=time(9, 0, 0), max=time(12, 0, 0), required=False)
 
 
 @contenttype(type_name="TestSchema", schema=ITestSchema)
@@ -1317,6 +1319,49 @@ async def test_field_values_list_bucket(container_requester):
             "/db/guillotina/item1/@fieldvalue/{}.bucket_list?cursor=500".format(ITestBehavior.__identifier__),
         )
         assert status == 410
+
+
+async def test_time_field_validation(container_requester):
+    async with container_requester as requester:
+        resp, status = await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps({"@type": "TestSchema", "time_": "9:00:00", "id": "foo_item"}),
+        )
+        assert status == 201
+
+        resp, status = await requester("GET", "/db/guillotina/foo_item")
+        assert status == 200
+        assert resp["time_"] == "9:00:00"
+
+        resp, status = await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps({"@type": "TestSchema", "time_": "9:70:00"}),
+        )
+        assert status == 412
+
+        resp, status = await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps({"@type": "TestSchema", "time_": "12:00:01"}),
+        )
+        assert status == 412
+        assert resp["deserialization_errors"][0]["message"] == "Value is too big"
+
+        resp, status = await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps({"@type": "TestSchema", "time_": "8:59:59"}),
+        )
+        assert status == 412
+        assert resp["deserialization_errors"][0]["message"] == "Value is too small"
+        resp, status = await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps({"@type": "TestSchema", "time_": 3600}),
+        )
+        assert status == 412
 
 
 async def test_patch_field_validation(container_requester):
