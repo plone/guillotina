@@ -4,7 +4,10 @@ CHANGELOG
 7.0.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Calling context.register() and notify ObjectModifiedEvent after
+  calling @sort/{field}, @delete/{field} and
+  @delete/{field}/{file_key} to index changes
+  [nilbacardit26]
 
 
 7.0.0 (2023-12-06)

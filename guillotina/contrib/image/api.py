@@ -14,6 +14,8 @@ from guillotina.response import HTTPNotFound
 from guillotina.schema.interfaces import IOrderedDict
 from guillotina.utils import get_registry
 from guillotina.utils import run_async
+from guillotina.event import notify
+from guillotina.events import ObjectModifiedEvent
 from io import BytesIO
 
 
@@ -153,3 +155,5 @@ class OrderMultiImage(TraversableFieldService):
         if IOrderedDict.providedBy(self.field):
             data = await self.request.json()
             self.field.reorder_images(data)
+            self.context.register()
+            await notify(ObjectModifiedEvent(self.context, payload={self.request.matchdict["field_name"]: data}))

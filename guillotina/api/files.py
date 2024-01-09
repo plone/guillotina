@@ -12,6 +12,8 @@ from guillotina.interfaces import IStaticDirectory
 from guillotina.interfaces import IStaticFile
 from guillotina.response import HTTPNotFound
 from guillotina.response import Response
+from guillotina.event import notify
+from guillotina.events import ObjectModifiedEvent
 
 import mimetypes
 
@@ -138,6 +140,8 @@ class DeleteFile(TraversableFieldService):
         # for the field to save there by chunks
         adapter = get_multi_adapter((self.context, self.request, self.field), IFileManager)
         result = await adapter.delete()
+        self.context.register()
+        await notify(ObjectModifiedEvent(self.context))
         return result
 
 
