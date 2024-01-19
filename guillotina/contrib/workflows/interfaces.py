@@ -33,7 +33,6 @@ class IWorkflowUtility(IAsyncUtility):
 
 
 class IWorkflow(Interface):
-
     initial_state = Attribute("Initial state of the workflow")
 
 
@@ -54,14 +53,13 @@ class DefaultReviewState:
 
 
 class IWorkflowBehavior(Interface):
-
     index_field("review_state", store=True, type="keyword")
     review_state = schema.Choice(
         readonly=True,
         title="Workflow review state",
         required=False,
         defaultFactory=DefaultReviewState(),
-        source="worklow_states",
+        source="workflow_states",
     )
 
     history = schema.List(

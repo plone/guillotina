@@ -4,7 +4,9 @@ CHANGELOG
 7.0.1 (unreleased)
 ------------------
 
-- Feat: Add metadata info to workflows 
+- Feat: Add metadata info to workflows
+- Fix: Update workflow vocabulary name
+- Feat: Update workflow vocabulary title attribute to use metadata
   [rboixaderg]
 
 
