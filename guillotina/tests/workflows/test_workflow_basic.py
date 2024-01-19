@@ -33,7 +33,9 @@ async def test_workflow_basic(container_requester):
         assert response["review_state"] == "public"
 
         response, _ = await requester("GET", "/db/guillotina/@sharing")
-        assert response["local"]["roleperm"]["guillotina.Anonymous"]["guillotina.AccessContent"] == "AllowSingle"
+        assert (
+            response["local"]["roleperm"]["guillotina.Anonymous"]["guillotina.AccessContent"] == "AllowSingle"
+        )
 
         response, status = await requester("GET", "/db/guillotina", token=None)
         assert status == 200
@@ -51,7 +53,10 @@ async def test_workflow_basic(container_requester):
                     "token": "private",
                 },
                 {
-                    "title": {"title": "Public", "translated_title": {"en": "Public", "ca": "Públic", "es": "Público"}},
+                    "title": {
+                        "title": "Public",
+                        "translated_title": {"en": "Public", "ca": "Públic", "es": "Público"},
+                    },
                     "token": "public",
                 },
             ],
