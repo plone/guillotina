@@ -4,7 +4,8 @@ CHANGELOG
 7.0.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Feat: Add metadata info to workflows 
+  [rboixaderg]
 
 
 7.0.0 (2023-12-06)
