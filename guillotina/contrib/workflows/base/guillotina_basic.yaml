@@ -3,10 +3,6 @@ states:
   private:
     metadata:
       title: Private
-      translated_title:
-        en: Private
-        ca: Privat
-        es: Privado
     actions:
       publish:
         title: Publish
@@ -26,10 +22,6 @@ states:
   public:
     metadata:
       title: Public
-      translated_title:
-        en: Public
-        ca: Públic
-        es: Público
     actions:
       retire:
         title: Retire
