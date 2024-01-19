@@ -35,7 +35,7 @@ class WorkflowGET(Service):
                 {
                     "@id": obj_url + "/@workflow/" + action_name,
                     "title": action["title"],
-                    "translated_title": action.get("translated_title", {}),
+                    "metadata": action.get("metadata", {}),
                 }
             )
 
