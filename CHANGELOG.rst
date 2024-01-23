@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-7.0.2 (unreleased)
+7.0.2 (2024-01-23)
 ------------------
 
 - Dummy Release [bloodbare]
