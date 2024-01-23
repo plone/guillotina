@@ -1,4 +1,5 @@
 from datetime import datetime
+from datetime import time
 from guillotina import configure
 from guillotina import schema
 from guillotina.addons import Addon

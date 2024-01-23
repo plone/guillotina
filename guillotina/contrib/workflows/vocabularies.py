@@ -6,7 +6,7 @@ from guillotina.contrib.workflows.interfaces import IWorkflowUtility
 from guillotina.interfaces import IResource
 
 
-@configure.vocabulary(name="worklow_states")
+@configure.vocabulary(name="workflow_states")
 class WorkflowVocabulary:
     def __init__(self, context):
         self.context = context
@@ -35,6 +35,9 @@ class WorkflowVocabulary:
 
     def getTerm(self, value):
         if value in self.states:
+            metadata = self.states[value].get("metadata", None)
+            if metadata:
+                return metadata
             return value
         else:
             raise KeyError("No valid state")
