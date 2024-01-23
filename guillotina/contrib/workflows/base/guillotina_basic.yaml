@@ -1,6 +1,8 @@
 initial_state: private
 states:
   private:
+    metadata:
+      title: Private
     actions:
       publish:
         title: Publish
@@ -18,6 +20,8 @@ states:
         role: guillotina.Anonymous
         permission: guillotina.SearchContent
   public:
+    metadata:
+      title: Public
     actions:
       retire:
         title: Retire

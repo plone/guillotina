@@ -5,6 +5,11 @@ CHANGELOG
 ------------------
 
 - Being able to use schema.Time
+[nilbacardit26]
+- Feat: Add metadata info to workflows
+- Fix: Update workflow vocabulary name
+- Feat: Update workflow vocabulary title attribute to use metadata
+  [rboixaderg]
 
 
 7.0.0 (2023-12-06)

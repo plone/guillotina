@@ -32,7 +32,11 @@ class WorkflowGET(Service):
             return workflow
         async for action_name, action in workflow_obj.available_actions(self.request):
             workflow["transitions"].append(
-                {"@id": obj_url + "/@workflow/" + action_name, "title": action["title"]}
+                {
+                    "@id": obj_url + "/@workflow/" + action_name,
+                    "title": action["title"],
+                    "metadata": action.get("metadata", {}),
+                }
             )
 
         workflow_obj = query_adapter(self.context, IWorkflowBehavior)
