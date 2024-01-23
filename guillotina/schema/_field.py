@@ -241,6 +241,15 @@ class Time(Orderable, Field):
     __doc__ = ITime.__doc__
     _type = time
 
+    def _validate(self, value):
+        try:
+            if isinstance(value, str):
+                args = [int(unit_time) for unit_time in value.split(":")]
+                value = time(*args)
+        except Exception:
+            raise WrongType(value, self._type, self.__name__)
+        super(Time, self)._validate(value)
+
 
 @implementer(IChoice, IFromUnicode)
 class Choice(Field):
