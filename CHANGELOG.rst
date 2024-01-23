@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-7.0.1 (unreleased)
+7.0.1 (2024-01-23)
 ------------------
 
 - Being able to use schema.Time
