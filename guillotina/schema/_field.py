@@ -243,8 +243,9 @@ class Time(Orderable, Field):
 
     def _validate(self, value):
         try:
-            args = [int(unit_time) for unit_time in value.split(":")]
-            value = time(*args)
+            if isinstance(value, str):
+                args = [int(unit_time) for unit_time in value.split(":")]
+                value = time(*args)
         except Exception:
             raise WrongType(value, self._type, self.__name__)
         super(Time, self)._validate(value)

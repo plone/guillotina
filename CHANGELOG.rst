@@ -1,16 +1,27 @@
 CHANGELOG
 =========
 
-7.0.1 (unreleased)
+7.0.3 (unreleased)
 ------------------
-- Calling context.register() and notify ObjectModifiedEvent after
-  calling @sort/{field}, @delete/{field} and
-  @delete/{field}/{file_key} to index changes
-  [nilbacardit26]
+
+- Nothing changed yet.
+
+
+7.0.2 (2024-01-23)
+------------------
+
+- Dummy Release [bloodbare]
+
+
+7.0.1 (2024-01-23)
+------------------
+
+- Being able to use schema.Time [nilbacardit26]
 - Feat: Add metadata info to workflows
 - Fix: Update workflow vocabulary name
 - Feat: Update workflow vocabulary title attribute to use metadata
   [rboixaderg]
+
 
 7.0.0 (2023-12-06)
 ------------------
