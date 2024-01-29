@@ -4,6 +4,8 @@ from guillotina.api.content import DefaultOPTIONS
 from guillotina.api.service import DownloadService
 from guillotina.api.service import TraversableFieldService
 from guillotina.component import get_multi_adapter
+from guillotina.event import notify
+from guillotina.events import ObjectModifiedEvent
 from guillotina.exceptions import FileNotFoundException
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IFileManager
@@ -12,8 +14,6 @@ from guillotina.interfaces import IStaticDirectory
 from guillotina.interfaces import IStaticFile
 from guillotina.response import HTTPNotFound
 from guillotina.response import Response
-from guillotina.event import notify
-from guillotina.events import ObjectModifiedEvent
 
 import mimetypes
 
