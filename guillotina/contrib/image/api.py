@@ -156,4 +156,6 @@ class OrderMultiImage(TraversableFieldService):
             data = await self.request.json()
             self.field.reorder_images(data)
             self.context.register()
-            await notify(ObjectModifiedEvent(self.context, payload={self.request.matchdict["field_name"]: data}))
+            await notify(
+                ObjectModifiedEvent(self.context, payload={self.request.matchdict["field_name"]: data})
+            )
