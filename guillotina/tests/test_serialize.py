@@ -264,11 +264,6 @@ async def test_deserialize_datetime(dummy_guillotina):
     converted = schema_compatible(now.isoformat(), ITestSchema["datetime"])
     assert converted.minute == now.minute
 
-async def test_deserialize_time(dummy_guillotina):
-    now = time.fromisoformat("10:00:00")
-    converted = schema_compatible(now, ITestSchema["time"])
-    assert converted.minute == now.minute
-
 
 async def test_deserialize_time(dummy_guillotina):
     now = time.fromisoformat("10:00:00")
