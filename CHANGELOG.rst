@@ -4,7 +4,9 @@ CHANGELOG
 7.0.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Calling register and notify when sorting OrderedDicts
+- Calling register and notify when deleting file keys
+  [nilbacardit26]
 
 
 7.0.2 (2024-01-23)

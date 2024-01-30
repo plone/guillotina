@@ -4,6 +4,8 @@ from guillotina.api.content import DefaultOPTIONS
 from guillotina.api.service import DownloadService
 from guillotina.api.service import TraversableFieldService
 from guillotina.component import get_multi_adapter
+from guillotina.event import notify
+from guillotina.events import ObjectModifiedEvent
 from guillotina.exceptions import FileNotFoundException
 from guillotina.interfaces import IAsyncBehavior
 from guillotina.interfaces import IFileManager
@@ -138,6 +140,8 @@ class DeleteFile(TraversableFieldService):
         # for the field to save there by chunks
         adapter = get_multi_adapter((self.context, self.request, self.field), IFileManager)
         result = await adapter.delete()
+        self.context.register()
+        await notify(ObjectModifiedEvent(self.context))
         return result
 
 

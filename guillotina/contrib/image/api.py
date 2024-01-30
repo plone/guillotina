@@ -7,6 +7,8 @@ from guillotina.component import get_multi_adapter
 from guillotina.contrib.image.interfaces import IImagingSettings
 from guillotina.contrib.image.preview import CloudPreviewImageFileField
 from guillotina.contrib.image.scale import scaleImage
+from guillotina.event import notify
+from guillotina.events import ObjectModifiedEvent
 from guillotina.interfaces import IFileManager
 from guillotina.interfaces.content import IResource
 from guillotina.response import HTTPNoContent
@@ -153,3 +155,7 @@ class OrderMultiImage(TraversableFieldService):
         if IOrderedDict.providedBy(self.field):
             data = await self.request.json()
             self.field.reorder_images(data)
+            self.context.register()
+            await notify(
+                ObjectModifiedEvent(self.context, payload={self.request.matchdict["field_name"]: data})
+            )
