@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-7.0.3 (unreleased)
+7.0.3 (2024-10-01)
 ------------------
 
 - Calling register and notify when sorting OrderedDicts
