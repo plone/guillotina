@@ -1,11 +1,11 @@
 from guillotina import configure
 from guillotina.addons import Addon
 from guillotina.content import create_content_in_container
+from guillotina.event import notify
+from guillotina.events import ObjectAddedEvent
 from guillotina.interfaces import ILayers
 from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import get_registry
-from guillotina.event import notify
-from guillotina.events import ObjectAddedEvent
 
 
 USERS_LAYER = "guillotina.contrib.dbusers.interfaces.IDBUsersLayer"
