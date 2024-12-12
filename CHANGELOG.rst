@@ -4,7 +4,9 @@ CHANGELOG
 7.0.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Calling notify event when user_manager folder is creatd, same with
+  group_manager
+  [nilbacardit26]
 
 
 7.0.3 (2024-10-01)
