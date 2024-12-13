@@ -535,7 +535,7 @@ async def guillotina(app_client):
 
 
 @pytest.fixture(scope="function")
-def guillotina_server(app):
+async def guillotina_server(app):
     host, port = app
     return GuillotinaDBHttpRequester(host, port)
 
@@ -551,7 +551,7 @@ def container_install_requester(guillotina, install_addons):
 
 
 @pytest.fixture(scope="function")
-def container_requester_server(guillotina_server):
+async def container_requester_server(guillotina_server):
     return ContainerRequesterAsyncContextManager(guillotina_server)
 
 
