@@ -1,8 +1,12 @@
 from pytest_docker_fixtures import images
 
 
-images.configure("cockroach", "cockroachdb/cockroach", "v2.1.6")
-
+images.configure(
+    name="cockroach",
+    image="cockroachdb/cockroach",
+    version="v24.3.0",
+    options={"command": "start-single-node --insecure"},
+)
 
 images.configure("postgresql", version="10.9")
 
