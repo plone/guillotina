@@ -25,5 +25,5 @@ exclude = '''
 '''
 
 [tool.mypy]
+exclude = ["guillotina/cookiecutter/"]
 ignore_missing_imports = true
-packages = ["{{cookiecutter.package_name}}"]
