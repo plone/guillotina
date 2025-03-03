@@ -23,3 +23,6 @@ exclude = '''
                      # the root of the project
 )
 '''
+
+[tool.mypy]
+ignore_missing_imports = true
