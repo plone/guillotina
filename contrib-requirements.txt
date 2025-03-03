@@ -12,4 +12,7 @@ MarkupSafe<2.1.0
 pytz==2020.1
 emcache==0.6.0; python_version < '3.10'
 pymemcache==3.4.0; python_version < '3.10'
-pillow==11.1.0
+
+# Conditional Pillow versions
+pillow==10.4.0; python_version < '3.11'
+pillow==11.1.0; python_version >= '3.11'
