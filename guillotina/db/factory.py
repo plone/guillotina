@@ -200,7 +200,7 @@ WHERE datistemplate = false;"""
         try:
             conn = await self.get_connection(name)
             return await self._check_exists(conn)
-        except asyncpg.exceptions.InvalidCatalogNameError:
+        except (asyncpg.exceptions.InvalidCatalogNameError, asyncpg.exceptions.InvalidNameError):
             return False
         finally:
             if conn is not None:
