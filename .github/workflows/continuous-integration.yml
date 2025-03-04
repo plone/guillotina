@@ -71,7 +71,7 @@ jobs:
 
       - name: Check mypy
         run: |
-          mypy guillotina/
+          mypy --config-file setup.cfg guillotina/
 
       - name: Run tests
         run: |

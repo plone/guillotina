@@ -424,7 +424,7 @@ class StaticDirectory(dict):
     Using dict makes this a simple container so traversing works
     """
 
-    def __init__(self, file_path: pathlib.Path, base_path: pathlib.Path = None) -> None:
+    def __init__(self, file_path: pathlib.Path, base_path: Optional[pathlib.Path] = None) -> None:
         self.file_path = file_path
         if base_path is None:
             self.base_path = file_path
