@@ -4,7 +4,11 @@ CHANGELOG
 7.0.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Trigger notify event when user_manager folder is created, and also for group_manager.
+- Refactor CockroachDB storage integration to work with the latest version of Cockroach.
+- Upgrade Pillow to the latest version.
+- Upgrade mypy and adjust setup.cfg to improve compatibility with the existing codebase.
+  [nilbacardit26]
 
 
 7.0.3 (2024-10-01)

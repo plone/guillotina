@@ -1,5 +1,6 @@
 from guillotina.gtypes import ResolvableType
 from typing import Any
+from typing import Optional
 from zope.interface.interfaces import IInterface
 
 import importlib
@@ -10,7 +11,7 @@ import sys
 import types
 
 
-def import_class(import_string: str) -> types.ModuleType:
+def import_class(import_string: str) -> Optional[types.ModuleType]:
     """
     Import class from string
 
@@ -47,7 +48,7 @@ def resolve_dotted_name(name: str) -> Any:
 
 def get_caller_module(
     level: int = 2, sys: types.ModuleType = sys
-) -> types.ModuleType:  # pylint: disable=W0621
+) -> Optional[types.ModuleType]:  # pylint: disable=W0621
     """
     Pulled out of pyramid
     """
@@ -57,16 +58,16 @@ def get_caller_module(
     return module
 
 
-def resolve_module_path(path: str) -> str:
+def resolve_module_path(path: str) -> Optional[str]:
     if len(path) > 0 and path[0] == ".":
         caller_mod = get_caller_module()
         caller_path = get_module_dotted_name(caller_mod)
-        caller_path = ".".join(caller_path.split(".")[: -path.count("..")])
+        caller_path = ".".join(caller_path.split(".")[: -path.count("..")])  # type: ignore
         path = caller_path + "." + path.split("..")[-1].strip(".")
     return path
 
 
-def get_module_dotted_name(ob) -> str:
+def get_module_dotted_name(ob) -> Optional[Any]:
     return getattr(ob, "__module__", None) or getattr(ob, "__name__", None)
 
 

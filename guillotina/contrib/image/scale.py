@@ -73,7 +73,7 @@ def scaleImage(image, width=None, height=None, mode="contain", quality=88, resul
         if extrema.get("A") == (255, 255):
             # no alpha used, just change the mode, which causes the alpha band
             # to be dropped on save
-            image.mode = "RGB"
+            image = image.convert("RGB")
         else:
             # switch to PNG, which supports alpha
             format_ = "PNG"
@@ -108,7 +108,7 @@ def _scale_thumbnail(image, width=None, height=None):
         return image
 
     image.draft(image.mode, (dimensions.target_width, dimensions.target_height))
-    image = image.resize((dimensions.target_width, dimensions.target_height), PIL.Image.ANTIALIAS)
+    image = image.resize((dimensions.target_width, dimensions.target_height), PIL.Image.Resampling.LANCZOS)
     return image
 
 
@@ -343,9 +343,9 @@ def scalePILImage(image, width=None, height=None, mode="contain", direction=None
         # The original already has the right aspect ratio, so we only need
         # to scale.
         if mode == "contain":
-            image.thumbnail((dimensions.final_width, dimensions.final_height), PIL.Image.ANTIALIAS)
+            image.thumbnail((dimensions.final_width, dimensions.final_height), PIL.Image.Resampling.LANCZOS)
             return image
-        return image.resize((dimensions.final_width, dimensions.final_height), PIL.Image.ANTIALIAS)
+        return image.resize((dimensions.final_width, dimensions.final_height), PIL.Image.Resampling.LANCZOS)
 
     if dimensions.pre_scale_crop:
         # crop image before scaling to avoid excessive memory use
@@ -358,7 +358,7 @@ def scalePILImage(image, width=None, height=None, mode="contain", direction=None
         return image
 
     image.draft(image.mode, (dimensions.target_width, dimensions.target_height))
-    image = image.resize((dimensions.target_width, dimensions.target_height), PIL.Image.ANTIALIAS)
+    image = image.resize((dimensions.target_width, dimensions.target_height), PIL.Image.Resampling.LANCZOS)
 
     if dimensions.post_scale_crop:
         # crop off remains due to rounding before scaling

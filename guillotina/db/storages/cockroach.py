@@ -243,7 +243,7 @@ class CockroachStorage(pg.PostgresqlStorage):
                     pickled,  # Pickle state)
                 )
             except asyncpg.exceptions.UniqueViolationError as ex:
-                if "duplicate key value (parent_id,id)" in ex.detail:
+                if "duplicate key value (parent_id,id)" in ex.detail or "already exists" in ex.detail:
                     raise ConflictIdOnContainer(ex)
                 raise
             except asyncpg.exceptions._base.InterfaceError as ex:

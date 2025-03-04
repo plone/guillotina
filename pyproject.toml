@@ -23,3 +23,7 @@ exclude = '''
                      # the root of the project
 )
 '''
+
+[tool.mypy]
+exclude = ["guillotina/cookiecutter/"]
+ignore_missing_imports = true
