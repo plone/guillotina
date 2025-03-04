@@ -586,9 +586,7 @@ def json_schema_definition(name: str, schema: dict) -> None:
     :param schema: schema definition, must be json compatible
     """
     register_configuration(
-        get_caller_module(),
-        dict(name=name, schema=schema),
-        "json_schema_definition"
+        get_caller_module(), dict(name=name, schema=schema), "json_schema_definition"
     )  # type: ignore
 
 
