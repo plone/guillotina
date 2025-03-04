@@ -1,5 +1,5 @@
 from guillotina.gtypes import ResolvableType
-from typing import Any, Optional
+from typing import Optional, Any
 from zope.interface.interfaces import IInterface
 
 import importlib
