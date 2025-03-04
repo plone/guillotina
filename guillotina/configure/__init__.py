@@ -585,7 +585,11 @@ def json_schema_definition(name: str, schema: dict) -> None:
     :param name: Name of schema
     :param schema: schema definition, must be json compatible
     """
-    register_configuration(get_caller_module(), dict(name=name, schema=schema), "json_schema_definition")  # type: ignore
+    register_configuration(
+        get_caller_module(),
+        dict(name=name, schema=schema),
+        "json_schema_definition"
+    )  # type: ignore
 
 
 def grant_directive(_context, principal=None, role=None, permission=None, permissions=None):
