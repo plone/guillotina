@@ -105,7 +105,7 @@ async def search_get(context, request):
     name="@count",
     validate=True,
     parameters=QUERY_PARAMETERS,
-    summary="Make search request",
+    summary="Make count request",
     responses={
         "200": {
             "description": "Returns a count as a number",
