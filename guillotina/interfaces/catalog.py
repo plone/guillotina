@@ -21,6 +21,11 @@ class ICatalogUtility(Interface):
         Search raw query
         """
 
+    async def count(context: IBaseObject, query: typing.Any, unrestricted=False):
+        """
+        Count query, uses parser to transform query
+        """
+
     async def index(container: IContainer, datas):
         """
         {uid: <dict>}

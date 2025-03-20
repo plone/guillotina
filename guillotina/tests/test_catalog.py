@@ -188,7 +188,7 @@ async def test_modified_event_gathers_all_index_data(dummy_guillotina):
 
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)
 @pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
-async def test_search_endpoint(container_requester):
+async def test_search_count_endpoint(container_requester):
     async with container_requester as requester:
         await requester("POST", "/db/guillotina", data=json.dumps({"@type": "Item"}))
         response, status = await requester("GET", "/db/guillotina/@search")
@@ -203,19 +203,32 @@ async def test_search_endpoint(container_requester):
         )
         assert status == 201
         await requester("POST", "/db/guillotina/folder", data=json.dumps({"@type": "Item"}))
-        await requester("POST", "/db/guillotina/folder2", data=json.dumps({"@type": "Item"}))
+        await requester(
+            "POST", "/db/guillotina/folder2", data=json.dumps({"@type": "Item", "id": "foo_item"})
+        )
         response, status = await requester("GET", "/db/guillotina/@search?type_name=Item")
         assert response["items_total"] == 3
+        response, status = await requester("GET", "/db/guillotina/@count?type_name=Item")
+        assert response == 3
         response, status = await requester("GET", "/db/guillotina/folder/@search?type_name=Item")
         assert response["items_total"] == 1
+        response, status = await requester("GET", "/db/guillotina/folder/@count?type_name=Item")
+        assert status == 200
+        assert response == 1
+        response, status = await requester("GET", "/db/guillotina/folder2/foo_item/@count")
+        assert status == 200
+        assert response == 0
 
 
 @pytest.mark.skipif(not NOT_POSTGRES, reason="Only not PG")
-async def test_search_endpoint_no_pg(container_requester):
+async def test_search_count_endpoint_no_pg(container_requester):
     async with container_requester as requester:
         response, status = await requester("GET", "/db/guillotina/@search")
         assert status == 200
         assert len(response["items"]) == 0
+        response, status = await requester("GET", "/db/guillotina/@count")
+        assert status == 200
+        assert response == 0
 
 
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)

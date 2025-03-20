@@ -100,6 +100,29 @@ async def search_get(context, request):
 
 @configure.service(
     context=IResource,
+    method="GET",
+    permission="guillotina.SearchContent",
+    name="@count",
+    validate=True,
+    parameters=QUERY_PARAMETERS,
+    summary="Make search request",
+    responses={
+        "200": {
+            "description": "Returns a count as a number",
+            "content": {"application/json": {"schema": {"type": "integer"}}},
+        }
+    },
+)
+async def count(context, request):
+    search = query_utility(ICatalogUtility)
+    if search is None:
+        raise HTTPServiceUnavailable()
+
+    return await search.count(context, dict(request.query))
+
+
+@configure.service(
+    context=IResource,
     method="POST",
     permission="guillotina.RawSearchContent",
     name="@search",
