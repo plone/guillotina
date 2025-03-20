@@ -21,7 +21,7 @@ class ICatalogUtility(Interface):
         Search raw query
         """
 
-    async def count(context: IBaseObject, query: typing.Any, unrestricted=False):
+    async def count(context: IBaseObject, query: typing.Any):
         """
         Count query, uses parser to transform query
         """

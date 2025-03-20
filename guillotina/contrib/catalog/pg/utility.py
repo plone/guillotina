@@ -297,7 +297,7 @@ class PGSearchUtility(DefaultSearchUtility):
         parsed_query = parse_query(context, query, self)
         return await self._query(context, parsed_query)  # type: ignore
 
-    async def count(self, context: IBaseObject, query: typing.Any, unrestricted=False):
+    async def count(self, context: IBaseObject, query: typing.Any):
         parsed_query = parse_query(context, query, self)
         sql, arguments = self.build_count_query(context, parsed_query)
         txn = get_transaction()

@@ -54,7 +54,7 @@ class DefaultSearchUtility:
         """
         return {"items": [], "items_total": 0}
 
-    async def count(self, context: IBaseObject, query: typing.Any, unrestricted=False):
+    async def count(self, context: IBaseObject, query: typing.Any):
         """
         Count query, uses parser to transform query
         """
