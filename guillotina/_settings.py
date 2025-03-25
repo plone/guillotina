@@ -92,6 +92,7 @@ app_settings: Dict[str, Any] = {
     "indexer": "guillotina.catalog.index.Indexer",
     "search_parser": "default",
     "object_reader": "guillotina.db.reader.reader",
+    "async_object_read_size": 25000,  # bytes
     "thread_pool_workers": 32,
     "server_settings": {"uvicorn": {"timeout_keep_alive": 5, "http": "h11"}},
     "valid_id_characters": string.digits + string.ascii_lowercase + ".-_@$^()+ =",
