@@ -27,6 +27,15 @@ user_data = {
     "password": "password",
 }
 
+second_user_data = {
+    "@type": "User",
+    "name": "Second user name",
+    "id": "foobar_2",
+    "username": "foobar_2",
+    "email": "foo2@bar.com",
+    "password": "password",
+}
+
 user_data_id_email = {
     "@type": "User",
     "name": "Foobar",
