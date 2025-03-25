@@ -297,6 +297,18 @@ class PGSearchUtility(DefaultSearchUtility):
         parsed_query = parse_query(context, query, self)
         return await self._query(context, parsed_query)  # type: ignore
 
+    async def count(self, context: IBaseObject, query: typing.Any):
+        parsed_query = parse_query(context, query, self)
+        sql, arguments = self.build_count_query(context, parsed_query)
+        txn = get_transaction()
+        if txn is None:
+            raise TransactionNotFound()
+        conn = await txn.get_connection()
+        logger.debug(f"Running count:\n{sql}\n{arguments}")
+        async with txn.lock:
+            records = await conn.fetch(sql, *arguments)
+        return records[0]["count"]
+
     async def unrestrictedSearch(self, context: IBaseObject, query: typing.Any):
         """
         Search query without restriction, uses parser to transform query

@@ -9,7 +9,9 @@ CHANGELOG
 - Upgrade Pillow to the latest version.
 - Upgrade mypy and adjust setup.cfg to improve compatibility with the existing codebase.
   [nilbacardit26]
-
+- Integrating the @count endpoint into the catalog interface and
+  implementing the associated functionality for pg catalog.
+  [nilbacardit26]
 
 7.0.3 (2024-10-01)
 ------------------
