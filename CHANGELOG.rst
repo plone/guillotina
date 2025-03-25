@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-7.0.4 (unreleased)
+7.0.4 (2025-03-25)
 ------------------
 
 - Trigger notify event when user_manager folder is created, and also for group_manager.
