@@ -1,6 +1,7 @@
 redis==4.3.4
 html2text==2019.8.11
-aiosmtplib==4.0.0
+aiosmtplib<4.0.0; python_version <= "3.8"
+aiosmtplib>=4.0.0; python_version >= "3.9"
 pre-commit==1.18.2
 flake8==5.0.4
 codecov==2.1.13
