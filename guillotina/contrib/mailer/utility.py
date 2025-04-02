@@ -11,6 +11,7 @@ from guillotina.interfaces import IMailEndpoint
 from guillotina.interfaces import IMailer
 from guillotina.utils import get_random_string
 from guillotina.utils import notice_on_error
+from typing import Any
 from typing import List
 from typing import Optional
 from typing import Union
@@ -102,7 +103,7 @@ class SMTPMailEndpoint(object):
                         await self.connect()
                         await self.queue.put((tries + 1, args))
 
-    async def send(self, sender, recipients, message):
+    async def send(self, sender, recipients: Union[List[str], str], message) -> Any:
         await self.queue.put((0, (sender, recipients, message.as_bytes())))
 
 
@@ -275,7 +276,7 @@ class TestMailerUtility(MailerUtility):
 
     async def send(
         self,
-        recipient=None,
+        recipient: Union[List[str], str],
         subject=None,
         message=None,
         text=None,
@@ -284,9 +285,8 @@ class TestMailerUtility(MailerUtility):
         message_id=None,
         endpoint="default",
         priority=3,
-        immediate=False,
         attachments=[],
-        cc=None,
+        cc: Optional[Union[List[str], str]] = None,
     ):
         self.mail.append(
             {
@@ -298,7 +298,6 @@ class TestMailerUtility(MailerUtility):
                 "html": html,
                 "message_id": message_id,
                 "endpoint": endpoint,
-                "immediate": immediate,
                 "attachments": attachments,
                 "cc": cc,
             }
