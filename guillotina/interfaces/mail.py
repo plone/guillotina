@@ -1,3 +1,8 @@
+from typing import Any
+from typing import Coroutine
+from typing import List
+from typing import Optional
+from typing import Union
 from zope.interface import Interface
 
 
@@ -10,7 +15,20 @@ class IMailer(Interface):
     async def initialize(app):
         pass
 
-    def send(recipient=None, subject=None, message=None, text=None, html=None, sender=None):
+    async def send(
+        self,
+        recipient: Union[List[str], str],
+        subject: Any = None,
+        message: Any = None,
+        text: Any = None,
+        html: Any = None,
+        sender: Any = None,
+        message_id: Any = None,
+        endpoint: Any = "default",
+        priority: Any = 3,
+        attachments: Any = None,
+        cc: Optional[Union[List[str], str]] = None,
+    ) -> Coroutine[Any, Any, Any]:
         pass
 
 

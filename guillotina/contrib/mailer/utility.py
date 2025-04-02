@@ -11,6 +11,10 @@ from guillotina.interfaces import IMailEndpoint
 from guillotina.interfaces import IMailer
 from guillotina.utils import get_random_string
 from guillotina.utils import notice_on_error
+from typing import Any
+from typing import List
+from typing import Optional
+from typing import Union
 from zope.interface import implementer
 
 import asyncio
@@ -99,7 +103,7 @@ class SMTPMailEndpoint(object):
                         await self.connect()
                         await self.queue.put((tries + 1, args))
 
-    async def send(self, sender, recipients, message):
+    async def send(self, sender, recipients: Union[List[str], str], message) -> Any:
         await self.queue.put((0, (sender, recipients, message.as_bytes())))
 
 
@@ -162,7 +166,16 @@ class MailerUtility:
         message.attach(textual_message)
 
     def get_message(
-        self, recipient, subject, sender, message=None, text=None, html=None, message_id=None, attachments=[]
+        self,
+        recipient,
+        subject,
+        sender,
+        message=None,
+        text=None,
+        html=None,
+        message_id=None,
+        attachments=[],
+        cc=None,
     ):
         if message is None:
             message = MIMEMultipart("mixed")
@@ -171,6 +184,8 @@ class MailerUtility:
         message["Subject"] = subject
         message["From"] = sender
         message["To"] = recipient
+        if cc is not None:
+            message["Cc"] = cc
         if message_id is not None:
             message["Message-Id"] = message_id
         else:
@@ -183,7 +198,7 @@ class MailerUtility:
 
     async def send(
         self,
-        recipient=None,
+        recipient: Union[List[str], str],
         subject=None,
         message=None,
         text=None,
@@ -193,16 +208,36 @@ class MailerUtility:
         endpoint="default",
         priority=3,
         attachments=[],
+        cc: Optional[Union[List[str], str]] = None,
     ):
         if sender is None:
             sender = self.settings.get("default_sender")
         message = self.get_message(
-            recipient, subject, sender, message, text, html, message_id=message_id, attachments=attachments
+            recipient,
+            subject,
+            sender,
+            message,
+            text,
+            html,
+            message_id=message_id,
+            attachments=attachments,
+            cc=cc,
         )
+        recipients = []
+        if isinstance(recipient, str) and recipient:
+            recipients.append(recipient)
+        elif isinstance(recipient, (list, tuple)) and recipient:
+            for recipient_email in recipient:
+                recipients.append(recipient_email)
+        if isinstance(cc, str) and recipient:
+            recipients.append(cc)
+        elif isinstance(cc, (list, tuple)) and recipient:
+            for recipient_email in cc:
+                recipients.append(recipient_email)
         encoding.cleanup_message(message)
         if message["Date"] is None:
             message["Date"] = formatdate()
-        await self._send(sender, recipient, message, endpoint)
+        await self._send(sender, recipients, message, endpoint)
 
     def create_message_id(self, _id=""):
         domain = self.settings["domain"]
@@ -241,7 +276,7 @@ class TestMailerUtility(MailerUtility):
 
     async def send(
         self,
-        recipient=None,
+        recipient: Union[List[str], str],
         subject=None,
         message=None,
         text=None,
@@ -250,8 +285,8 @@ class TestMailerUtility(MailerUtility):
         message_id=None,
         endpoint="default",
         priority=3,
-        immediate=False,
         attachments=[],
+        cc: Optional[Union[List[str], str]] = None,
     ):
         self.mail.append(
             {
@@ -263,7 +298,7 @@ class TestMailerUtility(MailerUtility):
                 "html": html,
                 "message_id": message_id,
                 "endpoint": endpoint,
-                "immediate": immediate,
                 "attachments": attachments,
+                "cc": cc,
             }
         )

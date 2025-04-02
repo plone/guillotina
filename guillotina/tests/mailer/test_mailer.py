@@ -26,7 +26,6 @@ async def test_send_mail(guillotina_main, event_loop):
         message_id=None,
         endpoint="default",
         priority=3,
-        immediate=False,
         attachments=[],
     )
 

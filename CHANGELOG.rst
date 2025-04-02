@@ -4,7 +4,7 @@ CHANGELOG
 7.0.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Adding cc argument in mailer's send coroutine
 
 
 7.0.4 (2025-03-25)
