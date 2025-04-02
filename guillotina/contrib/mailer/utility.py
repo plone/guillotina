@@ -11,8 +11,10 @@ from guillotina.interfaces import IMailEndpoint
 from guillotina.interfaces import IMailer
 from guillotina.utils import get_random_string
 from guillotina.utils import notice_on_error
+from typing import List
+from typing import Optional
+from typing import Union
 from zope.interface import implementer
-from typing import Union, Optional, List
 
 import asyncio
 import logging
