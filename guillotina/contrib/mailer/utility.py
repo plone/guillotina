@@ -162,7 +162,16 @@ class MailerUtility:
         message.attach(textual_message)
 
     def get_message(
-        self, recipient, subject, sender, message=None, text=None, html=None, message_id=None, attachments=[]
+        self,
+        recipient,
+        subject,
+        sender,
+        message=None,
+        text=None,
+        html=None,
+        message_id=None,
+        attachments=[],
+        cc=None,
     ):
         if message is None:
             message = MIMEMultipart("mixed")
@@ -171,6 +180,8 @@ class MailerUtility:
         message["Subject"] = subject
         message["From"] = sender
         message["To"] = recipient
+        if cc is not None:
+            message["Cc"] = cc
         if message_id is not None:
             message["Message-Id"] = message_id
         else:
@@ -193,11 +204,20 @@ class MailerUtility:
         endpoint="default",
         priority=3,
         attachments=[],
+        cc=None,
     ):
         if sender is None:
             sender = self.settings.get("default_sender")
         message = self.get_message(
-            recipient, subject, sender, message, text, html, message_id=message_id, attachments=attachments
+            recipient,
+            subject,
+            sender,
+            message,
+            text,
+            html,
+            message_id=message_id,
+            attachments=attachments,
+            cc=cc,
         )
         encoding.cleanup_message(message)
         if message["Date"] is None:
@@ -252,6 +272,7 @@ class TestMailerUtility(MailerUtility):
         priority=3,
         immediate=False,
         attachments=[],
+        cc=None,
     ):
         self.mail.append(
             {
@@ -265,5 +286,6 @@ class TestMailerUtility(MailerUtility):
                 "endpoint": endpoint,
                 "immediate": immediate,
                 "attachments": attachments,
+                "cc": cc,
             }
         )
