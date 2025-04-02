@@ -12,6 +12,7 @@ from guillotina.interfaces import IMailer
 from guillotina.utils import get_random_string
 from guillotina.utils import notice_on_error
 from zope.interface import implementer
+from typing import Union, Optional, List
 
 import asyncio
 import logging
@@ -194,7 +195,7 @@ class MailerUtility:
 
     async def send(
         self,
-        recipient=None,
+        recipient: Union[List[str], str],
         subject=None,
         message=None,
         text=None,
@@ -204,7 +205,7 @@ class MailerUtility:
         endpoint="default",
         priority=3,
         attachments=[],
-        cc=None,
+        cc: Optional[Union[List[str], str]] = None,
     ):
         if sender is None:
             sender = self.settings.get("default_sender")
@@ -219,10 +220,21 @@ class MailerUtility:
             attachments=attachments,
             cc=cc,
         )
+        recipients = []
+        if isinstance(recipient, str) and recipient:
+            recipients.append(recipient)
+        elif isinstance(recipient, (list, tuple)) and recipient:
+            for recipient_email in recipient:
+                recipients.append(recipient_email)
+        if isinstance(cc, str) and recipient:
+            recipients.append(cc)
+        elif isinstance(cc, (list, tuple)) and recipient:
+            for recipient_email in cc:
+                recipients.append(recipient_email)
         encoding.cleanup_message(message)
         if message["Date"] is None:
             message["Date"] = formatdate()
-        await self._send(sender, recipient, message, endpoint)
+        await self._send(sender, recipients, message, endpoint)
 
     def create_message_id(self, _id=""):
         domain = self.settings["domain"]
