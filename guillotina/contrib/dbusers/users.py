@@ -77,7 +77,7 @@ class EmailDBUserIdentifier:
               json->>'type_name' = 'User'
               AND parent_id != 'DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD'
               AND json->>'container_id' = $1::varchar
-              AND lower(json->>'user_email') = lower($2::varchar)
+              AND lower(json->>'email') = lower($2::varchar)
         """
         async with txn.lock:
             row = await conn.fetchrow(sql, container.id, token.get("id"))
