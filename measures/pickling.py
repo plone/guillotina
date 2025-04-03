@@ -28,7 +28,7 @@ async def run1():
     start = time.time()
     writer = get_adapter(ob, IWriter)
     for _ in range(ITERATIONS):
-        writer.serialize()
+        await writer.serialize()
     end = time.time()
     print(f"Done with {ITERATIONS} in {end - start} seconds")
 
@@ -39,11 +39,11 @@ async def run2():
     ob.foobar1 = "1"
     ob.foobar2 = "2"
     ob.foobar6 = "6"
-    start = time.time()
     writer = get_adapter(ob, IWriter)
-    serialized = writer.serialize()
+    serialized = await writer.serialize()
+    start = time.time()
     for _ in range(ITERATIONS):
-        ob = reader({"state": serialized, "zoid": 0, "tid": 0, "id": "foobar"})
+        ob = await reader({"state": serialized, "zoid": 0, "tid": 0, "id": "foobar"})
     end = time.time()
     assert ob.foobar1 == "1"
     assert ob.foobar6 == "6"
