@@ -44,12 +44,18 @@ async def cleanup(aps):
 
 
 async def get_aps(postgres, pool_size=16, autovacuum=True):
-    dsn = "postgres://postgres:@{}:{}/guillotina".format(postgres[0], postgres[1])
+    dsn = "postgres://postgres:postgres@{}:{}/guillotina".format(postgres[0], postgres[1])
     klass = PostgresqlStorage
     if DATABASE == "cockroachdb":
         klass = CockroachStorage
         dsn = "postgres://root:@{}:{}/guillotina?sslmode=disable".format(postgres[0], postgres[1])
-    aps = klass(dsn=dsn, name="db", pool_size=pool_size, conn_acquire_timeout=0.1, autovacuum=autovacuum)
+    aps = klass(
+        dsn=dsn,
+        name="db",
+        pool_size=pool_size,
+        conn_acquire_timeout=0.1,
+        autovacuum=autovacuum,
+    )
     await aps.initialize()
     return aps
 
@@ -119,7 +125,6 @@ async def test_restart_connection_pg(db, dummy_guillotina):
                 "cannot call Connection.fetchval(): the underlying connection is closed"
             ),
         ):
-
             with pytest.raises(ConflictError):
                 await tm._storage.get_next_tid(Mock())
 
@@ -130,11 +135,13 @@ async def test_restart_connection_pg(db, dummy_guillotina):
         await cleanup(aps)
 
 
-@pytest.mark.skipif(DATABASE in ("cockroachdb", "DUMMY"), reason="Cockroach does not have cascade support")
+@pytest.mark.skipif(
+    DATABASE in ("cockroachdb", "DUMMY"),
+    reason="Cockroach does not have cascade support",
+)
 async def test_deleting_parent_deletes_children(db, dummy_guillotina):
     aps = await get_aps(db)
     with TransactionManager(aps) as tm, await tm.begin() as txn:
-
         folder = create_content(Folder, "Folder")
         txn.register(folder)
         ob = create_content()
@@ -351,7 +358,6 @@ async def test_should_raise_conflict_error_on_concurrent_update(db, container_re
 async def test_count_total_objects(db, dummy_guillotina):
     aps = await get_aps(db)
     with TransactionManager(aps) as tm, await tm.begin() as txn:
-
         ob = create_content()
         txn.register(ob)
 
@@ -371,7 +377,6 @@ async def test_count_total_objects(db, dummy_guillotina):
 async def test_get_resources_of_type(db, dummy_guillotina):
     aps = await get_aps(db)
     with TransactionManager(aps) as tm, await tm.begin() as txn:
-
         ob = create_content()
         txn.register(ob)
 
@@ -478,7 +483,6 @@ async def test_exhausting_pool_size(db, dummy_guillotina):
 
 @pytest.mark.skipif(DATABASE == "DUMMY", reason="Not for dummy db")
 async def test_mismatched_tid_causes_conflict_error(db, dummy_guillotina):
-
     # base aps uses 1 connection from the pool for starting transactions
     aps = await get_aps(db)
     with TransactionManager(aps) as tm, await tm.begin() as txn:
@@ -500,11 +504,9 @@ async def test_mismatched_tid_causes_conflict_error(db, dummy_guillotina):
 
 @pytest.mark.skipif(DATABASE == "DUMMY", reason="Not for dummy db")
 async def test_iterate_keys(db, dummy_guillotina):
-
     # base aps uses 1 connection from the pool for starting transactions
     aps = await get_aps(db)
     with TransactionManager(aps) as tm, await tm.begin() as txn:
-
         parent = create_content()
         txn.register(parent)
         original_keys = []
@@ -528,7 +530,6 @@ async def test_iterate_keys(db, dummy_guillotina):
 
 @pytest.mark.skipif(DATABASE in ("cockroachdb", "DUMMY"), reason="Cockroach does not like this test...")
 async def test_handles_asyncpg_trying_savepoints(db, dummy_guillotina):
-
     aps = await get_aps(db)
     tm = TransactionManager(aps)
     # simulate transaction already started(should not happen)
@@ -538,7 +539,6 @@ async def test_handles_asyncpg_trying_savepoints(db, dummy_guillotina):
         conn._con._top_xact = asyncpg.transaction.Transaction(conn._con, "read_committed", False, False)
 
     with await tm.begin() as txn, tm:
-
         # then, try doing stuff...
         ob = create_content()
         txn.register(ob)
@@ -560,7 +560,6 @@ async def test_handles_asyncpg_trying_savepoints(db, dummy_guillotina):
 
 @pytest.mark.skipif(DATABASE in ("cockroachdb", "DUMMY"), reason="Cockroach does not like this test...")
 async def test_handles_asyncpg_trying_txn_with_manual_txn(db, dummy_guillotina):
-
     aps = await get_aps(db)
     tm = TransactionManager(aps)
     # simulate transaction already started(should not happen)

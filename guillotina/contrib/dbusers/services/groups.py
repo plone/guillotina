@@ -3,12 +3,16 @@ from guillotina.api.content import DefaultDELETE
 from guillotina.api.content import DefaultPATCH
 from guillotina.api.service import Service
 from guillotina.component import get_multi_adapter
+from guillotina.content import create_content_in_container
 from guillotina.contrib.dbusers.content.groups import Group
 from guillotina.contrib.dbusers.services.utils import ListGroupsOrUsersService
+from guillotina.event import notify
+from guillotina.events import ObjectAddedEvent
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import IPATCH
 from guillotina.interfaces import IResourceSerializeToJsonSummary
 from guillotina.response import HTTPNotFound
+from guillotina.response import HTTPPreconditionFailed
 from guillotina.utils import navigate_to
 from zope.interface import alsoProvides
 
@@ -36,7 +40,14 @@ logger = logging.getLogger("guillotina.contrib.dbusers")
 )
 class ListGroups(ListGroupsOrUsersService):
     type_name: str = "Group"
-    _desired_keys: typing.List[str] = ["groupname", "id", "title", "roles", "users", "@name"]
+    _desired_keys: typing.List[str] = [
+        "groupname",
+        "id",
+        "title",
+        "roles",
+        "users",
+        "@name",
+    ]
 
     async def process_catalog_obj(self, obj) -> dict:
         return {
@@ -121,3 +132,66 @@ class DeleteGroup(BaseGroup):
     async def __call__(self):
         group: Group = await self.get_group()
         return await DefaultDELETE(group, self.request)()
+
+
+@configure.service(
+    for_=IContainer,
+    method="POST",
+    name="@groups",
+    requestBody={
+        "description": "Create a new group",
+        "required": True,
+        "content": {
+            "application/json": {
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "groupname": {
+                            "type": "string",
+                            "description": "Unique identifier for the group",
+                        },
+                        "title": {
+                            "type": "string",
+                            "description": "Human‐readable title of the group",
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": "Longer description of the group",
+                        },
+                        "roles": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Initial roles assigned to the group",
+                        },
+                    },
+                    "additionalProperties": False,
+                }
+            }
+        },
+    },
+    permission="guillotina.ManageUsers",
+    responses={"200": {"description": "Group succesfully created"}},
+    summary="Add a group",
+    allow_access=True,
+)
+class CreateGroup(BaseGroup):
+    async def __call__(self):
+        data = await self.request.json()
+        payload_group = {}
+        try:
+            payload_group["name"] = data["groupname"]
+            payload_group["user_roles"] = data.get("roles", []) or []
+            payload_group["description"] = data.get("description")
+            payload_group["title"] = data.get("title")
+            payload_group["id_"] = None
+            groups_folder = await self.context.async_get("groups")
+            group = await create_content_in_container(
+                groups_folder, "Group", **payload_group, check_security=False
+            )
+            await notify(ObjectAddedEvent(group))
+        except KeyError:
+            raise HTTPPreconditionFailed(
+                content={"message": "Invalid subset. More values than current ordering"}
+            )
+        payload_group["id"] = group.id
+        return payload_group
