@@ -142,6 +142,7 @@ def get_db_settings(pytest_node=None):
 
     settings["databases"]["db"]["storage"] = "postgresql"
     settings["databases"]["db"]["db_schema"] = annotations["test_dbschema"]
+    settings["databases"]["db"]["conn_acquire_timeout"] = 45
 
     settings["databases"]["db"]["dsn"] = {
         "scheme": "postgres",

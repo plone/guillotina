@@ -26,11 +26,11 @@ try:
     )
 
     class watch(metrics.watch):
-        def __init__(self, operation: str):
+        def __init__(self, label: dict):
             super().__init__(
                 counter=REDIS_OPS,
                 histogram=REDIS_OPS_PROCESSING_TIME,
-                labels={"type": operation},
+                labels=label,
             )
 
 except ImportError:
@@ -39,7 +39,6 @@ except ImportError:
 
 @configure.adapter(for_=IExternalFileStorageManager, provides=IUploadDataManager, name="redis")
 class RedisFileDataManager(DBDataManager):
-
     _data = None
     _redis = None
     _loaded = False
@@ -50,7 +49,7 @@ class RedisFileDataManager(DBDataManager):
         if self._data is None:
             redis = await self.get_redis()
             key = self.get_key()
-            with watch("get"):
+            with watch(label={"type": "get"}):
                 data = await redis.get(key)
             if not data:
                 self._data = {}
@@ -71,7 +70,7 @@ class RedisFileDataManager(DBDataManager):
         key = self.get_key()
         self._data["last_activity"] = time.time()
         value = orjson.dumps(self._data, default=guillotina_json_default)
-        with watch("set"):
+        with watch({"type": "get"}):
             await redis.set(key, value, expire=self._ttl)
 
     async def get_redis(self):
@@ -96,5 +95,5 @@ class RedisFileDataManager(DBDataManager):
         # and clear the cache key
         redis = await self.get_redis()
         key = self.get_key()
-        with watch("delete"):
+        with watch({"type": "delete"}):
             await redis.delete(key)

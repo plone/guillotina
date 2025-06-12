@@ -8,6 +8,13 @@ images.configure(
     options={"command": "start-single-node --insecure"},
 )
 
+images.configure(
+    name="redis",
+    image="redis",
+    version="7.2.5",
+    options={"cap_add": ["IPC_LOCK"], "mem_limit": "200m"},
+)
+
 # images.configure("postgresql", version="10.9")
 images.configure(
     "postgresql",
