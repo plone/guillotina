@@ -417,7 +417,6 @@ async def test_get_total_resources_of_type(db, dummy_guillotina):
 @pytest.mark.skipif(DATABASE == "DUMMY", reason="Not for dummy db")
 async def test_using_gather_with_queries_before_prepare(db, dummy_guillotina):
     aps = await get_aps(db)
-    __import__("pdb").set_trace()
     with TransactionManager(aps) as tm, await tm.begin() as txn:
         ob1 = create_content()
         txn.register(ob1)
