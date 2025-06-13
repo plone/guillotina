@@ -39,6 +39,7 @@ annotations = {
     "test_dbschema": DB_SCHEMA,
     "redis": None,
     "memcached": None,
+    "pg_pasword": "postgres",
 }
 
 
@@ -141,6 +142,7 @@ def get_db_settings(pytest_node=None):
 
     settings["databases"]["db"]["storage"] = "postgresql"
     settings["databases"]["db"]["db_schema"] = annotations["test_dbschema"]
+    settings["databases"]["db"]["conn_acquire_timeout"] = 45
 
     settings["databases"]["db"]["dsn"] = {
         "scheme": "postgres",
@@ -148,19 +150,25 @@ def get_db_settings(pytest_node=None):
         "user": "postgres",
         "host": annotations.get("pg_host", "localhost"),
         "port": annotations.get("pg_port", 5432),
-        "password": "",
+        "password": "postgres",
     }
 
     options = dict(
         host=annotations.get("pg_host", "localhost"),
         port=annotations.get("pg_port", 5432),
         dbname=annotations.get("pg_db", "guillotina"),
+        password=annotations.get("pg_password", "postgres"),
     )
     settings = _update_from_pytest_markers(settings, pytest_node)
 
     if annotations["testdatabase"] == "cockroachdb":
         configure_db(settings["databases"]["db"], **options, user="root", storage="cockroach")
-        configure_db(settings["databases"]["db-custom"], **options, user="root", storage="cockroach")
+        configure_db(
+            settings["databases"]["db-custom"],
+            **options,
+            user="root",
+            storage="cockroach",
+        )
         configure_db(settings["storages"]["db"], **options, user="root", storage="cockroach")
     else:
         configure_db(settings["databases"]["db"], **options)
@@ -184,6 +192,7 @@ def db():
 
         annotations["pg_host"] = host
         annotations["pg_port"] = port
+        annotations["pg_password"] = "postgres"
 
         yield host, port  # provide the fixture value
 
@@ -213,7 +222,6 @@ class GuillotinaDBAsgiRequester(object):
         accept="application/json",
         allow_redirects=True,
     ):
-
         value, status, _ = await self.make_request(
             method,
             path,
@@ -300,7 +308,6 @@ class GuillotinaDBHttpRequester(object):
         accept="application/json",
         allow_redirects=True,
     ):
-
         value, status, _ = await self.make_request(
             method,
             path,
@@ -606,7 +613,7 @@ def container_command(db):
     settings = get_db_settings()
     host = settings["databases"]["db"]["dsn"]["host"]
     port = settings["databases"]["db"]["dsn"]["port"]
-    conn = psycopg2.connect(f"dbname=guillotina user=postgres host={host} port={port}")
+    conn = psycopg2.connect(f"dbname=guillotina user=postgres host={host} port={port} password=postgres")
     cur = conn.cursor()
     cur.execute(open(os.path.join(_dir, "data/tables.sql"), "r").read())
     cur.execute("COMMIT;")
@@ -614,7 +621,7 @@ def container_command(db):
     conn.close()
     yield {"settings": settings}
 
-    conn = psycopg2.connect(f"dbname=guillotina user=postgres host={host} port={port}")
+    conn = psycopg2.connect(f"dbname=guillotina user=postgres host={host} port={port} password=postgres")
     cur = conn.cursor()
     cur.execute(
         """

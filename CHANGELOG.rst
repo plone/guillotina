@@ -4,7 +4,9 @@ CHANGELOG
 7.0.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Adding POST @groups endpoint in dbusers
+- Upgrading postgres version when running test in conftest
+  [nilbacardit26]
 
 
 7.0.5 (2025-04-03)

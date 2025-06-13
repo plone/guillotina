@@ -9,7 +9,12 @@ import pytest
 pytestmark = pytest.mark.asyncio
 
 
-_group = {"name": "foo", "description": "foo description", "@type": "Group", "id": "foo"}
+_group = {
+    "name": "foo",
+    "description": "foo description",
+    "@type": "Group",
+    "id": "foo",
+}
 
 
 @pytest.fixture()
@@ -27,7 +32,13 @@ async def test_ensure_crud_groups(dbusers_requester, user_data):
         assert len(resp) == 1
         assert resp[0]["groupname"] == "foo"
 
-        data = {"roles": {"guillotina.Manager": True, "guillotina.Tester": True, "guillotina.Bad": False}}
+        data = {
+            "roles": {
+                "guillotina.Manager": True,
+                "guillotina.Tester": True,
+                "guillotina.Bad": False,
+            }
+        }
 
         resp, status = await requester("PATCH", "/db/guillotina/@groups/foo", data=json.dumps(data))
         assert status == 204
@@ -52,7 +63,9 @@ async def test_ensure_crud_groups(dbusers_requester, user_data):
 
         # fix bug https://github.com/plone/guillotina/issues/1069
         resp, status = await requester(
-            "PATCH", "/db/guillotina/@groups/foo", data=json.dumps({"user_roles": ["guillotina.Reader"]})
+            "PATCH",
+            "/db/guillotina/@groups/foo",
+            data=json.dumps({"user_roles": ["guillotina.Reader"]}),
         )
         assert status == 204
         resp, status = await requester("GET", "/db/guillotina/@groups/foo")
@@ -114,3 +127,18 @@ async def test_groups_cannot_be_added_outside_groups_folder(dbusers_requester, u
         assert status_code == 412
         assert resp["reason"] == "notAllowed"
         assert resp["details"] == "Type not allowed to be added here"
+
+
+@pytest.mark.app_settings(settings.DEFAULT_SETTINGS)
+async def test_create_groups_by_endpoint(dbusers_requester, user_data):
+    async with dbusers_requester as requester:
+        payload_groups = {
+            "groupname": "foo_group",
+            "title": "Group",
+            "description": "Foo group",
+            "roles": ["guillotina.Editor"],
+        }
+        resp, status = await requester("POST", "/db/guillotina/@groups", data=json.dumps(payload_groups))
+        assert status == 200
+        resp, status = await requester("GET", f"/db/guillotina/groups/{resp['id']}")
+        assert status == 200

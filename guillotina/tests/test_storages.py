@@ -62,7 +62,10 @@ async def test_storage_impl(db, guillotina_main):
     storages = app_settings["storages"]
     storage_config = storages["db"]
     factory = get_adapter(
-        guillotina_main.root, IDatabaseManager, name=storage_config["storage"], args=[storage_config]
+        guillotina_main.root,
+        IDatabaseManager,
+        name=storage_config["storage"],
+        args=[storage_config],
     )
     original_size = len(await factory.get_names())
     await factory.create("foobar")
@@ -76,7 +79,10 @@ async def test_storage_exists(db, guillotina_main):
     storages = app_settings["storages"]
     storage_config = storages["db"]
     factory = get_adapter(
-        guillotina_main.root, IDatabaseManager, name=storage_config["storage"], args=[storage_config]
+        guillotina_main.root,
+        IDatabaseManager,
+        name=storage_config["storage"],
+        args=[storage_config],
     )
     assert not await factory.exists("foobar")
     await factory.create("foobar")
@@ -100,7 +106,10 @@ async def test_get_internal_dyn_database(db, guillotina_main):
     storages = app_settings["storages"]
     storage_config = storages["db"]
     factory = get_adapter(
-        guillotina_main.root, IDatabaseManager, name=storage_config["storage"], args=[storage_config]
+        guillotina_main.root,
+        IDatabaseManager,
+        name=storage_config["storage"],
+        args=[storage_config],
     )
     await factory.create("foobar")
     db_obj = await get_database("foobar")

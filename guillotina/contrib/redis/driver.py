@@ -33,11 +33,11 @@ try:
     )
 
     class watch(metrics.watch):
-        def __init__(self, operation: str):
+        def __init__(self, labels: dict):
             super().__init__(
                 counter=REDIS_OPS,
                 histogram=REDIS_OPS_PROCESSING_TIME,
-                labels={"type": operation},
+                labels=labels,
             )
 
 except ImportError:
@@ -65,12 +65,13 @@ class RedisDriver:
                 while True:
                     try:
                         await self._connect()
-                        with watch("acquire_conn"):
+                        with watch(labels={"type": "acquire_conn"}):
                             assert await self._pool.ping() is True
                         self.initialized = True
                         break
                     except Exception:  # pragma: no cover
                         logger.error("Error initializing pubsub", exc_info=True)
+                        await asyncio.sleep(1)
 
     @backoff.on_exception(backoff.expo, (OSError,), max_time=30, max_tries=4)
     async def _connect(self):
@@ -100,14 +101,14 @@ class RedisDriver:
         kwargs = {}
         if expire is not None:
             kwargs["ex"] = expire
-        with watch("set"):
+        with watch(labels={"type": "set"}):
             ok = await self._pool.set(key, data, **kwargs)
         assert ok is True, ok
 
     async def get(self, key: str) -> str:
         if self._pool is None:
             raise NoRedisConfigured()
-        with watch("get") as w:
+        with watch(labels={"type": "get"}) as w:
             val = await self._pool.get(key)
             if not val:
                 w.labels["type"] = "get_miss"
@@ -116,7 +117,7 @@ class RedisDriver:
     async def delete(self, key: str):
         if self._pool is None:
             raise NoRedisConfigured()
-        with watch("delete"):
+        with watch(labels={"type": "delete"}):
             await self._pool.delete(key)
 
     async def expire(self, key: str, expire: int):
@@ -134,7 +135,7 @@ class RedisDriver:
             raise NoRedisConfigured()
         for key in keys:
             try:
-                with watch("delete_many"):
+                with watch(labels={"type": "acquire_conn"}):
                     await self._pool.delete(key)
                 logger.debug("Deleted cache keys {}".format(keys))
             except Exception:
@@ -143,7 +144,7 @@ class RedisDriver:
     async def flushall(self, *, async_op: bool = False):
         if self._pool is None:
             raise NoRedisConfigured()
-        with watch("flush"):
+        with watch(labels={"type": "flush"}):
             await self._pool.flushdb(asynchronous=async_op)
 
     # PUBSUB API
@@ -152,7 +153,7 @@ class RedisDriver:
         if self._pool is None:
             raise NoRedisConfigured()
 
-        with watch("publish"):
+        with watch(labels={"type": "publish"}):
             await self._pool.publish(channel_name, data)
 
     async def unsubscribe(self, channel_name: str):
