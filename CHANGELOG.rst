@@ -6,6 +6,10 @@ CHANGELOG
 
 - Adding POST @groups endpoint in dbusers
 - Upgrading postgres version when running test in conftest
+- Instancing watch in driver redis failed if prometheus_client is not
+  installed, which is controlled by a try excep clause.
+  Passing labels instead works always when watch is imported
+  from metrics.watch
   [nilbacardit26]
 
 
