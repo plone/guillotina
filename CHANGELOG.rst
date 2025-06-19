@@ -10,8 +10,8 @@ CHANGELOG
   installed, which is controlled by a try excep clause.
   Passing labels instead works always when watch is imported
   from metrics.watch
+- Updating .readthedocs.yml
   [nilbacardit26]
-
 
 7.0.5 (2025-04-03)
 ------------------
