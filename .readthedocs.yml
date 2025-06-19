@@ -1,7 +1,11 @@
+version: 2
+
 build:
-    image: latest
+  image: latest
 
 python:
-    version: 3.7
-    setup_py_install: true
-    requirements_file: docs-requirements.txt
+  version: 3.9
+  install:
+    - method: setuptools
+      path: .
+  requirements_file: docs-requirements.txt
