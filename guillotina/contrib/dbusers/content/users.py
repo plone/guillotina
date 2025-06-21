@@ -21,10 +21,10 @@ class IUser(IFolder, IPrincipal):
 
     username = schema.TextLine(title=_("Username"), required=False)
 
-    index_field("email", index_name="user_email", type="keyword")
+    index_field("email", type="keyword")
     email = schema.TextLine(title=_("Email"), required=False)
 
-    index_field("name", index_name="user_name", type="textkeyword")
+    index_field("name", type="searchabletext")
     name = schema.TextLine(title=_("Name"), required=False)
 
     read_permission(password="guillotina.Nobody")
