@@ -1,22 +1,19 @@
+from guillotina.asgi import AsgiApp
+from guillotina.commands import Command
+from guillotina.traversal import TraversalRouter
+
 import os
 import subprocess
 import sys
-from guillotina.commands import Command
-from guillotina.asgi import AsgiApp
-from guillotina.traversal import TraversalRouter
 
 
-def create_reload_app():
-    """
-    Create the ASGI application for development with the config file from environment.
-    """
+def create_app():
     config_file = os.getenv("GUILLOTINA_CONFIG_FILE", "config.yaml")
     router = TraversalRouter()
     return AsgiApp(config_file=config_file, settings={}, loop=None, router=router)
 
 
-# Create app instance at module level for uvicorn to find
-app = create_reload_app()
+app = create_app()
 
 
 class ServeReloadCommand(Command):
