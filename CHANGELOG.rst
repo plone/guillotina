@@ -7,7 +7,7 @@ CHANGELOG
 - Adding POST @groups endpoint in dbusers
 - Upgrading postgres version when running test in conftest
   [nilbacardit26]
-- Adding server_dev command to run the server in development mode with auto-reload
+- Adding serve-reload command to run the server with auto-reload
   [rboixaderg]
 
 

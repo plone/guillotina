@@ -1,13 +1,12 @@
-from guillotina.asgi import AsgiApp
-from guillotina.commands import Command
-from guillotina.traversal import TraversalRouter
-
 import os
 import subprocess
 import sys
+from guillotina.commands import Command
+from guillotina.asgi import AsgiApp
+from guillotina.traversal import TraversalRouter
 
 
-def create_dev_app():
+def create_reload_app():
     """
     Create the ASGI application for development with the config file from environment.
     """
@@ -17,20 +16,20 @@ def create_dev_app():
 
 
 # Create app instance at module level for uvicorn to find
-app = create_dev_app()
+app = create_reload_app()
 
 
-class ServerDevCommand(Command):
+class ServeReloadCommand(Command):
     """
     Command to run the server in development mode with auto-reload.
     Uses subprocess to ensure clean reloads.
     """
 
-    description = "Serve Guillotina in development mode with auto-reload"
+    description = "Serve Guillotina in reload mode with auto-reload"
 
     def get_parser(self):
         """
-        Parses command-line arguments for the serve-dev command.
+        Parses command-line arguments for the serve-reload command.
         """
         parser = super().get_parser()
         parser.add_argument("--watch", help="Directory to watch for changes", default=".")
@@ -47,15 +46,8 @@ class ServerDevCommand(Command):
             print(f"Error: Configuration file not found at '{config_file}'")
             sys.exit(1)
 
-        print(f"Using configuration file: {config_file}")
-        print(f"Watching directory: {arguments.watch}")
-        print(f"Server will be available at: http://{arguments.host}:{arguments.port}")
-
-        # Pass the config file path via environment variable
         env = os.environ.copy()
         env["GUILLOTINA_CONFIG_FILE"] = config_file
-
-        # Use the current module as the app entry point
         module_path = f"{self.__module__}:app"
 
         command = [
@@ -66,8 +58,6 @@ class ServerDevCommand(Command):
             f"--host={arguments.host}",
             f"--port={arguments.port}",
         ]
-
-        print(f"Starting development server with command: {' '.join(command)}")
 
         try:
             subprocess.run(command, env=env, check=True)
