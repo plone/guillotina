@@ -21,16 +21,13 @@ app = create_reload_app()
 
 class ServeReloadCommand(Command):
     """
-    Command to run the server in development mode with auto-reload.
+    Command to run the server with reload mode.
     Uses subprocess to ensure clean reloads.
     """
 
-    description = "Serve Guillotina in reload mode with auto-reload"
+    description = "Serve Guillotina with reload mode"
 
     def get_parser(self):
-        """
-        Parses command-line arguments for the serve-reload command.
-        """
         parser = super().get_parser()
         parser.add_argument("--watch", help="Directory to watch for changes", default=".")
         parser.add_argument("--host", help="Host to bind the server to", default="127.0.0.1")
@@ -38,9 +35,6 @@ class ServeReloadCommand(Command):
         return parser
 
     def run(self, arguments, settings, app):
-        """
-        Run the development server using uvicorn as subprocess for reliable reload.
-        """
         config_file = arguments.configuration
         if not os.path.exists(config_file):
             print(f"Error: Configuration file not found at '{config_file}'")
