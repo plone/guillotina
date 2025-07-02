@@ -7,6 +7,8 @@ CHANGELOG
 - Adding POST @groups endpoint in dbusers
 - Upgrading postgres version when running test in conftest
   [nilbacardit26]
+- Adding server_dev command to run the server in development mode with auto-reload
+  [rboixaderg]
 
 
 7.0.5 (2025-04-03)
