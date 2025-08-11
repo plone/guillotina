@@ -31,8 +31,6 @@
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 import pkg_resources
-from recommonmark.parser import CommonMarkParser
-from recommonmark.transform import AutoStructify
 
 extensions = [
     "sphinx.ext.coverage",
@@ -42,6 +40,7 @@ extensions = [
     "sphinxcontrib.httpexample",
     "guillotina.documentation.sphinx",
     "sphinx_guillotina_theme",
+    "myst_parser",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -50,7 +49,10 @@ templates_path = ["_templates"]
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-# source_suffix = ['.rst', '.md']
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".md": "markdown",
+}
 
 # The encoding of source files.
 #
@@ -61,7 +63,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "Guillotina"
-copyright = "2020, Ramon Navarro Bosch & Nathan Van Gheem"
+copyright = "2025, Ramon Navarro Bosch & Nathan Van Gheem"
 author = "Ramon Navarro Bosch & Nathan Van Gheem"
 
 # The version info for the project you're documenting, acts as replacement for
@@ -132,7 +134,7 @@ todo_include_todos = False
 # a list of builtin themes.
 #
 html_theme = "guillotina"
-html_use_smartypants = False
+smartquotes = False
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -339,10 +341,6 @@ texinfo_documents = [
     )
 ]
 
-source_parsers = {".md": CommonMarkParser}
-
-source_suffix = [".rst", ".md"]
-
 # Documents to append as an appendix to all manuals.
 #
 # texinfo_appendices = []
@@ -358,8 +356,3 @@ source_suffix = [".rst", ".md"]
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #
 # texinfo_no_detailmenu = False
-
-# At the bottom of conf.py
-def setup(app):
-    app.add_config_value("recommonmark_config", {"auto_toc_tree_section": "Contents"}, True)
-    app.add_transform(AutoStructify)
