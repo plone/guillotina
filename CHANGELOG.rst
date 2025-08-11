@@ -6,7 +6,8 @@ CHANGELOG
 
 - Adding POST @groups endpoint in dbusers
 - Upgrading postgres version when running test in conftest
-- Updating .readthedocs.yml to version 2
+- Updating .readthedocs.yml to version 2. Updating docs dependencies,
+  upgrading sphinx to version 8
   [nilbacardit26]
 
 7.0.5 (2025-04-03)
