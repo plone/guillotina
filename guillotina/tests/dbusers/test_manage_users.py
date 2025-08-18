@@ -83,6 +83,8 @@ async def test_list_users_works_with_catalog(dbusers_requester, user_data):
         assert resp[0]["@name"] == "foobar"
         assert resp[0]["fullname"] == "Foobar"
         assert resp[0]["email"] == "foo@bar.com"
+        assert resp[0]["@id"] == "http://localhost/db/guillotina/users/foobar"
+        assert resp[0]["username"] == "foobar"
         assert isinstance(resp[0]["roles"], list)
 
 

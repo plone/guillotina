@@ -182,7 +182,7 @@ class CreateGroup(BaseGroup):
         data = await self.request.json()
         payload_group = {}
         if data.get("groupname") is None:
-            raise HTTPPreconditionFailed(content={"message": "groupname field is required"})
+            raise HTTPPreconditionFailed(content={"message": "The group name field is required"})
 
         if not valid_id(data.get("groupname")):
             raise HTTPPreconditionFailed(content={"message": "The group name you entered is not valid"})
