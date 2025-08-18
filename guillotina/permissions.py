@@ -57,7 +57,7 @@ configure.role("guillotina.Editor", "Editor", "can edit content", True)
 configure.role("guillotina.Reviewer", "Reviewer", "can review content", True)
 configure.role("guillotina.Owner", "Content Manager", "can add/delete content", True)
 
-configure.role("guillotina.Manager", "Container Manager", "", local=False)
+configure.role("guillotina.Manager", "Container Manager", "", False)
 configure.role("guillotina.ContainerAdmin", "Container Administrator", "can set settings on container", False)
 configure.role(
     "guillotina.ContainerCreator", "Container DB Manager", "Can create containers and db connections", False

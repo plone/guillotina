@@ -155,8 +155,7 @@ async def test_create_groups_by_endpoint(dbusers_requester, user_data):
                 }
             ),
         )
-        assert status == 412
-        assert resp["message"] == "The group name field is required"
+        assert status == 200
 
         resp, status = await requester(
             "POST",

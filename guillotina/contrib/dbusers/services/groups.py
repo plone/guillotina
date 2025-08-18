@@ -181,15 +181,15 @@ class CreateGroup(BaseGroup):
     async def __call__(self):
         data = await self.request.json()
         payload_group = {}
-        if data.get("groupname") is None:
-            raise HTTPPreconditionFailed(content={"message": "The group name field is required"})
-
-        if not valid_id(data.get("groupname")):
-            raise HTTPPreconditionFailed(content={"message": "The group name you entered is not valid"})
+        _id = None
+        if data.get("groupname") is not None:
+            if not valid_id(data.get("groupname")):
+                raise HTTPPreconditionFailed(content={"message": "The group name you entered is not valid"})
+            _id = data.get("groupname").lower()
 
         try:
             payload_group["name"] = data.get("title") or data.get("groupname")
-            payload_group["id_"] = data["groupname"]
+            payload_group["id_"] = _id
             payload_group["user_roles"] = data.get("roles", []) or []
             payload_group["description"] = data.get("description")
             payload_group["title"] = data.get("title")
