@@ -14,6 +14,7 @@ from guillotina.interfaces import IResourceSerializeToJsonSummary
 from guillotina.response import HTTPNotFound
 from guillotina.response import HTTPPreconditionFailed
 from guillotina.utils import navigate_to
+from guillotina.utils import valid_id
 from zope.interface import alsoProvides
 
 import logging
@@ -52,10 +53,12 @@ class ListGroups(ListGroupsOrUsersService):
     async def process_catalog_obj(self, obj) -> dict:
         return {
             "@name": obj.get("@name"),
+            "@id": obj.get("@id"),
             "id": obj.get("id"),
             "title": obj.get("group_name"),
             "users": obj.get("group_users") or [],
             "roles": obj.get("group_user_roles") or [],
+            "groupname": obj.get("id"),
         }
 
 
@@ -178,12 +181,18 @@ class CreateGroup(BaseGroup):
     async def __call__(self):
         data = await self.request.json()
         payload_group = {}
+        if data.get("groupname") is None:
+            raise HTTPPreconditionFailed(content={"message": "groupname field is required"})
+
+        if not valid_id(data.get("groupname")):
+            raise HTTPPreconditionFailed(content={"message": "The group name you entered is not valid"})
+
         try:
-            payload_group["name"] = data["groupname"]
+            payload_group["name"] = data.get("title") or data.get("groupname")
+            payload_group["id_"] = data["groupname"]
             payload_group["user_roles"] = data.get("roles", []) or []
             payload_group["description"] = data.get("description")
             payload_group["title"] = data.get("title")
-            payload_group["id_"] = None
             groups_folder = await self.context.async_get("groups")
             group = await create_content_in_container(
                 groups_folder, "Group", **payload_group, check_security=False
