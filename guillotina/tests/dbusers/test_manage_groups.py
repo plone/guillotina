@@ -115,6 +115,8 @@ async def test_list_groups_works_with_catalog(dbusers_requester, user_data):
         assert len(resp) == 1
         assert resp[0]["@name"]
         assert resp[0]["title"]
+        assert resp[0]["groupname"]
+        assert resp[0]["@id"]
         assert isinstance(resp[0]["roles"], list)
         assert isinstance(resp[0]["users"], list)
 
@@ -142,3 +144,30 @@ async def test_create_groups_by_endpoint(dbusers_requester, user_data):
         assert status == 200
         resp, status = await requester("GET", f"/db/guillotina/groups/{resp['id']}")
         assert status == 200
+        resp, status = await requester(
+            "POST",
+            "/db/guillotina/@groups",
+            data=json.dumps(
+                {
+                    "title": "Group2",
+                    "description": "Foo group2",
+                    "roles": ["guillotina.Editor"],
+                }
+            ),
+        )
+        assert status == 200
+
+        resp, status = await requester(
+            "POST",
+            "/db/guillotina/@groups",
+            data=json.dumps(
+                {
+                    "groupname": "foo_group3.,",
+                    "title": "Group3",
+                    "description": "Foo group3",
+                    "roles": ["guillotina.Editor"],
+                }
+            ),
+        )
+        assert status == 412
+        assert resp["message"] == "The group name you entered is not valid"
