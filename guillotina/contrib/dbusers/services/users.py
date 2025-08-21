@@ -131,6 +131,8 @@ class ListUsers(ListGroupsOrUsersService):
         return {
             "@name": obj.get("@name"),
             "id": obj.get("id"),
+            "@id": obj.get("@id"),
+            "username": obj.get("id"),
             "fullname": obj.get("user_name"),
             "email": obj.get("user_email"),
             "roles": obj.get("user_roles") or [],

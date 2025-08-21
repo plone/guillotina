@@ -8,6 +8,9 @@ CHANGELOG
 - Upgrading postgres version when running test in conftest
   [nilbacardit26]
 - Adding serve-reload command to run the server with auto-reload
+- Updated role definitions in permissions.py to include default values for 'guillotina.Member' and 'guillotina.Manager' to ensure the correct parameters are passed to the role.
+- Modified ListGroups and ListUsers services to include '@id' and 'username' fields in the response.
+- Use the group name as the ID in groups if it is provided.
   [rboixaderg]
 
 
