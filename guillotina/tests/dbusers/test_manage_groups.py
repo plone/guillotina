@@ -22,8 +22,13 @@ async def user_data():
     return settings.user_data.copy()
 
 
+@pytest.fixture()
+async def second_user_data():
+    return settings.second_user_data.copy()
+
+
 @pytest.mark.app_settings(settings.DEFAULT_SETTINGS)
-async def test_ensure_crud_groups(dbusers_requester, user_data):
+async def test_ensure_crud_groups(dbusers_requester, user_data, second_user_data):
     async with dbusers_requester as requester:
         resp, status_code = await requester("POST", "/db/guillotina/groups", data=json.dumps(_group))
         assert status_code == 201
@@ -32,13 +37,7 @@ async def test_ensure_crud_groups(dbusers_requester, user_data):
         assert len(resp) == 1
         assert resp[0]["groupname"] == "foo"
 
-        data = {
-            "roles": {
-                "guillotina.Manager": True,
-                "guillotina.Tester": True,
-                "guillotina.Bad": False,
-            }
-        }
+        data = {"roles": {"guillotina.Manager": True, "guillotina.Tester": True, "guillotina.Bad": False}}
 
         resp, status = await requester("PATCH", "/db/guillotina/@groups/foo", data=json.dumps(data))
         assert status == 204
@@ -54,6 +53,7 @@ async def test_ensure_crud_groups(dbusers_requester, user_data):
         # create the user
         resp, status_code = await requester("GET", "/db/guillotina/users")
         resp, status_code = await requester("POST", "/db/guillotina/users", data=json.dumps(user_data))
+        resp, status_code = await requester("POST", "/db/guillotina/users", data=json.dumps(second_user_data))
 
         data = {"users": {"foobar": True}}
         resp, status = await requester("PATCH", "/db/guillotina/@groups/foo", data=json.dumps(data))
@@ -63,9 +63,7 @@ async def test_ensure_crud_groups(dbusers_requester, user_data):
 
         # fix bug https://github.com/plone/guillotina/issues/1069
         resp, status = await requester(
-            "PATCH",
-            "/db/guillotina/@groups/foo",
-            data=json.dumps({"user_roles": ["guillotina.Reader"]}),
+            "PATCH", "/db/guillotina/@groups/foo", data=json.dumps({"user_roles": ["guillotina.Reader"]})
         )
         assert status == 204
         resp, status = await requester("GET", "/db/guillotina/@groups/foo")
@@ -73,17 +71,117 @@ async def test_ensure_crud_groups(dbusers_requester, user_data):
 
         resp, status = await requester("GET", "/db/guillotina/users/foobar")
         assert resp["user_groups"] == ["foo"]
-        data = {"users": {"foobar": False}}
+
+        data = {"users": {"foobar": True}}
+        resp, status = await requester("PATCH", "/db/guillotina/@groups/foo", data=json.dumps(data))
+        assert status == 204
+
+        # Keep the user in the group
+        resp, status = await requester("GET", "/db/guillotina/users/foobar")
+        assert resp["user_groups"] == ["foo"]
+
+        # Delete first user and add second user
+        data = {"users": {"foobar": False, "foobar_2": True}}
+        resp, status = await requester("PATCH", "/db/guillotina/@groups/foo", data=json.dumps(data))
+        assert status == 204
+        resp, status = await requester("GET", "/db/guillotina/@groups/foo")
+        assert len(resp["users"]["items"]) == 1
+        resp, status = await requester("GET", "/db/guillotina/users/foobar")
+        assert resp["user_groups"] == []
+        resp, status = await requester("GET", "/db/guillotina/users/foobar_2")
+        assert resp["user_groups"] == ["foo"]
+
+        # Delete both users from the group
+        data = {"users": {"foobar": False, "foobar_2": False}}
         resp, status = await requester("PATCH", "/db/guillotina/@groups/foo", data=json.dumps(data))
         assert status == 204
         resp, status = await requester("GET", "/db/guillotina/@groups/foo")
         assert len(resp["users"]["items"]) == 0
         resp, status = await requester("GET", "/db/guillotina/users/foobar")
         assert resp["user_groups"] == []
+        resp, status = await requester("GET", "/db/guillotina/users/foobar_2")
+        assert resp["user_groups"] == []
 
         # ensure we cannot patch invalid users
         data = {"users": {"foobarx": True}}
         resp, status = await requester("PATCH", "/db/guillotina/@groups/foo", data=json.dumps(data))
+        assert status == 412
+
+
+@pytest.mark.app_settings(settings.DEFAULT_SETTINGS)
+async def test_ensure_crud_groups_using_standard_api(dbusers_requester, user_data, second_user_data):
+    async with dbusers_requester as requester:
+        resp, status_code = await requester("POST", "/db/guillotina/groups", data=json.dumps(_group))
+        assert status_code == 201
+
+        data = {"user_roles": ["guillotina.Manager", "guillotina.Tester"]}
+
+        resp, status = await requester("PATCH", "/db/guillotina/groups/foo", data=json.dumps(data))
+        assert status == 204
+        resp, status = await requester("GET", "/db/guillotina/groups/foo")
+        assert set(resp["user_roles"]) == set(["guillotina.Manager", "guillotina.Tester"])
+
+        data = {"user_roles": ["guillotina.Tester"]}
+        resp, status = await requester("PATCH", "/db/guillotina/groups/foo", data=json.dumps(data))
+        assert status == 204
+        resp, status = await requester("GET", "/db/guillotina/groups/foo")
+        assert set(resp["user_roles"]) == set(["guillotina.Tester"])
+
+        # create the user
+        resp, status_code = await requester("GET", "/db/guillotina/users")
+        resp, status_code = await requester("POST", "/db/guillotina/users", data=json.dumps(user_data))
+        resp, status_code = await requester("POST", "/db/guillotina/users", data=json.dumps(second_user_data))
+
+        data = {"users": ["foobar"]}
+        resp, status = await requester("PATCH", "/db/guillotina/groups/foo", data=json.dumps(data))
+        assert status == 204
+        resp, status = await requester("GET", "/db/guillotina/groups/foo")
+        assert resp["users"] == ["foobar"]
+
+        # fix bug https://github.com/plone/guillotina/issues/1069
+        resp, status = await requester(
+            "PATCH", "/db/guillotina/groups/foo", data=json.dumps({"user_roles": ["guillotina.Reader"]})
+        )
+        assert status == 204
+        resp, status = await requester("GET", "/db/guillotina/groups/foo")
+        assert resp["users"] == ["foobar"]
+
+        resp, status = await requester("GET", "/db/guillotina/users/foobar")
+        assert resp["user_groups"] == ["foo"]
+
+        data = {"users": ["foobar"]}
+        resp, status = await requester("PATCH", "/db/guillotina/groups/foo", data=json.dumps(data))
+        assert status == 204
+
+        # Keep the user in the group
+        resp, status = await requester("GET", "/db/guillotina/users/foobar")
+        assert resp["user_groups"] == ["foo"]
+
+        # Delete first user and add second user
+        data = {"users": ["foobar_2"]}
+        resp, status = await requester("PATCH", "/db/guillotina/groups/foo", data=json.dumps(data))
+        assert status == 204
+        resp, status = await requester("GET", "/db/guillotina/groups/foo")
+        assert len(resp["users"]) == 1
+        resp, status = await requester("GET", "/db/guillotina/users/foobar")
+        assert resp["user_groups"] == []
+        resp, status = await requester("GET", "/db/guillotina/users/foobar_2")
+        assert resp["user_groups"] == ["foo"]
+
+        # Delete both users from the group
+        data = {"users": []}
+        resp, status = await requester("PATCH", "/db/guillotina/groups/foo", data=json.dumps(data))
+        assert status == 204
+        resp, status = await requester("GET", "/db/guillotina/groups/foo")
+        assert len(resp["users"]) == 0
+        resp, status = await requester("GET", "/db/guillotina/users/foobar")
+        assert resp["user_groups"] == []
+        resp, status = await requester("GET", "/db/guillotina/users/foobar_2")
+        assert resp["user_groups"] == []
+
+        # ensure we cannot patch invalid users
+        data = {"users": {"foobarx": True}}
+        resp, status = await requester("PATCH", "/db/guillotina/groups/foo", data=json.dumps(data))
         assert status == 412
 
 
