@@ -273,6 +273,7 @@ async def test_create_groups_by_endpoint(dbusers_requester, user_data):
 
 
 @pytest.mark.app_settings(settings_with_catalog)
+@pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
 async def test_groups_and_users_endpoints(dbusers_requester, user_data):
     async with dbusers_requester as requester:
         group_payload = {
