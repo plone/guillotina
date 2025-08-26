@@ -7,14 +7,6 @@ class ServerCommand(Command):
 
     def get_parser(self):
         parser = super(ServerCommand, self).get_parser()
-        parser.add_argument(
-            "-r",
-            "--reload",
-            action="store_true",
-            dest="reload",
-            help="Auto reload on code changes",
-            default=False,
-        )
         parser.add_argument("--port", help="Override port to run this server on", default=None, type=int)
         parser.add_argument("--host", help="Override host to run this server on", default=None)
 
@@ -35,12 +27,12 @@ class ServerCommand(Command):
                 app,
                 host=host,
                 port=port,
-                reload=arguments.reload,
                 log_config=loggers or LOGGING_CONFIG,
                 **app.server_settings.get("uvicorn", {}),
             )
             server = Server(config)
             await server.serve()
+
         elif arguments.asgi_server == "hypercorn":
             from hypercorn.asyncio import serve  # type: ignore
             from hypercorn.config import Config  # type: ignore

@@ -69,6 +69,7 @@ app_settings: Dict[str, Any] = {
         "dbvacuum": "guillotina.commands.vacuum.VacuumCommand",
         "migrate": "guillotina.commands.migrate.MigrateCommand",
         "gen-key": "guillotina.commands.crypto.CryptoCommand",
+        "serve-reload": "guillotina.commands.serve_reload.ServeReloadCommand",
     },
     "json_schema_definitions": {},  # json schemas available to reference in docs
     "default_layer": interfaces.IDefaultLayer,
