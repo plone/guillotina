@@ -180,7 +180,7 @@ async def test_ensure_crud_groups_using_standard_api(dbusers_requester, user_dat
         assert resp["user_groups"] == []
 
         # ensure we cannot patch invalid users
-        data = {"users": {"foobarx": True}}
+        data = {"users": ["foobarx"]}
         resp, status = await requester("PATCH", "/db/guillotina/groups/foo", data=json.dumps(data))
         assert status == 412
 
