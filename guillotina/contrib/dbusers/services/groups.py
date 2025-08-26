@@ -51,12 +51,17 @@ class ListGroups(ListGroupsOrUsersService):
     ]
 
     async def process_catalog_obj(self, obj) -> dict:
+        users = obj.get("group_users") or []
+        users_obj = []
+        for user in users:
+            users_obj.append({"id": user, "title": user})
         return {
             "@name": obj.get("@name"),
             "@id": obj.get("@id"),
             "id": obj.get("id"),
             "title": obj.get("group_name"),
-            "users": obj.get("group_users") or [],
+            "users": users,
+            "members": {"items": users_obj, "items_total": len(users_obj)},  # Plone compatibility
             "roles": obj.get("group_user_roles") or [],
             "groupname": obj.get("id"),
         }

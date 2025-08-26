@@ -31,6 +31,7 @@ class IUser(IFolder, IPrincipal):
     password = schema.TextLine(title=_("Password"), required=False)
 
     write_permission(user_groups="guillotina.ManageUsers")
+    index_field("user_groups", type="textkeyword")
     user_groups = schema.List(title=_("Groups"), value_type=schema.TextLine(), required=False)
 
     write_permission(user_roles="guillotina.ManageUsers")

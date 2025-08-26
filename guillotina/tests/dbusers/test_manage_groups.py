@@ -119,6 +119,7 @@ async def test_list_groups_works_with_catalog(dbusers_requester, user_data):
         assert resp[0]["@id"]
         assert isinstance(resp[0]["roles"], list)
         assert isinstance(resp[0]["users"], list)
+        assert isinstance(resp[0]["members"]["items"], list)
 
 
 @pytest.mark.app_settings(settings.DEFAULT_SETTINGS)
@@ -171,3 +172,47 @@ async def test_create_groups_by_endpoint(dbusers_requester, user_data):
         )
         assert status == 412
         assert resp["message"] == "The group name you entered is not valid"
+
+
+@pytest.mark.app_settings(settings_with_catalog)
+async def test_groups_and_users_endpoints(dbusers_requester, user_data):
+    async with dbusers_requester as requester:
+        group_payload = {
+            "groupname": "testers",
+            "title": "Testers Group",
+            "description": "A group for testing",
+            "roles": ["guillotina.Editor"],
+        }
+        group_resp, group_status = await requester(
+            "POST", "/db/guillotina/@groups", data=json.dumps(group_payload)
+        )
+        assert group_status == 200
+        group_id = group_resp["id"]
+
+        user_resp, user_status = await requester("POST", "/db/guillotina/users", data=json.dumps(user_data))
+        assert user_status == 201
+        user_id = user_resp["@name"]
+
+        patch_payload = {"users": {user_id: True}}
+        resp, status = await requester(
+            "PATCH", f"/db/guillotina/@groups/{group_id}", data=json.dumps(patch_payload)
+        )
+        assert status == 204
+
+        resp, status = await requester("GET", f"/db/guillotina/@groups/{group_id}")
+        assert status == 200
+        assert resp["users"]["items"] == [user_id]
+
+        resp, status = await requester("GET", "/db/guillotina/@groups")
+        assert status == 200
+        assert resp[0]["users"] == [user_id]
+        assert resp[0]["members"]["items"] == [{"id": user_id, "title": user_id}]
+
+        resp, status = await requester("GET", f"/db/guillotina/@users/{user_id}")
+        assert status == 200
+        assert resp["user_groups"] == [group_id]
+
+        resp, status = await requester("GET", "/db/guillotina/@users")
+        assert status == 200
+        assert resp[0]["groups"]["items"] == [{"id": group_id, "title": group_id}]
+        assert resp[0]["user_groups"] == [group_id]
