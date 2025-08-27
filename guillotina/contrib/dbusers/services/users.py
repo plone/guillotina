@@ -125,9 +125,13 @@ class DeleteUser(BaseUser):
 )
 class ListUsers(ListGroupsOrUsersService):
     type_name: str = "User"
-    _desired_keys: typing.List[str] = ["@name", "fullname", "email", "id", "roles"]
+    _desired_keys: typing.List[str] = ["@name", "fullname", "email", "id", "roles", "user_groups"]
 
     async def process_catalog_obj(self, obj) -> dict:
+        groups = obj.get("user_groups") or []
+        groups_obj = []
+        for group in groups:
+            groups_obj.append({"id": group, "title": group})
         return {
             "@name": obj.get("@name"),
             "id": obj.get("id"),
@@ -136,4 +140,6 @@ class ListUsers(ListGroupsOrUsersService):
             "fullname": obj.get("user_name"),
             "email": obj.get("user_email"),
             "roles": obj.get("user_roles") or [],
+            "groups": {"items": groups_obj, "items_total": len(groups_obj)},  # Plone compatibility
+            "user_groups": groups,
         }

@@ -63,18 +63,26 @@ async def on_group_removed(group: Group, event: ObjectAddedEvent) -> None:
 
 @configure.subscriber(for_=(IGroup, IBeforeObjectModifiedEvent))
 async def on_group_modified(group: Group, event: BeforeObjectModifiedEvent) -> None:
-    # keep group.users updated with changes from users
-    old_users = group.users or []
-    users_added = set() - set(old_users)
-    users_removed = set(old_users) - set()
+    users_added = []
+    users_removed = []
     changes = event.payload.get("users", None)
     if changes is None:
         return
-    for user, is_new in changes.items():
-        if is_new:
-            users_added.add(user)
-        else:
-            users_removed.add(user)
+
+    if isinstance(changes, list):
+        for user in changes:
+            if user not in group.users:
+                users_added.append(user)
+
+        for user in group.users:
+            if user not in changes:
+                users_removed.append(user)
+    else:
+        for user, is_new in changes.items():
+            if is_new and user not in group.users:
+                users_added.append(user)
+            elif not is_new:
+                users_removed.append(user)
     await _update_users(group.id, users_added, users_removed)
 
 

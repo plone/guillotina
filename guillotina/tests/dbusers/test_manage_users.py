@@ -86,6 +86,8 @@ async def test_list_users_works_with_catalog(dbusers_requester, user_data):
         assert resp[0]["@id"] == "http://localhost/db/guillotina/users/foobar"
         assert resp[0]["username"] == "foobar"
         assert isinstance(resp[0]["roles"], list)
+        assert isinstance(resp[0]["groups"]["items"], list)
+        assert isinstance(resp[0]["user_groups"], list)
 
 
 @pytest.mark.app_settings(settings.DEFAULT_SETTINGS)
