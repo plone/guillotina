@@ -710,3 +710,13 @@ class Transaction:
 
     async def __aexit__(self, *args):
         return self.__exit__()
+
+    def __del__(self):
+        if self._db_conn is not None:
+            logger.error(
+                f"""
+                Found a leak of pg connection {self._db_conn} in txn {self}.
+                It's not possible to return the connection to the pool
+                (__del__ function is not async)
+                """
+            )
