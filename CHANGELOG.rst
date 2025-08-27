@@ -6,6 +6,8 @@ CHANGELOG
 
 - Adding POST @groups endpoint in dbusers
 - Upgrading postgres version when running test in conftest
+- Updating .readthedocs.yml to version 2. Updating docs dependencies,
+  upgrading sphinx to version 8
   [nilbacardit26]
 - Adding serve-reload command to run the server with auto-reload
 - Updated role definitions in permissions.py to include default values for 'guillotina.Member' and 'guillotina.Manager' to ensure the correct parameters are passed to the role.
@@ -14,7 +16,6 @@ CHANGELOG
 - Updated @users and @groups endpoints to adapt them to volto/plone api
 - Fixed updating users in groups in custom and standard API
   [rboixaderg]
-
 
 7.0.5 (2025-04-03)
 ------------------
