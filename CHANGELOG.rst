@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-7.0.6 (unreleased)
+7.0.6 (2025-10-10)
 ------------------
 
 - Adding POST @groups endpoint in dbusers
