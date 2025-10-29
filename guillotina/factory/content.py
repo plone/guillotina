@@ -175,7 +175,7 @@ class Database:
             await txn.initialize_tid()
             root = await tm._storage.load(txn, ROOT_ID)
             if root is not None:
-                root = app_settings["object_reader"](root)
+                root = await app_settings["object_reader"](root)
                 root.__txn__ = txn
                 if root.__db_id__ is None:
                     root.__db_id__ = self.__db_id__

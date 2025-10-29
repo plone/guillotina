@@ -186,7 +186,7 @@ async def get_object_by_uid(uid: str, txn=None) -> IBaseObject:
     if result["parent_id"] == TRASHED_ID:
         raise KeyError(uid)
 
-    obj = app_settings["object_reader"](result)
+    obj = await app_settings["object_reader"](result)
     obj.__txn__ = txn
     if result["parent_id"]:
         parent = await get_object_by_uid(result["parent_id"], txn)

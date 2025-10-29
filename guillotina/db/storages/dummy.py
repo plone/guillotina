@@ -69,7 +69,7 @@ class DummyStorage(BaseStorage):  # type: ignore
 
     async def store(self, oid, old_serial, writer, obj, txn):
         assert oid is not None
-        p = writer.serialize()  # This calls __getstate__ of obj
+        p = await writer.serialize()  # This calls __getstate__ of obj
         json = await writer.get_json()
         part = writer.part
         if part is None:

@@ -56,7 +56,7 @@ class Writer(object):
     def part(self):
         return getattr(self._obj, "__partition_id__", 0)
 
-    def serialize(self):
+    async def serialize(self):
         protocol = app_settings.get("pickle_protocol", pickle.HIGHEST_PROTOCOL)
         return pickle.dumps(self._obj, protocol=protocol)
 
