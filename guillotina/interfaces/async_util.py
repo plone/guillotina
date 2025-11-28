@@ -74,3 +74,8 @@ class ISessionManagerUtility(IAsyncUtility):
         """
         Refresh an actual session
         """
+
+
+class IRecaptchaValidationUtility(IAsyncUtility):
+    async def validate() -> bool:
+        pass

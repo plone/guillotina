@@ -4,7 +4,8 @@ CHANGELOG
 7.0.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- feat: create reCAPTCHA validation utility 
+[rboixaderg]
 
 
 7.0.6 (2025-10-10)
