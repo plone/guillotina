@@ -240,7 +240,7 @@ class ResetPasswordUsers(Service):
                 raise HTTPNotAcceptable()
         else:
             # We validate with recaptcha
-            recaptcha_validator = get_utility(IRecaptchaValidationUtility)
+            recaptcha_validator = query_utility(IRecaptchaValidationUtility)
             if recaptcha_validator is not None:
                 status = await recaptcha_validator.validate()
                 if status is False:
@@ -339,7 +339,7 @@ class RegisterUsers(Service):
         if allowed is False:
             raise HTTPUnauthorized(content={"text": "Not allowed registration"})
 
-        recaptcha_validator = get_utility(IRecaptchaValidationUtility)
+        recaptcha_validator = query_utility(IRecaptchaValidationUtility)
         if recaptcha_validator is not None:
             status = await recaptcha_validator.validate()
             if status is False:
@@ -400,7 +400,7 @@ class RegisterUsers(Service):
 )
 class InfoAccess(Service):
     async def __call__(self):
-        recaptcha_validator = get_utility(IRecaptchaValidationUtility)
+        recaptcha_validator = query_utility(IRecaptchaValidationUtility)
         if recaptcha_validator is not None:
             status = await recaptcha_validator.validate()
             if status is False:

@@ -1,5 +1,7 @@
 from guillotina import app_settings
+from guillotina.interfaces.async_util import IRecaptchaValidationUtility
 from guillotina.utils import get_current_request
+from zope.interface import implementer
 
 import logging
 
@@ -10,9 +12,18 @@ RECAPTCHA_VALIDATION_URL = "https://www.google.com/recaptcha/api/siteverify"
 VALIDATION_HEADER = "X-VALIDATION-G"
 
 
+@implementer(IRecaptchaValidationUtility)
 class RecaptchaValidator:
     # Not valid to generate a user
     for_validators = ()
+
+    async def initialize(self, app=None):
+        """Initialize the utility (no-op for reCAPTCHA)."""
+        pass
+
+    async def finalize(self, app=None):
+        """Finalize the utility (no-op for reCAPTCHA)."""
+        pass
 
     async def validate(self):
         request = get_current_request()
@@ -35,7 +46,7 @@ class RecaptchaValidator:
                     data = await resp.json()
                 except Exception:  # pragma: no cover
                     logger.warning("Did not get json response", exc_info=True)
-                    return
+                    return False
                 try:
                     return data["success"]
                 except Exception:  # pragma: no cover
