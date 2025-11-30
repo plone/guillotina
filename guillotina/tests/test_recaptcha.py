@@ -66,7 +66,7 @@ class TestRecaptchaValidator:
         mock_session.__aenter__ = AsyncMock(return_value=mock_session)
         mock_session.__aexit__ = AsyncMock(return_value=None)
 
-        with patch("guillotina.auth.recaptcha.aiohttp.ClientSession", return_value=mock_session):
+        with patch("aiohttp.ClientSession", return_value=mock_session):
             validator = RecaptchaValidator()
             result = await validator.validate()
 
@@ -95,7 +95,7 @@ class TestRecaptchaValidator:
         mock_session.__aenter__ = AsyncMock(return_value=mock_session)
         mock_session.__aexit__ = AsyncMock(return_value=None)
 
-        with patch("guillotina.auth.recaptcha.aiohttp.ClientSession", return_value=mock_session):
+        with patch("aiohttp.ClientSession", return_value=mock_session):
             validator = RecaptchaValidator()
             result = await validator.validate()
 
@@ -119,14 +119,14 @@ class TestRecaptchaValidator:
         mock_session.__aenter__ = AsyncMock(return_value=mock_session)
         mock_session.__aexit__ = AsyncMock(return_value=None)
 
-        with patch("guillotina.auth.recaptcha.aiohttp.ClientSession", return_value=mock_session):
+        with patch("aiohttp.ClientSession", return_value=mock_session):
             validator = RecaptchaValidator()
             result = await validator.validate()
             assert result is False
 
         # Test missing success key
         mock_response.json = AsyncMock(return_value={})
-        with patch("guillotina.auth.recaptcha.aiohttp.ClientSession", return_value=mock_session):
+        with patch("aiohttp.ClientSession", return_value=mock_session):
             validator = RecaptchaValidator()
             result = await validator.validate()
             assert result is False
@@ -135,9 +135,12 @@ class TestRecaptchaValidator:
 class TestRecaptchaUtilityIntegration:
     """Test the utility pattern integration."""
 
-    async def test_utility_registered_and_implements_interface(self):
+    async def test_utility_registered_and_implements_interface(self, guillotina_main):
         """Test that the utility is registered and implements the interface."""
         from zope.interface.verify import verifyObject
+
+        # guillotina_main fixture sets up the application and registers utilities
+        assert guillotina_main is not None  # Ensure app is initialized
 
         utility = query_utility(IRecaptchaValidationUtility)
         assert utility is not None
