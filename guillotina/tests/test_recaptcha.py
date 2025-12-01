@@ -29,107 +29,142 @@ class TestRecaptchaValidator:
 
     async def test_validate_with_fake_recaptcha(self):
         """Test validation with fake recaptcha token."""
-        app_settings["_fake_recaptcha_"] = FAKE_RECAPTCHA
-        request = utils.get_mocked_request(headers={VALIDATION_HEADER: FAKE_RECAPTCHA})
-        utils.task_vars.request.set(request)
+        original_value = app_settings.get("_fake_recaptcha_")
+        try:
+            app_settings["_fake_recaptcha_"] = FAKE_RECAPTCHA
+            request = utils.get_mocked_request(headers={VALIDATION_HEADER: FAKE_RECAPTCHA})
+            utils.task_vars.request.set(request)
 
-        validator = RecaptchaValidator()
-        result = await validator.validate()
-        assert result is True
+            validator = RecaptchaValidator()
+            result = await validator.validate()
+            assert result is True
+        finally:
+            if original_value is not None:
+                app_settings["_fake_recaptcha_"] = original_value
+            else:
+                app_settings.pop("_fake_recaptcha_", None)
 
     async def test_validate_without_configuration(self):
         """Test validation when recaptcha is not configured (graceful degradation)."""
-        app_settings.pop("recaptcha", None)
-        request = utils.get_mocked_request(headers={VALIDATION_HEADER: "some-token"})
-        utils.task_vars.request.set(request)
+        original_value = app_settings.get("recaptcha")
+        try:
+            app_settings.pop("recaptcha", None)
+            request = utils.get_mocked_request(headers={VALIDATION_HEADER: "some-token"})
+            utils.task_vars.request.set(request)
 
-        validator = RecaptchaValidator()
-        result = await validator.validate()
-        # Should return True when not configured (graceful degradation)
-        assert result is True
+            validator = RecaptchaValidator()
+            result = await validator.validate()
+            # Should return True when not configured (graceful degradation)
+            assert result is True
+        finally:
+            if original_value is not None:
+                app_settings["recaptcha"] = original_value
+            else:
+                app_settings.pop("recaptcha", None)
 
     async def test_validate_success(self):
         """Test successful validation with mocked HTTP response."""
-        app_settings["recaptcha"] = {"private": "test-secret-key"}
-        request = utils.get_mocked_request(headers={VALIDATION_HEADER: "valid-token"})
-        utils.task_vars.request.set(request)
+        original_value = app_settings.get("recaptcha")
+        try:
+            app_settings["recaptcha"] = {"private": "test-secret-key"}
+            request = utils.get_mocked_request(headers={VALIDATION_HEADER: "valid-token"})
+            utils.task_vars.request.set(request)
 
-        # Mock aiohttp response
-        mock_response = AsyncMock()
-        mock_response.json = AsyncMock(return_value={"success": True})
-        mock_response.__aenter__ = AsyncMock(return_value=mock_response)
-        mock_response.__aexit__ = AsyncMock(return_value=None)
+            # Mock aiohttp response
+            mock_response = AsyncMock()
+            mock_response.json = AsyncMock(return_value={"success": True})
+            mock_response.__aenter__ = AsyncMock(return_value=mock_response)
+            mock_response.__aexit__ = AsyncMock(return_value=None)
 
-        mock_post = AsyncMock(return_value=mock_response)
-        mock_session = MagicMock()
-        mock_session.post = mock_post
-        mock_session.__aenter__ = AsyncMock(return_value=mock_session)
-        mock_session.__aexit__ = AsyncMock(return_value=None)
+            mock_post = AsyncMock(return_value=mock_response)
+            mock_session = MagicMock()
+            mock_session.post = mock_post
+            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            mock_session.__aexit__ = AsyncMock(return_value=None)
 
-        with patch("aiohttp.ClientSession", return_value=mock_session):
-            validator = RecaptchaValidator()
-            result = await validator.validate()
+            with patch("aiohttp.ClientSession", return_value=mock_session):
+                validator = RecaptchaValidator()
+                result = await validator.validate()
 
-            assert result is True
-            mock_post.assert_called_once()
-            call_args = mock_post.call_args
-            assert call_args[0][0] == RECAPTCHA_VALIDATION_URL
-            assert call_args[1]["data"]["secret"] == "test-secret-key"
-            assert call_args[1]["data"]["response"] == "valid-token"
+                assert result is True
+                mock_post.assert_called_once()
+                call_args = mock_post.call_args
+                assert call_args[0][0] == RECAPTCHA_VALIDATION_URL
+                assert call_args[1]["data"]["secret"] == "test-secret-key"
+                assert call_args[1]["data"]["response"] == "valid-token"
+        finally:
+            if original_value is not None:
+                app_settings["recaptcha"] = original_value
+            else:
+                app_settings.pop("recaptcha", None)
 
     async def test_validate_failure(self):
         """Test failed validation with mocked HTTP response."""
-        app_settings["recaptcha"] = {"private": "test-secret-key"}
-        request = utils.get_mocked_request(headers={VALIDATION_HEADER: "invalid-token"})
-        utils.task_vars.request.set(request)
+        original_value = app_settings.get("recaptcha")
+        try:
+            app_settings["recaptcha"] = {"private": "test-secret-key"}
+            request = utils.get_mocked_request(headers={VALIDATION_HEADER: "invalid-token"})
+            utils.task_vars.request.set(request)
 
-        # Mock aiohttp response
-        mock_response = AsyncMock()
-        mock_response.json = AsyncMock(return_value={"success": False})
-        mock_response.__aenter__ = AsyncMock(return_value=mock_response)
-        mock_response.__aexit__ = AsyncMock(return_value=None)
+            # Mock aiohttp response
+            mock_response = AsyncMock()
+            mock_response.json = AsyncMock(return_value={"success": False})
+            mock_response.__aenter__ = AsyncMock(return_value=mock_response)
+            mock_response.__aexit__ = AsyncMock(return_value=None)
 
-        mock_post = AsyncMock(return_value=mock_response)
-        mock_session = MagicMock()
-        mock_session.post = mock_post
-        mock_session.__aenter__ = AsyncMock(return_value=mock_session)
-        mock_session.__aexit__ = AsyncMock(return_value=None)
+            mock_post = AsyncMock(return_value=mock_response)
+            mock_session = MagicMock()
+            mock_session.post = mock_post
+            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            mock_session.__aexit__ = AsyncMock(return_value=None)
 
-        with patch("aiohttp.ClientSession", return_value=mock_session):
-            validator = RecaptchaValidator()
-            result = await validator.validate()
+            with patch("aiohttp.ClientSession", return_value=mock_session):
+                validator = RecaptchaValidator()
+                result = await validator.validate()
 
-            assert result is False
+                assert result is False
+        finally:
+            if original_value is not None:
+                app_settings["recaptcha"] = original_value
+            else:
+                app_settings.pop("recaptcha", None)
 
     async def test_validate_error_handling(self):
         """Test validation error handling (JSON decode error, missing success key)."""
-        app_settings["recaptcha"] = {"private": "test-secret-key"}
-        request = utils.get_mocked_request(headers={VALIDATION_HEADER: "some-token"})
-        utils.task_vars.request.set(request)
+        original_value = app_settings.get("recaptcha")
+        try:
+            app_settings["recaptcha"] = {"private": "test-secret-key"}
+            request = utils.get_mocked_request(headers={VALIDATION_HEADER: "some-token"})
+            utils.task_vars.request.set(request)
 
-        # Test JSON decode error
-        mock_response = AsyncMock()
-        mock_response.json = AsyncMock(side_effect=ValueError("Invalid JSON"))
-        mock_response.__aenter__ = AsyncMock(return_value=mock_response)
-        mock_response.__aexit__ = AsyncMock(return_value=None)
+            # Test JSON decode error
+            mock_response = AsyncMock()
+            mock_response.json = AsyncMock(side_effect=ValueError("Invalid JSON"))
+            mock_response.__aenter__ = AsyncMock(return_value=mock_response)
+            mock_response.__aexit__ = AsyncMock(return_value=None)
 
-        mock_post = AsyncMock(return_value=mock_response)
-        mock_session = MagicMock()
-        mock_session.post = mock_post
-        mock_session.__aenter__ = AsyncMock(return_value=mock_session)
-        mock_session.__aexit__ = AsyncMock(return_value=None)
+            mock_post = AsyncMock(return_value=mock_response)
+            mock_session = MagicMock()
+            mock_session.post = mock_post
+            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            mock_session.__aexit__ = AsyncMock(return_value=None)
 
-        with patch("aiohttp.ClientSession", return_value=mock_session):
-            validator = RecaptchaValidator()
-            result = await validator.validate()
-            assert result is False
+            with patch("aiohttp.ClientSession", return_value=mock_session):
+                validator = RecaptchaValidator()
+                result = await validator.validate()
+                assert result is False
 
-        # Test missing success key
-        mock_response.json = AsyncMock(return_value={})
-        with patch("aiohttp.ClientSession", return_value=mock_session):
-            validator = RecaptchaValidator()
-            result = await validator.validate()
-            assert result is False
+            # Test missing success key
+            mock_response.json = AsyncMock(return_value={})
+            with patch("aiohttp.ClientSession", return_value=mock_session):
+                validator = RecaptchaValidator()
+                result = await validator.validate()
+                assert result is False
+        finally:
+            if original_value is not None:
+                app_settings["recaptcha"] = original_value
+            else:
+                app_settings.pop("recaptcha", None)
 
 
 class TestRecaptchaUtilityIntegration:
