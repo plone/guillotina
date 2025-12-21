@@ -2,7 +2,7 @@ from datetime import datetime
 from dateutil.tz import tzutc
 from guillotina import configure
 from guillotina import schema
-from guillotina.behaviors.instance import AnnotationBehavior
+from guillotina.behaviors.instance import ContextBehavior
 from guillotina.behaviors.properties import ContextProperty
 from guillotina.directives import index_field
 from guillotina.fields.patch import PatchField
@@ -92,7 +92,7 @@ class IDublinCore(Interface):
     marker=IMarkerDublinCore,
     for_="guillotina.interfaces.IResource",
 )
-class DublinCore(AnnotationBehavior):
+class DublinCore(ContextBehavior):
     auto_serialize = True
 
     title = ContextProperty("title", None)
