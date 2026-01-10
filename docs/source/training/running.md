@@ -1,6 +1,6 @@
 # Starting Guillotina
 
-Once you have [guillotina installed](./installation.html "Link to install docs"), you can run it
+Once you have {doc}`guillotina installed <installation>`, you can run it
 with the `g` executable that it installs.
 
 ## Command

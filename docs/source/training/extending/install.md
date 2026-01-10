@@ -57,7 +57,7 @@ class ManageAddon(Addon):
 
 Then, using Postman, do a `POST` request to the `@addons` endpoint:
 
-```eval_rst
+```{eval-rst}
 ..  http:example:: curl wget httpie python-requests
 
     POST /db/container/@addons HTTP/1.1

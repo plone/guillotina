@@ -38,6 +38,6 @@ This example creates a schema and assigns it to the `MyType` content
 type.
 
 
-```eval_rst
+```{eval-rst}
 .. include:: ./_scanning.rst
 ```

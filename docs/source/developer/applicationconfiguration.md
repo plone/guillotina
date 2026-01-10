@@ -22,6 +22,5 @@ If multiple `guillotina` applications configure conflicting configurations,
 `guillotina` chooses the configuration according to the order the `guillotina`
 applications that are included.
 
-A [full reference of the available configure decorators](../../api/configure.html)
-can be found in the
-[programming api reference section](../../api/index.html).
+A full reference of the available configure decorators can be found in the
+{doc}`programming api reference section </api/index>`.

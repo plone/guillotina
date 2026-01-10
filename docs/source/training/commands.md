@@ -1,12 +1,12 @@
 # Commands
 
-Guillotina comes with a great set of [commands](../../developer/commands.html) you
+Guillotina comes with a great set of {doc}`commands </developer/commands>` you
 can use to help debug and inspect your install.
 
 We've already gone through the `serve`, `create` and `testdata` commands so we'll
 now cover `shell` and `run`.
 
-Make sure to also read the [commands](../../developer/commands.html) reference in the docs
+Make sure to also read the {doc}`commands </developer/commands>` reference in the docs
 to learn how to create your own commands.
 
 ## Shell

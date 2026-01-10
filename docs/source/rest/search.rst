@@ -159,7 +159,7 @@ Aggregation
 
 Example:
 
-.. code-block:: http
+.. code-block:: text
 
   @aggregation?title__eq=my+title&metadata=title,creators
 

@@ -5,7 +5,7 @@ to provide a very simple chat experience.
 
 Copy the following files into a new folder `static` in your application:
 
-```eval_rst
+```{eval-rst}
 - :download:`chat.js <./_static/chat.js>`.
 - :download:`index.html <./_static/index.html>`.
 - :download:`main.css <./_static/main.css>`.

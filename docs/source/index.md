@@ -47,7 +47,7 @@ curl --user root:root http://localhost:8080/db/container
 
 Are you new to Guillotina? This is the place to start!
 
-The [quick tour](./quick-tour.html) gives an overview of the major features in Guillotina.
+The {doc}`quick tour <quick-tour>` gives an overview of the major features in Guillotina.
 
 Need help? Join our [Gitter channel](https://gitter.im/plone/guillotina).
 
@@ -107,9 +107,9 @@ if __name__ == "__main__":
 
 ## Training / Tutorial
 
-Learn how to use Guillotina by following the [training](./training/index.html "Link to Guillotina trining docs").
+Learn how to use Guillotina by following the {doc}`training <training/index>`.
 
-```eval_rst
+```{eval-rst}
 .. toctree::
    :maxdepth: 2
 
@@ -132,7 +132,7 @@ with:
 
 The endpoints available around these objects are detailed below:
 
-```eval_rst
+```{eval-rst}
 .. toctree::
    :maxdepth: 1
    :glob:
@@ -150,7 +150,7 @@ The endpoints available around these objects are detailed below:
 After reading quick tour or training section,
 Now you can start hands-on style guide to learn how to use it.
 
-```eval_rst
+```{eval-rst}
 .. toctree::
    :maxdepth: 2
 
@@ -177,48 +177,49 @@ Now you can start hands-on style guide to learn how to use it.
    developer/async_utils
    developer/component-architecture
    developer/debugging
+   developer/testing
 ```
 
 
 ## Deploying
 
-- [Installing Guillotina](./installation/installation.html)
+- {doc}`Installing Guillotina <installation/installation>`
   is done with pip but if you need to run with docker,
   [we also have you covered](https://hub.docker.com/r/guillotina/guillotina/).
 - Guillotina has an quite a few
-  [configuration options](./installation/configuration.html)
+  {doc}`configuration options <installation/configuration>`
   you might be curious about.
 - You can also setup
-  [logging configuration](./installation/logging.html).
+  {doc}`logging configuration <installation/logging>`.
 - Finally, you may also need to put Guillotina
-  [behind a proxy](./installation/production.html)
+  {doc}`behind a proxy <installation/production>`
   when you deploy it.
 
 
 ## References
 
-```eval_rst
+```{eval-rst}
 .. toctree::
    :maxdepth: 2
 
    api/index
 ```
 
-```eval_rst
+```{eval-rst}
 .. toctree::
    :maxdepth: 2
 
    migration/index
 ```
 
-```eval_rst
+```{eval-rst}
 .. toctree::
    :maxdepth: 2
 
    installation/index
 ```
 
-```eval_rst
+```{eval-rst}
 .. toctree::
    :maxdepth: 2
 
@@ -227,15 +228,19 @@ Now you can start hands-on style guide to learn how to use it.
 
 ## About
 
-- [Read about](./about.html) the rich history of the project
+- {doc}`Read about <about>` the rich history of the project
 
-```eval_rst
+```{eval-rst}
 .. toctree::
    :hidden:
    :glob:
 
+   about
+   quick-tour
+   quickstart
+   rest/index
    developer/*
    installation/*
    training/*
-   *
+   training/extending/*
 ```
