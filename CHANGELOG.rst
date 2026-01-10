@@ -4,6 +4,8 @@ CHANGELOG
 7.0.7 (unreleased)
 ------------------
 
+- feat: create reCAPTCHA validation utility 
+[rboixaderg]
 - Docs: Update documentation and configuration settings
 - Chore: Update sphinx-guillotina-theme version to 1.0.9
   [rboixaderg]

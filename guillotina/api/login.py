@@ -5,7 +5,6 @@ from guillotina import app_settings
 from guillotina import configure
 from guillotina.api.service import Service
 from guillotina.auth import authenticate_user
-from guillotina.auth.recaptcha import RecaptchaValidator
 from guillotina.auth.utils import find_user
 from guillotina.component import get_utility
 from guillotina.component import query_utility
@@ -16,6 +15,7 @@ from guillotina.interfaces import IApplication
 from guillotina.interfaces import IAuthValidationUtility
 from guillotina.interfaces import IContainer
 from guillotina.interfaces import ISessionManagerUtility
+from guillotina.interfaces.async_util import IRecaptchaValidationUtility
 from guillotina.response import HTTPNotAcceptable
 from guillotina.response import HTTPPreconditionFailed
 from guillotina.response import HTTPUnauthorized
@@ -240,10 +240,11 @@ class ResetPasswordUsers(Service):
                 raise HTTPNotAcceptable()
         else:
             # We validate with recaptcha
-            validator = RecaptchaValidator()
-            status = await validator.validate()
-            if status is False:
-                raise HTTPUnauthorized(content={"text": "Invalid validation"})
+            recaptcha_validator = query_utility(IRecaptchaValidationUtility)
+            if recaptcha_validator is not None:
+                status = await recaptcha_validator.validate()
+                if status is False:
+                    raise HTTPUnauthorized(content={"text": "Invalid validation"})
 
             # We need to validate is a valid user
             user = await find_user({"id": user_id})
@@ -338,10 +339,11 @@ class RegisterUsers(Service):
         if allowed is False:
             raise HTTPUnauthorized(content={"text": "Not allowed registration"})
 
-        validator = RecaptchaValidator()
-        status = await validator.validate()
-        if status is False:
-            raise HTTPUnauthorized(content={"text": "Invalid validation"})
+        recaptcha_validator = query_utility(IRecaptchaValidationUtility)
+        if recaptcha_validator is not None:
+            status = await recaptcha_validator.validate()
+            if status is False:
+                raise HTTPUnauthorized(content={"text": "Invalid validation"})
 
         payload = await self.request.json()
 
@@ -398,10 +400,11 @@ class RegisterUsers(Service):
 )
 class InfoAccess(Service):
     async def __call__(self):
-        validator = RecaptchaValidator()
-        status = await validator.validate()
-        if status is False:
-            raise HTTPUnauthorized(content={"text": "Invalid validation"})
+        recaptcha_validator = query_utility(IRecaptchaValidationUtility)
+        if recaptcha_validator is not None:
+            status = await recaptcha_validator.validate()
+            if status is False:
+                raise HTTPUnauthorized(content={"text": "Invalid validation"})
 
         auth_providers = app_settings.get("auth_providers", {})
         providers = []

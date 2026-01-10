@@ -32,6 +32,11 @@ app_settings: Dict[str, Any] = {
             "factory": "guillotina.async_util.AsyncJobPool",
             "settings": {"max_size": 5},
         },
+        "guillotina.recaptcha": {
+            "provides": "guillotina.interfaces.IRecaptchaValidationUtility",
+            "factory": "guillotina.auth.recaptcha.RecaptchaValidator",
+            "settings": {},
+        },
     },
     "store_json": True,
     "pickle_protocol": pickle.HIGHEST_PROTOCOL,
