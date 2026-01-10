@@ -9,7 +9,7 @@ All serializers are:
 - async callable objects that return a dictionary of json compatible data
 
 The training doc has a great introduction on
-[customizing the serialization for content](../training/extending/serialize.html).
+{doc}`customizing the serialization for content </training/extending/serialize>`.
 
 
 Serialization interfaces:

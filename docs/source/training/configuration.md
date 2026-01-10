@@ -23,10 +23,10 @@ to see what some of the default configuration options are.
 ## Modifying configuration
 
 A detailed list of configuration options and explanations can be found
-in the [configuration section](../../installation/configuration.html) of the docs.
+in the {doc}`configuration section </installation/configuration>` of the docs.
 
 
-```eval_rst
+```{eval-rst}
 .. note:: Guillotina also supports JSON configuration files
 ```
 
@@ -43,7 +43,7 @@ docker run \
 ```
 
 
-```eval_rst
+```{eval-rst}
 .. warning::
    This particular docker run command produces a volatile database.
 
@@ -60,7 +60,7 @@ the `-c` or `--config` command line option.
 g -c config-foobar.yaml
 ```
 
-```eval_rst
+```{eval-rst}
 .. note::
    Make sure your configuration matches your PostgreSQL server settings
 ```

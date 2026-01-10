@@ -35,14 +35,14 @@ Finally, run the server:
 The server should now be running on http://0.0.0.0:8080
 
 Then, use [Postman](https://www.getpostman.com/ "Link to Postman"), `curl` or whatever tool you
-prefer to interact with the [REST API](./rest/index.html).
+prefer to interact with the {doc}`REST API </rest/index>`.
 
 You can also navigate in your Guillotina server with its built-in web admin interface by visiting http://localhost:8080/+admin/.
 
 Modify the configuration in `config.yaml` to customize server settings.
 
 
-### Postgresql installation instructions
+## Postgresql installation instructions
 
 If you do not have a PostgreSQL database server installed, you can use docker
 to get one running quickly.
@@ -63,7 +63,7 @@ Only containers can be created inside databases.
 
 Let's create one:
 
-```eval_rst
+```{eval-rst}
 ..  http:example:: curl wget httpie python-requests
 
     POST /db/ HTTP/1.1
@@ -87,7 +87,7 @@ Let's create one:
 
 and create content inside the container:
 
-```eval_rst
+```{eval-rst}
 ..  http:example:: curl wget httpie python-requests
 
     POST /db/guillotina/ HTTP/1.1
@@ -114,7 +114,7 @@ Let's navigating through your newly created data.
 
 First you can see all your containers using the following, notice that at the moment there's only one named `guillotina`:
 
-```eval_rst
+```{eval-rst}
 ..  http:example:: curl wget httpie python-requests
 
     GET /db/ HTTP/1.1
@@ -137,7 +137,7 @@ First you can see all your containers using the following, notice that at the mo
 
 Then you could explore container data using:
 
-```eval_rst
+```{eval-rst}
 ..  http:example:: curl wget httpie python-requests
 
     GET /db/guillotina HTTP/1.1
@@ -180,7 +180,7 @@ Then you could explore container data using:
 
 And finally query a specific content inside the container using:
 
-```eval_rst
+```{eval-rst}
 ..  http:example:: curl wget httpie python-requests
 
     GET /db/guillotina/news HTTP/1.1

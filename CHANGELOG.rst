@@ -6,6 +6,8 @@ CHANGELOG
 
 - feat: create reCAPTCHA validation utility 
 [rboixaderg]
+- Docs: Update documentation and configuration settings
+  [rboixaderg]
 
 
 7.0.6 (2025-10-10)

@@ -84,7 +84,7 @@ class MyItem(Item):
     pass
 ```
 
-```eval_rst
+```{eval-rst}
 .. include:: ./_scanning.rst
 ```
 

@@ -32,7 +32,7 @@ In this example, the service will apply to a GET request against a container,
 `/zodb/guillotina/@myservice`.
 
 
-```eval_rst
+```{eval-rst}
 .. include:: ./_scanning.rst
 ```
 

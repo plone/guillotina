@@ -23,7 +23,7 @@ give a general understanding of how to explore and use the API.
 
 To create content, do a `POST` request on a container or folder object.
 
-```eval_rst
+```{eval-rst}
 .. http:gapi::
    :hidden:
    :path: /db/container
@@ -49,7 +49,7 @@ To create content, do a `POST` request on a container or folder object.
 
 To add a dynamic behavior, we use the `@behavior` endpoint.
 
-```eval_rst
+```{eval-rst}
 .. http:gapi::
    :path: /db/container/foobar5/@behaviors
    :path_spec: /(db)/(container)/(content)/@behaviors
@@ -64,7 +64,7 @@ To add a dynamic behavior, we use the `@behavior` endpoint.
 
 Simple file uploads can be done with the `@upload` endpoint.
 
-```eval_rst
+```{eval-rst}
 .. http:gapi::
    :path: /db/container/foobar5/@upload/file
    :path_spec: /(db)/(container)/(content)/@upload/file
@@ -75,7 +75,7 @@ Simple file uploads can be done with the `@upload` endpoint.
 
 Then, to download the file, use the `@download` endpoint.
 
-```eval_rst
+```{eval-rst}
 .. http:gapi::
    :path: /db/container/foobar5/@download/file
    :path_spec: /(db)/(container)/(content)/@download/file
@@ -91,7 +91,7 @@ resumable uploads.
 
 First, initialize the TUS upload with a POST
 
-```eval_rst
+```{eval-rst}
 .. http:gapi::
    :path: /db/container/foobar5/@tusupload/file
    :path_spec: /(db)/(container)/(content)/@tusupload/file
@@ -102,7 +102,7 @@ First, initialize the TUS upload with a POST
 
 Next, upload the chunks(here we're doing chunks):
 
-```eval_rst
+```{eval-rst}
 .. http:gapi::
    :path: /db/container/foobar5/@tusupload/file
    :path_spec: /(db)/(container)/(content)/@tusupload/file
@@ -114,7 +114,7 @@ Next, upload the chunks(here we're doing chunks):
 
 And final chunk:
 
-```eval_rst
+```{eval-rst}
 .. http:gapi::
    :path: /db/container/foobar5/@tusupload/file
    :path_spec: /(db)/(container)/(content)/@tusupload/file
@@ -151,7 +151,7 @@ To override this, send the `TUS-OVERRIDE-UPLOAD: 1` header.
 
 The `@sharing` endpoint is available to inspect and modify permissions on an object.
 
-```eval_rst
+```{eval-rst}
 .. http:gapi::
    :path: /db/container/foobar5/@sharing
    :path_spec: /(db)/(container)/(content)/@sharing
@@ -160,7 +160,7 @@ The `@sharing` endpoint is available to inspect and modify permissions on an obj
 
 To modify, we use the same endpoint but with a `POST`.
 
-```eval_rst
+```{eval-rst}
 .. http:gapi::
    :path: /db/container/foobar5/@sharing
    :path_spec: /(db)/(container)/(content)/@sharing
@@ -195,14 +195,14 @@ Each change can use the following settings:
 In the previous step, we installed `guillotina.contrib.swagger`. With OpenAPI, we can
 inspect any context and explore the API.
 
-```eval_rst
+```{eval-rst}
 .. figure:: ../_static/img/swagger.png
    :alt: Swagger
 
    Visit ``http://localhost:8080/@docs``
 ```
 
-```eval_rst
+```{eval-rst}
 .. figure:: ../_static/img/auth-swagger.png
    :alt: Authentication
 

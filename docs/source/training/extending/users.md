@@ -12,7 +12,7 @@ value in your `config.yaml` as `guillotina_dbusers` uses that to work.
 After you restart guillotina, you can also install `dbusers`
 into your container using the `@addons` endpoint:
 
-```eval_rst
+```{eval-rst}
 ..  http:example:: curl wget httpie python-requests
 
     POST /db/container/@addons HTTP/1.1
@@ -51,7 +51,7 @@ into your container using the `@addons` endpoint:
 
 Creating users is just creating a user object.
 
-```eval_rst
+```{eval-rst}
 ..  http:example:: curl wget httpie python-requests
 
     POST /db/container/users HTTP/1.1
@@ -84,7 +84,7 @@ Creating users is just creating a user object.
 
 Logging in can be done with the `@login` endpoint which returns a jwt token.
 
-```eval_rst
+```{eval-rst}
 ..  http:example:: curl wget httpie python-requests
 
     POST /db/container/@login HTTP/1.1
@@ -111,7 +111,7 @@ Logging in can be done with the `@login` endpoint which returns a jwt token.
 Then, future requests are done with a `Bearer` token with the jwt token. For
 example, to create a conversation with your user:
 
-```eval_rst
+```{eval-rst}
 ..  http:example:: curl wget httpie python-requests
 
     POST /db/container/conversations/ HTTP/1.1

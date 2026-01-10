@@ -34,7 +34,7 @@ Features:
 
 ### Example configuration:
 
-```eval_rst
+```{eval-rst}
 .. literalinclude:: examples/quick-tour/config.yaml
 ```
 
@@ -42,15 +42,16 @@ Features:
 
 See [instructions below](#playing-with-those-examples) to play with.
 
-```eval_rst
+```{eval-rst}
 .. literalinclude:: examples/quick-tour/service.py
 ```
 
+(example-content-type)=
 ### Example content type:
 
 See [instructions below](#playing-with-those-examples) to play with.
 
-```eval_rst
+```{eval-rst}
 .. literalinclude:: examples/quick-tour/ct.py
 ```
 
@@ -58,7 +59,7 @@ See [instructions below](#playing-with-those-examples) to play with.
 
 See [instructions below](#playing-with-those-examples) to play with.
 
-```eval_rst
+```{eval-rst}
 .. http:post:: /db/container/
 
     Create MyType
@@ -208,6 +209,7 @@ See [instructions below](#playing-with-those-examples) to play with.
     You can see that `@foobar` service is available on any endpoints.
 ```
 
+(playing-with-those-examples)=
 ### Playing with those examples
 
 To play with those examples you should install Guillotina and [Cookiecutter](https://cookiecutter.readthedocs.io "Link to cookiecutter"),
@@ -274,7 +276,7 @@ g serve -c myapp/config.yaml
 Now create a container:
 
 
-```eval_rst
+```{eval-rst}
 ..  http:example:: curl wget httpie python-requests
 
     POST /db/ HTTP/1.1
