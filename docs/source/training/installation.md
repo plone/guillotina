@@ -5,7 +5,7 @@ and [Docker](https://www.docker.com/ "Link to Docker's website").
 
 Please make sure that you have both installed.
 
-```eval_rst
+```{eval-rst}
 .. note:: It is recommended you install along with a `virtual environment <https://docs.python.org/3/library/venv.html>`_
 ```
 

@@ -11,7 +11,7 @@ Guillotina will output debugging headers in the response
 about timing, number of queries and cache hit/miss stats.
 
 
-```eval_rst
+```{eval-rst}
 .. make sure we have a container
 .. http:gapi::
    :hidden: yes

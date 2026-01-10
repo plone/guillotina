@@ -7,7 +7,7 @@ on tests, for instance:
 
 ```python
 @pytest.mark.app_settings({
-    'root_user: {'password': 'supersecret!'}
+    'root_user': {'password': 'supersecret!'}
 })
 async def test_the_code(container_requester):
     pass

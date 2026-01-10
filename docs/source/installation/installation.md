@@ -19,4 +19,4 @@ Installing Guillotina provide the `g` executable. To run the server, simply:
 g serve
 ```
 
-Read [command options](../../developer/commands.html) for details on commands.
+Read {doc}`command options </developer/commands>` for details on commands.

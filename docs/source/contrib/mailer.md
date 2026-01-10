@@ -34,7 +34,7 @@ await mailer.send(recipient='john@doe.com', subject='This is my subject', text='
 
 ## Example gmail StartTLS
 
-```json
+```yaml
 mailer:
   default_sender: no-reply@mydomain.net
   endpoints:
@@ -51,7 +51,7 @@ mailer:
 
 ## Example gmail TLS
 
-```json
+```yaml
 mailer:
   default_sender: no-reply@mydomain.net
   endpoints:

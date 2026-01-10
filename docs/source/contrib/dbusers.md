@@ -20,7 +20,7 @@ inside your container.
 Guillotina users holding `guillotina.ContainerAdmin` or
 `guillotina.Manager` permissions can add new users like
 
-```json
+```text
 POST /db/container/users {
     "@type": "User",
     "id": "foobar",
@@ -36,14 +36,14 @@ You can now login to the container with the `foobar` user.
 
 New groups are added likewise
 
-```json
+```text
 POST /db/container/groups {
     "@type": "Group",
     "id": "admins",
     "name": "My Site Admins",
     "description": "My site's admins group",
     "user_roles": ["guillotina.Manager"],
-    "users": ["foobar", "otheradmin"],
+    "users": ["foobar", "otheradmin"]
 }
 ```
 

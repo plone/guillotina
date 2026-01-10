@@ -4,7 +4,8 @@ CHANGELOG
 7.0.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Docs: Update documentation and configuration settings
+  [rboixaderg]
 
 
 7.0.6 (2025-10-10)

@@ -95,7 +95,7 @@ guillotina serve -c config.yaml
 
 Create container first:
 
-```eval_rst
+```{eval-rst}
 ..  http:example:: curl wget httpie python-requests
 
     POST /db/ HTTP/1.1
@@ -126,7 +126,7 @@ Create container first:
 
 Install your todo list application:
 
-```eval_rst
+```{eval-rst}
 ..  http:example:: curl wget httpie python-requests
 
     POST /db/todo/@addons HTTP/1.1
@@ -159,7 +159,7 @@ Install your todo list application:
 
 Add todo items:
 
-```eval_rst
+```{eval-rst}
 ..  http:example:: curl wget httpie python-requests
 
     POST /db/todo HTTP/1.1
@@ -187,7 +187,7 @@ Add todo items:
     }
 ```
 
-```eval_rst
+```{eval-rst}
 ..  http:example:: curl wget httpie python-requests
 
     POST /db/todo HTTP/1.1
@@ -217,7 +217,7 @@ Add todo items:
 
 Get a list of todo items:
 
-```eval_rst
+```{eval-rst}
 ..  http:example:: curl wget httpie python-requests
 
     GET /db/todo HTTP/1.1

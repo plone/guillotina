@@ -34,4 +34,4 @@ This will execute the function `send_email` in an asynchronous pool after the re
 
 The functions `execute.in_queue`, `execute.in_queue_with_func`, `execute.after_commit` and `execute.before_commit` are also available.
 
-See the [full specification](../api/utils.html#module-guillotina.utils.execute).
+See the {doc}`full specification </api/utils>`.

@@ -8,7 +8,7 @@ in this document.
 
 We'll be explaining the security system by showing examples.
 Fist, make sure to follow the steps from
-[Getting started](../narrative.html).
+{doc}`Getting started <narrative>`.
 
 Now you should have a resource tree that we can represent like the following:
 
@@ -28,7 +28,7 @@ for them, to do so we are going to install
 installed create two users, let's say "Bob" and "Alice".
 
 You can find more information about this addon especially how to get **Bearer Authorization JWT**
-see [training's users section](../../training/extending/users.html).
+see {doc}`training's users section </training/extending/users>`.
 
 Note that at this moment the resource tree can be represented like this:
 
@@ -46,7 +46,7 @@ db
 
 Now login with "Bob" and try access `/db/todo` endpoint:
 
-```eval_rst
+```{eval-rst}
 ..  http:example:: curl wget httpie python-requests
 
     GET /db/todo/ HTTP/1.1
@@ -70,7 +70,7 @@ Like you can see in the response you are not authorized to view.
 
 Let's grant "Bob" view permission for this `db/todo/` resource tree node:
 
-```eval_rst
+```{eval-rst}
 ..  http:example:: curl wget httpie python-requests
 
     POST /db/todo/@sharing HTTP/1.1
@@ -96,7 +96,7 @@ Let's grant "Bob" view permission for this `db/todo/` resource tree node:
 
 You can now access to `/db/todo` endpoint using Bob user:
 
-```eval_rst
+```{eval-rst}
 ..  http:example:: curl wget httpie python-requests
 
     GET /db/todo/ HTTP/1.1
@@ -206,7 +206,7 @@ the way we can add principals to users.
 
 Let's add a group named `todo_viewer`:
 
-```eval_rst
+```{eval-rst}
 ..  http:example:: curl wget httpie python-requests
 
     POST /db/todo/groups HTTP/1.1
@@ -244,7 +244,7 @@ Let's add a group named `todo_viewer`:
 
 And add "Bob" and "Alice" to that group.
 
-```eval_rst
+```{eval-rst}
 ..  http:example:: curl wget httpie python-requests
 
     PATCH /db/todo/users/Bob HTTP/1.1
@@ -264,7 +264,7 @@ And add "Bob" and "Alice" to that group.
     Content-Type: application/json
 ```
 
-```eval_rst
+```{eval-rst}
 ..  http:example:: curl wget httpie python-requests
 
     PATCH /db/todo/users/Alice HTTP/1.1
@@ -286,7 +286,7 @@ And add "Bob" and "Alice" to that group.
 
 Let's grant `todo_viewer` view permission for this `db/todo/` resource tree node:
 
-```eval_rst
+```{eval-rst}
 ..  http:example:: curl wget httpie python-requests
 
     POST /db/todo/@sharing HTTP/1.1
@@ -315,7 +315,7 @@ Now Alice should be able to view todo container and all it's children.
 At the moment Alice can view users and groups which is not convenient for a
 `todo_viewer` group, let's deny that.
 
-```eval_rst
+```{eval-rst}
 ..  http:example:: curl wget httpie python-requests
 
     POST /db/todo/users/@sharing HTTP/1.1
@@ -339,7 +339,7 @@ At the moment Alice can view users and groups which is not convenient for a
     Content-Type: application/json
 ```
 
-```eval_rst
+```{eval-rst}
 ..  http:example:: curl wget httpie python-requests
 
     POST /db/todo/groups/@sharing HTTP/1.1
@@ -373,7 +373,7 @@ Roles are granted permissions, which means that a principal with one role will
 inherit all that role permissions.
 
 Guillotina defined serval default roles, see
-[developer roles section](../../developer/roles.html). But remember that you
+{doc}`developer roles section <roles>`. But remember that you
 can defined your own ones(more on that later).
 <!-- TODO: write an "How to defined role" section in developer/role.md -->
 
@@ -389,7 +389,7 @@ grants the following permissions:
 To do use run (don't forget to replace `<first_todo_id_>` with your first todo
 id):
 
-```eval_rst
+```{eval-rst}
 ..  http:example:: curl wget httpie python-requests
 
     POST /db/todo/<first_todo_id>/@sharing HTTP/1.1
@@ -423,7 +423,7 @@ a given role, for example at the moment principal "Alice" which have
 Let's fix that by giving "guillotina.DeleteContent" permission to
 "guillotina.Editor" role at this specific resource tree node:
 
-```eval_rst
+```{eval-rst}
 ..  http:example:: curl wget httpie python-requests
 
     POST /db/todo/<first_todo_id>/@sharing HTTP/1.1

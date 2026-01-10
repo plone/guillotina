@@ -4,8 +4,9 @@ Introduction
 .. image:: https://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat
    :target: http://guillotina.readthedocs.io/en/latest/
 
-.. image:: https://travis-ci.org/plone/guillotina.svg?branch=master
-   :target: https://travis-ci.org/plone/guillotina
+.. image:: https://github.com/plone/guillotina/workflows/CI/badge.svg
+   :target: https://github.com/plone/guillotina/actions
+   :alt: CI Status
 
 .. image:: https://codecov.io/gh/plone/guillotina/branch/master/graph/badge.svg
    :target: https://codecov.io/gh/plone/guillotina/branch/master
@@ -39,7 +40,7 @@ This is the working project of the next generation Guillotina server based on as
 Dependencies
 ------------
 
-* Python >= 3.7
+* Python >= 3.8
 * PostgreSQL >= 9.6
 
 
