@@ -25,12 +25,16 @@ class ResultProcessor:
             return results
 
         items = results.get("items", [])
-        if not items:
-            return results
-
+        items_total = results.get("items_total")
         operation = aggregation_config.get("operation")
         field = aggregation_config.get("field")
         group_by = aggregation_config.get("group_by")
+
+        if operation == "count" and not group_by:
+            total = items_total if items_total is not None else len(items)
+            return {"count": total}
+        if not items:
+            return results
 
         if operation == "sum":
             return ResultProcessor._sum_aggregation(items, field, group_by)

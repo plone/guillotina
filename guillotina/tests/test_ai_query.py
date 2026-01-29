@@ -16,7 +16,7 @@ async def test_schema_analyzer_discovers_content_types(container_requester):
         resp, status = await requester("GET", "/db/guillotina")
         assert status == 200
 
-        container = await utils.get_container(requester)
+        container = await utils.get_container(requester=requester)
         analyzer = SchemaAnalyzer(container)
         schema_info = await analyzer.get_schema_info()
 

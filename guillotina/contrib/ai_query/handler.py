@@ -1,4 +1,5 @@
 from guillotina import app_settings
+from guillotina.contrib.ai_query.llm_logger import LLMInteractionLogger
 from guillotina.contrib.ai_query.prompts import PromptBuilder
 from guillotina.contrib.ai_query.providers import LLMProvider
 from guillotina.contrib.ai_query.schema_analyzer import SchemaAnalyzer
@@ -10,6 +11,7 @@ from typing import Optional
 
 import json
 import logging
+import time
 
 
 logger = logging.getLogger("guillotina")
@@ -50,6 +52,7 @@ class AIQueryHandler:
         context: IResource,
         schema_info: dict,
         conversation_history: Optional[List[Dict]] = None,
+        interaction_logger: Optional[LLMInteractionLogger] = None,
     ) -> dict:
         """
         Translate natural language query to structured query format.
@@ -68,25 +71,104 @@ class AIQueryHandler:
         ]
 
         temperature = self.settings.get("temperature", 0.1)
-        max_tokens = self.settings.get(
-            "query_translation_max_tokens", self.settings.get("max_tokens", 1024)
-        )
+        max_tokens = self.settings.get("query_translation_max_tokens", self.settings.get("max_tokens", 1024))
         timeout = self.settings.get("timeout", 30)
 
         try:
+            t0 = time.perf_counter()
             response_text = await self.provider.completion(
                 messages=messages,
                 temperature=temperature,
                 max_tokens=max_tokens,
                 timeout=timeout,
             )
-            query = self._parse_query_response(response_text)
-            self._validate_query(query, schema_info)
-
-            return query
+            duration = time.perf_counter() - t0
+            response = self._parse_query_response(response_text)
+            if interaction_logger:
+                interaction_logger.log_translate_query(
+                    messages, response_text, response, duration_seconds=duration
+                )
+            if self._is_step_response(response):
+                self._validate_query(response["query"], schema_info)
+                return response
+            self._validate_query(response, schema_info)
+            return response
         except Exception as e:
-            logger.error(f"Query translation failed: {e}", exc_info=True)
+            duration = time.perf_counter() - t0
+            if interaction_logger:
+                interaction_logger.log_llm_error(
+                    "translate_query", e, messages=messages, duration_seconds=duration
+                )
+            logger.error("Query translation failed: %s", e, exc_info=True)
             raise
+
+    async def translate_next_step(
+        self,
+        natural_language: str,
+        context: IResource,
+        schema_info: dict,
+        step_results: List[Dict],
+        conversation_history: Optional[List[Dict]] = None,
+        interaction_logger: Optional[LLMInteractionLogger] = None,
+        step_index: int = 1,
+    ) -> dict:
+        """
+        Given previous step results, return either the next query to run
+        (with _next: true) or _action: answer. Used in multi-step agent loop.
+        """
+        if not self.provider.is_enabled():
+            raise ValueError("AI query is not enabled")
+
+        system_prompt, user_prompt_template = PromptBuilder.build_next_step_prompt(
+            schema_info, step_results, conversation_history
+        )
+        step_results_desc = PromptBuilder.format_step_results(step_results)
+        user_prompt = user_prompt_template.format(query=natural_language, step_results=step_results_desc)
+
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ]
+
+        temperature = self.settings.get("temperature", 0.1)
+        max_tokens = self.settings.get("query_translation_max_tokens", self.settings.get("max_tokens", 1024))
+        timeout = self.settings.get("timeout", 30)
+
+        try:
+            t0 = time.perf_counter()
+            response_text = await self.provider.completion(
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                timeout=timeout,
+            )
+            duration = time.perf_counter() - t0
+            response = self._parse_query_response(response_text)
+            if interaction_logger:
+                interaction_logger.log_translate_next_step(
+                    step_index, messages, response_text, response, duration_seconds=duration
+                )
+            if response.get("_action") == "answer":
+                return response
+            if self._is_step_response(response):
+                self._validate_query(response["query"], schema_info)
+                return response
+            raise ValueError("Expected next-step query or _action answer from LLM")
+        except Exception as e:
+            duration = time.perf_counter() - t0
+            if interaction_logger:
+                interaction_logger.log_llm_error(
+                    f"translate_next_step (step {step_index})",
+                    e,
+                    messages=messages,
+                    duration_seconds=duration,
+                )
+            logger.error("Next step translation failed: %s", e, exc_info=True)
+            raise
+
+    def _is_step_response(self, response: dict) -> bool:
+        """True if response is a step (has query and _next)."""
+        return isinstance(response.get("query"), dict) and response.get("_next") is True
 
     async def generate_response(
         self,
@@ -94,6 +176,7 @@ class AIQueryHandler:
         results: dict,
         schema_info: dict,
         conversation_history: Optional[List[Dict]] = None,
+        interaction_logger: Optional[LLMInteractionLogger] = None,
     ) -> str:
         """
         Generate natural language response from query results.
@@ -110,15 +193,24 @@ class AIQueryHandler:
         timeout = self.settings.get("timeout", 30)
 
         try:
+            t0 = time.perf_counter()
             response = await self.provider.completion(
                 messages=messages,
                 temperature=temperature,
                 max_tokens=max_tokens,
                 timeout=timeout,
             )
+            duration = time.perf_counter() - t0
+            if interaction_logger:
+                interaction_logger.log_generate_response(messages, response, duration_seconds=duration)
             return response
         except Exception as e:
-            logger.error(f"Response generation failed: {e}", exc_info=True)
+            duration = time.perf_counter() - t0
+            if interaction_logger:
+                interaction_logger.log_llm_error(
+                    "generate_response", e, messages=messages, duration_seconds=duration
+                )
+            logger.error("Response generation failed: %s", e, exc_info=True)
             return f"Error generating response: {str(e)}"
 
     async def generate_response_stream(
@@ -127,6 +219,7 @@ class AIQueryHandler:
         results: dict,
         schema_info: dict,
         conversation_history: Optional[List[Dict]] = None,
+        interaction_logger: Optional[LLMInteractionLogger] = None,
     ) -> AsyncGenerator[str, None]:
         """
         Generate natural language response from query results; yields content chunks.
@@ -144,15 +237,26 @@ class AIQueryHandler:
         timeout = self.settings.get("timeout", 30)
 
         try:
+            t0 = time.perf_counter()
+            chunks = []
             async for chunk in self.provider.completion_stream(
                 messages=messages,
                 temperature=temperature,
                 max_tokens=max_tokens,
                 timeout=timeout,
             ):
+                chunks.append(chunk)
                 yield chunk
+            duration = time.perf_counter() - t0
+            if interaction_logger and chunks:
+                interaction_logger.log_generate_response(messages, "".join(chunks), duration_seconds=duration)
         except Exception as e:
-            logger.error(f"Response stream failed: {e}", exc_info=True)
+            duration = time.perf_counter() - t0
+            if interaction_logger:
+                interaction_logger.log_llm_error(
+                    "generate_response_stream", e, messages=messages, duration_seconds=duration
+                )
+            logger.error("Response stream failed: %s", e, exc_info=True)
             yield f"Error generating response: {str(e)}"
 
     def _parse_query_response(self, response_text: str) -> dict:
@@ -196,6 +300,4 @@ class AIQueryHandler:
             field_name = key.split("__")[0]
             if type_name and type_name in content_types:
                 if field_name not in content_types[type_name]:
-                    logger.warning(
-                        f"Field {field_name} not found in {type_name}, but allowing query"
-                    )
+                    logger.warning(f"Field {field_name} not found in {type_name}, but allowing query")

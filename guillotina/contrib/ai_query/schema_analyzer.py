@@ -5,6 +5,7 @@ from guillotina.directives import merged_tagged_value_dict
 from guillotina.interfaces import IBehavior
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceFactory
+from guillotina.utils import get_content_path
 
 import logging
 
@@ -15,6 +16,26 @@ logger = logging.getLogger("guillotina")
 class SchemaAnalyzer:
     def __init__(self, context: IResource):
         self.context = context
+
+    def get_request_context(self) -> dict:
+        """
+        Return current request context (path, id, type_name, title) so the LLM
+        can filter by "this container" or resolve references by id/title.
+        """
+        path = get_content_path(self.context)
+        if path != "/" and not path.endswith("/"):
+            path = path + "/"
+        ctx = {
+            "path": path,
+            "id": getattr(self.context, "__name__", None) or getattr(self.context, "id", None),
+        }
+        type_name = getattr(self.context, "type_name", None)
+        if type_name:
+            ctx["type_name"] = type_name
+        title = getattr(self.context, "title", None)
+        if title is not None:
+            ctx["title"] = title
+        return ctx
 
     async def get_schema_info(self) -> dict:
         """
@@ -61,6 +82,7 @@ class SchemaAnalyzer:
                 schema_info["behaviors"][behavior_name] = behavior_schema
 
         schema_info["field_types"] = self._categorize_field_types(schema_info)
+        schema_info["request_context"] = self.get_request_context()
 
         return schema_info
 
