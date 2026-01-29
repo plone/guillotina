@@ -1,0 +1,95 @@
+from guillotina.component import get_utilities_for
+from guillotina.content import get_all_possible_schemas_for_type
+from guillotina.directives import index
+from guillotina.directives import merged_tagged_value_dict
+from guillotina.interfaces import IBehavior
+from guillotina.interfaces import IResource
+from guillotina.interfaces import IResourceFactory
+
+import logging
+
+
+logger = logging.getLogger("guillotina")
+
+
+class SchemaAnalyzer:
+    def __init__(self, context: IResource):
+        self.context = context
+
+    async def get_schema_info(self) -> dict:
+        """
+        Discover all content types, indexed fields, and field types dynamically.
+        Returns a dictionary with schema information.
+        """
+        schema_info = {
+            "content_types": {},
+            "behaviors": {},
+            "field_types": {},
+        }
+
+        factories = list(get_utilities_for(IResourceFactory))
+        logger.debug(f"Discovered {len(factories)} content type factories")
+
+        for factory_name, factory in factories:
+            type_name = factory.type_name
+            if type_name is None:
+                continue
+
+            type_schema = {}
+            schemas = get_all_possible_schemas_for_type(type_name)
+
+            for schema in schemas:
+                indices = merged_tagged_value_dict(schema, index.key)
+                for field_name, index_info in indices.items():
+                    field_type = index_info.get("type", "text")
+                    type_schema[field_name] = field_type
+
+            if type_schema:
+                schema_info["content_types"][type_name] = type_schema
+
+        behaviors = list(get_utilities_for(IBehavior))
+        logger.debug(f"Discovered {len(behaviors)} behaviors")
+
+        for behavior_name, behavior_utility in behaviors:
+            behavior_schema = {}
+            indices = merged_tagged_value_dict(behavior_utility.interface, index.key)
+            for field_name, index_info in indices.items():
+                field_type = index_info.get("type", "text")
+                behavior_schema[field_name] = field_type
+
+            if behavior_schema:
+                schema_info["behaviors"][behavior_name] = behavior_schema
+
+        schema_info["field_types"] = self._categorize_field_types(schema_info)
+
+        return schema_info
+
+    def _categorize_field_types(self, schema_info: dict) -> dict:
+        """
+        Categorize fields by type for easier query building.
+        """
+        field_types = {
+            "numeric": [],
+            "date": [],
+            "text": [],
+            "keyword": [],
+        }
+
+        all_fields = {}
+        for type_name, fields in schema_info["content_types"].items():
+            for field_name, field_type in fields.items():
+                key = f"{type_name}.{field_name}"
+                if key not in all_fields:
+                    all_fields[key] = field_type
+
+        for key, field_type in all_fields.items():
+            if field_type in ("int", "float", "decimal"):
+                field_types["numeric"].append(key)
+            elif field_type in ("date", "datetime"):
+                field_types["date"].append(key)
+            elif field_type == "keyword":
+                field_types["keyword"].append(key)
+            else:
+                field_types["text"].append(key)
+
+        return field_types
