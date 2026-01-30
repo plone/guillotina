@@ -23,11 +23,11 @@ async def lock_object_for_write(oid: str, *, retries: int = 3, delay: float = 0.
     txn = task_vars.txn.get()
     if txn is None:
         raise TransactionNotFound()
-    if txn.read_only:
+    if getattr(txn, "read_only", False):
         raise ReadOnlyError()
 
     storage = txn.storage
-    if txn._db_txn is None:
+    if getattr(txn, "_db_txn", None) is None:
         await storage.start_transaction(txn)
 
     if retries < 1:
