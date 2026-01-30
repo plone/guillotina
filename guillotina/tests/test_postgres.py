@@ -46,15 +46,11 @@ async def cleanup(aps):
 
 
 async def get_aps(postgres, pool_size=16, autovacuum=True):
-    dsn = "postgres://postgres:postgres@{}:{}/guillotina".format(
-        postgres[0], postgres[1]
-    )
+    dsn = "postgres://postgres:postgres@{}:{}/guillotina".format(postgres[0], postgres[1])
     klass = PostgresqlStorage
     if DATABASE == "cockroachdb":
         klass = CockroachStorage
-        dsn = "postgres://root:@{}:{}/guillotina?sslmode=disable".format(
-            postgres[0], postgres[1]
-        )
+        dsn = "postgres://root:@{}:{}/guillotina?sslmode=disable".format(postgres[0], postgres[1])
     aps = klass(
         dsn=dsn,
         name="db",
@@ -271,12 +267,8 @@ async def test_delete_resource_deletes_blob(db, dummy_guillotina):
         await cleanup(aps)
 
 
-@pytest.mark.skipif(
-    DATABASE in ("cockroachdb", "DUMMY"), reason="Cockroach not support resolve..."
-)
-async def test_should_raise_conflict_error_when_editing_diff_data_with_resolve_strat(
-    db, dummy_guillotina
-):
+@pytest.mark.skipif(DATABASE in ("cockroachdb", "DUMMY"), reason="Cockroach not support resolve...")
+async def test_should_raise_conflict_error_when_editing_diff_data_with_resolve_strat(db, dummy_guillotina):
     aps = await get_aps(db)
     with TransactionManager(aps) as tm, await tm.begin() as txn:
         ob = create_content()
@@ -307,9 +299,7 @@ async def test_should_raise_conflict_error_when_editing_diff_data_with_resolve_s
         await cleanup(aps)
 
 
-@pytest.mark.skipif(
-    DATABASE in ("cockroachdb", "DUMMY"), reason="Cockroach not support resolve..."
-)
+@pytest.mark.skipif(DATABASE in ("cockroachdb", "DUMMY"), reason="Cockroach not support resolve...")
 async def test_should_resolve_conflict_error(db, dummy_guillotina):
     aps = await get_aps(db)
     with TransactionManager(aps) as tm, await tm.begin() as txn:
@@ -340,9 +330,7 @@ async def test_should_resolve_conflict_error(db, dummy_guillotina):
 
 
 @pytest.mark.skipif(DATABASE in ("DUMMY",), reason="DUMMY not support simple...")
-async def test_should_raise_conflict_error_on_concurrent_insert(
-    db, container_requester
-):
+async def test_should_raise_conflict_error_on_concurrent_insert(db, container_requester):
     async with container_requester as requester:
         with requester.db.get_transaction_manager() as tm:
             txn = await tm.begin()
@@ -369,9 +357,7 @@ async def test_should_raise_conflict_error_on_concurrent_insert(
 
 
 @pytest.mark.skipif(DATABASE in ("DUMMY",), reason="DUMMY not support simple...")
-async def test_should_raise_conflict_error_on_concurrent_update(
-    db, container_requester
-):
+async def test_should_raise_conflict_error_on_concurrent_update(db, container_requester):
     async with container_requester as requester:
         with requester.db.get_transaction_manager() as tm:
             txn = await tm.begin()
@@ -575,9 +561,7 @@ async def test_iterate_keys(db, dummy_guillotina):
         await tm.abort(txn=txn)
 
 
-@pytest.mark.skipif(
-    DATABASE in ("cockroachdb", "DUMMY"), reason="Cockroach does not like this test..."
-)
+@pytest.mark.skipif(DATABASE in ("cockroachdb", "DUMMY"), reason="Cockroach does not like this test...")
 async def test_handles_asyncpg_trying_savepoints(db, dummy_guillotina):
     aps = await get_aps(db)
     tm = TransactionManager(aps)
@@ -585,9 +569,7 @@ async def test_handles_asyncpg_trying_savepoints(db, dummy_guillotina):
     for conn in tm._storage.pool._queue._queue:
         if conn._con is None:
             await conn.connect()
-        conn._con._top_xact = asyncpg.transaction.Transaction(
-            conn._con, "read_committed", False, False
-        )
+        conn._con._top_xact = asyncpg.transaction.Transaction(conn._con, "read_committed", False, False)
 
     with await tm.begin() as txn, tm:
         # then, try doing stuff...
@@ -609,9 +591,7 @@ async def test_handles_asyncpg_trying_savepoints(db, dummy_guillotina):
         await cleanup(aps)
 
 
-@pytest.mark.skipif(
-    DATABASE in ("cockroachdb", "DUMMY"), reason="Cockroach does not like this test..."
-)
+@pytest.mark.skipif(DATABASE in ("cockroachdb", "DUMMY"), reason="Cockroach does not like this test...")
 async def test_handles_asyncpg_trying_txn_with_manual_txn(db, dummy_guillotina):
     aps = await get_aps(db)
     tm = TransactionManager(aps)
