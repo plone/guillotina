@@ -11,10 +11,12 @@ Both use the same read-only tools and the same permissions.
 
 ## Installation
 
+**Requires Python 3.10+** (the `mcp` package does not support older versions).
+
 1. Add dependencies (e.g. in `contrib-requirements.txt` or `requirements.txt`):
 
    ```
-   mcp>=1.0.0
+   mcp>=1.0.0; python_version >= "3.10"
    litellm>=1.0.0
    ```
 

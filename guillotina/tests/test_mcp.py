@@ -8,12 +8,19 @@ import pytest
 import sys
 
 
-pytestmark = pytest.mark.asyncio
+try:
+    import mcp
+except ImportError:
+    mcp = None
+
+pytestmark = [
+    pytest.mark.asyncio,
+    pytest.mark.skipif(mcp is None, reason="mcp package requires Python 3.10+"),
+]
 
 
 @pytest.mark.app_settings({"applications": ["guillotina.contrib.mcp"]})
 async def test_mcp_service_registered(container_requester):
-    pytest.importorskip("mcp")
     async with container_requester as requester:
         resp, status = await requester("GET", "/db/guillotina/@mcp")
         assert status in (200, 401, 404, 421)
@@ -21,7 +28,6 @@ async def test_mcp_service_registered(container_requester):
 
 @pytest.mark.app_settings({"applications": ["guillotina.contrib.mcp"], "mcp": {"enabled": False}})
 async def test_mcp_disabled_returns_404(container_requester):
-    pytest.importorskip("mcp")
     async with container_requester as requester:
         _, status = await requester("GET", "/db/guillotina/@mcp")
         assert status == 404
@@ -29,7 +35,6 @@ async def test_mcp_disabled_returns_404(container_requester):
 
 @pytest.mark.app_settings({"applications": ["guillotina.contrib.mcp"]})
 async def test_mcp_tools_list(container_requester):
-    pytest.importorskip("mcp")
     async with container_requester as requester:
         resp, status = await requester(
             "POST",
@@ -47,7 +52,6 @@ async def test_mcp_tools_list(container_requester):
 
 @pytest.mark.app_settings({"applications": ["guillotina.contrib.mcp"]})
 async def test_inprocess_backend_search_requires_context(container_requester):
-    pytest.importorskip("mcp")
     backend = InProcessBackend()
     clear_mcp_context()
     with pytest.raises(RuntimeError, match="MCP context not set"):
@@ -56,7 +60,6 @@ async def test_inprocess_backend_search_requires_context(container_requester):
 
 @pytest.mark.app_settings({"applications": ["guillotina.contrib.mcp"]})
 async def test_inprocess_backend_rejects_string_context(container_requester):
-    pytest.importorskip("mcp")
     backend = InProcessBackend()
     clear_mcp_context()
     with pytest.raises(RuntimeError, match="InProcessBackend requires IResource context"):

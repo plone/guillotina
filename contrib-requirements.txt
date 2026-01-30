@@ -18,4 +18,4 @@ pymemcache==3.4.0; python_version < '3.10'
 pillow==10.4.0; python_version < '3.11'
 pillow==11.1.0; python_version >= '3.11'
 litellm>=1.0.0
-mcp>=1.0.0
+mcp>=1.0.0; python_version >= "3.10"
