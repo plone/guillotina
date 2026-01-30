@@ -16,4 +16,5 @@ Contents:
    pubsub
    swagger
    mailer
+   mcp
    dbusers

@@ -4,7 +4,8 @@ from guillotina.api.service import Service
 from guillotina.contrib.mcp.backend import clear_mcp_context
 from guillotina.contrib.mcp.backend import InProcessBackend
 from guillotina.contrib.mcp.backend import set_mcp_context
-from guillotina.contrib.mcp.chat_tools import get_chat_tools
+from guillotina.contrib.mcp.tools import get_all_chat_tools
+from guillotina.contrib.mcp.tools import get_extra_tools_module
 from guillotina.interfaces import IResource
 from guillotina.response import HTTPNotFound
 from guillotina.response import HTTPPreconditionFailed
@@ -48,6 +49,9 @@ async def _execute_tool(backend: InProcessBackend, name: str, arguments: dict):
             args.get("from_index", 0),
             args.get("page_size", 20),
         )
+    mod = get_extra_tools_module()
+    if mod is not None and hasattr(mod, "execute_extra_tool"):
+        return await mod.execute_extra_tool(backend, name, args)
     return {"error": f"Unknown tool: {name}"}
 
 
@@ -98,7 +102,7 @@ class Chat(Service):
     async def _run_chat(self, messages: list, chat_model: str, mcp_settings: dict):
         litellm = __import__("litellm", fromlist=["acompletion"])
         acompletion = getattr(litellm, "acompletion")
-        tools = get_chat_tools()
+        tools = get_all_chat_tools()
         api_key = _get_api_key_for_model(chat_model)
         backend = InProcessBackend()
         kwargs = {"model": chat_model, "messages": messages, "tools": tools}

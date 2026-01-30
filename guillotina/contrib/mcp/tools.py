@@ -28,6 +28,42 @@ TOOL_DESCRIPTIONS = {
     ),
 }
 
+CHAT_PARAM_SCHEMAS = {
+    "search": {
+        "properties": {
+            "container_path": {"type": "string", "description": "Optional path relative to container."},
+            "query": {
+                "type": "object",
+                "description": "Search query: type_name, term, _size, _from, _sort_asc, _sort_des, field filters.",
+            },
+        },
+    },
+    "count": {
+        "properties": {
+            "container_path": {"type": "string", "description": "Optional path relative to container."},
+            "query": {
+                "type": "object",
+                "description": "Count query: type_name, term, field filters (no _size/_from/_sort).",
+            },
+        },
+    },
+    "get_content": {
+        "properties": {
+            "path": {"type": "string", "description": "Path relative to container."},
+            "uid": {"type": "string", "description": "Resource UID."},
+            "container_path": {"type": "string", "description": "Optional path relative to container."},
+        },
+    },
+    "list_children": {
+        "properties": {
+            "path": {"type": "string", "description": "Path relative to container."},
+            "from_index": {"type": "integer", "description": "Offset (maps to _from).", "default": 0},
+            "page_size": {"type": "integer", "description": "Page size (maps to _size).", "default": 20},
+            "container_path": {"type": "string", "description": "Optional path relative to container."},
+        },
+    },
+}
+
 
 def _get_description_extras():
     from guillotina.component import query_utility
@@ -104,3 +140,41 @@ def register_tools(mcp_server, backend):
         if context is None and container_path is None:
             return {"items": [], "items_total": 0}
         return await backend.list_children(context, path or "", from_index, page_size)
+
+
+def get_chat_tools():
+    """Return built-in tool definitions in the format expected by LiteLLM for @chat (all providers)."""
+    extras = _get_description_extras()
+    descriptions = {
+        name: (TOOL_DESCRIPTIONS[name] + " " + (extras.get(name) or "")).strip() for name in TOOL_DESCRIPTIONS
+    }
+    return [
+        {
+            "type": "function",
+            "function": {
+                "name": name,
+                "description": descriptions[name],
+                "parameters": {"type": "object", **CHAT_PARAM_SCHEMAS[name]},
+            },
+        }
+        for name in TOOL_DESCRIPTIONS
+    ]
+
+
+def get_extra_tools_module():
+    """Return the extra_tools_module if configured, else None."""
+    path = app_settings.get("mcp", {}).get("extra_tools_module")
+    if not path:
+        return None
+    return __import__(str(path), fromlist=["register_extra_tools"])
+
+
+def get_all_chat_tools():
+    """Return built-in + extra chat tools (same format). Projects can define get_extra_chat_tools() in extra_tools_module."""  # noqa: E501
+    result = list(get_chat_tools())
+    mod = get_extra_tools_module()
+    if mod is not None and hasattr(mod, "get_extra_chat_tools"):
+        extra = getattr(mod, "get_extra_chat_tools")()
+        if isinstance(extra, list):
+            result.extend(extra)
+    return result
