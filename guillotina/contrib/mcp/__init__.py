@@ -12,6 +12,8 @@ app_settings = {
         },
         "description_extras": {},
         "extra_tools_module": None,
+        "token_max_duration_days": 90,
+        "token_allowed_durations": None,
     },
     "commands": {
         "mcp-server": "guillotina.contrib.mcp.command.MCPServerCommand",
