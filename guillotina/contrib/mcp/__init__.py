@@ -4,19 +4,10 @@ from guillotina import configure
 app_settings = {
     "mcp": {
         "enabled": True,
-        "base_url": None,
-        "auth": {
-            "type": "basic",
-            "username": "root",
-            "password": None,
-        },
         "description_extras": {},
         "extra_tools_module": None,
         "token_max_duration_days": 90,
         "token_allowed_durations": None,
-    },
-    "commands": {
-        "mcp-server": "guillotina.contrib.mcp.command.MCPServerCommand",
     },
 }
 

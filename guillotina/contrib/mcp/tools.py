@@ -43,16 +43,16 @@ def _get_description_extras():
 def register_tools(mcp_server, backend):
     def _context_for_path(container_path: typing.Optional[str]):
         ctx = get_mcp_context()
-        if ctx is not None and container_path:
+        if ctx is None:
+            return None
+        if container_path:
             from guillotina.utils import navigate_to
 
             try:
                 return navigate_to(ctx, "/" + container_path.strip("/"))
             except KeyError:
                 return None
-        if ctx is not None:
-            return ctx
-        return container_path
+        return ctx
 
     extras = _get_description_extras()
 

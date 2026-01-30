@@ -3,14 +3,17 @@ from guillotina.contrib.mcp.backend import InProcessBackend
 from guillotina.contrib.mcp.tools import register_tools
 
 
-_mcp_server_instance = None
+_mcp_server = None
+_mcp_app = None
 
 
-def get_mcp_server(backend=None):
+def get_mcp_app_and_server():
+    global _mcp_server, _mcp_app
+    if _mcp_app is not None:
+        return _mcp_app, _mcp_server
     from mcp.server.fastmcp import FastMCP
 
-    if backend is None:
-        backend = InProcessBackend()
+    backend = InProcessBackend()
     mcp = FastMCP(
         "Guillotina MCP",
         json_response=True,
@@ -23,16 +26,6 @@ def get_mcp_server(backend=None):
     if extra_module:
         mod = __import__(str(extra_module), fromlist=["register_extra_tools"])
         getattr(mod, "register_extra_tools")(mcp, backend)
-    return mcp
-
-
-def get_mcp_server_instance():
-    return _mcp_server_instance
-
-
-def get_mcp_asgi_app(backend=None):
-    global _mcp_server_instance
-    server = get_mcp_server(backend)
-    app = server.streamable_http_app()
-    _mcp_server_instance = server
-    return app
+    _mcp_server = mcp
+    _mcp_app = mcp.streamable_http_app()
+    return _mcp_app, _mcp_server

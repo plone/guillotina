@@ -5,8 +5,7 @@ from guillotina.auth import authenticate_user
 from guillotina.auth.users import AnonymousUser
 from guillotina.contrib.mcp.backend import clear_mcp_context
 from guillotina.contrib.mcp.backend import set_mcp_context
-from guillotina.contrib.mcp.server import get_mcp_asgi_app
-from guillotina.contrib.mcp.server import get_mcp_server_instance
+from guillotina.contrib.mcp.server import get_mcp_app_and_server
 from guillotina.interfaces import IResource
 from guillotina.response import HTTPPreconditionFailed
 from guillotina.response import HTTPUnauthorized
@@ -19,15 +18,6 @@ import logging
 
 
 logger = logging.getLogger("guillotina")
-
-_mcp_asgi_app = None
-
-
-def _get_mcp_app():
-    global _mcp_asgi_app
-    if _mcp_asgi_app is None:
-        _mcp_asgi_app = get_mcp_asgi_app()
-    return _mcp_asgi_app
 
 
 @configure.service(
@@ -54,8 +44,7 @@ async def mcp_service(context, request):
         scope = copy.copy(request.scope)
         scope["path"] = "/"
         scope["raw_path"] = b"/"
-        app = _get_mcp_app()
-        server = get_mcp_server_instance()
+        app, server = get_mcp_app_and_server()
         session_manager = server.session_manager
         original_task_group = session_manager._task_group
         async with anyio.create_task_group() as tg:
