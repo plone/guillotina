@@ -48,5 +48,6 @@ format: ## Format code
 	black guillotina/
 	isort -rc guillotina/
 
-tests:
+.PHONY: tests
+tests: ## Run tests
 	DATABASE=POSTGRES pytest -s -x guillotina
