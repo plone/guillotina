@@ -41,3 +41,12 @@ create-cockroachdb: ## Create CockroachDB
 	@echo ""
 	@echo "$(YELLOW)==> Creating CockroachDB $(VERSION)$(RESET)"
 	./bin/python _cockroachdb-createdb.py
+
+.PHONY: format
+format: ## Format code
+	flake8 guillotina --config=setup.cfg
+	black guillotina/
+	isort -rc guillotina/
+
+tests:
+	DATABASE=POSTGRES pytest -s -x guillotina
