@@ -170,6 +170,68 @@ class AIQueryHandler:
         """True if response is a step (has query and _next)."""
         return isinstance(response.get("query"), dict) and response.get("_next") is True
 
+    async def translate_retry_on_empty(
+        self,
+        natural_language: str,
+        context: IResource,
+        schema_info: dict,
+        last_query: dict,
+        conversation_history: Optional[List[Dict]] = None,
+        interaction_logger: Optional[LLMInteractionLogger] = None,
+    ) -> dict:
+        """
+        When the last query returned 0 results, ask the LLM for one alternative
+        query or to confirm no results. Returns {"query": {...}, "_next": true}
+        or {"_action": "answer"}.
+        """
+        if not self.provider.is_enabled():
+            raise ValueError("AI query is not enabled")
+
+        t0 = time.perf_counter()
+        system_prompt, user_prompt_template = PromptBuilder.build_retry_on_empty_prompt(
+            schema_info, natural_language, last_query, conversation_history
+        )
+        user_prompt = user_prompt_template.format(
+            user_query=natural_language,
+            last_query=json.dumps(last_query, indent=2, default=str),
+        )
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ]
+
+        temperature = self.settings.get("temperature", 0.1)
+        max_tokens = self.settings.get("query_translation_max_tokens", self.settings.get("max_tokens", 1024))
+        timeout = self.settings.get("timeout", 30)
+
+        try:
+            response_text = await self.provider.completion(
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                timeout=timeout,
+            )
+            duration = time.perf_counter() - t0
+            response = self._parse_query_response(response_text)
+            if interaction_logger:
+                interaction_logger.log_retry_on_empty(
+                    messages, response_text, response, duration_seconds=duration
+                )
+            if response.get("_action") == "answer":
+                return response
+            if self._is_step_response(response):
+                self._validate_query(response["query"], schema_info)
+                return response
+            raise ValueError("Expected alternative query or _action answer from LLM")
+        except Exception as e:
+            duration = time.perf_counter() - t0
+            if interaction_logger:
+                interaction_logger.log_llm_error(
+                    "retry_on_empty", e, messages=messages, duration_seconds=duration
+                )
+            logger.error("Retry on empty failed: %s", e, exc_info=True)
+            raise
+
     async def generate_response(
         self,
         query: str,

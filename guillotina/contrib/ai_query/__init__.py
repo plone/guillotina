@@ -20,6 +20,7 @@ app_settings = {
         "enable_conversation": True,
         "max_conversation_history": 10,
         "max_steps": 5,
+        "retry_on_empty": True,
         "log_llm_interactions": False,
         "log_llm_dir": None,
         "litellm_settings": {

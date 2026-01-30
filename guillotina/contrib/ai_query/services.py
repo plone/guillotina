@@ -146,6 +146,31 @@ class AIQueryService(Service):
                     interaction_logger.log_catalog_search(
                         translated_query, search_results, duration_seconds=duration
                     )
+                if (
+                    search_results.get("items_total", 0) == 0
+                    and settings.get("retry_on_empty", True)
+                    and not translated_query.get("aggregation")
+                ):
+                    retry_response = await ai_query_handler.translate_retry_on_empty(
+                        query_text,
+                        self.context,
+                        schema_info,
+                        translated_query,
+                        conversation_history,
+                        interaction_logger=interaction_logger,
+                    )
+                    if ai_query_handler._is_step_response(retry_response):
+                        alt_query = dict(retry_response["query"])
+                        t0 = time.perf_counter()
+                        search_results = await self._execute_query(alt_query)
+                        duration = time.perf_counter() - t0
+                        if interaction_logger:
+                            interaction_logger.log_catalog_search(
+                                alt_query,
+                                search_results,
+                                duration_seconds=duration,
+                            )
+                        translated_query = alt_query
                 aggregation_config = translated_query.get("aggregation")
                 if aggregation_config:
                     processed_results = ResultProcessor.process_results(search_results, aggregation_config)

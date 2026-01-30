@@ -179,6 +179,25 @@ class LLMInteractionLogger:
         self._write(f"  [LLM response]:\n{response_text}\n")
         self._write(_duration_line(duration_seconds))
 
+    def log_retry_on_empty(
+        self,
+        messages: List[Dict],
+        response_text: str,
+        parsed: Dict,
+        duration_seconds: Optional[float] = None,
+    ) -> None:
+        """Log the retry-on-empty LLM call (alternative query or _action answer)."""
+        if not self.enabled:
+            return
+        self._write("\n--- retry_on_empty (0 results, suggest alternative or confirm) ---\n")
+        for m in messages:
+            role = m.get("role", "")
+            content = m.get("content", "")
+            self._write(f"  [{role}]:\n{content}\n")
+        self._write(f"  [LLM response]:\n{response_text}\n")
+        self._write(f"  [parsed]:\n{json.dumps(parsed, indent=2, default=str)}\n")
+        self._write(_duration_line(duration_seconds))
+
     def log_llm_error(
         self,
         step_name: str,

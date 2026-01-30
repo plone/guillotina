@@ -191,6 +191,56 @@ Return either the next query JSON with "_next": true, or {{ "_action": "answer" 
         return system_formatted, user_prompt_template
 
     @staticmethod
+    def build_retry_on_empty_prompt(
+        schema_info: Dict,
+        user_query: str,
+        last_query: Dict,
+        conversation_history: Optional[List[Dict]] = None,
+    ) -> Tuple[str, str]:
+        """
+        Build prompt for retry when the last query returned 0 results: suggest
+        one alternative query or confirm no results.
+        """
+        content_types_desc = PromptBuilder._format_content_types(schema_info)
+        request_context_desc = PromptBuilder._format_request_context(schema_info)
+
+        system_prompt = """You are a query assistant for Guillotina. The last catalog query returned zero results.
+Either the data does not exist, or the query was too strict (wrong type, field, or operator).
+
+Current request context:
+{request_context}
+
+Available content types and indexed fields:
+{content_types}
+
+You must return exactly one of:
+
+1) One alternative query to try (e.g. different type_name, use title__wildcard instead of title__in, or id__eq instead of title, or looser path):
+{{ "query": {{ "type_name": "...", ... }}, "_next": true }}
+
+2) Confirm there are no results (do not retry):
+{{ "_action": "answer" }}
+
+Return only valid JSON. No other text."""
+
+        user_prompt_template = """User question: {user_query}
+
+Last query (returned 0 results):
+{last_query}
+
+Return either one alternative query with "_next": true, or {{ "_action": "answer" }}."""
+
+        if conversation_history:
+            history_text = "\n".join(f"{m['role']}: {m['content']}" for m in conversation_history[-3:])
+            user_prompt_template = f"Previous conversation:\n{history_text}\n\n{user_prompt_template}"
+
+        system_formatted = system_prompt.format(
+            request_context=request_context_desc,
+            content_types=content_types_desc,
+        )
+        return system_formatted, user_prompt_template
+
+    @staticmethod
     def format_step_results(step_results: List[Dict]) -> str:
         """Format step results for the next-step prompt."""
         parts = []
