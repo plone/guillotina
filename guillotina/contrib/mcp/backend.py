@@ -1,3 +1,4 @@
+from contextvars import ContextVar
 from guillotina.component import get_multi_adapter
 from guillotina.component import query_utility
 from guillotina.interfaces import ICatalogUtility
@@ -28,8 +29,6 @@ class IMCPBackend(Interface):
     ) -> dict:
         pass
 
-
-from contextvars import ContextVar
 
 _mcp_context_var: ContextVar[typing.Optional[IResource]] = ContextVar("mcp_context", default=None)
 

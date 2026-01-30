@@ -4,11 +4,28 @@ from guillotina.contrib.mcp.interfaces import IMCPDescriptionExtras
 
 import typing
 
+
 TOOL_DESCRIPTIONS = {
-    "search": "Search the catalog. container_path is optional (default: current context). query keys follow Guillotina @search: type_name, term, _size, _from, _sort_asc (field name for ascending), _sort_des (field name for descending), _metadata, _metadata_not; field filters: field__eq, field__not, field__gt, field__gte, field__lt, field__lte, field__in. E.g. creators__in to filter by creator (value: user id or list).",
-    "count": "Count catalog results. container_path is optional. query uses same keys as search: type_name, term, field__eq, field__gt, etc. (no _size/_from/_sort_asc/_sort_des).",
-    "get_content": "Get a resource by path (relative to container) or by UID. container_path is optional for in-process.",
-    "list_children": "List direct children of a container. path: relative path to container. from_index: offset (maps to _from). page_size: page size (maps to _size). container_path is optional for in-process.",
+    "search": (
+        "Search the catalog. container_path is optional (default: current context). "
+        "query keys follow Guillotina @search: type_name, term, _size, _from, _sort_asc "
+        "(field name for ascending), _sort_des (field name for descending), _metadata, "
+        "_metadata_not; field filters: field__eq, field__not, field__gt, field__gte, "
+        "field__lt, field__lte, field__in. E.g. creators__in to filter by creator."
+    ),
+    "count": (
+        "Count catalog results. container_path is optional. query uses same keys as search: "
+        "type_name, term, field__eq, field__gt, etc. (no _size/_from/_sort_asc/_sort_des)."
+    ),
+    "get_content": (
+        "Get a resource by path (relative to container) or by UID. "
+        "container_path is optional for in-process."
+    ),
+    "list_children": (
+        "List direct children of a container. path: relative path to container. "
+        "from_index: offset (maps to _from). page_size: page size (maps to _size). "
+        "container_path is optional for in-process."
+    ),
 }
 
 

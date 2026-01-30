@@ -2,7 +2,6 @@ from guillotina.commands import Command
 from guillotina.contrib.mcp.backend import HttpBackend
 from guillotina.contrib.mcp.server import get_mcp_server
 
-import argparse
 import asyncio
 import logging
 import os

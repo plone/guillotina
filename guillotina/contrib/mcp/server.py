@@ -2,6 +2,7 @@ from guillotina._settings import app_settings
 from guillotina.contrib.mcp.backend import InProcessBackend
 from guillotina.contrib.mcp.tools import register_tools
 
+
 _mcp_server_instance = None
 
 

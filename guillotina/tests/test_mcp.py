@@ -1,8 +1,8 @@
+from guillotina.contrib.mcp.backend import clear_mcp_context
+from guillotina.contrib.mcp.backend import InProcessBackend
+
 import json
 import pytest
-
-from guillotina.contrib.mcp.backend import InProcessBackend
-from guillotina.contrib.mcp.backend import clear_mcp_context
 
 
 pytestmark = pytest.mark.asyncio
