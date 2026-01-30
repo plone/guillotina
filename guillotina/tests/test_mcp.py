@@ -47,6 +47,7 @@ async def test_mcp_tools_list(container_requester):
 
 @pytest.mark.app_settings({"applications": ["guillotina.contrib.mcp"]})
 async def test_inprocess_backend_search_requires_context(container_requester):
+    pytest.importorskip("mcp")
     backend = InProcessBackend()
     clear_mcp_context()
     with pytest.raises(RuntimeError, match="MCP context not set"):
@@ -55,6 +56,7 @@ async def test_inprocess_backend_search_requires_context(container_requester):
 
 @pytest.mark.app_settings({"applications": ["guillotina.contrib.mcp"]})
 async def test_inprocess_backend_rejects_string_context(container_requester):
+    pytest.importorskip("mcp")
     backend = InProcessBackend()
     clear_mcp_context()
     with pytest.raises(RuntimeError, match="InProcessBackend requires IResource context"):

@@ -25,7 +25,7 @@ def clear_mcp_context():
     try:
         _mcp_context_var.set(None)
     except LookupError:
-        pass
+        pass  # No active context set; clear operation is intentionally idempotent.
 
 
 class InProcessBackend:
@@ -113,14 +113,14 @@ class InProcessBackend:
         if not IFolder.providedBy(container):
             return {"items": [], "items_total": 0}
         request = task_vars.request.get()
+        items_total = await container.async_len()
         items = []
         total = 0
         async for name, child in container.async_items():
             if total >= _from + _size:
-                total += 1
-                continue
+                break
             if total >= _from:
                 summary_serializer = get_multi_adapter((child, request), IResourceSerializeToJsonSummary)
                 items.append(await summary_serializer())
             total += 1
-        return {"items": items, "items_total": total}
+        return {"items": items, "items_total": items_total}

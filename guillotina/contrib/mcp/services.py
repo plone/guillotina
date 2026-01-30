@@ -14,6 +14,7 @@ from guillotina.utils import get_authenticated_user
 
 import anyio
 import copy
+import json
 import logging
 
 
@@ -41,12 +42,12 @@ async def mcp_service(context, request):
         raise HTTPNotFound(content={"reason": "MCP is disabled"})
     set_mcp_context(context)
     try:
-        scope = copy.copy(request.scope)
+        scope = copy.copy(request.scope)  # Only top-level keys modified; shallow copy sufficient.
         scope["path"] = "/"
         scope["raw_path"] = b"/"
         app, server = get_mcp_app_and_server()
         session_manager = server.session_manager
-        original_task_group = session_manager._task_group
+        original_task_group = session_manager._task_group  # Workaround: mcp lib does not expose task group.
         async with anyio.create_task_group() as tg:
             session_manager._task_group = tg
             try:
@@ -55,6 +56,7 @@ async def mcp_service(context, request):
                 session_manager._task_group = original_task_group
     finally:
         clear_mcp_context()
+    # Response already sent via request.send(); return dummy so framework does not send again.
     resp = Response()
     resp._prepared = True
     resp._eof_sent = True
@@ -79,7 +81,7 @@ class MCPToken(Service):
             raise HTTPUnauthorized(content={"reason": "Authentication required"})
         try:
             body = await self.request.json()
-        except Exception:
+        except (json.JSONDecodeError, ValueError):
             body = {}
         if not isinstance(body, dict):
             body = {}
