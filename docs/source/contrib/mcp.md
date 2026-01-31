@@ -38,13 +38,29 @@ You can override these in your application config:
 |--------|-------------|
 | `mcp.enabled` | If `false`, `@mcp` returns 404. Default: `true`. |
 | `mcp.chat_enabled` | If `false`, `@chat` returns 404. Default: `true`. |
-| `mcp.chat_model` | Model for @chat (LiteLLM). Required if you use chat. Examples: `openai/gpt-4o-mini`, `gemini/gemini-1.5-flash`, `anthropic/claude-3-haiku`. |
+| `mcp.chat_model` | Model for @chat (LiteLLM). Required if you use chat. Examples: `openai/gpt-4o-mini`, `gemini/gemini-1.5-flash`, `anthropic/claude-3-haiku`, `groq/llama-3.1-8b-instant`, `openrouter/google/gemini-2.0-flash-001`, `minimax/MiniMax-M2.1`, `mistral/mistral-small-latest`, `deepseek/deepseek-chat`, `cerebras/llama3-70b-instruct`. |
 | `mcp.token_max_duration_days` | Max `duration_days` for `@mcp-token`. Default: `90`. |
 | `mcp.token_allowed_durations` | Optional list of allowed values (e.g. `[30, 60, 90]`). If set, only these values are accepted. |
 | `mcp.description_extras` | Optional dict: tool name → string appended to that tool’s description (for LLM context). Keys: `search`, `count`, `get_content`, `list_children`. |
 | `mcp.extra_tools_module` | Optional dotted path to a module that defines `register_extra_tools(mcp_server, backend)` (and optionally chat extensions). See [Extending](#extending). |
 
-For **@chat**, the LLM API key is read **only from environment variables**: `OPENAI_API_KEY`, `GEMINI_API_KEY` (or `GOOGLE_API_KEY`), or `ANTHROPIC_API_KEY` depending on `mcp.chat_model`. Do not put API keys in config files.
+For `mcp.chat_model`, use the `provider/model-name` format. For current model names use the [LiteLLM Providers](https://docs.litellm.ai/docs/providers) index and the docs for each provider.
+
+**@chat** reads credentials **only from environment variables**. Set the variables for the provider implied by your `mcp.chat_model`:
+
+| Provider | Required | Optional (base URL) |
+|----------|----------|----------------------|
+| OpenAI | `OPENAI_API_KEY` | — |
+| Google (Gemini) | `GEMINI_API_KEY` or `GOOGLE_API_KEY` | — |
+| Anthropic | `ANTHROPIC_API_KEY` | — |
+| Groq | `GROQ_API_KEY` | — |
+| OpenRouter | `OPENROUTER_API_KEY` | `OPENROUTER_API_BASE` (default: `https://openrouter.ai/api/v1`) |
+| MiniMax | `MINIMAX_API_KEY` | `MINIMAX_API_BASE` (e.g. `https://api.minimax.io/v1` for chat completions) |
+| Mistral | `MISTRAL_API_KEY` | — |
+| Deepseek | `DEEPSEEK_API_KEY` | — |
+| Cerebras | `CEREBRAS_API_KEY` | — |
+
+Do not put API keys in config files.
 
 ## Using the MCP endpoint (@mcp)
 

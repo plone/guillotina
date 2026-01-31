@@ -20,14 +20,30 @@ logger = logging.getLogger("guillotina")
 MAX_TOOL_ROUNDS = 10
 
 
-def _get_api_key_for_model(model: str) -> str:
+def _get_litellm_credentials(model: str):
+    api_key = ""
+    api_base = None
     if model.startswith("openai/"):
-        return os.environ.get("OPENAI_API_KEY") or ""
-    if model.startswith("gemini/"):
-        return os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") or ""
-    if model.startswith("anthropic/"):
-        return os.environ.get("ANTHROPIC_API_KEY") or ""
-    return ""
+        api_key = os.environ.get("OPENAI_API_KEY") or ""
+    elif model.startswith("gemini/"):
+        api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") or ""
+    elif model.startswith("anthropic/"):
+        api_key = os.environ.get("ANTHROPIC_API_KEY") or ""
+    elif model.startswith("groq/"):
+        api_key = os.environ.get("GROQ_API_KEY") or ""
+    elif model.startswith("openrouter/"):
+        api_key = os.environ.get("OPENROUTER_API_KEY") or ""
+        api_base = os.environ.get("OPENROUTER_API_BASE") or None
+    elif model.startswith("minimax/"):
+        api_key = os.environ.get("MINIMAX_API_KEY") or ""
+        api_base = os.environ.get("MINIMAX_API_BASE") or None
+    elif model.startswith("mistral/"):
+        api_key = os.environ.get("MISTRAL_API_KEY") or ""
+    elif model.startswith("deepseek/"):
+        api_key = os.environ.get("DEEPSEEK_API_KEY") or ""
+    elif model.startswith("cerebras/"):
+        api_key = os.environ.get("CEREBRAS_API_KEY") or ""
+    return api_key, api_base
 
 
 async def _execute_tool(backend: InProcessBackend, name: str, arguments: dict):
@@ -60,7 +76,7 @@ async def _execute_tool(backend: InProcessBackend, name: str, arguments: dict):
     method="POST",
     permission="guillotina.mcp.Use",
     name="@chat",
-    summary="Chat with LLM using MCP tools (OpenAI, Gemini, Anthropic)",
+    summary="Chat with LLM using MCP tools (OpenAI, Gemini, Anthropic, Groq, OpenRouter, MiniMax, Mistral, Deepseek, Cerebras)",  # noqa: E501
 )
 class Chat(Service):
     __body_required__ = False
@@ -103,11 +119,13 @@ class Chat(Service):
         litellm = __import__("litellm", fromlist=["acompletion"])
         acompletion = getattr(litellm, "acompletion")
         tools = get_all_chat_tools()
-        api_key = _get_api_key_for_model(chat_model)
+        api_key, api_base = _get_litellm_credentials(chat_model)
         backend = InProcessBackend()
         kwargs = {"model": chat_model, "messages": messages, "tools": tools}
         if api_key:
             kwargs["api_key"] = api_key
+        if api_base:
+            kwargs["api_base"] = api_base
         for _ in range(MAX_TOOL_ROUNDS):
             response = await acompletion(**kwargs)
             choice = response.choices[0] if response.choices else None
