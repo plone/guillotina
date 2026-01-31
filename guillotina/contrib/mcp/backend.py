@@ -5,6 +5,7 @@ from guillotina.interfaces import ICatalogUtility
 from guillotina.interfaces import IResource
 from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.utils import get_object_by_uid
+from guillotina.utils import get_security_policy
 from guillotina.utils import navigate_to
 
 import typing
@@ -83,6 +84,8 @@ class InProcessBackend:
                 return {}
         else:
             return {}
+        if not get_security_policy().check_permission("guillotina.ViewContent", ob):
+            return {}
         serializer = get_multi_adapter((ob, request), IResourceSerializeToJson)
         return await serializer()
 
@@ -112,15 +115,15 @@ class InProcessBackend:
 
         if not IFolder.providedBy(container):
             return {"items": [], "items_total": 0}
+        if not get_security_policy().check_permission("guillotina.ViewContent", container):
+            return {"items": [], "items_total": 0}
         request = task_vars.request.get()
-        items_total = await container.async_len()
-        items = []
-        total = 0
+        policy = get_security_policy()
+        visible = []
         async for name, child in container.async_items():
-            if total >= _from + _size:
-                break
-            if total >= _from:
+            if policy.check_permission("guillotina.ViewContent", child):
                 summary_serializer = get_multi_adapter((child, request), IResourceSerializeToJsonSummary)
-                items.append(await summary_serializer())
-            total += 1
+                visible.append(await summary_serializer())
+        items_total = len(visible)
+        items = visible[_from : _from + _size]
         return {"items": items, "items_total": items_total}
