@@ -2,6 +2,7 @@ from guillotina import configure
 from guillotina._settings import app_settings
 from guillotina.api.service import Service
 from guillotina.contrib.mcp.backend import clear_mcp_context
+from guillotina.contrib.mcp.backend import get_mcp_context
 from guillotina.contrib.mcp.backend import InProcessBackend
 from guillotina.contrib.mcp.backend import set_mcp_context
 from guillotina.contrib.mcp.tools import get_all_chat_tools
@@ -46,21 +47,47 @@ def _get_litellm_credentials(model: str):
     return api_key, api_base
 
 
+def _get_value(obj, key, default=None):
+    if isinstance(obj, dict):
+        return obj.get(key, default)
+    return getattr(obj, key, default)
+
+
+async def _context_for_path(container_path):
+    ctx = get_mcp_context()
+    if ctx is None:
+        return None
+    if container_path:
+        from guillotina.utils import navigate_to
+
+        try:
+            return await navigate_to(ctx, "/" + container_path.strip("/"))
+        except KeyError:
+            return None
+    return ctx
+
+
 async def _execute_tool(backend: InProcessBackend, name: str, arguments: dict):
     args = arguments or {}
+    container_path = args.get("container_path") or None
+    context = await _context_for_path(container_path)
     if name == "search":
-        return await backend.search(None, args.get("query") or {})
+        if context is None:
+            return {"items": [], "items_total": 0}
+        return await backend.search(context, args.get("query") or {})
     if name == "count":
-        return await backend.count(None, args.get("query") or {})
+        if context is None:
+            return 0
+        return await backend.count(context, args.get("query") or {})
     if name == "get_content":
-        return await backend.get_content(
-            None,
-            args.get("path"),
-            args.get("uid"),
-        )
+        if context is None:
+            return {}
+        return await backend.get_content(context, args.get("path"), args.get("uid"))
     if name == "list_children":
+        if context is None:
+            return {"items": [], "items_total": 0}
         return await backend.list_children(
-            None,
+            context,
             args.get("path") or "",
             args.get("from_index", 0),
             args.get("page_size", 20),
@@ -128,25 +155,28 @@ class Chat(Service):
             kwargs["api_base"] = api_base
         for _ in range(MAX_TOOL_ROUNDS):
             response = await acompletion(**kwargs)
-            choice = response.choices[0] if response.choices else None
+            choices = _get_value(response, "choices", None) or []
+            choice = choices[0] if choices else None
             if not choice:
                 raise HTTPPreconditionFailed(content={"reason": "Empty response from LLM"})
-            msg = choice.message
-            tool_calls = getattr(msg, "tool_calls", None) or []
+            msg = _get_value(choice, "message", None)
+            if msg is None:
+                raise HTTPPreconditionFailed(content={"reason": "Empty response from LLM"})
+            tool_calls = _get_value(msg, "tool_calls", None) or []
+            if isinstance(tool_calls, dict):
+                tool_calls = [tool_calls]
+            elif not isinstance(tool_calls, list):
+                tool_calls = []
             if not tool_calls:
-                content = getattr(msg, "content", None) or ""
+                content = _get_value(msg, "content", None) or ""
                 return {"content": content}
-            assistant_msg = {"role": "assistant", "content": getattr(msg, "content", None)}
+            assistant_msg = {"role": "assistant", "content": _get_value(msg, "content", None)}
             tool_calls_list = []
             for tc in tool_calls:
-                tc_id = getattr(tc, "id", None) or (tc.get("id") if isinstance(tc, dict) else "")
-                fn = getattr(tc, "function", None) or (tc.get("function") if isinstance(tc, dict) else {})
-                name = getattr(fn, "name", None) if fn else None
-                if name is None and isinstance(fn, dict):
-                    name = fn.get("name", "")
-                raw_args = getattr(fn, "arguments", None) if fn else None
-                if raw_args is None and isinstance(fn, dict):
-                    raw_args = fn.get("arguments", "{}")
+                tc_id = _get_value(tc, "id", "") or ""
+                fn = _get_value(tc, "function", None) or {}
+                name = _get_value(fn, "name", "") or ""
+                raw_args = _get_value(fn, "arguments", "{}")
                 tool_calls_list.append(
                     {
                         "id": tc_id,
@@ -157,14 +187,10 @@ class Chat(Service):
             assistant_msg["tool_calls"] = tool_calls_list
             messages.append(assistant_msg)
             for tc in tool_calls:
-                tc_id = getattr(tc, "id", None) or (tc.get("id") if isinstance(tc, dict) else "")
-                fn = getattr(tc, "function", None) or (tc.get("function") if isinstance(tc, dict) else {})
-                name = getattr(fn, "name", None) if fn else None
-                if name is None and isinstance(fn, dict):
-                    name = fn.get("name", "")
-                raw_args = getattr(fn, "arguments", None) if fn else None
-                if raw_args is None and isinstance(fn, dict):
-                    raw_args = fn.get("arguments", "{}")
+                tc_id = _get_value(tc, "id", "") or ""
+                fn = _get_value(tc, "function", None) or {}
+                name = _get_value(fn, "name", "") or ""
+                raw_args = _get_value(fn, "arguments", "{}")
                 name = name or ""
                 raw_args = raw_args or "{}"
                 try:

@@ -77,7 +77,7 @@ def _get_description_extras():
 
 
 def register_tools(mcp_server, backend):
-    def _context_for_path(container_path: typing.Optional[str]):
+    async def _context_for_path(container_path: typing.Optional[str]):
         ctx = get_mcp_context()
         if ctx is None:
             return None
@@ -85,7 +85,7 @@ def register_tools(mcp_server, backend):
             from guillotina.utils import navigate_to
 
             try:
-                return navigate_to(ctx, "/" + container_path.strip("/"))
+                return await navigate_to(ctx, "/" + container_path.strip("/"))
             except KeyError:
                 return None
         return ctx
@@ -97,8 +97,8 @@ def register_tools(mcp_server, backend):
         container_path: typing.Optional[str] = None,
         query: typing.Optional[typing.Dict[str, str]] = None,
     ) -> dict:
-        context = _context_for_path(container_path)
-        if context is None and container_path is None:
+        context = await _context_for_path(container_path)
+        if context is None:
             return {"items": [], "items_total": 0}
         q = query or {}
         return await backend.search(context, q)
@@ -108,8 +108,8 @@ def register_tools(mcp_server, backend):
         container_path: typing.Optional[str] = None,
         query: typing.Optional[typing.Dict[str, str]] = None,
     ):
-        context = _context_for_path(container_path)
-        if context is None and container_path is None:
+        context = await _context_for_path(container_path)
+        if context is None:
             return 0
         q = query or {}
         return await backend.count(context, q)
@@ -122,8 +122,8 @@ def register_tools(mcp_server, backend):
         uid: typing.Optional[str] = None,
         container_path: typing.Optional[str] = None,
     ) -> dict:
-        context = _context_for_path(container_path)
-        if context is None and container_path is None:
+        context = await _context_for_path(container_path)
+        if context is None:
             return {}
         return await backend.get_content(context, path, uid)
 
@@ -136,8 +136,8 @@ def register_tools(mcp_server, backend):
         page_size: int = 20,
         container_path: typing.Optional[str] = None,
     ) -> dict:
-        context = _context_for_path(container_path)
-        if context is None and container_path is None:
+        context = await _context_for_path(container_path)
+        if context is None:
             return {"items": [], "items_total": 0}
         return await backend.list_children(context, path or "", from_index, page_size)
 

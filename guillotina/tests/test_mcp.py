@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from guillotina.contrib.mcp.backend import clear_mcp_context
 from guillotina.contrib.mcp.backend import InProcessBackend
 from guillotina.contrib.mcp.backend import set_mcp_context
+from guillotina.contrib.mcp.chat import _execute_tool
 from guillotina.tests import utils
 from guillotina.transactions import get_transaction
 from unittest.mock import AsyncMock
@@ -304,6 +305,36 @@ async def test_backend_list_children_empty_when_no_view_on_container(container_r
         assert status == 200
         async with _mcp_backend_context(requester) as (backend, container):
             result = await backend.list_children(container, "private", 0, 20)
+        assert result["items_total"] == 0
+        assert result["items"] == []
+
+
+@pytest.mark.app_settings({"applications": ["guillotina.contrib.mcp"]})
+async def test_chat_execute_tool_container_path_scopes(container_requester):
+    async with container_requester as requester:
+        _, status = await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps({"@type": "Folder", "id": "sub"}),
+        )
+        assert status == 201
+        _, status = await requester(
+            "POST",
+            "/db/guillotina/sub/",
+            data=json.dumps({"@type": "Item", "id": "inside"}),
+        )
+        assert status == 201
+        async with _mcp_backend_context(requester) as (backend, _):
+            result = await _execute_tool(backend, "list_children", {"container_path": "sub"})
+        assert result["items_total"] == 1
+        assert result["items"][0]["@name"] == "inside"
+
+
+@pytest.mark.app_settings({"applications": ["guillotina.contrib.mcp"]})
+async def test_chat_execute_tool_invalid_container_path_returns_empty(container_requester):
+    async with container_requester as requester:
+        async with _mcp_backend_context(requester) as (backend, _):
+            result = await _execute_tool(backend, "list_children", {"container_path": "missing"})
         assert result["items_total"] == 0
         assert result["items"] == []
 

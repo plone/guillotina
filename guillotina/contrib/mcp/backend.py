@@ -119,11 +119,13 @@ class InProcessBackend:
             return {"items": [], "items_total": 0}
         request = task_vars.request.get()
         policy = get_security_policy()
-        visible = []
+        items = []
+        items_total = 0
+        start = _from if _from > 0 else 0
         async for name, child in container.async_items():
             if policy.check_permission("guillotina.ViewContent", child):
-                summary_serializer = get_multi_adapter((child, request), IResourceSerializeToJsonSummary)
-                visible.append(await summary_serializer())
-        items_total = len(visible)
-        items = visible[_from : _from + _size]
+                if items_total >= start and len(items) < _size:
+                    summary_serializer = get_multi_adapter((child, request), IResourceSerializeToJsonSummary)
+                    items.append(await summary_serializer())
+                items_total += 1
         return {"items": items, "items_total": items_total}
