@@ -34,7 +34,7 @@ class watch:
         self.error_mappings = error_mappings or {}
 
     def __enter__(self):
-        self.start = time.time()
+        self.start = time.perf_counter()
         return self
 
     def __exit__(
@@ -48,7 +48,7 @@ class watch:
 
         error = ERROR_NONE
         if self.histogram is not None:
-            finished = time.time()
+            finished = time.perf_counter()
             if len(self.labels) > 0:
                 self.histogram.labels(**self.labels).observe(finished - self.start)
             else:
@@ -79,10 +79,10 @@ class watch_lock:
         self.labels = labels or {}
 
     async def __aenter__(self) -> None:
-        start = time.time()
+        start = time.perf_counter()
         await self.lock.acquire()
         if self.histogram is not None:
-            finished = time.time()
+            finished = time.perf_counter()
             if len(self.labels) > 0:
                 self.histogram.labels(**self.labels).observe(finished - start)
             else:

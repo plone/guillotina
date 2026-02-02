@@ -57,7 +57,7 @@ setup(
     install_requires=[
         "uvicorn",
         "websockets",
-        "jsonschema==2.6.0",
+        "jsonschema==4.26.0",
         "python-dateutil",
         "pycryptodome",
         "jwcrypto",
