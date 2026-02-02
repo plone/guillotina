@@ -8,10 +8,10 @@ from guillotina.utils import get_object_by_uid
 from guillotina.utils import get_security_policy
 from guillotina.utils import navigate_to
 
-import typing
+from typing import Any, Dict, List, Optional
 
 
-_mcp_context_var: ContextVar[typing.Optional[IResource]] = ContextVar("mcp_context", default=None)
+_mcp_context_var: ContextVar[Optional[IResource]] = ContextVar("mcp_context", default=None)
 
 
 def get_mcp_context():
@@ -36,7 +36,7 @@ class InProcessBackend:
             raise RuntimeError("MCP context not set (not in @mcp request?)")
         return ctx
 
-    def _resolve_context(self, context: typing.Optional[IResource]) -> IResource:
+    def _resolve_context(self, context: Optional[IResource]) -> IResource:
         if context is None:
             return self._get_base_context()
         if not IResource.providedBy(context):
@@ -62,8 +62,8 @@ class InProcessBackend:
     async def get_content(
         self,
         context: IResource,
-        path: typing.Optional[str],
-        uid: typing.Optional[str],
+        path: Optional[str],
+        uid: Optional[str],
     ) -> dict:
         from guillotina import task_vars
 
@@ -119,7 +119,7 @@ class InProcessBackend:
             return {"items": [], "items_total": 0}
         request = task_vars.request.get()
         policy = get_security_policy()
-        items = []
+        items: List[Dict[str, Any]] = []
         items_total = 0
         start = _from if _from > 0 else 0
         async for name, child in container.async_items():
