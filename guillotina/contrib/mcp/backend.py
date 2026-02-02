@@ -7,8 +7,10 @@ from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.utils import get_object_by_uid
 from guillotina.utils import get_security_policy
 from guillotina.utils import navigate_to
-
-from typing import Any, Dict, List, Optional
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
 
 
 _mcp_context_var: ContextVar[Optional[IResource]] = ContextVar("mcp_context", default=None)
