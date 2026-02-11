@@ -55,7 +55,7 @@ async def _mcp_backend_context(requester):
 async def test_mcp_service_registered(container_requester):
     async with container_requester as requester:
         resp, status = await requester("GET", "/db/guillotina/@mcp")
-        assert status in (200, 401, 404, 421)
+        assert status == 200
 
 
 @pytest.mark.app_settings({"applications": ["guillotina.contrib.mcp"], "mcp": {"enabled": False}})
@@ -77,7 +77,7 @@ async def test_mcp_tools_list(container_requester):
                 "Content-Type": "application/json",
             },
         )
-        assert status in (200, 401, 421)
+        assert status == 200
         if status == 200 and isinstance(resp, dict):
             assert "result" in resp or "error" in resp
 

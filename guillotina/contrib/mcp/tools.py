@@ -1,5 +1,6 @@
 from guillotina._settings import app_settings
 from guillotina.contrib.mcp.backend import get_mcp_context
+from guillotina.contrib.mcp.backend import InProcessBackend
 from guillotina.contrib.mcp.interfaces import IMCPDescriptionExtras
 
 import typing
@@ -76,7 +77,7 @@ def _get_description_extras():
     return extras
 
 
-def register_tools(mcp_server, backend):
+def register_tools(mcp_server, backend: InProcessBackend):
     async def _context_for_path(container_path: typing.Optional[str]):
         ctx = get_mcp_context()
         if ctx is None:
