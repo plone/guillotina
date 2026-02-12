@@ -12,6 +12,7 @@ from guillotina.response import HTTPUnauthorized
 from guillotina.response import Response
 from guillotina.utils import get_authenticated_user
 
+import asyncio
 import anyio
 import copy
 import json
@@ -19,6 +20,7 @@ import logging
 
 
 logger = logging.getLogger("guillotina")
+_mcp_session_manager_lock = asyncio.Lock()
 
 
 @configure.service(
@@ -46,14 +48,15 @@ async def mcp_service(context, request):
         scope["path"] = "/"
         scope["raw_path"] = b"/"
         app, server = get_mcp_app_and_server()
-        session_manager = server.session_manager
-        original_task_group = session_manager._task_group  # Workaround: mcp lib does not expose task group.
-        async with anyio.create_task_group() as tg:
-            session_manager._task_group = tg
-            try:
-                await app(scope, request.receive, request.send)
-            finally:
-                session_manager._task_group = original_task_group
+        async with _mcp_session_manager_lock:
+            session_manager = server.session_manager
+            original_task_group = session_manager._task_group  # Workaround: mcp lib does not expose task group.
+            async with anyio.create_task_group() as tg:
+                session_manager._task_group = tg
+                try:
+                    await app(scope, request.receive, request.send)
+                finally:
+                    session_manager._task_group = original_task_group
     finally:
         clear_mcp_context()
     # Response already sent via request.send(); return dummy so framework does not send again.
