@@ -11,16 +11,15 @@ Both use the same read-only tools and the same permissions.
 
 ## Installation
 
-**Requires Python 3.10+** (the `mcp` package does not support older versions).
+**Requires Python 3.10+** (the `mcp` package does not support older versions). Guillotina core supports Python 3.8+; MCP is optional and only needed when you use this contrib.
 
-1. Add dependencies (e.g. in `contrib-requirements.txt` or `requirements.txt`):
+1. Install the MCP extra (Python 3.10+ only):
 
+   ```bash
+   pip install guillotina[mcp]
    ```
-   mcp>=1.0.0; python_version >= "3.10"
-   litellm>=1.0.0
-   ```
 
-   `litellm` is required only if you use **@chat**.
+   Or add to your requirements: ``guillotina[mcp]`` or ``mcp>=1.0.0; python_version >= "3.10"`` and ``litellm>=1.0.0``. `litellm` is required only if you use **@chat**.
 
 2. Enable the contrib in your app config:
 
