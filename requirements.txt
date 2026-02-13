@@ -1,6 +1,7 @@
 Cython==0.29.24
 asyncpg>=0.28.0
-cffi==2.0.0
+cffi>=1.17.1,<2.0; python_version < '3.9'
+cffi>=2.0.0; python_version >= '3.9'
 chardet==3.0.4
 jsonschema==4.26.0
 multidict==6.0.4
@@ -13,7 +14,8 @@ six==1.11.0
 orjson>=3,<4
 zope.interface==5.1.0
 uvicorn==0.40.0
-argon2-cffi==25.1.0
+argon2-cffi>=23.1.0,<25.1.0; python_version < '3.8'
+argon2-cffi>=25.1.0; python_version >= '3.8'
 backoff==1.10.0
 prometheus-client==0.8.0
 typing_extensions==4.15.0
