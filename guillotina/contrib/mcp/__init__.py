@@ -11,6 +11,13 @@ app_settings = {
         "chat_enabled": True,
         "chat_model": None,
     },
+    "load_utilities": {
+        "guillotina.mcp": {
+            "provides": "guillotina.contrib.mcp.interfaces.IMCPUtility",
+            "factory": "guillotina.contrib.mcp.utility.MCPUtility",
+            "settings": {},
+        }
+    },
 }
 
 

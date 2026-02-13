@@ -1,4 +1,12 @@
+from zope.interface import Attribute
 from zope.interface import Interface
+
+
+class IMCPUtility(Interface):
+    """MCP server utility providing the FastMCP app and server instances."""
+
+    server = Attribute("FastMCP server instance")
+    app = Attribute("ASGI app from streamable_http_app()")
 
 
 class IMCPDescriptionExtras(Interface):

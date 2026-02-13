@@ -3,17 +3,18 @@ from guillotina._settings import app_settings
 from guillotina.api.service import Service
 from guillotina.auth import authenticate_user
 from guillotina.auth.users import AnonymousUser
+from guillotina.component import get_utility
 from guillotina.contrib.mcp.backend import clear_mcp_context
 from guillotina.contrib.mcp.backend import set_mcp_context
-from guillotina.contrib.mcp.server import get_mcp_app_and_server
+from guillotina.contrib.mcp.interfaces import IMCPUtility
 from guillotina.interfaces import IResource
 from guillotina.response import HTTPPreconditionFailed
 from guillotina.response import HTTPUnauthorized
 from guillotina.response import Response
 from guillotina.utils import get_authenticated_user
 
-import asyncio
 import anyio
+import asyncio
 import copy
 import json
 import logging
@@ -47,10 +48,13 @@ async def mcp_service(context, request):
         scope = copy.copy(request.scope)  # Only top-level keys modified; shallow copy sufficient.
         scope["path"] = "/"
         scope["raw_path"] = b"/"
-        app, server = get_mcp_app_and_server()
+        mcp_utility = get_utility(IMCPUtility)
+        app, server = mcp_utility.app, mcp_utility.server
         async with _mcp_session_manager_lock:
             session_manager = server.session_manager
-            original_task_group = session_manager._task_group  # Workaround: mcp lib does not expose task group.
+            original_task_group = (
+                session_manager._task_group
+            )  # Workaround: mcp lib does not expose task group.
             async with anyio.create_task_group() as tg:
                 session_manager._task_group = tg
                 try:
