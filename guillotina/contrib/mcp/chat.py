@@ -5,6 +5,7 @@ from guillotina.contrib.mcp.backend import clear_mcp_context
 from guillotina.contrib.mcp.backend import get_mcp_context
 from guillotina.contrib.mcp.backend import InProcessBackend
 from guillotina.contrib.mcp.backend import set_mcp_context
+from guillotina.contrib.mcp.tools import _normalize_query
 from guillotina.contrib.mcp.tools import get_all_chat_tools
 from guillotina.contrib.mcp.tools import get_extra_tools_module
 from guillotina.interfaces import IResource
@@ -74,11 +75,11 @@ async def _execute_tool(backend: InProcessBackend, name: str, arguments: dict):
     if name == "search":
         if context is None:
             return {"items": [], "items_total": 0}
-        return await backend.search(context, args.get("query") or {})
+        return await backend.search(context, _normalize_query(args.get("query")))
     if name == "count":
         if context is None:
             return 0
-        return await backend.count(context, args.get("query") or {})
+        return await backend.count(context, _normalize_query(args.get("query")))
     if name == "get_content":
         if context is None:
             return {}

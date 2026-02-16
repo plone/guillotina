@@ -3,6 +3,7 @@ from guillotina.contrib.mcp.backend import clear_mcp_context
 from guillotina.contrib.mcp.backend import InProcessBackend
 from guillotina.contrib.mcp.backend import set_mcp_context
 from guillotina.contrib.mcp.chat import _execute_tool
+from guillotina.contrib.mcp.tools import _normalize_query
 from guillotina.tests import utils
 from guillotina.transactions import get_transaction
 from unittest.mock import AsyncMock
@@ -49,6 +50,20 @@ async def _mcp_backend_context(requester):
             yield InProcessBackend(), container
     finally:
         clear_mcp_context()
+
+
+def test_normalize_query_accepts_dict_and_string():
+    assert _normalize_query(None) == {}
+    assert _normalize_query({}) == {}
+    assert _normalize_query({"type_name": "Activity", "_size": 20}) == {
+        "type_name": "Activity",
+        "_size": 20,
+    }
+    assert _normalize_query('{"type_name": "Activity", "_size": 100}') == {
+        "type_name": "Activity",
+        "_size": 100,
+    }
+    assert _normalize_query("invalid") == {}
 
 
 @pytest.mark.app_settings({"applications": ["guillotina.contrib.mcp"], "mcp": {"enabled": True}})

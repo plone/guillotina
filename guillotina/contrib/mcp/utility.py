@@ -7,6 +7,12 @@ from zope.interface import implementer
 
 @implementer(IMCPUtility)
 class MCPUtility:
+    async def initialize(self, app):
+        pass
+
+    async def finalize(self, app):
+        pass
+
     def __init__(self, settings=None):
         from mcp.server.fastmcp import FastMCP
 

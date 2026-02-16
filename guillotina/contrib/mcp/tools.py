@@ -3,20 +3,19 @@ from guillotina.contrib.mcp.backend import get_mcp_context
 from guillotina.contrib.mcp.backend import InProcessBackend
 from guillotina.contrib.mcp.interfaces import IMCPDescriptionExtras
 
+import json
 import typing
 
 
 TOOL_DESCRIPTIONS = {
     "search": (
         "Search the catalog. container_path is optional (default: current context). "
-        "query keys follow Guillotina @search: type_name, term, _size, _from, _sort_asc "
-        "(field name for ascending), _sort_des (field name for descending), _metadata, "
-        "_metadata_not; field filters: field__eq, field__not, field__gt, field__gte, "
-        "field__lt, field__lte, field__in. E.g. creators__in to filter by creator."
+        "query must be an object (dict) with keys: type_name, term, _size, _from, _sort_asc, _sort_des; "
+        "date filters: fieldname__gte, fieldname__lte (ISO 8601, e.g. 2026-02-09T00:00:00Z)."
     ),
     "count": (
-        "Count catalog results. container_path is optional. query uses same keys as search: "
-        "type_name, term, field__eq, field__gt, etc. (no _size/_from/_sort_asc/_sort_des)."
+        "Count catalog results. container_path is optional. query must be an object (dict), same keys as search "
+        "(no _size/_from/_sort_asc/_sort_des). Date filters: fieldname__gte, fieldname__lte (ISO 8601)."
     ),
     "get_content": (
         "Get a resource by path (relative to container) or by UID. "
@@ -35,7 +34,7 @@ CHAT_PARAM_SCHEMAS = {
             "container_path": {"type": "string", "description": "Optional path relative to container."},
             "query": {
                 "type": "object",
-                "description": "Search query: type_name, term, _size, _from, _sort_asc, _sort_des, field filters.",
+                "description": "Search query object. Keys: type_name, _size, fieldname__gte, fieldname__lte (dates ISO 8601).",  # noqa: E501
             },
         },
     },
@@ -44,7 +43,7 @@ CHAT_PARAM_SCHEMAS = {
             "container_path": {"type": "string", "description": "Optional path relative to container."},
             "query": {
                 "type": "object",
-                "description": "Count query: type_name, term, field filters (no _size/_from/_sort).",
+                "description": "Count query object. Keys: type_name, fieldname__gte, fieldname__lte (dates ISO 8601).",
             },
         },
     },
@@ -64,6 +63,22 @@ CHAT_PARAM_SCHEMAS = {
         },
     },
 }
+
+
+def _normalize_query(
+    query: typing.Optional[typing.Union[typing.Dict[str, typing.Any], str]],
+) -> typing.Dict[str, typing.Any]:
+    if query is None:
+        return {}
+    if isinstance(query, dict):
+        return query
+    if isinstance(query, str):
+        try:
+            parsed = json.loads(query)
+            return parsed if isinstance(parsed, dict) else {}
+        except (json.JSONDecodeError, TypeError):
+            return {}
+    return {}
 
 
 def _get_description_extras():
@@ -96,23 +111,23 @@ def register_tools(mcp_server, backend: InProcessBackend):
     @mcp_server.tool(description=(TOOL_DESCRIPTIONS["search"] + " " + (extras.get("search") or "")).strip())
     async def search(
         container_path: typing.Optional[str] = None,
-        query: typing.Optional[typing.Dict[str, str]] = None,
+        query: typing.Optional[typing.Dict[str, typing.Any]] = None,
     ) -> dict:
         context = await _context_for_path(container_path)
         if context is None:
             return {"items": [], "items_total": 0}
-        q = query or {}
+        q = _normalize_query(query)
         return await backend.search(context, q)
 
     @mcp_server.tool(description=(TOOL_DESCRIPTIONS["count"] + " " + (extras.get("count") or "")).strip())
     async def count(
         container_path: typing.Optional[str] = None,
-        query: typing.Optional[typing.Dict[str, str]] = None,
+        query: typing.Optional[typing.Dict[str, typing.Any]] = None,
     ):
         context = await _context_for_path(container_path)
         if context is None:
             return 0
-        q = query or {}
+        q = _normalize_query(query)
         return await backend.count(context, q)
 
     @mcp_server.tool(
