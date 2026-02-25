@@ -4,6 +4,8 @@ CHANGELOG
 7.0.7 (unreleased)
 ------------------
 
+- Docs: Add baseline docs IA artifacts (inventory, redirect map, ADR-001)
+  [nilbacardit26]
 - Docs: Add ADR for LLM discovery policy decisions (canonical URL, bots, size cap)
   [nilbacardit26]
 - Docs: Update documentation and configuration settings

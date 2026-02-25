@@ -1,0 +1,10 @@
+old_path,new_path,strategy,reason
+quickstart,getting-started/quickstart,stub+toctree alias,Keep existing quickstart URL stable while introducing getting-started section.
+quick-tour,getting-started/quick-tour,stub+toctree alias,Keep existing quick-tour URL stable while introducing getting-started section.
+training/index,getting-started/training/index,stub page,Preserve historical training entrypoint during IA migration.
+developer/index,concepts/index,stub+cross-link,Developer conceptual docs move toward concepts section.
+installation/index,operations/index,stub+cross-link,Operational docs grouped under operations while preserving legacy path.
+rest/index,reference/rest/index,stub+cross-link,REST reference grouped under reference section.
+api/index,reference/python-api/index,stub+cross-link,Python API reference grouped under reference section.
+contrib/index,contrib/index,no redirect,Contrib remains top-level to avoid high-churn move risk.
+migration/index,migration/index,no redirect,Migration remains stable and externally linked.
