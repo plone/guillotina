@@ -7,6 +7,11 @@ internal design decisions.
 .. toctree::
    :maxdepth: 2
 
+   architecture
+   object-model
+   traversal
+   request-response
+   transactions
    ../developer/narrative
    ../developer/design
    ../developer/component-architecture

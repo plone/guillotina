@@ -4,6 +4,8 @@ CHANGELOG
 7.0.7 (unreleased)
 ------------------
 
+- Docs: Add core concepts pages (architecture, object model, traversal, request/response, transactions)
+  [nilbacardit26]
 - Docs: Add section index pages for concepts, how-to, and operations
   [nilbacardit26]
 - Docs: Rework root documentation navigation toward Diataxis sections
