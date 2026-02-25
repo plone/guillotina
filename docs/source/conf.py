@@ -174,7 +174,10 @@ html_static_path = ["_static"]
 # .htaccess) here, relative to this directory. These files are copied
 # directly to the root of the documentation.
 #
-# html_extra_path = []
+html_extra_path = ["_extra"]
+
+# Canonical URL base for generated links and sitemap references.
+html_baseurl = "https://guillotina.readthedocs.io/en/latest/"
 
 # If not None, a 'Last updated on:' timestamp is inserted at every page
 # bottom, using the given strftime format.

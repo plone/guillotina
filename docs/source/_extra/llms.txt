@@ -1,0 +1,25 @@
+# Guillotina documentation index
+# Generated: 2026-02-25T11:43:39Z
+# Canonical base: https://guillotina.readthedocs.io/en/latest/
+
+- https://guillotina.readthedocs.io/en/latest/index.html | Documentation Home | Main documentation landing page and section map.
+- https://guillotina.readthedocs.io/en/latest/quickstart.html | Quickstart | End-to-end first setup and first API usage.
+- https://guillotina.readthedocs.io/en/latest/quick-tour.html | Quick Tour | Feature overview and first extension examples.
+- https://guillotina.readthedocs.io/en/latest/how-to/ | How-To Guides | Task-oriented guides for setup, configuration, and troubleshooting.
+- https://guillotina.readthedocs.io/en/latest/concepts/ | Concepts | Core architectural concepts and system model.
+- https://guillotina.readthedocs.io/en/latest/concepts/architecture.html | Architecture | ASGI/AsyncIO architecture and extension points.
+- https://guillotina.readthedocs.io/en/latest/concepts/object-model.html | Object Model | Hierarchical content model and URL mapping.
+- https://guillotina.readthedocs.io/en/latest/concepts/traversal.html | Traversal | URL traversal and context resolution behavior.
+- https://guillotina.readthedocs.io/en/latest/concepts/request-response.html | Request and Response | Request lifecycle and response conventions.
+- https://guillotina.readthedocs.io/en/latest/concepts/transactions.html | Transactions | Transaction boundaries, commit, and rollback semantics.
+- https://guillotina.readthedocs.io/en/latest/concepts/storage.html | Storage | Persistence backends and data consistency concerns.
+- https://guillotina.readthedocs.io/en/latest/concepts/catalog.html | Catalog | Search/indexing model and retrieval behavior.
+- https://guillotina.readthedocs.io/en/latest/concepts/middleware.html | Middleware | Request/response middleware pipeline behavior.
+- https://guillotina.readthedocs.io/en/latest/concepts/task-vars.html | Task Variables | Context propagation and request-scoped variables.
+- https://guillotina.readthedocs.io/en/latest/concepts/security-model.html | Security Model | Roles, permissions, and context-based authorization.
+- https://guillotina.readthedocs.io/en/latest/rest/ | REST API Reference | REST endpoints grouped by object type.
+- https://guillotina.readthedocs.io/en/latest/api/ | Python API Reference | Internal API references for components and request/response.
+- https://guillotina.readthedocs.io/en/latest/installation/ | Installation and Configuration | Installation, configuration, and deployment docs.
+- https://guillotina.readthedocs.io/en/latest/contrib/ | Contrib Packages | Optional packages and integrations.
+- https://guillotina.readthedocs.io/en/latest/migration/ | Migration Guide | Version upgrade notes and migration paths.
+- https://guillotina.readthedocs.io/en/latest/CHANGELOG.html | Changelog | Release history and notable changes.

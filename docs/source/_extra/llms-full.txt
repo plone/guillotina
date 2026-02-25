@@ -1,0 +1,75 @@
+# Guillotina llms-full
+Generated: 2026-02-25T11:43:39Z
+Canonical base: https://guillotina.readthedocs.io/en/latest/
+
+## Quickstart
+Source: https://guillotina.readthedocs.io/en/latest/quickstart.html
+Summary: End-to-end first setup and first API usage.
+
+# Quickstart How to quickly get started using Guillotina. This tutorial will assume usage of venv. You can use your own preferred tool for managing your python environment. *This tutorial assumes you have PostgreSQL running* Setup the environment: Install Guillotina: Generate configuration file (requires cookiecutter): Finally, run the server: The server should now be running on http://0.0.0.0:8080 Then, use Postman, curl or whatever tool you prefer to interact with the REST API . You can also navigate in your Guillotina server with its built-in web admin interface by visiting http://localhost:8080/+admin/. Modify the configuration in config.yaml to customize server settings. ## Postgresql installation instructions If you do not have a PostgreSQL database server installed, you can use docker to get one running quickly. Example docker run command: ## Creating a container Guillotina containers are the building block of all other content. A container is where you place all other content for your application. Only containers can be created inside databases. Let's create one: and create content inside the container: ## Retrieving your data Let's navigating through your newly created data. First you can see all your containers using the following, notice that at the moment there's only one named guillotina: Then you could explore container data using: And finally query a specific content inside the container using:
+
+## Quick Tour
+Source: https://guillotina.readthedocs.io/en/latest/quick-tour.html
+Summary: Feature overview and first extension examples.
+
+# Quick tour of Guillotina Guillotina is powerful datastore, capable of storing and indexing millions of objects. It is a high performance web server based on many of the technologies and lessons learned from Plone, Pyramid, Django and others all while utilizing Python's great AsyncIO library. Using Python's AsyncIO, it works well with micro-service oriented environments. Features: - REST JSON API - Built-in authentication/authorization, built-in JWT support - Hierarchical data/url structure. Object storage. - Permissions/roles/groups - Fully customizable permission/roles/groups based on hierarchical data structure - Robust customizable component architecture and configuration syntax - Content types, dynamic behaviors, based on python interfaces and json schemas. - Built-in CORS support - Serialization/Validation library integrated. - Elastic search integration through guillotina_elasticsearch, or fallback to PostgreSQL json indexing. - Declarative configuration using decorators. - Integrated cloud storage file uploads. - py.test fixtures for easy service/api/endpoint testing - Built-in command system to run jobs. - Rich ecosystem of additional packages for adding additional features: Integration with RabbitMQ, batching of queries, redis cache layer. - Powerful addon architecture based on Zope Component Architecture. ## What is Guillotina like? ### Example configuration: ### Example service: See instructions below to play with. (example-content-type)= ### Example content type: See instructions below to play with. ### Example usage: See instructions below to play with. (playing-with-those-examples)= ### Playing with those examples To play with those examples you should install Guillotina and Cookiecutter, let's do that in a python venv: Use Guillotina templates to create an application: You should now have a structure like the following one: Now copy Example content type section content in myapp/myapp/content.py. Add configure.scan('myapp.content') to myapp/myapp/__init__.py includeme function. @foobar service is already defined in myapp/mayapp/api.py. Then install myapp: Edit myapp/config.yaml to fit your needs, especially in term of db configuration. And run guillotina with: Now create a container: You can now use all above examples.
+
+## Architecture
+Source: https://guillotina.readthedocs.io/en/latest/concepts/architecture.html
+Summary: ASGI/AsyncIO architecture and extension points.
+
+# Architecture ## What it is Guillotina is an ASGI-native, AsyncIO-first framework with a hierarchical content model and pluggable services. ## Why it matters Architecture choices define scalability, extension points, and how API behavior maps to stored content. ## How it works - ASGI request handling drives async service execution. - Content is organized under database/container/content paths. - Configuration and component registration control behavior, permissions, and adapters. ## Minimal example ## Common failures - Blocking I/O in custom code reduces concurrency. - Misconfigured applications list prevents expected components from loading. ## Related pages - object-model - request-response - ../developer/component-architecture
+
+## Object Model
+Source: https://guillotina.readthedocs.io/en/latest/concepts/object-model.html
+Summary: Hierarchical content model and URL mapping.
+
+# Object Model ## What it is Guillotina models content as a tree rooted at application/database/container objects, then user-defined content beneath them. ## Why it matters URL paths, security inheritance, and traversal behavior all depend on this hierarchy. ## How it works - / is the application root. - /(db) selects a configured database. - /(db)/(container) scopes content and permissions. - Child resources live under containers and inherit contextual behavior. ## Minimal example ## Common failures - Creating content in the wrong container causes security and query confusion. - Assuming flat models breaks inheritance expectations. ## Related pages - traversal - security-model - ../developer/narrative
+
+## Traversal
+Source: https://guillotina.readthedocs.io/en/latest/concepts/traversal.html
+Summary: URL traversal and context resolution behavior.
+
+# Traversal ## What it is Traversal is the process that resolves URL paths into Guillotina context objects. ## Why it matters Correct traversal is required for service lookup, permission checks, and route behavior. ## How it works - The router parses incoming paths segment by segment. - Each segment resolves to a resource in the object tree. - Once context is resolved, service dispatch and security policy are applied. ## Minimal example The path resolves to item-1, then the service endpoint is dispatched. ## Common failures - Missing segments produce 404-style traversal errors. - Wrong context assumptions in services break permission logic. ## Related pages - object-model - request-response - ../developer/router
+
+## Request and Response
+Source: https://guillotina.readthedocs.io/en/latest/concepts/request-response.html
+Summary: Request lifecycle and response conventions.
+
+# Request and Response ## What it is Guillotina processes HTTP requests asynchronously and returns structured JSON responses for content and services. ## Why it matters Request/response conventions are the contract your clients, integrations, and extensions rely on. ## How it works - Request parsing resolves context and identity. - Service or default handlers execute against the resolved context. - Responses include JSON payloads with metadata fields like @id. ## Minimal example ## Common failures - Missing auth headers cause unauthorized responses. - Invalid payload schemas return validation errors. ## Related pages - traversal - transactions - ../api/request - ../api/response
+
+## Transactions
+Source: https://guillotina.readthedocs.io/en/latest/concepts/transactions.html
+Summary: Transaction boundaries, commit, and rollback semantics.
+
+# Transactions ## What it is Transactions group related persistence operations so writes are committed or rolled back coherently. ## Why it matters Transactional consistency protects data integrity under concurrency and failures. ## How it works - Request handling opens a transaction context. - Resource mutations are tracked during execution. - On success, changes commit; on failure, changes rollback. ## Minimal example ## Common failures - Long-running transactions increase lock/contention risk. - Exceptions without proper handling can leave partial in-memory state. ## Related pages - storage - request-response - ../api/transactions
+
+## Storage
+Source: https://guillotina.readthedocs.io/en/latest/concepts/storage.html
+Summary: Persistence backends and data consistency concerns.
+
+# Storage ## What it is Storage is the persistence layer backing Guillotina resources, typically through PostgreSQL/Cockroach integrations and transaction management. ## Why it matters Storage performance and correctness directly affect request latency, durability, and consistency. ## How it works - Resource changes are staged in transactions. - The configured backend persists object state. - Search/catalog layers index persisted data for query use-cases. ## Minimal example ## Common failures - Incorrect backend configuration prevents startup. - Slow queries and lock contention degrade API response times. ## Related pages - transactions - catalog - ../developer/persistence
+
+## Catalog
+Source: https://guillotina.readthedocs.io/en/latest/concepts/catalog.html
+Summary: Search/indexing model and retrieval behavior.
+
+# Catalog ## What it is The catalog provides indexed search capabilities over Guillotina content. ## Why it matters Without indexing, content discovery and filtering are expensive and hard to scale. ## How it works - Content fields are indexed according to catalog configuration. - Query endpoints use indexed metadata for fast retrieval. - Reindex flows keep index state in sync with content changes. ## Minimal example ## Common failures - Missing index fields cause poor query relevance. - Stale indexes produce incomplete or outdated search results. ## Related pages - storage - traversal - ../rest/search
+
+## Middleware
+Source: https://guillotina.readthedocs.io/en/latest/concepts/middleware.html
+Summary: Request/response middleware pipeline behavior.
+
+# Middleware ## What it is Middleware is request/response pipeline logic that wraps endpoint execution. ## Why it matters It is the right place for cross-cutting behavior such as logging, tracing, request metadata, and common guards. ## How it works - Incoming request enters middleware chain. - Each middleware can inspect/modify request or response. - Control passes to the next middleware until endpoint execution completes. ## Minimal example ## Common failures - Blocking operations inside middleware affect every request. - Unexpected mutation of request/response objects causes subtle regressions. ## Related pages - request-response - security-model - ../developer/advanced
+
+## Task Variables
+Source: https://guillotina.readthedocs.io/en/latest/concepts/task-vars.html
+Summary: Context propagation and request-scoped variables.
+
+# Task Variables ## What it is Task variables are contextual values passed through execution flow to support service behavior, async utilities, and request-scoped operations. ## Why it matters They help avoid global mutable state and keep behavior deterministic per request or task execution. ## How it works - Variables are created in request/task context. - Async flow propagates context-aware values. - Services and utilities consume those values where needed. ## Minimal example ## Common failures - Context leakage across async boundaries. - Assuming task-local values are globally available. ## Related pages - transactions - middleware - ../developer/async_utils
+
+## Security Model
+Source: https://guillotina.readthedocs.io/en/latest/concepts/security-model.html
+Summary: Roles, permissions, and context-based authorization.
+
+# Security Model ## What it is Guillotina applies hierarchical, role/permission-based security over the object model. ## Why it matters Security decisions determine who can read, modify, and manage content at each context path. ## How it works - Users and groups hold roles. - Roles map to permissions. - Permission resolution is contextual and can inherit through the object tree. ## Minimal example ## Common failures - Assigning roles at the wrong level causes overexposure or accidental denial. - Assuming global roles override contextual permission checks. ## Related pages - object-model - traversal - ../developer/security

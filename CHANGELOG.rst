@@ -4,6 +4,8 @@ CHANGELOG
 7.0.7 (unreleased)
 ------------------
 
+- Docs: Add generated llms/robots/sitemap assets and Sphinx root publishing config
+  [nilbacardit26]
 - Docs: Add core concepts pages (storage, catalog, middleware, task vars, security model)
   [nilbacardit26]
 - Docs: Add core concepts pages (architecture, object model, traversal, request/response, transactions)
