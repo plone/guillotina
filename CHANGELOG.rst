@@ -4,6 +4,8 @@ CHANGELOG
 7.0.7 (unreleased)
 ------------------
 
+- Docs: Rework root documentation navigation toward Diataxis sections
+  [nilbacardit26]
 - Docs: Phase 1 hygiene updates (stray text cleanup, Python version refresh, link fixes)
   [nilbacardit26]
 - Docs: Add baseline docs IA artifacts (inventory, redirect map, ADR-001)

@@ -105,119 +105,78 @@ if __name__ == "__main__":
 ```
 
 
-## Training / Tutorial
+## Getting Started (Tutorials)
 
-Learn how to use Guillotina by following the {doc}`training <training/index>`.
+Use this section when you are new to Guillotina and want a guided path.
 
 ```{eval-rst}
 .. toctree::
    :maxdepth: 2
 
+   quickstart
+   quick-tour
    training/index
 ```
 
-## REST API
+## How-To Guides
 
-After you're up and running, primarily, Guillotina provides a REST API to work with
-and it is what you should become the most familiar with.
-
-Guillotina API structure mirrors the object tree structure. Within the object
-tree structure, there are four major types of objects you'll want to be familiar
-with:
-
-- Application: The root of the tree: `/`
-- Database: A configured database: `/(db)`
-- Container: A main object to add data to: `/(db)/(container)`
-- Content: Item or Folder by default. This is your dynamic object tree you create
-
-The endpoints available around these objects are detailed below:
+Use this section for task-oriented guides while building and maintaining your app.
 
 ```{eval-rst}
 .. toctree::
-   :maxdepth: 1
-   :glob:
+   :maxdepth: 2
 
-   rest/application
-   rest/db
-   rest/container
-   rest/item
-   rest/folder
-   rest/search
+   installation/installation
+   installation/configuration
+   installation/logging
+   installation/production
+   developer/commands
+   developer/debugging
+   developer/testing
 ```
 
-## Developer Documentation
+## Concepts
 
-After reading quick tour or training section,
-Now you can start hands-on style guide to learn how to use it.
+Use this section to understand architecture, security model, and core design choices.
 
 ```{eval-rst}
 .. toctree::
    :maxdepth: 2
 
    developer/narrative
-   developer/security
-   developer/roles
-   developer/applications
-   developer/addons
-   developer/services
-   developer/render
-   developer/contenttypes
-   developer/behavior
-   developer/interfaces
-   developer/events
-   developer/commands
-   developer/applicationconfiguration
    developer/design
-   developer/persistence
-   developer/blob
-   developer/router
-   developer/exceptions
-   developer/fields
-   developer/serialize
-   developer/async_utils
    developer/component-architecture
-   developer/debugging
-   developer/testing
+   developer/security
+   developer/persistence
+   developer/router
+   developer/async_utils
 ```
 
+## Reference
 
-## Deploying
-
-- {doc}`Installing Guillotina <installation/installation>`
-  is done with pip but if you need to run with docker,
-  [we also have you covered](https://hub.docker.com/r/guillotina/guillotina/).
-- Guillotina has an quite a few
-  {doc}`configuration options <installation/configuration>`
-  you might be curious about.
-- You can also setup
-  {doc}`logging configuration <installation/logging>`.
-- Finally, you may also need to put Guillotina
-  {doc}`behind a proxy <installation/production>`
-  when you deploy it.
-
-
-## References
+Use this section for API-level lookups and endpoint behavior.
 
 ```{eval-rst}
 .. toctree::
    :maxdepth: 2
 
+   rest/index
    api/index
 ```
 
-```{eval-rst}
-.. toctree::
-   :maxdepth: 2
+## Operations
 
-   migration/index
-```
+Use this section for deployment, configuration, and upgrade guidance.
 
 ```{eval-rst}
 .. toctree::
    :maxdepth: 2
 
    installation/index
+   migration/index
 ```
+
+## Contrib Packages
 
 ```{eval-rst}
 .. toctree::
