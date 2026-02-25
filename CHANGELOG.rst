@@ -4,6 +4,8 @@ CHANGELOG
 7.0.7 (unreleased)
 ------------------
 
+- Docs: Add retrieval benchmark queries and lexical coverage checker script
+  [nilbacardit26]
 - CI: Add docs quality gate job (build, linkcheck, llms checks)
   [nilbacardit26]
 - Docs: Add generated llms/robots/sitemap assets and Sphinx root publishing config
