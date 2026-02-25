@@ -179,6 +179,13 @@ html_extra_path = ["_extra"]
 # Canonical URL base for generated links and sitemap references.
 html_baseurl = "https://guillotina.readthedocs.io/en/latest/"
 
+# Known legacy external links that are currently unavailable/blocked.
+linkcheck_ignore = [
+    r"https://plonerestapi\.readthedocs\.io/en/latest/users\.html",
+    r"https://plonerestapi\.readthedocs\.io/en/latest/groups\.html",
+    r"https://pgjones\.gitlab\.io/hypercorn/?",
+]
+
 # If not None, a 'Last updated on:' timestamp is inserted at every page
 # bottom, using the given strftime format.
 # The empty string is equivalent to '%b %d, %Y'.

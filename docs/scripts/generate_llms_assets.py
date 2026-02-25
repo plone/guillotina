@@ -2,9 +2,7 @@
 from __future__ import annotations
 
 import argparse
-import datetime as dt
 import re
-import sys
 from pathlib import Path
 from typing import Dict, List
 
@@ -79,14 +77,12 @@ def generate(curation_path: Path, source_root: Path, output_root: Path) -> Dict[
 
     llms_lines = [
         f"# {project_name} documentation index",
-        f"# Generated: {dt.datetime.utcnow().replace(microsecond=0).isoformat()}Z",
         f"# Canonical base: {base_url}",
         "",
     ]
 
     full_parts = [
         f"# {project_name} llms-full",
-        f"Generated: {dt.datetime.utcnow().replace(microsecond=0).isoformat()}Z",
         f"Canonical base: {base_url}",
         "",
     ]
@@ -178,13 +174,12 @@ def generate(curation_path: Path, source_root: Path, output_root: Path) -> Dict[
         seen.add(u)
         unique_urls.append(u)
 
-    now = dt.datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
     sitemap_parts = [
         '<?xml version="1.0" encoding="UTF-8"?>',
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
     ]
     for u in unique_urls:
-        sitemap_parts.extend(["  <url>", f"    <loc>{u}</loc>", f"    <lastmod>{now}</lastmod>", "  </url>"])
+        sitemap_parts.extend(["  <url>", f"    <loc>{u}</loc>", "  </url>"])
     sitemap_parts.append("</urlset>")
     sitemap_text = "\n".join(sitemap_parts) + "\n"
 

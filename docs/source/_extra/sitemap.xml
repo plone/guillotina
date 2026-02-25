@@ -2,86 +2,65 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://guillotina.readthedocs.io/en/latest/index.html</loc>
-    <lastmod>2026-02-25T11:43:39Z</lastmod>
   </url>
   <url>
     <loc>https://guillotina.readthedocs.io/en/latest/quickstart.html</loc>
-    <lastmod>2026-02-25T11:43:39Z</lastmod>
   </url>
   <url>
     <loc>https://guillotina.readthedocs.io/en/latest/quick-tour.html</loc>
-    <lastmod>2026-02-25T11:43:39Z</lastmod>
   </url>
   <url>
     <loc>https://guillotina.readthedocs.io/en/latest/how-to/</loc>
-    <lastmod>2026-02-25T11:43:39Z</lastmod>
   </url>
   <url>
     <loc>https://guillotina.readthedocs.io/en/latest/concepts/</loc>
-    <lastmod>2026-02-25T11:43:39Z</lastmod>
   </url>
   <url>
     <loc>https://guillotina.readthedocs.io/en/latest/concepts/architecture.html</loc>
-    <lastmod>2026-02-25T11:43:39Z</lastmod>
   </url>
   <url>
     <loc>https://guillotina.readthedocs.io/en/latest/concepts/object-model.html</loc>
-    <lastmod>2026-02-25T11:43:39Z</lastmod>
   </url>
   <url>
     <loc>https://guillotina.readthedocs.io/en/latest/concepts/traversal.html</loc>
-    <lastmod>2026-02-25T11:43:39Z</lastmod>
   </url>
   <url>
     <loc>https://guillotina.readthedocs.io/en/latest/concepts/request-response.html</loc>
-    <lastmod>2026-02-25T11:43:39Z</lastmod>
   </url>
   <url>
     <loc>https://guillotina.readthedocs.io/en/latest/concepts/transactions.html</loc>
-    <lastmod>2026-02-25T11:43:39Z</lastmod>
   </url>
   <url>
     <loc>https://guillotina.readthedocs.io/en/latest/concepts/storage.html</loc>
-    <lastmod>2026-02-25T11:43:39Z</lastmod>
   </url>
   <url>
     <loc>https://guillotina.readthedocs.io/en/latest/concepts/catalog.html</loc>
-    <lastmod>2026-02-25T11:43:39Z</lastmod>
   </url>
   <url>
     <loc>https://guillotina.readthedocs.io/en/latest/concepts/middleware.html</loc>
-    <lastmod>2026-02-25T11:43:39Z</lastmod>
   </url>
   <url>
     <loc>https://guillotina.readthedocs.io/en/latest/concepts/task-vars.html</loc>
-    <lastmod>2026-02-25T11:43:39Z</lastmod>
   </url>
   <url>
     <loc>https://guillotina.readthedocs.io/en/latest/concepts/security-model.html</loc>
-    <lastmod>2026-02-25T11:43:39Z</lastmod>
   </url>
   <url>
     <loc>https://guillotina.readthedocs.io/en/latest/rest/</loc>
-    <lastmod>2026-02-25T11:43:39Z</lastmod>
   </url>
   <url>
     <loc>https://guillotina.readthedocs.io/en/latest/api/</loc>
-    <lastmod>2026-02-25T11:43:39Z</lastmod>
   </url>
   <url>
     <loc>https://guillotina.readthedocs.io/en/latest/installation/</loc>
-    <lastmod>2026-02-25T11:43:39Z</lastmod>
   </url>
   <url>
     <loc>https://guillotina.readthedocs.io/en/latest/contrib/</loc>
-    <lastmod>2026-02-25T11:43:39Z</lastmod>
   </url>
   <url>
     <loc>https://guillotina.readthedocs.io/en/latest/migration/</loc>
-    <lastmod>2026-02-25T11:43:39Z</lastmod>
   </url>
   <url>
     <loc>https://guillotina.readthedocs.io/en/latest/CHANGELOG.html</loc>
-    <lastmod>2026-02-25T11:43:39Z</lastmod>
   </url>
 </urlset>

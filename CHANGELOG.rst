@@ -4,6 +4,8 @@ CHANGELOG
 7.0.7 (unreleased)
 ------------------
 
+- CI: Add docs quality gate job (build, linkcheck, llms checks)
+  [nilbacardit26]
 - Docs: Add generated llms/robots/sitemap assets and Sphinx root publishing config
   [nilbacardit26]
 - Docs: Add core concepts pages (storage, catalog, middleware, task vars, security model)
