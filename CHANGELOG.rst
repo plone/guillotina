@@ -4,6 +4,8 @@ CHANGELOG
 7.0.7 (unreleased)
 ------------------
 
+- Docs: Add final documentation quality and rollout readiness report
+  [nilbacardit26]
 - Docs: Add contributor docs and maintenance cadence documentation
   [nilbacardit26]
 - Docs: Add retrieval benchmark queries and lexical coverage checker script
