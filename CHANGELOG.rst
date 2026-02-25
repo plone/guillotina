@@ -4,6 +4,8 @@ CHANGELOG
 7.0.7 (unreleased)
 ------------------
 
+- Docs: Add ADR for LLM discovery policy decisions (canonical URL, bots, size cap)
+  [nilbacardit26]
 - Docs: Update documentation and configuration settings
 - Chore: Update sphinx-guillotina-theme version to 1.0.9
   [rboixaderg]
