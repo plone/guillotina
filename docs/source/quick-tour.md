@@ -216,7 +216,7 @@ To play with those examples you should install Guillotina and [Cookiecutter](htt
 let's do that in a python venv:
 
 ```shell
-python3.7 -m venv .
+python3 -m venv .
 source ./bin/activate
 pip install guillotina cookiecutter
 ```

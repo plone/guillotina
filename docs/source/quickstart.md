@@ -10,7 +10,7 @@ You can use your own preferred tool for managing your python environment.
 Setup the environment:
 
 ```shell
-python3.7 -m venv .
+python3 -m venv .
 ```
 
 Install Guillotina:

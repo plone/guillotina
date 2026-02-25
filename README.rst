@@ -2,7 +2,7 @@ Introduction
 ============
 
 .. image:: https://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat
-   :target: http://guillotina.readthedocs.io/en/latest/
+   :target: https://guillotina.readthedocs.io/en/latest/
 
 .. image:: https://github.com/plone/guillotina/workflows/CI/badge.svg
    :target: https://github.com/plone/guillotina/actions
@@ -31,7 +31,7 @@ Introduction
    :target: https://hub.docker.com/r/guillotina/guillotina
    :alt: Docker Cloud Build Status
 
-Please `read the detailed docs <http://guillotina.readthedocs.io/en/latest/>`_
+Please `read the detailed docs <https://guillotina.readthedocs.io/en/latest/>`_
 
 
 This is the working project of the next generation Guillotina server based on asyncio.
@@ -99,13 +99,13 @@ Read more `Guillotina-Heroku <https://github.com/guillotinaweb/guillotina-heroku
 Getting started with development
 --------------------------------
 
-Using pip (requires Python > 3.7)
+Using pip (requires Python >= 3.10)
 
 .. code-block:: shell
 
     git clone git@github.com:plone/guillotina.git
     cd guillotina
-    python3.7 -m venv .
+    python3 -m venv .
     ./bin/pip install -r requirements.txt
     ./bin/pip install -r contrib-requirements.txt
     ./bin/pip install -e '.[test]'

@@ -1,6 +1,5 @@
 Contrib packages
 ================
-production
 
 Contents:
 

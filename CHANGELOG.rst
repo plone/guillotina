@@ -4,6 +4,8 @@ CHANGELOG
 7.0.7 (unreleased)
 ------------------
 
+- Docs: Phase 1 hygiene updates (stray text cleanup, Python version refresh, link fixes)
+  [nilbacardit26]
 - Docs: Add baseline docs IA artifacts (inventory, redirect map, ADR-001)
   [nilbacardit26]
 - Docs: Add ADR for LLM discovery policy decisions (canonical URL, bots, size cap)

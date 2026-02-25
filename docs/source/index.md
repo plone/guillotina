@@ -127,7 +127,7 @@ with:
 
 - Application: The root of the tree: `/`
 - Database: A configured database: `/(db)`
-- Container: An main object to add data to: `/(db)/(container)`
+- Container: A main object to add data to: `/(db)/(container)`
 - Content: Item or Folder by default. This is your dynamic object tree you create
 
 The endpoints available around these objects are detailed below:

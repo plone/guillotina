@@ -37,7 +37,7 @@ of functionality so it will never be as fast as say Pyramid.
 ## Asynchronous
 
 Guillotina is asynchronous from the ground up, built with ASGI
-using Python 3.7's asyncio features.
+using Python's asyncio features.
 
 Practically speaking, being built completely on asyncio compatible technologies,
 Guillotina does not block for network IO to the database, index catalog,
