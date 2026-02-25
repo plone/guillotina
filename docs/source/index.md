@@ -140,6 +140,17 @@ Use this section to understand architecture, security model, and core design cho
    concepts/index
 ```
 
+## Developer Guides
+
+Use this section when extending Guillotina internals, components, and services.
+
+```{eval-rst}
+.. toctree::
+   :maxdepth: 2
+
+   developer/index
+```
+
 ## Reference
 
 Use this section for API-level lookups and endpoint behavior.
