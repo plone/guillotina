@@ -126,13 +126,7 @@ Use this section for task-oriented guides while building and maintaining your ap
 .. toctree::
    :maxdepth: 2
 
-   installation/installation
-   installation/configuration
-   installation/logging
-   installation/production
-   developer/commands
-   developer/debugging
-   developer/testing
+   how-to/index
 ```
 
 ## Concepts
@@ -143,13 +137,7 @@ Use this section to understand architecture, security model, and core design cho
 .. toctree::
    :maxdepth: 2
 
-   developer/narrative
-   developer/design
-   developer/component-architecture
-   developer/security
-   developer/persistence
-   developer/router
-   developer/async_utils
+   concepts/index
 ```
 
 ## Reference
@@ -172,8 +160,7 @@ Use this section for deployment, configuration, and upgrade guidance.
 .. toctree::
    :maxdepth: 2
 
-   installation/index
-   migration/index
+   operations/index
 ```
 
 ## Contrib Packages
@@ -197,6 +184,9 @@ Use this section for deployment, configuration, and upgrade guidance.
    about
    quick-tour
    quickstart
+   concepts/index
+   how-to/index
+   operations/index
    rest/index
    developer/*
    installation/*
