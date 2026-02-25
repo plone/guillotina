@@ -4,6 +4,8 @@ CHANGELOG
 7.0.7 (unreleased)
 ------------------
 
+- Docs: Add core concepts pages (storage, catalog, middleware, task vars, security model)
+  [nilbacardit26]
 - Docs: Add core concepts pages (architecture, object model, traversal, request/response, transactions)
   [nilbacardit26]
 - Docs: Add section index pages for concepts, how-to, and operations

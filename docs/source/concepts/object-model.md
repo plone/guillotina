@@ -26,5 +26,5 @@ curl -u root:root http://localhost:8080/db/docs
 
 ## Related pages
 - {doc}`traversal`
-- {doc}`../developer/security`
+- {doc}`security-model`
 - {doc}`../developer/narrative`

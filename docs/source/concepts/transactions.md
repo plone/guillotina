@@ -27,6 +27,6 @@ await tm.commit()
 - Exceptions without proper handling can leave partial in-memory state.
 
 ## Related pages
-- {doc}`../developer/persistence`
+- {doc}`storage`
 - {doc}`request-response`
 - {doc}`../api/transactions`

@@ -12,6 +12,11 @@ internal design decisions.
    traversal
    request-response
    transactions
+   storage
+   catalog
+   middleware
+   task-vars
+   security-model
    ../developer/narrative
    ../developer/design
    ../developer/component-architecture
