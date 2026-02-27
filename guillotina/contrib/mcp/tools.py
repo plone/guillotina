@@ -1,7 +1,11 @@
+from guillotina import configure
 from guillotina._settings import app_settings
+from guillotina.component import query_utility
 from guillotina.contrib.mcp.backend import get_mcp_context
 from guillotina.contrib.mcp.backend import InProcessBackend
 from guillotina.contrib.mcp.interfaces import IMCPDescriptionExtras
+from guillotina.contrib.mcp.interfaces import IMCPToolProvider
+from zope.interface import implementer
 
 import json
 import typing
@@ -82,8 +86,6 @@ def _normalize_query(
 
 
 def _get_description_extras():
-    from guillotina.component import query_utility
-
     extras = dict(app_settings.get("mcp", {}).get("description_extras") or {})
     util = query_utility(IMCPDescriptionExtras)
     if util is not None:
@@ -92,85 +94,126 @@ def _get_description_extras():
     return extras
 
 
-def register_tools(mcp_server, backend: InProcessBackend):
-    async def _context_for_path(container_path: typing.Optional[str]):
-        ctx = get_mcp_context()
-        if ctx is None:
-            return None
-        if container_path:
-            from guillotina.utils import navigate_to
-
-            try:
-                return await navigate_to(ctx, "/" + container_path.strip("/"))
-            except KeyError:
-                return None
-        return ctx
-
+def _tool_description(name: str) -> str:
     extras = _get_description_extras()
+    return (TOOL_DESCRIPTIONS[name] + " " + (extras.get(name) or "")).strip()
 
-    @mcp_server.tool(description=(TOOL_DESCRIPTIONS["search"] + " " + (extras.get("search") or "")).strip())
-    async def search(
-        container_path: typing.Optional[str] = None,
-        query: typing.Optional[typing.Dict[str, typing.Any]] = None,
-    ) -> dict:
-        context = await _context_for_path(container_path)
+
+def _tool_input_schema(name: str) -> typing.Dict[str, typing.Any]:
+    return {"type": "object", **CHAT_PARAM_SCHEMAS[name]}
+
+
+def _tool_definition(name: str) -> typing.Dict[str, typing.Any]:
+    return {
+        "name": name,
+        "description": _tool_description(name),
+        "input_schema": _tool_input_schema(name),
+    }
+
+
+async def _context_for_path(container_path: typing.Optional[str]):
+    ctx = get_mcp_context()
+    if ctx is None:
+        return None
+    if container_path:
+        from guillotina.utils import navigate_to
+
+        try:
+            return await navigate_to(ctx, "/" + container_path.strip("/"))
+        except KeyError:
+            return None
+    return ctx
+
+
+@implementer(IMCPToolProvider)
+@configure.utility(provides=IMCPToolProvider, name="search")
+class SearchToolProvider:
+    def __init__(self):
+        self.backend = InProcessBackend()
+
+    def get_tool_definition(self) -> typing.Dict[str, typing.Any]:
+        return _tool_definition("search")
+
+    async def execute(self, arguments: typing.Dict[str, typing.Any]) -> typing.Dict[str, typing.Any]:
+        args = arguments if isinstance(arguments, dict) else {}
+        context = await _context_for_path(args.get("container_path"))
         if context is None:
             return {"items": [], "items_total": 0}
-        q = _normalize_query(query)
-        return await backend.search(context, q)
+        query = _normalize_query(args.get("query"))
+        return await self.backend.search(context, query)
 
-    @mcp_server.tool(description=(TOOL_DESCRIPTIONS["count"] + " " + (extras.get("count") or "")).strip())
-    async def count(
-        container_path: typing.Optional[str] = None,
-        query: typing.Optional[typing.Dict[str, typing.Any]] = None,
-    ):
-        context = await _context_for_path(container_path)
+
+@implementer(IMCPToolProvider)
+@configure.utility(provides=IMCPToolProvider, name="count")
+class CountToolProvider:
+    def __init__(self):
+        self.backend = InProcessBackend()
+
+    def get_tool_definition(self) -> typing.Dict[str, typing.Any]:
+        return _tool_definition("count")
+
+    async def execute(self, arguments: typing.Dict[str, typing.Any]) -> typing.Dict[str, typing.Any]:
+        args = arguments if isinstance(arguments, dict) else {}
+        context = await _context_for_path(args.get("container_path"))
         if context is None:
-            return 0
-        q = _normalize_query(query)
-        return await backend.count(context, q)
+            return {"count": 0}
+        query = _normalize_query(args.get("query"))
+        value = await self.backend.count(context, query)
+        return {"count": value}
 
-    @mcp_server.tool(
-        description=(TOOL_DESCRIPTIONS["get_content"] + " " + (extras.get("get_content") or "")).strip()
-    )
-    async def get_content(
-        path: typing.Optional[str] = None,
-        uid: typing.Optional[str] = None,
-        container_path: typing.Optional[str] = None,
-    ) -> dict:
-        context = await _context_for_path(container_path)
+
+@implementer(IMCPToolProvider)
+@configure.utility(provides=IMCPToolProvider, name="get_content")
+class GetContentToolProvider:
+    def __init__(self):
+        self.backend = InProcessBackend()
+
+    def get_tool_definition(self) -> typing.Dict[str, typing.Any]:
+        return _tool_definition("get_content")
+
+    async def execute(self, arguments: typing.Dict[str, typing.Any]) -> typing.Dict[str, typing.Any]:
+        args = arguments if isinstance(arguments, dict) else {}
+        context = await _context_for_path(args.get("container_path"))
         if context is None:
             return {}
-        return await backend.get_content(context, path, uid)
+        return await self.backend.get_content(context, args.get("path"), args.get("uid"))
 
-    @mcp_server.tool(
-        description=(TOOL_DESCRIPTIONS["list_children"] + " " + (extras.get("list_children") or "")).strip()
-    )
-    async def list_children(
-        path: str = "",
-        from_index: int = 0,
-        page_size: int = 20,
-        container_path: typing.Optional[str] = None,
-    ) -> dict:
-        context = await _context_for_path(container_path)
+
+@implementer(IMCPToolProvider)
+@configure.utility(provides=IMCPToolProvider, name="list_children")
+class ListChildrenToolProvider:
+    def __init__(self):
+        self.backend = InProcessBackend()
+
+    def get_tool_definition(self) -> typing.Dict[str, typing.Any]:
+        return _tool_definition("list_children")
+
+    async def execute(self, arguments: typing.Dict[str, typing.Any]) -> typing.Dict[str, typing.Any]:
+        args = arguments if isinstance(arguments, dict) else {}
+        context = await _context_for_path(args.get("container_path"))
         if context is None:
             return {"items": [], "items_total": 0}
-        return await backend.list_children(context, path or "", from_index, page_size)
+        try:
+            from_index = int(args.get("from_index", 0))
+        except (TypeError, ValueError):
+            from_index = 0
+        try:
+            page_size = int(args.get("page_size", 20))
+        except (TypeError, ValueError):
+            page_size = 20
+        return await self.backend.list_children(context, args.get("path") or "", from_index, page_size)
 
 
 def get_chat_tools():
     """Return built-in tool definitions in the format expected by LiteLLM for @chat (all providers)."""
-    extras = _get_description_extras()
-    descriptions = {
-        name: (TOOL_DESCRIPTIONS[name] + " " + (extras.get(name) or "")).strip() for name in TOOL_DESCRIPTIONS
-    }
+    descriptions = {name: _tool_description(name) for name in TOOL_DESCRIPTIONS}
     return [
         {
             "type": "function",
             "function": {
                 "name": name,
                 "description": descriptions[name],
-                "parameters": {"type": "object", **CHAT_PARAM_SCHEMAS[name]},
+                "parameters": _tool_input_schema(name),
             },
         }
         for name in TOOL_DESCRIPTIONS

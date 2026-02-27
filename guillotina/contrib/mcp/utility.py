@@ -1,8 +1,11 @@
-from guillotina._settings import app_settings
-from guillotina.contrib.mcp.backend import InProcessBackend
+from guillotina.component import get_utilities_for
+from guillotina.component import query_utility
+from guillotina.contrib.mcp.interfaces import IMCPToolProvider
 from guillotina.contrib.mcp.interfaces import IMCPUtility
-from guillotina.contrib.mcp.tools import register_tools
 from zope.interface import implementer
+
+import json
+import typing
 
 
 @implementer(IMCPUtility)
@@ -14,29 +17,51 @@ class MCPUtility:
         pass
 
     def __init__(self, settings=None):
-        from mcp.server.fastmcp import FastMCP
+        from mcp.server.lowlevel.server import Server
+        from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
+        import mcp.types as types
 
-        settings = settings or {}
-        backend = InProcessBackend()
-        mcp = FastMCP(
+        server = Server(
             "Guillotina MCP",
-            json_response=True,
-            stateless_http=True,
         )
-        if hasattr(mcp, "settings") and hasattr(mcp.settings, "streamable_http_path"):
-            mcp.settings.streamable_http_path = "/"
-        register_tools(mcp, backend)
-        extra_module = app_settings.get("mcp", {}).get("extra_tools_module")
-        if extra_module:
-            mod = __import__(str(extra_module), fromlist=["register_extra_tools"])
-            getattr(mod, "register_extra_tools")(mcp, backend)
-        self._server = mcp
-        self._app = mcp.streamable_http_app()
+
+        @server.list_tools()
+        async def _list_tools():
+            tools = []
+            for name, provider in sorted(get_utilities_for(IMCPToolProvider), key=lambda value: value[0]):
+                definition = provider.get_tool_definition() or {}
+                tool_name = definition.get("name") or name
+                tools.append(
+                    types.Tool(
+                        name=tool_name,
+                        description=definition.get("description", ""),
+                        inputSchema=definition.get("input_schema") or {"type": "object", "properties": {}},
+                    )
+                )
+            return tools
+
+        @server.call_tool()
+        async def _call_tool(name: str, arguments: typing.Optional[typing.Dict[str, typing.Any]]):
+            provider = query_utility(IMCPToolProvider, name=name)
+            if provider is None:
+                raise ValueError(f"Unknown tool: {name}")
+            result = await provider.execute(arguments or {})
+            if not isinstance(result, dict):
+                raise TypeError(f"Invalid result for {name}: {type(result).__name__}")
+            text = json.dumps(result, indent=2, ensure_ascii=False)
+            return [types.TextContent(type="text", text=text)]
+
+        self._server = server
+        self._session_manager = StreamableHTTPSessionManager(
+            app=server,
+            json_response=True,
+            stateless=True,
+        )
 
     @property
     def server(self):
         return self._server
 
     @property
-    def app(self):
-        return self._app
+    def session_manager(self):
+        return self._session_manager

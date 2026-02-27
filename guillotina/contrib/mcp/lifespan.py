@@ -17,7 +17,7 @@ async def mcp_lifespan_startup(event):
         mcp_utility = get_utility(IMCPUtility)
     except ComponentLookupError:
         return
-    session_manager = mcp_utility.server.session_manager
+    session_manager = mcp_utility.session_manager
     ready = asyncio.Event()
     stop = asyncio.Event()
     startup_exc = None

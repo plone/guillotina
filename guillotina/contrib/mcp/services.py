@@ -12,7 +12,9 @@ from guillotina.response import HTTPPreconditionFailed
 from guillotina.response import HTTPUnauthorized
 from guillotina.response import Response
 from guillotina.utils import get_authenticated_user
+from multidict import CIMultiDict
 
+import anyio
 import copy
 import json
 import logging
@@ -21,39 +23,125 @@ import logging
 logger = logging.getLogger("guillotina")
 
 
+def _ensure_mcp_enabled():
+    if not app_settings.get("mcp", {}).get("enabled", True):
+        from guillotina.response import HTTPNotFound
+
+        raise HTTPNotFound(content={"reason": "MCP is disabled"})
+
+
+def _make_dummy_response() -> Response:
+    resp = Response()
+    resp._prepared = True
+    resp._eof_sent = True
+    return resp
+
+
 @configure.service(
     context=IResource,
     method="POST",
     permission="guillotina.mcp.Use",
     name="@mcp",
-    summary="MCP protocol endpoint (POST)",
+    summary="MCP protocol endpoint (POST, captured response)",
 )
 @configure.service(
     context=IResource,
     method="GET",
     permission="guillotina.mcp.Use",
     name="@mcp",
-    summary="MCP protocol endpoint (GET)",
+    summary="MCP protocol endpoint (GET, captured response)",
 )
 async def mcp_service(context, request):
-    if not app_settings.get("mcp", {}).get("enabled", True):
-        from guillotina.response import HTTPNotFound
-
-        raise HTTPNotFound(content={"reason": "MCP is disabled"})
+    _ensure_mcp_enabled()
     set_mcp_context(context)
     try:
         scope = copy.copy(request.scope)
         scope["path"] = "/"
         scope["raw_path"] = b"/"
         mcp_utility = get_utility(IMCPUtility)
-        await mcp_utility.app(scope, request.receive, request.send)
+
+        response_status = 200
+        response_headers = []
+        response_body = bytearray()
+
+        async def capture_send(message):
+            nonlocal response_status
+            if message["type"] == "http.response.start":
+                response_status = message.get("status", 200)
+                response_headers[:] = list(message.get("headers", []))
+                return
+            if message["type"] == "http.response.body":
+                body = message.get("body", b"")
+                if body:
+                    response_body.extend(body)
+
+        await mcp_utility.session_manager.handle_request(scope, request.receive, capture_send)
+
+        headers = CIMultiDict()
+        for key, value in response_headers:
+            header_key = key.decode() if isinstance(key, (bytes, bytearray)) else str(key)
+            header_value = value.decode() if isinstance(value, (bytes, bytearray)) else str(value)
+            headers.add(header_key, header_value)
+
+        return Response(body=bytes(response_body), headers=headers, status=response_status)
     finally:
         clear_mcp_context()
-    # Response already sent via request.send(); return dummy so framework does not send again.
-    resp = Response()
-    resp._prepared = True
-    resp._eof_sent = True
-    return resp
+
+
+@configure.service(
+    context=IResource,
+    method="POST",
+    permission="guillotina.mcp.Use",
+    name="@mcp-legacy",
+    summary="MCP protocol endpoint (POST, passthrough dummy response)",
+)
+@configure.service(
+    context=IResource,
+    method="GET",
+    permission="guillotina.mcp.Use",
+    name="@mcp-legacy",
+    summary="MCP protocol endpoint (GET, passthrough dummy response)",
+)
+async def mcp_legacy_service(context, request):
+    _ensure_mcp_enabled()
+    set_mcp_context(context)
+    try:
+        from mcp.server.streamable_http import StreamableHTTPServerTransport
+
+        scope = copy.copy(request.scope)
+        scope["path"] = "/"
+        scope["raw_path"] = b"/"
+        mcp_utility = get_utility(IMCPUtility)
+
+        http_transport = StreamableHTTPServerTransport(
+            mcp_session_id=None,
+            is_json_response_enabled=True,
+            event_store=None,
+            security_settings=None,
+        )
+
+        async def run_stateless_server(*, task_status: anyio.abc.TaskStatus[None] = anyio.TASK_STATUS_IGNORED):
+            async with http_transport.connect() as streams:
+                read_stream, write_stream = streams
+                task_status.started()
+                try:
+                    await mcp_utility.server.run(
+                        read_stream,
+                        write_stream,
+                        mcp_utility.server.create_initialization_options(),
+                        stateless=True,
+                    )
+                except Exception:
+                    logger.exception("Legacy stateless MCP session crashed")
+
+        async with anyio.create_task_group() as tg:
+            await tg.start(run_stateless_server)
+            await http_transport.handle_request(scope, request.receive, request.send)
+            await http_transport.terminate()
+
+        return _make_dummy_response()
+    finally:
+        clear_mcp_context()
 
 
 @configure.service(

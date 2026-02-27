@@ -23,6 +23,7 @@ app_settings = {
 
 def includeme(root, settings):
     configure.scan("guillotina.contrib.mcp.permissions")
+    configure.scan("guillotina.contrib.mcp.tools")
     configure.scan("guillotina.contrib.mcp.lifespan")
     configure.scan("guillotina.contrib.mcp.services")
     configure.scan("guillotina.contrib.mcp.chat")

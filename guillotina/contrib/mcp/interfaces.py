@@ -3,10 +3,20 @@ from zope.interface import Interface
 
 
 class IMCPUtility(Interface):
-    """MCP server utility providing the FastMCP app and server instances."""
+    """MCP utility providing low-level server and session manager."""
 
-    server = Attribute("FastMCP server instance")
-    app = Attribute("ASGI app from streamable_http_app()")
+    server = Attribute("Low-level MCP server instance")
+    session_manager = Attribute("Streamable HTTPSessionManager instance")
+
+
+class IMCPToolProvider(Interface):
+    """Named utility that exposes one MCP tool."""
+
+    def get_tool_definition():
+        """Return dict with name, description and input_schema."""
+
+    async def execute(arguments):
+        """Execute tool call and return dict."""
 
 
 class IMCPDescriptionExtras(Interface):
