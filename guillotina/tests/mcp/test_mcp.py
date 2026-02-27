@@ -1,6 +1,8 @@
 import json
 import pytest
 
+from guillotina.contrib.mcp import tools as mcp_tools
+
 
 pytestmark = pytest.mark.asyncio
 
@@ -78,3 +80,36 @@ async def test_invoke_unknown_tool_returns_400(container_requester):
         )
         assert status == 400
         assert "Unknown MCP tool" in response["reason"]
+
+
+@pytest.mark.app_settings(MCP_SETTINGS)
+async def test_list_children_uses_catalog_when_available(container_requester, monkeypatch):
+    class FakeCatalog:
+        async def search(self, context, query):
+            assert query["path__starts"] == "/"
+            return {
+                "items": [
+                    {
+                        "id": "catalog-child",
+                        "type_name": "Item",
+                        "title": "From catalog",
+                        "path": "/catalog-child",
+                    }
+                ],
+                "items_total": 1,
+            }
+
+    async def fail_async_items(**kwargs):
+        raise AssertionError("async_items fallback should not be used when catalog utility is available")
+
+    monkeypatch.setattr(mcp_tools, "query_utility", lambda iface: FakeCatalog())
+    monkeypatch.setattr(mcp_tools, "_list_children_from_async_items", fail_async_items)
+
+    async with container_requester as requester:
+        payload = {"tool": "list_children", "arguments": {"path": "/", "limit": 20}}
+        response, status = await requester(
+            "POST", "/db/guillotina/@mcp/tools/invoke", data=json.dumps(payload)
+        )
+        assert status == 200
+        assert response["result"]["items_total"] == 1
+        assert response["result"]["items"][0]["id"] == "catalog-child"

@@ -40,3 +40,5 @@ mcp:
 The tool registry is implemented as a Guillotina utility and cache invalidation
 is handled by subscribers on object add/modify/remove events.
 
+`list_children` prefers catalog-backed lookup when a catalog utility is
+available and falls back to `async_items()` iteration when it is not.

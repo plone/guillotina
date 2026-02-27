@@ -7,6 +7,8 @@ CHANGELOG
 - Add `guillotina.contrib.mcp` with low-level MCP server integration
   (`mcp.server.lowlevel`), tool registry utility, MCP services,
   cache invalidation subscribers, and tests/docs coverage.
+- Optimize MCP `list_children` tool to prefer catalog queries and
+  fallback to `async_items` when catalog is unavailable.
 - Docs: Update documentation and configuration settings
 - Chore: Update sphinx-guillotina-theme version to 1.0.9
   [rboixaderg]
