@@ -111,6 +111,7 @@ setup(
         "memcached": ["emcache"],
         "validation": ["pytz==2020.1"],
         "recaptcha": ["aiohttp<4"],
+        "mcp": ["mcp>=1.0.0"],
     },
     entry_points={
         "console_scripts": [

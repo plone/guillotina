@@ -4,6 +4,9 @@ CHANGELOG
 7.0.7 (unreleased)
 ------------------
 
+- Add `guillotina.contrib.mcp` with low-level MCP server integration
+  (`mcp.server.lowlevel`), tool registry utility, MCP services,
+  cache invalidation subscribers, and tests/docs coverage.
 - Docs: Update documentation and configuration settings
 - Chore: Update sphinx-guillotina-theme version to 1.0.9
   [rboixaderg]

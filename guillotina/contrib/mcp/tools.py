@@ -1,0 +1,192 @@
+from guillotina.component import query_multi_adapter
+from guillotina.event import notify
+from guillotina.events import ObjectModifiedEvent
+from guillotina.interfaces import IResourceSerializeToJson
+from guillotina.interfaces import IResourceSerializeToJsonSummary
+from guillotina.utils import get_content_path
+from guillotina.utils import get_current_container
+from guillotina.utils import navigate_to
+from typing import Any
+from typing import Awaitable
+from typing import Callable
+from typing import Dict
+from typing import List
+from typing import Tuple
+
+import functools
+
+
+ToolHandler = Callable[[Any, Any, Dict[str, Any]], Awaitable[Dict[str, Any]]]
+
+
+RESOLVE_PATH_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "path": {"type": "string", "description": "Absolute or relative Guillotina path", "default": "/"},
+        "include_serialized": {"type": "boolean", "default": False},
+    },
+}
+
+LIST_CHILDREN_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "path": {"type": "string", "description": "Absolute or relative Guillotina path", "default": "/"},
+        "limit": {"type": "integer", "minimum": 1, "maximum": 200, "default": 50},
+        "include_serialized": {"type": "boolean", "default": False},
+    },
+}
+
+SERIALIZE_RESOURCE_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "path": {"type": "string", "description": "Absolute or relative Guillotina path", "default": "/"}
+    },
+}
+
+NOTIFY_MODIFIED_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "path": {"type": "string", "description": "Absolute or relative Guillotina path"},
+        "payload": {"type": "object", "description": "Payload sent to ObjectModifiedEvent", "default": {}},
+    },
+    "required": ["path"],
+}
+
+
+def _normalize_path(raw_path: Any) -> str:
+    clean = str(raw_path or "/").strip() or "/"
+    if clean.startswith("/"):
+        return clean
+    return clean
+
+
+def _coerce_limit(value: Any, default: int) -> int:
+    try:
+        limit = int(value)
+    except (TypeError, ValueError):
+        return default
+    return max(1, min(limit, 200))
+
+
+def _resource_summary(resource: Any, path_hint: str = "") -> Dict[str, Any]:
+    path = path_hint or get_content_path(resource)
+    return {
+        "id": getattr(resource, "id", getattr(resource, "__name__", None)),
+        "@type": getattr(resource, "type_name", resource.__class__.__name__),
+        "title": getattr(resource, "title", None),
+        "path": path or "/",
+    }
+
+
+async def _serialize_resource(resource: Any, request: Any) -> Dict[str, Any]:
+    serializer = query_multi_adapter((resource, request), IResourceSerializeToJsonSummary)
+    if serializer is None:
+        serializer = query_multi_adapter((resource, request), IResourceSerializeToJson)
+    if serializer is None:
+        return _resource_summary(resource)
+    return await serializer()
+
+
+async def _resolve_target(context: Any, raw_path: Any) -> Tuple[Any, str]:
+    clean = _normalize_path(raw_path)
+    if clean in ("", "/"):
+        container = get_current_container()
+        if container is None:
+            raise ValueError("Container is not available in current task vars")
+        return container, "/"
+
+    if clean.startswith("/"):
+        container = get_current_container()
+        if container is None:
+            raise ValueError("Container is not available in current task vars")
+        return await navigate_to(container, clean), clean
+
+    return await navigate_to(context, clean), clean
+
+
+async def resolve_path_tool(context: Any, request: Any, arguments: Dict[str, Any]) -> Dict[str, Any]:
+    target, resolved_path = await _resolve_target(context, arguments.get("path", "/"))
+    result = {
+        "path": resolved_path,
+        "resource": _resource_summary(target, get_content_path(target)),
+    }
+    if bool(arguments.get("include_serialized", False)):
+        result["serialized"] = await _serialize_resource(target, request)
+    return result
+
+
+async def list_children_tool(
+    context: Any, request: Any, arguments: Dict[str, Any], default_limit: int = 50
+) -> Dict[str, Any]:
+    target, resolved_path = await _resolve_target(context, arguments.get("path", "/"))
+    if not hasattr(target, "async_items"):
+        raise ValueError("Target path does not point to a folder-like resource")
+
+    limit = _coerce_limit(arguments.get("limit", default_limit), default_limit)
+    include_serialized = bool(arguments.get("include_serialized", False))
+
+    items: List[Dict[str, Any]] = []
+    truncated = False
+    async for _, child in target.async_items():
+        if len(items) >= limit:
+            truncated = True
+            break
+        item_summary = _resource_summary(child, get_content_path(child))
+        if include_serialized:
+            item_summary["serialized"] = await _serialize_resource(child, request)
+        items.append(item_summary)
+
+    return {
+        "path": resolved_path,
+        "limit": limit,
+        "items_total": len(items),
+        "truncated": truncated,
+        "items": items,
+    }
+
+
+async def serialize_resource_tool(context: Any, request: Any, arguments: Dict[str, Any]) -> Dict[str, Any]:
+    target, resolved_path = await _resolve_target(context, arguments.get("path", "/"))
+    return {"path": resolved_path, "serialized": await _serialize_resource(target, request)}
+
+
+async def notify_modified_tool(context: Any, request: Any, arguments: Dict[str, Any]) -> Dict[str, Any]:
+    target, resolved_path = await _resolve_target(context, arguments.get("path"))
+    payload = arguments.get("payload", {})
+    if not isinstance(payload, dict):
+        raise ValueError("Tool argument 'payload' must be an object")
+    await notify(ObjectModifiedEvent(target, payload=payload))
+    return {"path": resolved_path, "notified": True, "payload_keys": sorted(payload.keys())}
+
+
+def default_tools(default_child_limit: int = 50) -> List[Tuple[str, str, Dict[str, Any], ToolHandler, bool]]:
+    return [
+        (
+            "resolve_path",
+            "Resolve a Guillotina path and return basic resource metadata.",
+            RESOLVE_PATH_SCHEMA,
+            resolve_path_tool,
+            True,
+        ),
+        (
+            "list_children",
+            "List child resources from a folder-like Guillotina resource.",
+            LIST_CHILDREN_SCHEMA,
+            functools.partial(list_children_tool, default_limit=default_child_limit),
+            True,
+        ),
+        (
+            "serialize_resource",
+            "Serialize a Guillotina resource using the registered serializers.",
+            SERIALIZE_RESOURCE_SCHEMA,
+            serialize_resource_tool,
+            False,
+        ),
+        (
+            "notify_modified",
+            "Emit an ObjectModifiedEvent for a resource path, triggering subscribers.",
+            NOTIFY_MODIFIED_SCHEMA,
+            notify_modified_tool,
+            False,
+        ),
+    ]

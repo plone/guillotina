@@ -17,3 +17,4 @@ Contents:
    swagger
    mailer
    dbusers
+   mcp
