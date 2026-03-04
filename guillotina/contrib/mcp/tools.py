@@ -1,8 +1,12 @@
+from guillotina.catalog.catalog import DefaultSearchUtility
+from guillotina.component import query_utility
 from guillotina.component import query_multi_adapter
 from guillotina.event import notify
 from guillotina.events import ObjectModifiedEvent
 from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import IResourceSerializeToJsonSummary
+from guillotina.interfaces.catalog import ICatalogUtility
+from guillotina.utils import get_content_depth
 from guillotina.utils import get_content_path
 from guillotina.utils import get_current_container
 from guillotina.utils import navigate_to
@@ -127,6 +131,95 @@ async def list_children_tool(
     page = max(1, int(arguments.get("page", 1)))
     include_serialized = bool(arguments.get("include_serialized", False))
 
+    catalog_result = await _list_children_from_catalog(
+        target=target,
+        request=request,
+        resolved_path=resolved_path,
+        limit=limit,
+        include_serialized=include_serialized,
+    )
+    if catalog_result is not None:
+        return catalog_result
+
+    return await _list_children_from_async_items(
+        target=target,
+        request=request,
+        resolved_path=resolved_path,
+        limit=limit,
+        include_serialized=include_serialized,
+    )
+
+
+def _get_catalog_utility():
+    catalog = query_utility(ICatalogUtility)
+    if catalog is None or catalog.__class__ == DefaultSearchUtility:
+        return None
+    return catalog
+
+
+def _child_prefix(path: str) -> str:
+    if path in ("", "/"):
+        return "/"
+    return path.rstrip("/") + "/"
+
+
+async def _serialize_from_catalog_path(path: str, request: Any) -> Dict[str, Any]:
+    container = get_current_container()
+    if container is None:
+        raise ValueError("Container is not available in current task vars")
+    resource = await navigate_to(container, path)
+    return await _serialize_resource(resource, request)
+
+
+def _summary_from_catalog_hit(hit: Dict[str, Any], fallback_path: str = "") -> Dict[str, Any]:
+    return {
+        "id": hit.get("id", hit.get("@name")),
+        "@type": hit.get("type_name", hit.get("@type", "Resource")),
+        "title": hit.get("title"),
+        "path": hit.get("path", fallback_path or ""),
+    }
+
+
+async def _list_children_from_catalog(
+    *, target: Any, request: Any, resolved_path: str, limit: int, include_serialized: bool
+) -> Any:
+    catalog = _get_catalog_utility()
+    if catalog is None:
+        return None
+
+    query = {
+        "path__starts": _child_prefix(resolved_path),
+        "depth": str(get_content_depth(target) + 1),
+        "_size": str(limit + 1),
+        "_sort_asc": "id",
+        "_metadata": "id,type_name,title,path",
+    }
+    result = await catalog.search(target, query)
+    hits = list(result.get("items", []))
+    truncated = bool(result.get("items_total", len(hits)) > limit or len(hits) > limit)
+    hits = hits[:limit]
+
+    items: List[Dict[str, Any]] = []
+    for hit in hits:
+        item_summary = _summary_from_catalog_hit(hit)
+        if include_serialized:
+            path = item_summary.get("path", "")
+            if isinstance(path, str) and path:
+                item_summary["serialized"] = await _serialize_from_catalog_path(path, request)
+        items.append(item_summary)
+
+    return {
+        "path": resolved_path,
+        "limit": limit,
+        "items_total": len(items),
+        "truncated": truncated,
+        "items": items,
+    }
+
+
+async def _list_children_from_async_items(
+    *, target: Any, request: Any, resolved_path: str, limit: int, include_serialized: bool
+) -> Dict[str, Any]:
     items: List[Dict[str, Any]] = []
     truncated = False
     count = 0
