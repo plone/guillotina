@@ -57,6 +57,14 @@ NOTIFY_MODIFIED_SCHEMA = {
     "required": ["path"],
 }
 
+SEARCH_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "query": {"type": "object", "description": "Guillotina catalog query object"},
+    },
+    "required": ["query"],
+}
+
 
 def _normalize_path(raw_path: Any) -> str:
     clean = str(raw_path or "/").strip() or "/"
@@ -146,6 +154,7 @@ async def list_children_tool(
         request=request,
         resolved_path=resolved_path,
         limit=limit,
+        page=page,
         include_serialized=include_serialized,
     )
 
@@ -218,7 +227,7 @@ async def _list_children_from_catalog(
 
 
 async def _list_children_from_async_items(
-    *, target: Any, request: Any, resolved_path: str, limit: int, include_serialized: bool
+    *, target: Any, request: Any, resolved_path: str, limit: int, page: int, include_serialized: bool
 ) -> Dict[str, Any]:
     items: List[Dict[str, Any]] = []
     truncated = False
@@ -261,6 +270,15 @@ async def notify_modified_tool(context: Any, request: Any, arguments: Dict[str, 
     return {"path": resolved_path, "notified": True, "payload_keys": sorted(payload.keys())}
 
 
+async def search_tool(context: Any, request: Any, arguments: Dict[str, Any]) -> Dict[str, Any]:
+    catalog = _get_catalog_utility()
+    if catalog is None:
+        raise ValueError("Catalog utility is not available")
+    query = arguments.get("query", {})
+    result = await catalog.search(context, query)
+    return {"query": query, "result": result}
+
+
 def default_tools(default_child_limit: int = 50) -> List[Tuple[str, str, Dict[str, Any], ToolHandler, bool]]:
     return [
         (
@@ -290,5 +308,12 @@ def default_tools(default_child_limit: int = 50) -> List[Tuple[str, str, Dict[st
             NOTIFY_MODIFIED_SCHEMA,
             notify_modified_tool,
             False,
+        ),
+        (
+            "search",
+            "Search for resources using the catalog.",
+            SEARCH_SCHEMA,
+            search_tool,
+            True,
         ),
     ]
