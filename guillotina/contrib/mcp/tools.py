@@ -32,6 +32,7 @@ LIST_CHILDREN_SCHEMA = {
     "properties": {
         "path": {"type": "string", "description": "Absolute or relative Guillotina path", "default": "/"},
         "limit": {"type": "integer", "minimum": 1, "maximum": 200, "default": 50},
+        "page": {"type": "integer", "minimum": 1, "default": 1},
         "include_serialized": {"type": "boolean", "default": False},
     },
 }
@@ -79,9 +80,9 @@ def _resource_summary(resource: Any, path_hint: str = "") -> Dict[str, Any]:
 
 
 async def _serialize_resource(resource: Any, request: Any) -> Dict[str, Any]:
-    serializer = query_multi_adapter((resource, request), IResourceSerializeToJsonSummary)
+    serializer = query_multi_adapter((resource, request), IResourceSerializeToJson)
     if serializer is None:
-        serializer = query_multi_adapter((resource, request), IResourceSerializeToJson)
+        serializer = query_multi_adapter((resource, request), IResourceSerializeToJsonSummary)
     if serializer is None:
         return _resource_summary(resource)
     return await serializer()
@@ -123,22 +124,30 @@ async def list_children_tool(
         raise ValueError("Target path does not point to a folder-like resource")
 
     limit = _coerce_limit(arguments.get("limit", default_limit), default_limit)
+    page = max(1, int(arguments.get("page", 1)))
     include_serialized = bool(arguments.get("include_serialized", False))
 
     items: List[Dict[str, Any]] = []
     truncated = False
+    count = 0
+    start_index = (page - 1) * limit
+    end_index = page * limit
+
     async for _, child in target.async_items():
-        if len(items) >= limit:
+        if count >= start_index and count < end_index:
+            item_summary = _resource_summary(child, get_content_path(child))
+            if include_serialized:
+                item_summary["serialized"] = await _serialize_resource(child, request)
+            items.append(item_summary)
+        elif count >= end_index:
             truncated = True
             break
-        item_summary = _resource_summary(child, get_content_path(child))
-        if include_serialized:
-            item_summary["serialized"] = await _serialize_resource(child, request)
-        items.append(item_summary)
+        count += 1
 
     return {
         "path": resolved_path,
         "limit": limit,
+        "page": page,
         "items_total": len(items),
         "truncated": truncated,
         "items": items,

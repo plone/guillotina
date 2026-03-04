@@ -78,3 +78,36 @@ async def test_invoke_unknown_tool_returns_400(container_requester):
         )
         assert status == 400
         assert "Unknown MCP tool" in response["reason"]
+
+
+@pytest.mark.app_settings(MCP_SETTINGS)
+async def test_list_children_tool_pagination(container_requester):
+    async with container_requester as requester:
+        for i in range(1, 106):
+            await requester(
+                "POST", 
+                "/db/guillotina", 
+                data=json.dumps({"@type": "Item", "id": f"item-{i}"})
+            )
+        payload = {"tool": "list_children", "arguments": {"path": "/", "limit": 50, "page": 1}}
+        response, status = await requester(
+            "POST", 
+            "/db/guillotina/@mcp/tools/invoke", 
+            data=json.dumps(payload)
+        )
+        assert status == 200
+        assert response["result"]["limit"] == 50
+        assert response["result"]["page"] == 1
+        assert response["result"]["truncated"] is True
+        assert len(response["result"]["items"]) == 50
+
+        payload["arguments"]["page"] = 3
+        response, status = await requester(
+            "POST", 
+            "/db/guillotina/@mcp/tools/invoke", 
+            data=json.dumps(payload)
+        )
+        assert status == 200
+        assert response["result"]["page"] == 3
+        assert response["result"]["truncated"] is False
+        assert len(response["result"]["items"]) == 5
