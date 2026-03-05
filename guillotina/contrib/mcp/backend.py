@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from guillotina import app_settings
+from guillotina.contrib.mcp import resources as mcp_resources
 from guillotina.contrib.mcp import tools
 from typing import Any
 from typing import Awaitable
@@ -12,6 +13,7 @@ import json
 
 
 ToolHandler = Callable[[Any, Any, Dict[str, Any]], Awaitable[Dict[str, Any]]]
+ResourceHandler = Callable[[Any], Awaitable[Dict[str, Any]]]
 
 
 @dataclass
@@ -23,6 +25,16 @@ class MCPTool:
     cacheable: bool = False
 
 
+@dataclass
+class MCPResource:
+    name: str
+    uri: str
+    description: str
+    endpoint: str
+    handler: ResourceHandler
+    mime_type: str = "application/json"
+
+
 class MCPToolRegistry:
     def __init__(self, settings: Optional[Dict[str, Any]] = None):
         config = app_settings.get("mcp", {})
@@ -31,9 +43,11 @@ class MCPToolRegistry:
         self._server_name = str(config.get("server_name", "guillotina-mcp"))
         self._default_child_limit = int(config.get("default_child_limit", 50))
         self._tools: Dict[str, MCPTool] = {}
+        self._resources: Dict[str, MCPResource] = {}
         self._cache: Dict[str, Dict[str, Any]] = {}
         self._cache_revision = 0
         self._register_default_tools()
+        self._register_default_resources()
 
     def _register_default_tools(self) -> None:
         for tool_name, description, input_schema, handler, cacheable in tools.default_tools(
@@ -45,6 +59,16 @@ class MCPToolRegistry:
                 input_schema=input_schema,
                 handler=handler,
                 cacheable=cacheable,
+            )
+
+    def _register_default_resources(self) -> None:
+        for name, uri, description, endpoint, handler in mcp_resources.default_resources():
+            self.register_resource(
+                name=name,
+                uri=uri,
+                description=description,
+                endpoint=endpoint,
+                handler=handler,
             )
 
     def is_enabled(self) -> bool:
@@ -81,6 +105,49 @@ class MCPToolRegistry:
             for tool in sorted(self._tools.values(), key=lambda registered: registered.name)
         ]
 
+    # ── Resource management ──────────────────────────────────────────
+
+    def register_resource(
+        self,
+        *,
+        name: str,
+        uri: str,
+        description: str,
+        endpoint: str,
+        handler: ResourceHandler,
+        mime_type: str = "application/json",
+    ) -> None:
+        clean_name = str(name or "").strip()
+        if not clean_name:
+            raise ValueError("Resource name is required")
+        self._resources[clean_name] = MCPResource(
+            name=clean_name,
+            uri=str(uri or "").strip(),
+            description=str(description or "").strip(),
+            endpoint=str(endpoint or "").strip(),
+            handler=handler,
+            mime_type=mime_type,
+        )
+
+    def list_resources(self) -> List[Dict[str, Any]]:
+        return [
+            {
+                "uri": res.uri,
+                "name": res.name,
+                "description": res.description,
+                "endpoint": res.endpoint,
+                "mimeType": res.mime_type,
+            }
+            for res in sorted(self._resources.values(), key=lambda r: r.name)
+        ]
+
+    async def read_resource(self, resource_name: str, context: Any, request: Any) -> Dict[str, Any]:
+        clean_name = str(resource_name or "").strip()
+        if clean_name not in self._resources:
+            raise ValueError(f"Unknown MCP resource: {resource_name}")
+        resource = self._resources[clean_name]
+        return await resource.handler(request)
+
     def _cache_key(self, tool_name: str, arguments: Dict[str, Any]) -> str:
         payload = json.dumps(arguments, sort_keys=True, separators=(",", ":"), default=str)
         return f"{tool_name}:{payload}"
@@ -115,6 +182,7 @@ class MCPToolRegistry:
             "enabled": self.is_enabled(),
             "server_name": self._server_name,
             "tool_count": len(self._tools),
+            "resource_count": len(self._resources),
             "cache_revision": self._cache_revision,
         }
 

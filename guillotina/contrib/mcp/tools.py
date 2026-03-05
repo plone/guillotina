@@ -1,6 +1,6 @@
 from guillotina.catalog.catalog import DefaultSearchUtility
-from guillotina.component import query_utility
 from guillotina.component import query_multi_adapter
+from guillotina.component import query_utility
 from guillotina.event import notify
 from guillotina.events import ObjectModifiedEvent
 from guillotina.interfaces import IResourceSerializeToJson
@@ -21,7 +21,6 @@ import functools
 
 
 ToolHandler = Callable[[Any, Any, Dict[str, Any]], Awaitable[Dict[str, Any]]]
-
 
 RESOLVE_PATH_SCHEMA = {
     "type": "object",

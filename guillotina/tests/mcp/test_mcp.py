@@ -1,11 +1,11 @@
+from guillotina.contrib.mcp import resources as mcp_resources
+from guillotina.contrib.mcp import tools as mcp_tools
+
 import json
 import pytest
 
-from guillotina.contrib.mcp import tools as mcp_tools
-
 
 pytestmark = pytest.mark.asyncio
-
 
 MCP_SETTINGS = {
     "applications": ["guillotina", "guillotina.contrib.mcp"],
@@ -86,16 +86,10 @@ async def test_invoke_unknown_tool_returns_400(container_requester):
 async def test_list_children_tool_pagination(container_requester):
     async with container_requester as requester:
         for i in range(1, 106):
-            await requester(
-                "POST", 
-                "/db/guillotina", 
-                data=json.dumps({"@type": "Item", "id": f"item-{i}"})
-            )
+            await requester("POST", "/db/guillotina", data=json.dumps({"@type": "Item", "id": f"item-{i}"}))
         payload = {"tool": "list_children", "arguments": {"path": "/", "limit": 50, "page": 1}}
         response, status = await requester(
-            "POST", 
-            "/db/guillotina/@mcp/tools/invoke", 
-            data=json.dumps(payload)
+            "POST", "/db/guillotina/@mcp/tools/invoke", data=json.dumps(payload)
         )
         assert status == 200
         assert response["result"]["limit"] == 50
@@ -105,14 +99,13 @@ async def test_list_children_tool_pagination(container_requester):
 
         payload["arguments"]["page"] = 3
         response, status = await requester(
-            "POST", 
-            "/db/guillotina/@mcp/tools/invoke", 
-            data=json.dumps(payload)
+            "POST", "/db/guillotina/@mcp/tools/invoke", data=json.dumps(payload)
         )
         assert status == 200
         assert response["result"]["page"] == 3
         assert response["result"]["truncated"] is False
         assert len(response["result"]["items"]) == 5
+
 
 @pytest.mark.app_settings(MCP_SETTINGS)
 async def test_list_children_uses_catalog_when_available(container_requester, monkeypatch):
@@ -145,3 +138,111 @@ async def test_list_children_uses_catalog_when_available(container_requester, mo
         assert status == 200
         assert response["result"]["items_total"] == 1
         assert response["result"]["items"][0]["id"] == "catalog-child"
+
+
+@pytest.mark.app_settings(MCP_SETTINGS)
+async def test_mcp_root_lists_tools_and_resources(container_requester):
+    async with container_requester as requester:
+        response, status = await requester("GET", "/db/guillotina/@mcp")
+        assert status == 200
+        assert "mcp" in response
+        assert "tools" in response
+        assert "resources" in response
+        assert isinstance(response["resources"], list)
+        assert len(response["resources"]) > 0
+        # Every resource must expose discovery fields
+        for res in response["resources"]:
+            assert "uri" in res
+            assert "name" in res
+            assert "endpoint" in res
+
+
+@pytest.mark.app_settings(MCP_SETTINGS)
+async def test_mcp_resources_listing(container_requester):
+    async with container_requester as requester:
+        response, status = await requester("GET", "/db/guillotina/@mcp/resources")
+        assert status == 200
+        names = {r["name"] for r in response["resources"]}
+        # All default resources must be registered
+        for expected in ("info", "health", "config", "users", "catalog", "summary"):
+            assert expected in names, f"Missing resource: {expected}"
+
+
+@pytest.mark.app_settings(MCP_SETTINGS)
+async def test_mcp_metadata_includes_resource_count(container_requester):
+    async with container_requester as requester:
+        response, status = await requester("GET", "/db/guillotina/@mcp")
+        assert status == 200
+        assert response["mcp"]["resource_count"] == len(response["resources"])
+
+
+@pytest.mark.app_settings(MCP_SETTINGS)
+async def test_resource_info(container_requester):
+    async with container_requester as requester:
+        response, status = await requester("GET", "/db/guillotina/@mcp/resources/info")
+        assert status == 200
+        assert "version" in response
+        assert "container_id" in response
+
+
+@pytest.mark.app_settings(MCP_SETTINGS)
+async def test_resource_health(container_requester):
+    async with container_requester as requester:
+        response, status = await requester("GET", "/db/guillotina/@mcp/resources/health")
+        assert status == 200
+        assert response["status"] in ("ok", "degraded")
+        assert "db" in response
+
+
+@pytest.mark.app_settings(MCP_SETTINGS)
+async def test_resource_config(container_requester):
+    async with container_requester as requester:
+        response, status = await requester("GET", "/db/guillotina/@mcp/resources/config")
+        assert status == 200
+        assert "mcp" in response
+        assert response["mcp"]["enabled"] is True
+        assert "applications" in response
+
+
+@pytest.mark.app_settings(MCP_SETTINGS)
+async def test_resource_catalog(container_requester):
+    async with container_requester as requester:
+        response, status = await requester("GET", "/db/guillotina/@mcp/resources/catalog")
+        assert status == 200
+        assert "available" in response
+
+
+@pytest.mark.app_settings(MCP_SETTINGS)
+async def test_resource_summary(container_requester):
+    async with container_requester as requester:
+        response, status = await requester("GET", "/db/guillotina/@mcp/resources/summary?path=/")
+        assert status == 200
+        assert response["@type"] == "Container"
+        assert "path" in response
+
+
+@pytest.mark.app_settings(MCP_SETTINGS)
+async def test_unknown_resource_returns_404(container_requester):
+    async with container_requester as requester:
+        response, status = await requester("GET", "/db/guillotina/@mcp/resources/nonexistent")
+        assert status == 404
+
+
+@pytest.mark.app_settings(MCP_SETTINGS)
+async def test_server_status(container_requester):
+    async with container_requester as requester:
+        response, status = await requester("GET", "/db/guillotina/@mcp/server/status")
+        assert status == 200
+        assert "ready" in response
+        assert "mcp" in response
+
+
+@pytest.mark.app_settings(MCP_SETTINGS)
+async def test_resource_registry_matches_default_resources(container_requester):
+    """The registry must contain exactly the resources declared in default_resources()."""
+    async with container_requester as requester:
+        response, status = await requester("GET", "/db/guillotina/@mcp/resources")
+        assert status == 200
+        registered_names = {r["name"] for r in response["resources"]}
+        default_names = {name for name, *_ in mcp_resources.default_resources()}
+        assert registered_names == default_names

@@ -4,6 +4,7 @@ from guillotina.component import query_utility
 from guillotina.contrib.mcp.interfaces import IMCPToolRegistry
 from guillotina.interfaces import IResource
 from guillotina.response import HTTPBadRequest
+from guillotina.response import HTTPNotFound
 from guillotina.response import HTTPServiceUnavailable
 
 
@@ -25,33 +26,88 @@ def _get_registry():
 class MCPInfoService(Service):
     async def __call__(self):
         registry = _get_registry()
-        return {"mcp": registry.metadata(), "tools": registry.list_tools()}
+        return {
+            "mcp": registry.metadata(),
+            "tools": registry.list_tools(),
+            "resources": registry.list_resources(),
+        }
 
 
 @configure.service(
     method="GET",
     context=IResource,
-    name="@mcp/tools",
+    name="@mcp/{action}",
     permission="guillotina.MCPView",
-    summary="List available MCP tools",
+    summary="MCP sub-actions (tools, resources, server)",
     allow_access=True,
 )
-class MCPToolsService(Service):
+class MCPActionGetService(Service):
     async def __call__(self):
+        action = self.request.matchdict.get("action", "")
+        if action == "tools":
+            registry = _get_registry()
+            return {"tools": registry.list_tools()}
+        if action == "resources":
+            registry = _get_registry()
+            return {"resources": registry.list_resources()}
+        raise HTTPNotFound(content={"reason": f"Unknown MCP action: {action}"})
+
+
+@configure.service(
+    method="GET",
+    context=IResource,
+    name="@mcp/{action}/{sub}",
+    permission="guillotina.MCPView",
+    summary="MCP sub-resource endpoints",
+    allow_access=True,
+)
+class MCPSubActionGetService(Service):
+    async def __call__(self):
+        action = self.request.matchdict.get("action", "")
+        sub = self.request.matchdict.get("sub", "")
+
+        if action == "server" and sub == "status":
+            return await self._server_status()
+
+        if action == "resources":
+            # Dispatch to the registered resource by name
+            registry = _get_registry()
+            try:
+                return await registry.read_resource(sub, self.context, self.request)
+            except ValueError:
+                raise HTTPNotFound(content={"reason": f"Unknown MCP resource: {sub}"})
+
+        raise HTTPNotFound(content={"reason": f"Unknown MCP endpoint: {action}/{sub}"})
+
+    async def _server_status(self):
         registry = _get_registry()
-        return {"tools": registry.list_tools()}
+        metadata = registry.metadata()
+        try:
+            registry.create_lowlevel_server(context=self.context, request=self.request)
+        except RuntimeError as exc:
+            return {"ready": False, "error": str(exc), "mcp": metadata}
+        return {"ready": True, "mcp": metadata}
 
 
 @configure.service(
     method="POST",
     context=IResource,
-    name="@mcp/tools/invoke",
+    name="@mcp/{action}/{sub}",
     permission="guillotina.MCPExecute",
-    summary="Execute one registered MCP tool",
+    summary="MCP tool invocation",
     allow_access=True,
 )
-class MCPInvokeToolService(Service):
+class MCPSubActionPostService(Service):
     async def __call__(self):
+        action = self.request.matchdict.get("action", "")
+        sub = self.request.matchdict.get("sub", "")
+        key = f"{action}/{sub}"
+
+        if key == "tools/invoke":
+            return await self._invoke_tool()
+        raise HTTPNotFound(content={"reason": f"Unknown MCP POST endpoint: {key}"})
+
+    async def _invoke_tool(self):
         registry = _get_registry()
         try:
             payload = await self.request.json()
@@ -75,22 +131,3 @@ class MCPInvokeToolService(Service):
             raise HTTPBadRequest(content={"reason": str(exc)}) from exc
 
         return {"tool": tool_name, "result": result}
-
-
-@configure.service(
-    method="GET",
-    context=IResource,
-    name="@mcp/server/status",
-    permission="guillotina.MCPView",
-    summary="Check whether low-level MCP server dependencies are available",
-    allow_access=True,
-)
-class MCPServerStatusService(Service):
-    async def __call__(self):
-        registry = _get_registry()
-        metadata = registry.metadata()
-        try:
-            registry.create_lowlevel_server(context=self.context, request=self.request)
-        except RuntimeError as exc:
-            return {"ready": False, "error": str(exc), "mcp": metadata}
-        return {"ready": True, "mcp": metadata}

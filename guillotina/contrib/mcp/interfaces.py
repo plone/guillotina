@@ -12,8 +12,14 @@ class IMCPToolRegistry(Interface):
     def list_tools():
         """Return registered MCP tools."""
 
+    def list_resources():
+        """Return registered MCP resources."""
+
     async def invoke(tool_name, context, request, arguments=None):
         """Execute one tool and return a JSON-serializable response."""
+
+    async def read_resource(resource_name, context, request):
+        """Read one resource and return a JSON-serializable response."""
 
     def metadata():
         """Return metadata for diagnostics."""
