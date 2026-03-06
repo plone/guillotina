@@ -34,8 +34,14 @@ LIST_CHILDREN_SCHEMA = {
     "type": "object",
     "properties": {
         "path": {"type": "string", "description": "Absolute or relative Guillotina path", "default": "/"},
-        "limit": {"type": "integer", "minimum": 1, "maximum": 200, "default": 50},
-        "page": {"type": "integer", "minimum": 1, "default": 1},
+        "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200,
+            "default": 50,
+            "description": "Number of children to return per page. Hard cap is 200.",
+        },
+        "page": {"type": "integer", "minimum": 1, "default": 1, "description": "Page number (1-based). Use with limit to paginate."},
         "include_serialized": {"type": "boolean", "default": False},
     },
 }
@@ -59,7 +65,16 @@ NOTIFY_MODIFIED_SCHEMA = {
 SEARCH_SCHEMA = {
     "type": "object",
     "properties": {
-        "query": {"type": "object", "description": "Guillotina catalog query object"},
+        "query": {
+            "type": "object",
+            "description": (
+                "Guillotina catalog query object. "
+                "Supports: type_name, creators, tags, path__startswith, creation_date__gte, etc. "
+                "Use 'b_size' (max 1000) to set page size and 'b_start' to offset for pagination. "
+                "Use '_metadata' as a comma-separated list of field names to limit returned fields "
+                "and reduce response size, e.g. '_metadata': 'id,type_name,title,path'."
+            ),
+        },
     },
     "required": ["query"],
 }
@@ -289,7 +304,7 @@ def default_tools(default_child_limit: int = 50) -> List[Tuple[str, str, Dict[st
         ),
         (
             "list_children",
-            "List child resources from a folder-like Guillotina resource.",
+            "List child resources from a folder-like Guillotina resource. Max 200 per page; use 'page' to paginate.",
             LIST_CHILDREN_SCHEMA,
             functools.partial(list_children_tool, default_limit=default_child_limit),
             True,
@@ -310,7 +325,12 @@ def default_tools(default_child_limit: int = 50) -> List[Tuple[str, str, Dict[st
         ),
         (
             "search",
-            "Search for resources using the catalog.",
+            (
+                "Search for resources using the Guillotina catalog. "
+                "Supports filtering by type_name, creators, path, dates, and more. "
+                "Paginate with 'b_start' (offset) and 'b_size' (page size, max 1000). "
+                "Limit returned fields with '_metadata' (e.g. 'id,type_name,title,path,creators')."
+            ),
             SEARCH_SCHEMA,
             search_tool,
             True,
