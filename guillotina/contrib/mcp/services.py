@@ -110,7 +110,11 @@ class MCPActionGetService(Service):
                     "Accept": "application/json, text/event-stream",
                 },
                 "lifecycle": [
-                    {"step": 1, "method": "initialize", "description": "Handshake and capability negotiation"},
+                    {
+                        "step": 1,
+                        "method": "initialize",
+                        "description": "Handshake and capability negotiation",
+                    },
                     {"step": 2, "method": "tools/list", "description": "Discover available tools"},
                     {"step": 3, "method": "tools/call", "description": "Invoke a tool"},
                     {"step": 4, "method": "resources/list", "description": "Discover available resources"},

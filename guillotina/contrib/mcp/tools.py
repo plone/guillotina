@@ -41,7 +41,12 @@ LIST_CHILDREN_SCHEMA = {
             "default": 50,
             "description": "Number of children to return per page. Hard cap is 200.",
         },
-        "page": {"type": "integer", "minimum": 1, "default": 1, "description": "Page number (1-based). Use with limit to paginate."},
+        "page": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 1,
+            "description": "Page number (1-based). Use with limit to paginate.",
+        },
         "include_serialized": {"type": "boolean", "default": False},
     },
 }
