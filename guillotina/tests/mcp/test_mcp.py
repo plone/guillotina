@@ -24,7 +24,7 @@ def _skip_if_protocol_unavailable(response, status):
         reason = str(response.get("reason") or response.get("message") or "")
     known_causes = (
         "MCP SDK missing",
-        "Install \"guillotina[mcp]\"",
+        'Install "guillotina[mcp]"',
         "MCP registry utility is not available",
     )
     if any(cause in reason for cause in known_causes):
