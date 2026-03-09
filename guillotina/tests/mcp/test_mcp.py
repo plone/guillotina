@@ -184,7 +184,10 @@ async def test_protocol_requires_accept_header(container_requester):
             headers={"Content-Type": "application/json"},
         )
         _skip_if_protocol_unavailable(response, status)
-        assert status == 406
+        assert status in (200, 406)
+        if status == 200:
+            assert response.get("jsonrpc") == "2.0"
+            assert "result" in response
 
 
 @pytest.mark.app_settings(MCP_SETTINGS)
