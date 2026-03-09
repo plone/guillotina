@@ -1,7 +1,25 @@
 from typing import Any
+from urllib.parse import parse_qs
+from urllib.parse import urlparse
 
 import importlib
 import json
+
+
+class _RequestWithUriParams:
+    """Thin proxy that overlays URI query params on top of the real HTTP request's query dict."""
+
+    def __init__(self, request: Any, uri_params: dict):
+        self._request = request
+        self._uri_params = uri_params
+
+    @property
+    def query(self):
+        orig = dict(getattr(self._request, "query", {}) or {})
+        return {**orig, **self._uri_params}
+
+    def __getattr__(self, name: str):
+        return getattr(self._request, name)
 
 
 class LowLevelMCPServer:
@@ -88,9 +106,13 @@ class LowLevelMCPServer:
             if self.context is None or self.request is None:
                 raise ValueError("Context and request are required to read Guillotina MCP resources")
             uri_str = str(uri)
+            parsed = urlparse(uri_str)
+            base_uri = parsed._replace(query="").geturl()
+            uri_params = {k: v[0] for k, v in parse_qs(parsed.query).items()} if parsed.query else {}
             for res in self.registry.list_resources():
-                if res["uri"] == uri_str:
-                    data = await self.registry.read_resource(res["name"], self.context, self.request)
+                if res["uri"] == base_uri:
+                    request = _RequestWithUriParams(self.request, uri_params) if uri_params else self.request
+                    data = await self.registry.read_resource(res["name"], self.context, request)
                     return json.dumps(data, ensure_ascii=True, sort_keys=True, default=str)
             raise ValueError(f"Unknown resource URI: {uri}")
 

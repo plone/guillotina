@@ -6,7 +6,6 @@ from guillotina.events import ObjectModifiedEvent
 from guillotina.interfaces import IResourceSerializeToJson
 from guillotina.interfaces import IResourceSerializeToJsonSummary
 from guillotina.interfaces.catalog import ICatalogUtility
-from guillotina.utils import get_content_depth
 from guillotina.utils import get_content_path
 from guillotina.utils import get_current_container
 from guillotina.utils import navigate_to
@@ -217,7 +216,7 @@ async def _list_children_from_catalog(
 
     query = {
         "path__starts": _child_prefix(resolved_path),
-        "depth": str(get_content_depth(target) + 1),
+        "depth": "1",
         "_size": str(limit + 1),
         "_sort_asc": "id",
         "_metadata": "id,type_name,title,path",
