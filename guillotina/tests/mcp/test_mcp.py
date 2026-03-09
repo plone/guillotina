@@ -16,6 +16,22 @@ PROTOCOL_HEADERS = {
 }
 
 
+def _skip_if_protocol_unavailable(response, status):
+    if status != 503:
+        return
+    reason = ""
+    if isinstance(response, dict):
+        reason = str(response.get("reason") or response.get("message") or "")
+    known_causes = (
+        "MCP SDK missing",
+        "Install \"guillotina[mcp]\"",
+        "MCP registry utility is not available",
+    )
+    if any(cause in reason for cause in known_causes):
+        detail = f": {reason}" if reason else ""
+        pytest.skip(f"MCP protocol unavailable in this environment{detail}")
+
+
 async def _protocol(requester, method, params=None, id=1):
     payload = {"jsonrpc": "2.0", "id": id, "method": method, "params": params or {}}
     response, status = await requester(
@@ -24,6 +40,7 @@ async def _protocol(requester, method, params=None, id=1):
         data=json.dumps(payload),
         headers=PROTOCOL_HEADERS,
     )
+    _skip_if_protocol_unavailable(response, status)
     return response, status
 
 
@@ -166,6 +183,7 @@ async def test_protocol_requires_accept_header(container_requester):
             data=json.dumps({"jsonrpc": "2.0", "id": 1, "method": "tools/list", "params": {}}),
             headers={"Content-Type": "application/json"},
         )
+        _skip_if_protocol_unavailable(response, status)
         assert status == 406
 
 
@@ -178,6 +196,7 @@ async def test_protocol_invalid_json_rpc_returns_400(container_requester):
             data=json.dumps({"not": "jsonrpc"}),
             headers=PROTOCOL_HEADERS,
         )
+        _skip_if_protocol_unavailable(response, status)
         assert status == 400
 
 
