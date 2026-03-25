@@ -1,5 +1,7 @@
 from guillotina.contrib.mcp import resources as mcp_resources
+from guillotina.utils import resolve_dotted_name
 
+import asyncio
 import json
 import pytest
 
@@ -8,6 +10,14 @@ pytestmark = pytest.mark.asyncio
 
 MCP_SETTINGS = {
     "applications": ["guillotina", "guillotina.contrib.mcp"],
+}
+
+MCP_SETTINGS_REDIS = {
+    "applications": [
+        "guillotina",
+        "guillotina.contrib.mcp",
+        "guillotina.contrib.redis",
+    ],
 }
 
 PROTOCOL_HEADERS = {
@@ -95,7 +105,9 @@ async def test_protocol_tools_call_resolve_path(container_requester):
 async def test_protocol_tools_call_list_children(container_requester):
     async with container_requester as requester:
         _, status = await requester(
-            "POST", "/db/guillotina", data=json.dumps({"@type": "Item", "id": "item-proto"})
+            "POST",
+            "/db/guillotina",
+            data=json.dumps({"@type": "Item", "id": "item-proto"}),
         )
         assert status == 201
 
@@ -229,6 +241,13 @@ async def test_protocol_resource_registry_matches_defaults(container_requester):
 async def test_invoke_resolve_path_tool(container_requester):
     """Kept as an alias — now uses the JSON-RPC protocol path."""
     async with container_requester as requester:
+        _, status = await requester(
+            "POST",
+            "/db/guillotina",
+            data=json.dumps({"@type": "Item", "id": "foo_item"}),
+        )
+        assert status == 201
+
         response, status = await _protocol(
             requester,
             "tools/call",
@@ -238,3 +257,58 @@ async def test_invoke_resolve_path_tool(container_requester):
         content = json.loads(response["result"]["content"][0]["text"])
         assert content["resource"]["@type"] == "Container"
         assert content["path"] == "/"
+
+        response, status = await _protocol(
+            requester,
+            "tools/call",
+            params={"name": "resolve_path", "arguments": {"path": "/foo_item"}},
+        )
+        assert status == 200
+        content = json.loads(response["result"]["content"][0]["text"])
+        assert content["resource"]["@type"] == "Item"
+        assert content["path"] == "/foo_item"
+
+
+@pytest.mark.app_settings(MCP_SETTINGS_REDIS)
+async def test_cache_redis(redis_container, container_requester):
+    async with container_requester as requester:
+        _, status = await requester(
+            "POST",
+            "/db/guillotina",
+            data=json.dumps({"@type": "Item", "id": "foo_item"}),
+        )
+        assert status == 201
+
+        response, status = await _protocol(
+            requester,
+            "tools/call",
+            params={"name": "resolve_path", "arguments": {"path": "/"}},
+        )
+        assert status == 200
+        content = json.loads(response["result"]["content"][0]["text"])
+        assert content["resource"]["@type"] == "Container"
+        assert content["path"] == "/"
+
+        response, status = await _protocol(
+            requester,
+            "tools/call",
+            params={"name": "resolve_path", "arguments": {"path": "/foo_item"}},
+        )
+        assert status == 200
+        content = json.loads(response["result"]["content"][0]["text"])
+        assert content["resource"]["@type"] == "Item"
+        assert content["path"] == "/foo_item"
+        driver = await resolve_dotted_name("guillotina.contrib.redis").get_driver()
+        assert driver.initialized
+        keys = await driver.keys_startswith("mcp_tool_cache:v1")
+        assert len(keys) == 2
+        # Let's modify an object to invalidate the cache
+        _, status = await requester(
+            "PATCH",
+            "/db/guillotina/foo_item",
+            data=json.dumps({"title": "Foo title"}),
+        )
+        assert status == 204
+        await asyncio.sleep(0.5)
+        keys = await driver.keys_startswith("mcp_tool_cache:v1")
+        assert len(keys) == 0

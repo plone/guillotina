@@ -24,7 +24,7 @@ class IMCPToolRegistry(Interface):
     def metadata():
         """Return metadata for diagnostics."""
 
-    def invalidate_cache(reason="manual"):
+    async def invalidate_cache(reason="manual"):
         """Invalidate cached tool responses."""
 
     def create_lowlevel_server(context=None, request=None):

@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from guillotina import app_settings
 from guillotina.contrib.mcp import resources as mcp_resources
 from guillotina.contrib.mcp import tools
+from guillotina.contrib.redis import get_driver
 from typing import Any
 from typing import Awaitable
 from typing import Callable
@@ -9,6 +10,7 @@ from typing import Dict
 from typing import List
 from typing import Optional
 
+import hashlib
 import json
 
 
@@ -44,15 +46,27 @@ class MCPToolRegistry:
         self._default_child_limit = int(config.get("default_child_limit", 50))
         self._tools: Dict[str, MCPTool] = {}
         self._resources: Dict[str, MCPResource] = {}
-        self._cache: Dict[str, Dict[str, Any]] = {}
-        self._cache_revision = 0
         self._register_default_tools()
         self._register_default_resources()
+        self._key_cache_redis_prefix = "mcp_tool_cache:v1"
+
+    async def initialize(self, app):
+        self._cache_disabled = True
+        self._driver_redis = None
+        try:
+            self._driver_redis = await get_driver()
+            self._cache_disabled = False
+        except Exception:
+            pass
 
     def _register_default_tools(self) -> None:
-        for tool_name, description, input_schema, handler, cacheable in tools.default_tools(
-            self._default_child_limit
-        ):
+        for (
+            tool_name,
+            description,
+            input_schema,
+            handler,
+            cacheable,
+        ) in tools.default_tools(self._default_child_limit):
             self.register_tool(
                 name=tool_name,
                 description=description,
@@ -62,7 +76,13 @@ class MCPToolRegistry:
             )
 
     def _register_default_resources(self) -> None:
-        for name, uri, description, endpoint, handler in mcp_resources.default_resources():
+        for (
+            name,
+            uri,
+            description,
+            endpoint,
+            handler,
+        ) in mcp_resources.default_resources():
             self.register_resource(
                 name=name,
                 uri=uri,
@@ -150,10 +170,25 @@ class MCPToolRegistry:
 
     def _cache_key(self, tool_name: str, arguments: Dict[str, Any]) -> str:
         payload = json.dumps(arguments, sort_keys=True, separators=(",", ":"), default=str)
-        return f"{tool_name}:{payload}"
+        digest = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+        return f"{self._key_cache_redis_prefix}:{tool_name}:{digest[:16]}"
+
+    def _serialize_cache_value(self, value: Dict[str, Any]) -> str:
+        return json.dumps(value, separators=(",", ":"), sort_keys=True)
+
+    def _deserialize_cache_value(self, value: Any) -> Dict[str, Any]:
+        if isinstance(value, bytes):
+            value = value.decode("utf-8")
+        if isinstance(value, str):
+            return json.loads(value)
+        return value
 
     async def invoke(
-        self, tool_name: str, context: Any, request: Any, arguments: Optional[Dict[str, Any]] = None
+        self,
+        tool_name: str,
+        context: Any,
+        request: Any,
+        arguments: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         clean_name = str(tool_name or "").strip()
         if clean_name not in self._tools:
@@ -165,17 +200,24 @@ class MCPToolRegistry:
 
         tool = self._tools[clean_name]
         cache_key = self._cache_key(clean_name, clean_arguments)
-        if tool.cacheable and cache_key in self._cache:
-            return self._cache[cache_key]
-
+        if tool.cacheable and self._cache_disabled is False:
+            result = await self._driver_redis.get(cache_key)
+            if result is not None:
+                return self._deserialize_cache_value(result)
         result = await tool.handler(context, request, clean_arguments)
-        if tool.cacheable:
-            self._cache[cache_key] = result
+        if tool.cacheable and self._cache_disabled is False:
+            # Expire in 1 hour
+            await self._driver_redis.set(
+                key=cache_key,
+                data=self._serialize_cache_value(result),
+                expire=3600,
+            )
         return result
 
-    def invalidate_cache(self, reason: str = "manual") -> None:
-        self._cache.clear()
-        self._cache_revision += 1
+    async def invalidate_cache(self, reason: str = "manual") -> None:
+        if self._cache_disabled is False:
+            keys_to_delete = await self._driver_redis.keys_startswith(self._key_cache_redis_prefix)
+            await self._driver_redis.delete_all(keys_to_delete)
 
     def metadata(self) -> Dict[str, Any]:
         return {
@@ -183,13 +225,15 @@ class MCPToolRegistry:
             "server_name": self._server_name,
             "tool_count": len(self._tools),
             "resource_count": len(self._resources),
-            "cache_revision": self._cache_revision,
         }
 
     def create_lowlevel_server(self, context: Any = None, request: Any = None) -> Any:
         from guillotina.contrib.mcp.server import LowLevelMCPServer
 
         adapter = LowLevelMCPServer(
-            registry=self, context=context, request=request, server_name=self._server_name
+            registry=self,
+            context=context,
+            request=request,
+            server_name=self._server_name,
         )
         return adapter.build()

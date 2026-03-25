@@ -6,13 +6,16 @@ from guillotina.interfaces import IObjectAddedEvent
 from guillotina.interfaces import IObjectModifiedEvent
 from guillotina.interfaces import IResource
 
+import asyncio
+
 
 @configure.subscriber(for_=(IResource, IObjectAddedEvent))
 @configure.subscriber(for_=(IResource, IObjectModifiedEvent))
 @configure.subscriber(for_=(IResource, IBeforeObjectRemovedEvent))
-def invalidate_mcp_cache_on_content_change(obj, event):
+async def invalidate_mcp_cache_on_content_change(obj, event):
     registry = query_utility(IMCPToolRegistry)
     if registry is None:
         return
     object_id = getattr(obj, "id", None) or getattr(obj, "__name__", None) or "unknown"
-    registry.invalidate_cache(reason=f"{event.__class__.__name__}:{object_id}")
+    coroutine = registry.invalidate_cache(reason=f"{event.__class__.__name__}:{object_id}")
+    asyncio.create_task(coroutine)
