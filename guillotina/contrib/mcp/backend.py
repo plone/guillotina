@@ -12,10 +12,12 @@ from typing import Optional
 
 import hashlib
 import json
+import logging
 
 
 ToolHandler = Callable[[Any, Any, Dict[str, Any]], Awaitable[Dict[str, Any]]]
 ResourceHandler = Callable[[Any], Awaitable[Dict[str, Any]]]
+logger = logging.getLogger("guillotina.contrib.redis")
 
 
 @dataclass
@@ -57,7 +59,7 @@ class MCPToolRegistry:
             self._driver_redis = await get_driver()
             self._cache_disabled = False
         except Exception:
-            pass
+            logger.info("redis not enabled to cache")
 
     def _register_default_tools(self) -> None:
         for (
