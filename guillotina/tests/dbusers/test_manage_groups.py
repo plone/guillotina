@@ -4,6 +4,7 @@ from guillotina.tests.test_catalog import NOT_POSTGRES
 import copy
 import json
 import pytest
+import pytest_asyncio
 
 
 pytestmark = pytest.mark.asyncio
@@ -17,12 +18,12 @@ _group = {
 }
 
 
-@pytest.fixture()
+@pytest_asyncio.fixture()
 async def user_data():
     return settings.user_data.copy()
 
 
-@pytest.fixture()
+@pytest_asyncio.fixture()
 async def second_user_data():
     return settings.second_user_data.copy()
 

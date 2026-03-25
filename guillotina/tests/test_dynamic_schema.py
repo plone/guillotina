@@ -9,6 +9,7 @@ from zope.interface import Interface
 
 import json
 import pytest
+import pytest_asyncio
 
 
 pytestmark = pytest.mark.asyncio
@@ -42,7 +43,7 @@ class CustomTypeContainerRequesterAsyncContextManager(ContainerRequesterAsyncCon
         return requester
 
 
-@pytest.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function")
 async def custom_type_container_requester(guillotina):
     return CustomTypeContainerRequesterAsyncContextManager(guillotina)
 

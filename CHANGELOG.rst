@@ -9,6 +9,8 @@ CHANGELOG
   cache invalidation subscribers, and tests/docs coverage.
 - Optimize MCP `list_children` tool to prefer catalog queries and
   fallback to `async_items` when catalog is unavailable.
+- Upgrade the pytest stack so the CI test environment stays compatible
+  with the optional MCP SDK and its AnyIO pytest plugin on Python 3.10+.
 - Docs: Update documentation and configuration settings
 - Chore: Update sphinx-guillotina-theme version to 1.0.9
   [rboixaderg]

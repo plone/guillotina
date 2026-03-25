@@ -27,6 +27,7 @@ import asyncio
 import json
 import os
 import pytest
+import pytest_asyncio
 
 
 _dir = os.path.dirname(os.path.realpath(__file__))
@@ -53,7 +54,7 @@ def base_settings_configurator(settings):
 testing.configure_with(base_settings_configurator)
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def event_loop():
     """Create an instance of the default event loop for each test case."""
     # https://github.com/pytest-dev/pytest-asyncio/issues/30#issuecomment-226947196
@@ -389,7 +390,7 @@ def clear_task_vars():
         getattr(task_vars, var).set(None)
 
 
-@pytest.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function")
 async def dummy_guillotina(event_loop, request):
     globalregistry.reset()
     app = make_app(settings=get_dummy_settings(request.node), loop=event_loop)
@@ -444,7 +445,7 @@ class RootAsyncContextManager:
         await self.txn.abort()
 
 
-@pytest.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function")
 async def dummy_txn_root(dummy_request):
     return RootAsyncContextManager(dummy_request)
 
@@ -487,7 +488,7 @@ SELECT 'DROP INDEX ' || string_agg(indexrelid::regclass::text, ', ')
                 )
 
 
-@pytest.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function")
 async def app(event_loop, db, request):
     globalregistry.reset()
     settings = get_db_settings(request.node)
@@ -519,7 +520,7 @@ async def app(event_loop, db, request):
     clear_task_vars()
 
 
-@pytest.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function")
 async def app_client(event_loop, db, request):
     globalregistry.reset()
     app = make_app(settings=get_db_settings(request.node), loop=event_loop)
@@ -529,19 +530,19 @@ async def app_client(event_loop, db, request):
     clear_task_vars()
 
 
-@pytest.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function")
 async def guillotina_main(app_client):
     app, _ = app_client
     return app
 
 
-@pytest.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function")
 async def guillotina(app_client):
     _, client = app_client
     return GuillotinaDBAsgiRequester(client)
 
 
-@pytest.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function")
 async def guillotina_server(app):
     host, port = app
     return GuillotinaDBHttpRequester(host, port)
@@ -557,7 +558,7 @@ def container_install_requester(guillotina, install_addons):
     return ContainerRequesterAsyncContextManager(guillotina, install_addons)
 
 
-@pytest.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function")
 async def container_requester_server(guillotina_server):
     return ContainerRequesterAsyncContextManager(guillotina_server)
 
@@ -650,12 +651,12 @@ def memcached_container(memcached):
     annotations["memcached"] = None
 
 
-@pytest.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function")
 async def dbusers_requester(guillotina):
     return ContainerRequesterAsyncContextManager(guillotina, ["dbusers"])
 
 
-@pytest.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function")
 async def metrics_registry():
     import prometheus_client.registry
 
