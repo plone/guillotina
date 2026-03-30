@@ -60,4 +60,5 @@ class IBaseObject(Interface):
         The result must be picklable.
         """
 
-    def register(): ...
+    def register():
+        """ """

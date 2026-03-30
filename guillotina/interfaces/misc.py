@@ -56,6 +56,8 @@ class IAddOn(Interface):
 
 
 class IIDChecker(Interface):
-    def __init__(context): ...
+    def __init__(context):
+        """ """
 
-    async def __call__(id_: str, type_: str) -> bool: ...
+    async def __call__(id_: str, type_: str) -> bool:
+        """ """

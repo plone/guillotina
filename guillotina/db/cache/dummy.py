@@ -14,12 +14,17 @@ class DummyCache(BaseCache):
 
     async def set(
         self, value, keyset: List[Dict[str, Any]] = None, oid=None, container=None, id=None, variant=None
-    ): ...
+    ):
+        pass
 
-    async def clear(self): ...
+    async def clear(self):
+        pass
 
-    async def invalidate(self, ob): ...
+    async def invalidate(self, ob):
+        pass
 
-    async def delete(self, key): ...
+    async def delete(self, key):
+        pass
 
-    async def delete_all(self, keys): ...
+    async def delete_all(self, keys):
+        pass

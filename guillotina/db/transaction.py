@@ -72,7 +72,8 @@ except ImportError:
 
     def record_cache_metric(
         name: str, result_type: str, value: Union[ObjectResultType, str], key_args: Dict[str, Any]
-    ) -> None: ...
+    ) -> None:
+        pass
 
 
 logger = logging.getLogger(__name__)
