@@ -1,6 +1,5 @@
 import uuid
 
-
 MAX_UID_LENGTH = 64
 UID_SPLIT_LENGTH = 3
 UUID_LENGTH = 32

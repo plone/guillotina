@@ -20,7 +20,6 @@ from zope import interface
 import guillotina.schema
 import sys
 
-
 _marker = object()
 
 

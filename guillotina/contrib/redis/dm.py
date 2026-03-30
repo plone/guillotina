@@ -10,7 +10,6 @@ from guillotina.transactions import get_transaction
 import orjson
 import time
 
-
 try:
     import prometheus_client
 

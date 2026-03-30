@@ -19,7 +19,6 @@ import enum
 import traceback
 import uuid
 
-
 logger = glogging.getLogger("guillotina")
 
 

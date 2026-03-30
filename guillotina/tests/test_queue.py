@@ -8,7 +8,6 @@ from guillotina.transactions import transaction
 import asyncio
 import pytest
 
-
 pytestmark = pytest.mark.asyncio
 
 

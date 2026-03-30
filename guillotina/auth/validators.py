@@ -19,7 +19,6 @@ import jwt
 import logging
 import uuid
 
-
 ph = argon2.PasswordHasher()
 _pw_auth_validator = LRU(100)
 

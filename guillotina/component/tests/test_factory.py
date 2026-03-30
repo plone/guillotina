@@ -27,14 +27,14 @@ class FactoryTests(unittest.TestCase):
         return self._getTargetClass()(callable, *args, **kw)
 
     def test_class_conforms_to_IFactory(self):
-        from zope.interface.verify import verifyClass
         from guillotina.component.interfaces import IFactory
+        from zope.interface.verify import verifyClass
 
         verifyClass(IFactory, self._getTargetClass())
 
     def test_instance_conforms_to_IFactory(self):
-        from zope.interface.verify import verifyObject
         from guillotina.component.interfaces import IFactory
+        from zope.interface.verify import verifyObject
 
         verifyObject(IFactory, self._makeOne())
 
@@ -81,8 +81,8 @@ class FactoryTests(unittest.TestCase):
         self.assertEqual(_called, [((), {"foo": "bar"})])
 
     def test_get_interfaces_explicit(self):
-        from zope.interface import Interface
         from zope.interface import implementer
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -103,8 +103,8 @@ class FactoryTests(unittest.TestCase):
         self.assertEqual(list(spec), [IFoo, IBar])
 
     def test_get_interfaces_implicit(self):
-        from zope.interface import Interface
         from zope.interface import implementer
+        from zope.interface import Interface
 
         class IBaz(Interface):
             pass

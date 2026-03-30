@@ -2,7 +2,6 @@ from guillotina import configure
 from typing import Any
 from typing import Dict
 
-
 app_settings: Dict[str, Any] = {}
 
 

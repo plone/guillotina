@@ -10,7 +10,6 @@ import json
 import os
 import pytest
 
-
 pytestmark = pytest.mark.asyncio
 
 NOT_POSTGRES = os.environ.get("DATABASE", "DUMMY") in ("cockroachdb", "DUMMY")

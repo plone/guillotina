@@ -8,7 +8,6 @@ import inspect
 import logging
 import os
 
-
 logger = logging.getLogger("guillotina")
 
 

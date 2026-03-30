@@ -1,7 +1,6 @@
 from setuptools import find_packages
 from setuptools import setup
 
-
 try:
     README = open('README.rst').read()
 except IOError:

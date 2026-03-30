@@ -18,7 +18,6 @@ import logging
 import pickle
 import uuid
 
-
 logger = logging.getLogger("guillotina.contrib.cache")
 _default_size = 1024
 _basic_types = (bytes, str, int, float)

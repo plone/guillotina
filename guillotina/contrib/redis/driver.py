@@ -17,7 +17,6 @@ import asyncio
 import backoff
 import logging
 
-
 try:
     import prometheus_client
 

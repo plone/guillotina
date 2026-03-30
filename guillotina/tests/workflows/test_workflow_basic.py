@@ -1,6 +1,5 @@
 import pytest
 
-
 pytestmark = pytest.mark.asyncio
 
 guillotina_basic_with_translations = {

@@ -50,6 +50,7 @@ TUS_PARAMETERS = [
     {"name": "UPLOAD-METADATA", "in": "headers", "required": False, "schema": {"type": "string"}},
 ]
 
+
 # Static File
 @configure.service(context=IStaticFile, method="GET", permission="guillotina.AccessContent")
 class FileGET(DownloadService):

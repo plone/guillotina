@@ -8,7 +8,6 @@ from guillotina.interfaces import IContainer
 from guillotina.response import ErrorResponse
 from guillotina.utils import get_registry
 
-
 _ = MessageFactory("guillotina")
 
 

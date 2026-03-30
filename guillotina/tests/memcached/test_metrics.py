@@ -8,7 +8,6 @@ from unittest import mock
 
 import pytest
 
-
 pytestmark = pytest.mark.asyncio
 MEMCACHED_SETTINGS = {"applications": ["guillotina", "memcached", "guillotina.contrib.memcached"]}
 

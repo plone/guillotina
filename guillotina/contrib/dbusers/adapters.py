@@ -5,7 +5,6 @@ from guillotina.interfaces import IIDChecker
 
 import re
 
-
 # from https://github.com/theskumar/python-usernames/blob/master/usernames/validators.py
 
 username_regex = re.compile(

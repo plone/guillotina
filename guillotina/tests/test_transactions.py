@@ -11,7 +11,6 @@ from guillotina.utils import get_object_by_uid
 
 import pytest
 
-
 pytestmark = pytest.mark.asyncio
 
 

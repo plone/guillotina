@@ -27,7 +27,6 @@ from zope.interface import implementer
 import logging
 import typing
 
-
 logger = logging.getLogger("guillotina")
 
 global_principal_permission_setting = principal_permission_manager.get_setting

@@ -4,7 +4,6 @@ from multidict import CIMultiDict
 import asyncio
 import pytest
 
-
 pytestmark = pytest.mark.asyncio
 
 

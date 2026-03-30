@@ -16,7 +16,6 @@ from typing import List
 import asyncio
 import logging
 
-
 logger = logging.getLogger("guillotina")
 
 _default_size = 1024

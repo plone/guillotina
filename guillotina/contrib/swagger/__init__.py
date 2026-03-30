@@ -1,6 +1,5 @@
 from guillotina import configure
 
-
 configure.permission("guillotina.swagger.View", "View swagger definition")
 configure.grant(permission="guillotina.swagger.View", role="guillotina.Anonymous")
 configure.grant(permission="guillotina.swagger.View", role="guillotina.Authenticated")

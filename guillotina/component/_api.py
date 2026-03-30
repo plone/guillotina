@@ -27,7 +27,6 @@ from zope.interface import providedBy
 
 import zope.interface.interface
 
-
 _MISSING = object()
 
 
@@ -276,7 +275,7 @@ def get_factory_interfaces(name, context=None):
 def get_factories_for(interface, context=None):
     """Return info on all factories implementing the given interface."""
     utils = get_component_registry(context)
-    for (name, factory) in utils.getUtilitiesFor(IFactory):
+    for name, factory in utils.getUtilitiesFor(IFactory):
         interfaces = factory.get_interfaces()
         try:
             if interfaces.isOrExtends(interface):

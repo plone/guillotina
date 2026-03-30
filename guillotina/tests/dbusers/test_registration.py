@@ -5,7 +5,6 @@ from guillotina.interfaces import IMailer
 import json
 import pytest
 
-
 pytestmark = pytest.mark.asyncio
 
 

@@ -6,7 +6,6 @@ import asyncio
 import time
 import traceback
 
-
 try:
     from prometheus_client import Counter
     from prometheus_client import Histogram

@@ -29,7 +29,6 @@ import base64
 import posixpath
 import uuid
 
-
 logger = glogging.getLogger("guillotina")
 
 

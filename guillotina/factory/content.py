@@ -27,7 +27,6 @@ import asyncio
 import logging
 import typing
 
-
 logger = logging.getLogger("guillotina")
 
 

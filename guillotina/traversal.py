@@ -1,4 +1,5 @@
 """Main routing traversal class."""
+
 from contextlib import contextmanager
 from guillotina import __version__
 from guillotina import logger
@@ -195,9 +196,9 @@ class BaseMatchInfo:
                         for idx, query in enumerate(txn._queries.keys()):
                             counts = txn._queries[query]
                             duration = "{0:.5f}".format(counts[1] * 1000)
-                            resp.headers[
-                                f"XG-Query-{idx}"
-                            ] = f"count: {counts[0]}, time: {duration}, query: {query}"  # noqa
+                            resp.headers[f"XG-Query-{idx}"] = (
+                                f"count: {counts[0]}, time: {duration}, query: {query}"  # noqa
+                            )
             except (KeyError, AttributeError):
                 resp.headers["XG-Error"] = "Could not get stats"
 

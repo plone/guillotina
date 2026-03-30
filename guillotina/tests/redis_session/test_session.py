@@ -6,7 +6,6 @@ import json
 import jwt
 import pytest
 
-
 pytestmark = pytest.mark.asyncio
 
 

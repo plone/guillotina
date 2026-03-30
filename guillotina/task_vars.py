@@ -10,7 +10,6 @@ from guillotina.interfaces import ISecurityPolicy
 from typing import Dict
 from typing import Optional
 
-
 request: ContextVar[Optional[IRequest]] = ContextVar("g_request", default=None)
 txn: ContextVar[Optional[ITransaction]] = ContextVar("g_txn", default=None)
 tm: ContextVar[Optional[ITransactionManager]] = ContextVar("g_tm", default=None)

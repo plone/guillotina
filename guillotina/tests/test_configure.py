@@ -18,7 +18,6 @@ from zope.interface import Interface
 
 import pytest
 
-
 pytestmark = pytest.mark.asyncio
 
 
@@ -103,8 +102,8 @@ async def test_register_contenttype(container_requester):
 async def test_register_behavior(container_requester):
     cur_count = len(configure.get_configurations("guillotina.tests", "behavior"))
 
-    from guillotina.interfaces import IResource
     from guillotina import schema
+    from guillotina.interfaces import IResource
 
     class IMyBehavior(Interface):
         foobar = schema.Text()

@@ -3,7 +3,6 @@ from guillotina.interfaces import IBehaviorAdapterFactory
 from zope.interface import implementer
 from zope.interface import Interface
 
-
 REGISTRATION_REPR = """\
 <{class} {name} at {id}
   schema: {identifier}

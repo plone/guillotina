@@ -40,7 +40,6 @@ import asyncio
 import inspect
 import logging
 
-
 _registered_configurations: ConfigurationType = []
 # stored as tuple of (type, configuration) so we get keep it in the order
 # it is registered even if you mix types of registrations
@@ -591,9 +590,9 @@ def json_schema_definition(name: str, schema: dict) -> None:
 
 
 def grant_directive(_context, principal=None, role=None, permission=None, permissions=None):
-    from guillotina.security.security_code import role_permission_manager as role_perm_mgr
     from guillotina.security.security_code import principal_permission_manager as principal_perm_mgr
     from guillotina.security.security_code import principal_role_manager as principal_role_mgr
+    from guillotina.security.security_code import role_permission_manager as role_perm_mgr
 
     nspecified = (
         (principal is not None) + (role is not None) + (permission is not None) + (permissions is not None)
@@ -633,8 +632,8 @@ def grant_directive(_context, principal=None, role=None, permission=None, permis
 
 def grantAll_directive(_context, principal=None, role=None):  # noqa: N802
     """Grant all permissions to a role or principal"""
-    from guillotina.security.security_code import role_permission_manager
     from guillotina.security.security_code import principal_permission_manager
+    from guillotina.security.security_code import role_permission_manager
 
     nspecified = (principal is not None) + (role is not None)
 

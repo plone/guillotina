@@ -15,7 +15,6 @@ import json
 import os
 import pkg_resources
 
-
 here = os.path.dirname(os.path.realpath(__file__))
 
 

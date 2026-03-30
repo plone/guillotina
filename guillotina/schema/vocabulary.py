@@ -23,7 +23,6 @@ from guillotina.schema.interfaces import IVocabularyTokenized
 from zope.interface import directlyProvides
 from zope.interface import implementer
 
-
 # simple vocabularies performing enumerated-like tasks
 _marker = object()
 

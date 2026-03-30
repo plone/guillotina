@@ -18,7 +18,6 @@ from guillotina.utils import execute
 import logging
 import typing
 
-
 logger = logging.getLogger("guillotina")
 
 

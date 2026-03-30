@@ -7,7 +7,6 @@ from guillotina.interfaces import ILayers
 from guillotina.utils import get_authenticated_user_id
 from guillotina.utils import get_registry
 
-
 USERS_LAYER = "guillotina.contrib.dbusers.interfaces.IDBUsersLayer"
 
 

@@ -1,7 +1,6 @@
 from guillotina.i18n import MessageFactory
 from zope.interface import Interface
 
-
 _ = MessageFactory("guillotina")
 
 

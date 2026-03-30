@@ -94,7 +94,6 @@ import json
 import jsonschema
 import re
 
-
 __docformat__ = "restructuredtext"
 
 # pep 8 friendlyness

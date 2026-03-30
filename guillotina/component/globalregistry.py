@@ -26,7 +26,6 @@ import logging
 import os
 import time
 
-
 profile_logger = logging.getLogger("guillotina.profile")
 
 
@@ -55,9 +54,11 @@ class GuillotinaAdapterLookup(AdapterLookup):
 class DebugGuillotinaAdapterLookup(GuillotinaAdapterLookup):  # pragma: no cover
     @profilable
     async def asubscribers(self, objects, provided):
-        from guillotina.utils import get_current_request, get_authenticated_user_id, get_dotted_name
-        from guillotina.exceptions import RequestNotFound
         from guillotina import task_vars
+        from guillotina.exceptions import RequestNotFound
+        from guillotina.utils import get_authenticated_user_id
+        from guillotina.utils import get_current_request
+        from guillotina.utils import get_dotted_name
 
         if len(objects) > 1:
             event = get_dotted_name(objects[1])

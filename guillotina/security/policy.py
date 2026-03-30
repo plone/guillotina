@@ -26,7 +26,6 @@ from typing import List
 from typing import Optional
 from typing import Union
 
-
 code_principal_permission_setting = principal_permission_manager.get_setting
 code_roles_for_permission = role_permission_manager.get_roles_for_permission
 code_roles_for_principal = principal_role_manager.get_roles_for_principal

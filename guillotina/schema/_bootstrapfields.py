@@ -30,7 +30,6 @@ from zope.interface import Attribute
 from zope.interface import implementer
 from zope.interface import providedBy
 
-
 __docformat__ = "restructuredtext"
 
 

@@ -7,7 +7,7 @@ flake8==6.1.0
 codecov==2.1.13
 mypy-zope==1.0.11
 black==24.10.0
-isort==4.3.21
+isort==5.13.2
 jinja2==2.11.3
 MarkupSafe<2.1.0
 pytz==2020.1

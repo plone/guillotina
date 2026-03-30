@@ -9,7 +9,6 @@ import backoff
 import logging
 import pickle
 
-
 logger = logging.getLogger("guillotina")
 
 

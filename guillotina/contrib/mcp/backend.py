@@ -14,7 +14,6 @@ import hashlib
 import json
 import logging
 
-
 ToolHandler = Callable[[Any, Any, Dict[str, Any]], Awaitable[Dict[str, Any]]]
 ResourceHandler = Callable[[Any], Awaitable[Dict[str, Any]]]
 logger = logging.getLogger("guillotina.contrib.redis")

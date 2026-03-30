@@ -4,7 +4,6 @@ import asyncio
 import logging
 import uuid
 
-
 logger = logging.getLogger("guillotina")
 
 

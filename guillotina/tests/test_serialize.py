@@ -26,7 +26,6 @@ from zope.interface.interface import invariant
 import pytest
 import uuid
 
-
 pytestmark = pytest.mark.asyncio
 
 
@@ -78,8 +77,9 @@ async def test_serialize_omit_main_interface_field(dummy_request, mock_txn):
 
 
 async def test_serialize_cloud_file(dummy_request, mock_txn):
-    from guillotina.test_package import FileContent, IFileContent
     from guillotina.interfaces import IFileManager
+    from guillotina.test_package import FileContent
+    from guillotina.test_package import IFileContent
 
     obj = create_content(FileContent)
     obj.file = DBFile(filename="foobar.json", md5="foobar")
@@ -101,7 +101,8 @@ async def test_serialize_cloud_file(dummy_request, mock_txn):
 
 
 async def test_deserialize_cloud_file(dummy_request, mock_txn):
-    from guillotina.test_package import IFileContent, FileContent
+    from guillotina.test_package import FileContent
+    from guillotina.test_package import IFileContent
 
     obj = create_content(FileContent)
     obj.file = None

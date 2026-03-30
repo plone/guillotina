@@ -17,7 +17,6 @@ from guillotina.utils import get_registry
 from guillotina.utils import import_class
 from guillotina.utils import resolve_dotted_name
 
-
 _ = MessageFactory("guillotina")
 
 

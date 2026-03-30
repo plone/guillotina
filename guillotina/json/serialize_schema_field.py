@@ -26,7 +26,6 @@ from guillotina.schema.interfaces import ITime
 from zope.interface import implementedBy
 from zope.interface import Interface
 
-
 FIELDS_CACHE: dict = {}
 
 

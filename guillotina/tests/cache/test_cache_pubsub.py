@@ -12,7 +12,6 @@ import asyncio
 import pickle
 import pytest
 
-
 pytestmark = pytest.mark.asyncio
 
 

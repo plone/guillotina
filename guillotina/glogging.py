@@ -6,9 +6,9 @@ import uuid
 
 def _wrapped(name):
     def log(self, *args, **kwargs):
+        from guillotina.exceptions import RequestNotFound
         from guillotina.utils import get_authenticated_user_id
         from guillotina.utils import get_current_request
-        from guillotina.exceptions import RequestNotFound
 
         func = getattr(self._logger, name)
         request = kwargs.pop("request", None)

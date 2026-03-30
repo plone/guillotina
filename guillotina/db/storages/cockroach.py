@@ -15,7 +15,6 @@ from zope.interface import implementer
 import asyncpg
 import uuid
 
-
 logger = glogging.getLogger("guillotina")
 
 # upsert without checking matching tids on updated object

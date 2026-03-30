@@ -2,7 +2,6 @@
 from zope.interface import Attribute
 from zope.interface import Interface
 
-
 OID_TYPE = SERIAL_TYPE = bytes
 
 
@@ -61,5 +60,4 @@ class IBaseObject(Interface):
         The result must be picklable.
         """
 
-    def register():
-        ...
+    def register(): ...

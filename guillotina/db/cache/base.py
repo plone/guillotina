@@ -6,7 +6,6 @@ from typing import List
 
 import typing
 
-
 logger = glogging.getLogger("guillotina")
 
 

@@ -6,7 +6,6 @@ from guillotina.schema._bootstrapinterfaces import IContextAwareDefaultFactory
 from zope.interface import alsoProvides
 from zope.interface import implementer
 
-
 REGISTRY_DATA_KEY = "_registry"
 
 

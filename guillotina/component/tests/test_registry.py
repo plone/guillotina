@@ -17,7 +17,8 @@ import unittest
 
 class Test_dispatch_utility_registration_event(unittest.TestCase):
 
-    from guillotina.component.testing import setUp, tearDown
+    from guillotina.component.testing import setUp
+    from guillotina.component.testing import tearDown
 
     def _callFUT(self, *args, **kw):
         from guillotina.component.registry import dispatch_utility_registration_event
@@ -43,7 +44,8 @@ class Test_dispatch_utility_registration_event(unittest.TestCase):
 
 class Test_dispatch_adapter_registration_event(unittest.TestCase):
 
-    from guillotina.component.testing import setUp, tearDown
+    from guillotina.component.testing import setUp
+    from guillotina.component.testing import tearDown
 
     def _callFUT(self, *args, **kw):
         from guillotina.component.registry import dispatch_adapter_registration_event
@@ -71,7 +73,8 @@ class Test_dispatch_adapter_registration_event(unittest.TestCase):
 
 class Test_dispatch_subscription_adapter_registration_event(unittest.TestCase):
 
-    from guillotina.component.testing import setUp, tearDown
+    from guillotina.component.testing import setUp
+    from guillotina.component.testing import tearDown
 
     def _callFUT(self, *args, **kw):
         from guillotina.component.registry import dispatch_subscription_adapter_registration_event
@@ -99,7 +102,8 @@ class Test_dispatch_subscription_adapter_registration_event(unittest.TestCase):
 
 class Test_dispatch_handler_registration_event(unittest.TestCase):
 
-    from guillotina.component.testing import setUp, tearDown
+    from guillotina.component.testing import setUp
+    from guillotina.component.testing import tearDown
 
     def _callFUT(self, *args, **kw):
         from guillotina.component.registry import dispatch_handler_registration_event

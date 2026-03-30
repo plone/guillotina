@@ -6,7 +6,6 @@ from guillotina.utils import import_class
 
 import logging
 
-
 logger = logging.getLogger("guillotina.contrib.mailer")
 
 app_settings = {

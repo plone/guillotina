@@ -15,7 +15,6 @@ from zope.interface import implementedBy
 from zope.interface import providedBy
 from zope.interface.interface import Method
 
-
 """
 Field accessors
 ===============

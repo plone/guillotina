@@ -9,7 +9,6 @@ import asyncio
 import asyncpg.exceptions
 import logging
 
-
 logger = logging.getLogger("guillotina")
 
 

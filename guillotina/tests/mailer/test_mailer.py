@@ -3,7 +3,6 @@ from guillotina.interfaces import IMailer
 
 import pytest
 
-
 pytestmark = pytest.mark.asyncio
 
 

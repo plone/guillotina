@@ -6,7 +6,6 @@ from guillotina.tests.utils import get_mocked_request
 
 import pytest
 
-
 pytestmark = pytest.mark.asyncio
 
 

@@ -7,7 +7,6 @@ from guillotina.utils import iter_databases
 
 import logging
 
-
 logger = logging.getLogger("guillotina")
 
 

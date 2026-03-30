@@ -17,7 +17,6 @@ import pickle as _pickle
 import sys
 import types
 
-
 CLASS_TYPES = (type,)
 
 PYTHON3 = True

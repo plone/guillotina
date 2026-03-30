@@ -3,7 +3,6 @@ from guillotina.interfaces import IApplication
 
 import pytest
 
-
 pytestmark = pytest.mark.asyncio
 
 

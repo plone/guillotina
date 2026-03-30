@@ -5,7 +5,6 @@ import logging
 import typing
 import yaml
 
-
 logger = logging.getLogger("guillotina.contrib.workflows")
 
 

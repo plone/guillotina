@@ -7,7 +7,6 @@ from guillotina.security.utils import get_roles_with_access_content
 from guillotina.utils import get_content_depth
 from guillotina.utils import get_content_path
 
-
 global_roles_for_permission = role_permission_manager.get_roles_for_permission
 
 

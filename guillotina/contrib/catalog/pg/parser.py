@@ -13,7 +13,6 @@ from guillotina.interfaces.catalog import ICatalogUtility
 import typing
 import urllib
 
-
 _type_mapping = {"int": int, "float": float}
 
 

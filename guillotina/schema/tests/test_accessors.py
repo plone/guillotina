@@ -38,8 +38,8 @@ class FieldReadAccessorTests(unittest.TestCase):
         self.assertEqual(wrapped.__doc__, "get Hmm")
 
     def test_ctor_created_inside_interface(self):
-        from zope.interface import Interface
         from guillotina.schema import Text
+        from zope.interface import Interface
 
         field = Text(title="Hmm")
 
@@ -58,9 +58,9 @@ class FieldReadAccessorTests(unittest.TestCase):
         self.assertEqual(list(providedBy(wrapped)), list(implementedBy(self._getTargetClass())))
 
     def test___provides___w_field_w_provides(self):
+        from guillotina.schema import Text
         from zope.interface import implementedBy
         from zope.interface import providedBy
-        from guillotina.schema import Text
 
         field = Text()
         field_provides = list(providedBy(field))
@@ -151,8 +151,8 @@ class FieldReadAccessorTests(unittest.TestCase):
         self.assertEqual(getter.query(Foo()), "123")
 
     def test_set_readonly(self):
-        from zope.interface import Interface
         from guillotina.schema import Text
+        from zope.interface import Interface
 
         field = Text(readonly=True)
 
@@ -241,8 +241,8 @@ class FieldWriteAccessorTests(unittest.TestCase):
         self.assertEqual(wrapped.__doc__, "set Hmm")
 
     def test_ctor_created_inside_interface(self):
-        from zope.interface import Interface
         from guillotina.schema import Text
+        from zope.interface import Interface
 
         field = Text(title="Hmm")
 
@@ -274,8 +274,8 @@ class Test_accessors(unittest.TestCase):
         return accessors(*args, **kw)
 
     def test_w_only_read_accessor(self):
-        from zope.interface import Interface
         from guillotina.schema import Text
+        from zope.interface import Interface
 
         field = Text(title="Hmm", readonly=True)
 
@@ -294,8 +294,8 @@ class Test_accessors(unittest.TestCase):
         self.assertEqual(info["kwargs"], None)
 
     def test_w_read_and_write_accessors(self):
-        from zope.interface import Interface
         from guillotina.schema import Text
+        from zope.interface import Interface
 
         field = Text(title="Hmm")
 

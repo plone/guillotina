@@ -13,7 +13,6 @@ from zope.interface import Interface
 import copyreg  # type: ignore
 import typing
 
-
 _ = MessageFactory("guillotina")
 
 

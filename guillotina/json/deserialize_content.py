@@ -35,7 +35,6 @@ from zope.interface import Interface
 
 import asyncio
 
-
 logger = glogging.getLogger("guillotina")
 
 

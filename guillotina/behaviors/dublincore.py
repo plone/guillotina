@@ -8,7 +8,6 @@ from guillotina.directives import index_field
 from guillotina.fields.patch import PatchField
 from zope.interface import Interface
 
-
 _utc = tzutc()
 
 # never expires

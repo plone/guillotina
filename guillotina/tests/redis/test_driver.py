@@ -3,7 +3,6 @@ from guillotina.utils import resolve_dotted_name
 import asyncio
 import pytest
 
-
 pytestmark = pytest.mark.asyncio
 
 

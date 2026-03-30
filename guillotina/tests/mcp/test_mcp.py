@@ -5,7 +5,6 @@ import asyncio
 import json
 import pytest
 
-
 pytestmark = pytest.mark.asyncio
 
 MCP_SETTINGS = {

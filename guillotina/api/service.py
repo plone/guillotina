@@ -20,7 +20,6 @@ from typing import Union
 import json
 import jsonschema
 
-
 logger = glogging.getLogger("guillotina")
 
 

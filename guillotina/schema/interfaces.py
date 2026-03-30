@@ -24,7 +24,6 @@ from zope.interface import Attribute
 from zope.interface import Interface
 from zope.interface.common.mapping import IEnumerableMapping
 
-
 __docformat__ = "reStructuredText"
 
 # pep 8 friendlyness

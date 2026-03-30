@@ -15,7 +15,6 @@ import pickle
 import prometheus_client
 import pytest
 
-
 pytestmark = pytest.mark.asyncio
 
 

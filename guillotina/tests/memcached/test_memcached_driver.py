@@ -1,8 +1,9 @@
 try:
-    import emcache
     from guillotina.contrib.memcached.driver import MemcachedDriver
     from guillotina.contrib.memcached.driver import safe_key
     from guillotina.contrib.memcached.driver import update_connection_pool_metrics
+
+    import emcache
 except ModuleNotFoundError:
     emcache = None
 
@@ -17,7 +18,6 @@ from unittest import mock
 import asyncio
 import pytest
 import pytest_asyncio
-
 
 pytestmark = pytest.mark.asyncio
 

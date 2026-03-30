@@ -123,9 +123,10 @@ class Test_adapts(unittest.TestCase):
         self.assertRaises(AttributeError, _try)
 
     def test_called_from_function(self):
-        import warnings
         from guillotina.component._declaration import adapts
         from zope.interface import Interface
+
+        import warnings
 
         class IFoo(Interface):
             pass
@@ -141,10 +142,11 @@ class Test_adapts(unittest.TestCase):
                 self.assertEqual(len(log), 0)  # no longer warn
 
     def test_called_twice_from_class(self):
-        import warnings
         from guillotina.component._declaration import adapts
         from zope.interface import Interface
         from zope.interface._compat import PYTHON3
+
+        import warnings
 
         class IFoo(Interface):
             pass
@@ -205,8 +207,8 @@ class Test_adaptedBy(unittest.TestCase):
         self.assertEqual(self._callFUT(Baz), (IFoo, IBar))
 
     def test__call___w_inst_of_decorated_class(self):
-        from zope.interface import Interface
         from guillotina.component._declaration import _adapts_descr
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass

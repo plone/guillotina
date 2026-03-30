@@ -17,7 +17,6 @@ from guillotina.utils import get_security_policy
 import json
 import pytest
 
-
 pytestmark = pytest.mark.asyncio
 
 

@@ -18,8 +18,8 @@ import unittest
 
 
 def _makeSchema():
-    from zope.interface import Interface
     from guillotina.schema import Bytes
+    from zope.interface import Interface
 
     return InterfaceClass(
         "ISchemaTest",
@@ -153,9 +153,9 @@ class Test_getValidationErrors(unittest.TestCase):
         self.assertEqual(len(errors), 0)
 
     def test_schema_with_field_errors(self):
-        from zope.interface import Interface
         from guillotina.schema import Text
         from guillotina.schema.exceptions import SchemaNotFullyImplemented
+        from zope.interface import Interface
 
         class IWithRequired(Interface):
             must = Text(required=True)
@@ -200,8 +200,8 @@ class Test_getSchemaValidationErrors(unittest.TestCase):
         return getSchemaValidationErrors(schema, object)
 
     def test_schema_wo_fields(self):
-        from zope.interface import Interface
         from zope.interface import Attribute
+        from zope.interface import Interface
 
         class INoFields(Interface):
             def method():
@@ -213,8 +213,8 @@ class Test_getSchemaValidationErrors(unittest.TestCase):
         self.assertEqual(len(errors), 0)
 
     def test_schema_with_fields_ok(self):
-        from zope.interface import Interface
         from guillotina.schema import Text
+        from zope.interface import Interface
 
         class IWithFields(Interface):
             foo = Text()
@@ -228,9 +228,9 @@ class Test_getSchemaValidationErrors(unittest.TestCase):
         self.assertEqual(len(errors), 0)
 
     def test_schema_with_missing_field(self):
-        from zope.interface import Interface
         from guillotina.schema import Text
         from guillotina.schema.exceptions import SchemaNotFullyImplemented
+        from zope.interface import Interface
 
         class IWithRequired(Interface):
             must = Text(required=True)
@@ -241,9 +241,9 @@ class Test_getSchemaValidationErrors(unittest.TestCase):
         self.assertEqual(errors[0][1].__class__, SchemaNotFullyImplemented)
 
     def test_schema_with_invalid_field(self):
-        from zope.interface import Interface
         from guillotina.schema import Int
         from guillotina.schema.exceptions import TooSmall
+        from zope.interface import Interface
 
         class IWithMinium(Interface):
             value = Int(required=True, min=0)

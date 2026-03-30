@@ -25,7 +25,6 @@ from zope.interface import Interface
 
 import datetime
 
-
 _type_conversions = (int, str, float, bool)
 
 

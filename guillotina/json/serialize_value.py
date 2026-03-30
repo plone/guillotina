@@ -12,7 +12,6 @@ from guillotina.interfaces import IValueToJson
 from guillotina.profile import profilable
 from guillotina.schema.vocabulary import SimpleVocabulary
 
-
 _MISSING = object()
 
 

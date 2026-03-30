@@ -20,7 +20,6 @@ from zope.interface import alsoProvides
 import logging
 import typing
 
-
 logger = logging.getLogger("guillotina.contrib.dbusers")
 
 

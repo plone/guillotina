@@ -1,6 +1,5 @@
 from guillotina.schema.utils import get_default_from_schema
 
-
 _EMPTY = object()
 
 

@@ -3,7 +3,6 @@ from guillotina.utils import get_current_request
 
 import logging
 
-
 logger = logging.getLogger("guillotina")
 
 RECAPTCHA_VALIDATION_URL = "https://www.google.com/recaptcha/api/siteverify"

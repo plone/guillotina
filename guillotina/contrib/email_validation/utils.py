@@ -9,7 +9,6 @@ import orjson
 import pytz
 import time
 
-
 logger = logging.getLogger("guillotina.email_validation")
 
 

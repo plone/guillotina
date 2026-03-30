@@ -13,7 +13,6 @@ from lru import LRU
 
 import logging
 
-
 logger = logging.getLogger("guillotina")
 
 

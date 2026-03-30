@@ -7,7 +7,6 @@ from typing import Dict
 import base64
 import os
 
-
 TESTING_PORT = 55001
 
 TESTING_SETTINGS: Dict[str, Any] = {

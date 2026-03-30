@@ -7,7 +7,6 @@ from guillotina.schema.utils import get_default_from_schema
 from typing import Tuple
 from zope.interface import implementer
 
-
 _default = object()
 
 

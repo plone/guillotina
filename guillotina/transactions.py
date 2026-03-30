@@ -5,7 +5,6 @@ from guillotina.db.interfaces import ITransactionManager
 import logging
 import typing
 
-
 logger = logging.getLogger("guillotina")
 
 

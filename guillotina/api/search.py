@@ -8,7 +8,6 @@ from guillotina.response import HTTPServiceUnavailable
 
 import logging
 
-
 logger = logging.getLogger("guillotina")
 
 QUERY_PARAMETERS = [

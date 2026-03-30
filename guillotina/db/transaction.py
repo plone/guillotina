@@ -34,7 +34,6 @@ import sys
 import time
 import warnings
 
-
 _EMPTY = "__<EMPTY VALUE>__"
 
 
@@ -73,8 +72,7 @@ except ImportError:
 
     def record_cache_metric(
         name: str, result_type: str, value: Union[ObjectResultType, str], key_args: Dict[str, Any]
-    ) -> None:
-        ...
+    ) -> None: ...
 
 
 logger = logging.getLogger(__name__)

@@ -5,7 +5,6 @@ from guillotina.interfaces import IFolder
 import json
 import pytest
 
-
 pytestmark = pytest.mark.asyncio
 
 configure.permission("dbusers.SeeTopSecret", "SeeTopSecret", "Ability to see TopSecret docs")

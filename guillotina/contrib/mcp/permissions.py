@@ -1,6 +1,5 @@
 from guillotina import configure
 
-
 configure.permission("guillotina.MCPView", "View MCP integration services")
 configure.permission("guillotina.MCPExecute", "Execute MCP tools")
 

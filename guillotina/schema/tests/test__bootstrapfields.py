@@ -130,8 +130,8 @@ class DefaultPropertyTests(unittest.TestCase):
         self.assertRaises(ValueError, _provoke, inst)
 
     def test___get___w_defaultFactory_w_ICAF_w_check(self):
-        from zope.interface import directlyProvides
         from guillotina.schema._bootstrapinterfaces import IContextAwareDefaultFactory
+        from zope.interface import directlyProvides
 
         _checked = []
 
@@ -589,14 +589,14 @@ class TextLineTests(unittest.TestCase):
         return self._getTargetClass()(*args, **kw)
 
     def test_class_conforms_to_ITextLine(self):
-        from zope.interface.verify import verifyClass
         from guillotina.schema.interfaces import ITextLine
+        from zope.interface.verify import verifyClass
 
         verifyClass(ITextLine, self._getTargetClass())
 
     def test_instance_conforms_to_ITextLine(self):
-        from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import ITextLine
+        from zope.interface.verify import verifyObject
 
         verifyObject(ITextLine, self._makeOne())
 

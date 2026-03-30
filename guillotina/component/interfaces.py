@@ -38,7 +38,6 @@ from zope.interface.interfaces import Registered
 from zope.interface.interfaces import RegistrationEvent
 from zope.interface.interfaces import Unregistered
 
-
 # fmt: on
 
 

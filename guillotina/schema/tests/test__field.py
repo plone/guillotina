@@ -25,14 +25,14 @@ class BytesTests(unittest.TestCase):
         return self._getTargetClass()(*args, **kw)
 
     def test_class_conforms_to_IBytes(self):
-        from zope.interface.verify import verifyClass
         from guillotina.schema.interfaces import IBytes
+        from zope.interface.verify import verifyClass
 
         verifyClass(IBytes, self._getTargetClass())
 
     def test_instance_conforms_to_IBytes(self):
-        from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import IBytes
+        from zope.interface.verify import verifyObject
 
         verifyObject(IBytes, self._makeOne())
 
@@ -91,14 +91,14 @@ class ASCIITests(unittest.TestCase):
         return self._getTargetClass()(*args, **kw)
 
     def test_class_conforms_to_IASCII(self):
-        from zope.interface.verify import verifyClass
         from guillotina.schema.interfaces import IASCII
+        from zope.interface.verify import verifyClass
 
         verifyClass(IASCII, self._getTargetClass())
 
     def test_instance_conforms_to_IASCII(self):
-        from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import IASCII
+        from zope.interface.verify import verifyObject
 
         verifyObject(IASCII, self._makeOne())
 
@@ -143,14 +143,14 @@ class BytesLineTests(unittest.TestCase):
         return self._getTargetClass()(*args, **kw)
 
     def test_class_conforms_to_IBytesLine(self):
-        from zope.interface.verify import verifyClass
         from guillotina.schema.interfaces import IBytesLine
+        from zope.interface.verify import verifyClass
 
         verifyClass(IBytesLine, self._getTargetClass())
 
     def test_instance_conforms_to_IBytesLine(self):
-        from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import IBytesLine
+        from zope.interface.verify import verifyObject
 
         verifyObject(IBytesLine, self._makeOne())
 
@@ -203,14 +203,14 @@ class ASCIILineTests(unittest.TestCase):
         return self._getTargetClass()(*args, **kw)
 
     def test_class_conforms_to_IASCIILine(self):
-        from zope.interface.verify import verifyClass
         from guillotina.schema.interfaces import IASCIILine
+        from zope.interface.verify import verifyClass
 
         verifyClass(IASCIILine, self._getTargetClass())
 
     def test_instance_conforms_to_IASCIILine(self):
-        from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import IASCIILine
+        from zope.interface.verify import verifyObject
 
         verifyObject(IASCIILine, self._makeOne())
 
@@ -268,14 +268,14 @@ class FloatTests(unittest.TestCase):
         return self._getTargetClass()(*args, **kw)
 
     def test_class_conforms_to_IFloat(self):
-        from zope.interface.verify import verifyClass
         from guillotina.schema.interfaces import IFloat
+        from zope.interface.verify import verifyClass
 
         verifyClass(IFloat, self._getTargetClass())
 
     def test_instance_conforms_to_IFloat(self):
-        from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import IFloat
+        from zope.interface.verify import verifyObject
 
         verifyObject(IFloat, self._makeOne())
 
@@ -351,14 +351,14 @@ class DecimalTests(unittest.TestCase):
         return self._getTargetClass()(*args, **kw)
 
     def test_class_conforms_to_IDecimal(self):
-        from zope.interface.verify import verifyClass
         from guillotina.schema.interfaces import IDecimal
+        from zope.interface.verify import verifyClass
 
         verifyClass(IDecimal, self._getTargetClass())
 
     def test_instance_conforms_to_IDecimal(self):
-        from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import IDecimal
+        from zope.interface.verify import verifyObject
 
         verifyObject(IDecimal, self._makeOne())
 
@@ -372,8 +372,9 @@ class DecimalTests(unittest.TestCase):
         field.validate(None)
 
     def test_validate_required(self):
-        import decimal
         from guillotina.schema.exceptions import RequiredMissing
+
+        import decimal
 
         field = self._makeOne(required=True)
         field.validate(decimal.Decimal("10.0"))
@@ -382,8 +383,9 @@ class DecimalTests(unittest.TestCase):
         self.assertRaises(RequiredMissing, field.validate, None)
 
     def test_validate_min(self):
-        import decimal
         from guillotina.schema.exceptions import TooSmall
+
+        import decimal
 
         field = self._makeOne(min=decimal.Decimal("10.5"))
         field.validate(decimal.Decimal("10.6"))
@@ -392,8 +394,9 @@ class DecimalTests(unittest.TestCase):
         self.assertRaises(TooSmall, field.validate, decimal.Decimal("10.4"))
 
     def test_validate_max(self):
-        import decimal
         from guillotina.schema.exceptions import TooBig
+
+        import decimal
 
         field = self._makeOne(max=decimal.Decimal("10.5"))
         field.validate(decimal.Decimal("5.3"))
@@ -402,9 +405,10 @@ class DecimalTests(unittest.TestCase):
         self.assertRaises(TooBig, field.validate, decimal.Decimal("20.7"))
 
     def test_validate_min_and_max(self):
-        import decimal
         from guillotina.schema.exceptions import TooBig
         from guillotina.schema.exceptions import TooSmall
+
+        import decimal
 
         field = self._makeOne(min=decimal.Decimal("-0.6"), max=decimal.Decimal("10.1"))
         field.validate(decimal.Decimal("0.0"))
@@ -442,14 +446,14 @@ class DatetimeTests(unittest.TestCase):
         return self._getTargetClass()(*args, **kw)
 
     def test_class_conforms_to_IDatetime(self):
-        from zope.interface.verify import verifyClass
         from guillotina.schema.interfaces import IDatetime
+        from zope.interface.verify import verifyClass
 
         verifyClass(IDatetime, self._getTargetClass())
 
     def test_instance_conforms_to_IDatetime(self):
-        from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import IDatetime
+        from zope.interface.verify import verifyObject
 
         verifyObject(IDatetime, self._makeOne())
 
@@ -534,14 +538,14 @@ class DateTests(unittest.TestCase):
         return self._getTargetClass()(*args, **kw)
 
     def test_class_conforms_to_IDate(self):
-        from zope.interface.verify import verifyClass
         from guillotina.schema.interfaces import IDate
+        from zope.interface.verify import verifyClass
 
         verifyClass(IDate, self._getTargetClass())
 
     def test_instance_conforms_to_IDate(self):
-        from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import IDate
+        from zope.interface.verify import verifyObject
 
         verifyObject(IDate, self._makeOne())
 
@@ -630,14 +634,14 @@ class TimedeltaTests(unittest.TestCase):
         return self._getTargetClass()(*args, **kw)
 
     def test_class_conforms_to_ITimedelta(self):
-        from zope.interface.verify import verifyClass
         from guillotina.schema.interfaces import ITimedelta
+        from zope.interface.verify import verifyClass
 
         verifyClass(ITimedelta, self._getTargetClass())
 
     def test_instance_conforms_to_ITimedelta(self):
-        from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import ITimedelta
+        from zope.interface.verify import verifyObject
 
         verifyObject(ITimedelta, self._makeOne())
 
@@ -707,14 +711,14 @@ class TimeTests(unittest.TestCase):
         return self._getTargetClass()(*args, **kw)
 
     def test_class_conforms_to_ITime(self):
-        from zope.interface.verify import verifyClass
         from guillotina.schema.interfaces import ITime
+        from zope.interface.verify import verifyClass
 
         verifyClass(ITime, self._getTargetClass())
 
     def test_instance_conforms_to_ITime(self):
-        from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import ITime
+        from zope.interface.verify import verifyObject
 
         verifyObject(ITime, self._makeOne())
 
@@ -795,14 +799,14 @@ class ChoiceTests(unittest.TestCase):
         return self._getTargetClass()(*args, **kw)
 
     def test_class_conforms_to_IChoice(self):
-        from zope.interface.verify import verifyClass
         from guillotina.schema.interfaces import IChoice
+        from zope.interface.verify import verifyClass
 
         verifyClass(IChoice, self._getTargetClass())
 
     def test_instance_conforms_to_IChoice(self):
-        from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import IChoice
+        from zope.interface.verify import verifyObject
 
         verifyObject(IChoice, self._makeOne(values=[1, 2, 3]))
 
@@ -858,9 +862,9 @@ class ChoiceTests(unittest.TestCase):
         self.assertRaises(ValidationError, _provoke, bound)
 
     def test_bind_w_voc_not_ICSB(self):
-        from zope.interface import implementer
-        from guillotina.schema.interfaces import ISource
         from guillotina.schema.interfaces import IBaseVocabulary
+        from guillotina.schema.interfaces import ISource
+        from zope.interface import implementer
 
         @implementer(IBaseVocabulary)
         @implementer(ISource)
@@ -874,9 +878,9 @@ class ChoiceTests(unittest.TestCase):
         self.assertTrue(target.vocabulary is source.vocabulary)
 
     def test_bind_w_voc_is_ICSB(self):
-        from zope.interface import implementer
         from guillotina.schema.interfaces import IContextSourceBinder
         from guillotina.schema.interfaces import ISource
+        from zope.interface import implementer
 
         @implementer(IContextSourceBinder)
         @implementer(ISource)
@@ -896,8 +900,8 @@ class ChoiceTests(unittest.TestCase):
         self.assertEqual(target.vocabulary.context, instance)
 
     def test_bind_w_voc_is_ICSB_but_not_ISource(self):
-        from zope.interface import implementer
         from guillotina.schema.interfaces import IContextSourceBinder
+        from zope.interface import implementer
 
         @implementer(IContextSourceBinder)
         class Vocab(object):
@@ -980,8 +984,8 @@ class ChoiceTests(unittest.TestCase):
         self.assertRaises(ConstraintNotSatisfied, choose._validate, 42)
 
     def test__validate_source_is_ICSB_unbound(self):
-        from zope.interface import implementer
         from guillotina.schema.interfaces import IContextSourceBinder
+        from zope.interface import implementer
 
         @implementer(IContextSourceBinder)
         class SampleContextSourceBinder(object):
@@ -992,10 +996,10 @@ class ChoiceTests(unittest.TestCase):
         self.assertRaises(TypeError, choice.validate, 1)
 
     def test__validate_source_is_ICSB_bound(self):
-        from zope.interface import implementer
-        from guillotina.schema.interfaces import IContextSourceBinder
         from guillotina.schema.exceptions import ConstraintNotSatisfied
+        from guillotina.schema.interfaces import IContextSourceBinder
         from guillotina.schema.tests.test_vocabulary import _makeSampleVocabulary
+        from zope.interface import implementer
 
         @implementer(IContextSourceBinder)
         class SampleContextSourceBinder(object):
@@ -1023,14 +1027,14 @@ class URITests(unittest.TestCase):
         return self._getTargetClass()(*args, **kw)
 
     def test_class_conforms_to_IURI(self):
-        from zope.interface.verify import verifyClass
         from guillotina.schema.interfaces import IURI
+        from zope.interface.verify import verifyClass
 
         verifyClass(IURI, self._getTargetClass())
 
     def test_instance_conforms_to_IURI(self):
-        from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import IURI
+        from zope.interface.verify import verifyObject
 
         verifyObject(IURI, self._makeOne())
 
@@ -1095,14 +1099,14 @@ class DottedNameTests(unittest.TestCase):
         return self._getTargetClass()(*args, **kw)
 
     def test_class_conforms_to_IDottedName(self):
-        from zope.interface.verify import verifyClass
         from guillotina.schema.interfaces import IDottedName
+        from zope.interface.verify import verifyClass
 
         verifyClass(IDottedName, self._getTargetClass())
 
     def test_instance_conforms_to_IDottedName(self):
-        from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import IDottedName
+        from zope.interface.verify import verifyObject
 
         verifyObject(IDottedName, self._makeOne())
 
@@ -1202,14 +1206,14 @@ class IdTests(unittest.TestCase):
         return self._getTargetClass()(*args, **kw)
 
     def test_class_conforms_to_IId(self):
-        from zope.interface.verify import verifyClass
         from guillotina.schema.interfaces import IId
+        from zope.interface.verify import verifyClass
 
         verifyClass(IId, self._getTargetClass())
 
     def test_instance_conforms_to_IId(self):
-        from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import IId
+        from zope.interface.verify import verifyObject
 
         verifyObject(IId, self._makeOne())
 
@@ -1280,14 +1284,14 @@ class InterfaceFieldTests(unittest.TestCase):
         return self._getTargetClass()(*args, **kw)
 
     def test_class_conforms_to_IInterfaceField(self):
-        from zope.interface.verify import verifyClass
         from guillotina.schema.interfaces import IInterfaceField
+        from zope.interface.verify import verifyClass
 
         verifyClass(IInterfaceField, self._getTargetClass())
 
     def test_instance_conforms_to_IInterfaceField(self):
-        from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import IInterfaceField
+        from zope.interface.verify import verifyObject
 
         verifyObject(IInterfaceField, self._makeOne())
 
@@ -1319,8 +1323,8 @@ class InterfaceFieldTests(unittest.TestCase):
         field.validate(None)
 
     def test_validate_required(self):
-        from zope.interface import Interface
         from guillotina.schema.exceptions import RequiredMissing
+        from zope.interface import Interface
 
         class DummyInterface(Interface):
             pass
@@ -1379,16 +1383,16 @@ class AbstractCollectionTests(unittest.TestCase):
         self.assertEqual(bound.unique, True)
 
     def test__validate_wrong_contained_type(self):
-        from guillotina.schema.exceptions import WrongContainedType
         from guillotina.schema._bootstrapfields import Text
+        from guillotina.schema.exceptions import WrongContainedType
 
         text = Text()
         absc = self._makeOne(text)
         self.assertRaises(WrongContainedType, absc.validate, [1])
 
     def test__validate_miss_uniqueness(self):
-        from guillotina.schema.exceptions import NotUnique
         from guillotina.schema._bootstrapfields import Text
+        from guillotina.schema.exceptions import NotUnique
 
         text = Text()
         absc = self._makeOne(text, True)
@@ -1405,14 +1409,14 @@ class TupleTests(unittest.TestCase):
         return self._getTargetClass()(*args, **kw)
 
     def test_class_conforms_to_ITuple(self):
-        from zope.interface.verify import verifyClass
         from guillotina.schema.interfaces import ITuple
+        from zope.interface.verify import verifyClass
 
         verifyClass(ITuple, self._getTargetClass())
 
     def test_instance_conforms_to_ITuple(self):
-        from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import ITuple
+        from zope.interface.verify import verifyObject
 
         verifyObject(ITuple, self._makeOne())
 
@@ -1485,14 +1489,14 @@ class ListTests(unittest.TestCase):
         return self._getTargetClass()(*args, **kw)
 
     def test_class_conforms_to_IList(self):
-        from zope.interface.verify import verifyClass
         from guillotina.schema.interfaces import IList
+        from zope.interface.verify import verifyClass
 
         verifyClass(IList, self._getTargetClass())
 
     def test_instance_conforms_to_IList(self):
-        from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import IList
+        from zope.interface.verify import verifyObject
 
         verifyObject(IList, self._makeOne())
 
@@ -1566,14 +1570,14 @@ class SetTests(unittest.TestCase):
         return self._getTargetClass()(*args, **kw)
 
     def test_class_conforms_to_ISet(self):
-        from zope.interface.verify import verifyClass
         from guillotina.schema.interfaces import ISet
+        from zope.interface.verify import verifyClass
 
         verifyClass(ISet, self._getTargetClass())
 
     def test_instance_conforms_to_ISet(self):
-        from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import ISet
+        from zope.interface.verify import verifyObject
 
         verifyObject(ISet, self._makeOne())
 
@@ -1655,14 +1659,14 @@ class FrozenSetTests(unittest.TestCase):
         return self._getTargetClass()(*args, **kw)
 
     def test_class_conforms_to_IFrozenSet(self):
-        from zope.interface.verify import verifyClass
         from guillotina.schema.interfaces import IFrozenSet
+        from zope.interface.verify import verifyClass
 
         verifyClass(IFrozenSet, self._getTargetClass())
 
     def test_instance_conforms_to_IFrozenSet(self):
-        from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import IFrozenSet
+        from zope.interface.verify import verifyObject
 
         verifyObject(IFrozenSet, self._makeOne())
 
@@ -1771,11 +1775,11 @@ class ObjectTests(unittest.TestCase):
         self.fail("Expected WrongContainedType Error")
 
     def _makeCycles(self):
-        from zope.interface import Interface
-        from zope.interface import implementer
-        from guillotina.schema import Object
         from guillotina.schema import List
+        from guillotina.schema import Object
         from guillotina.schema._messageid import _
+        from zope.interface import implementer
+        from zope.interface import Interface
 
         class IUnit(Interface):
             """A schema that participate to a cycle"""
@@ -1812,14 +1816,14 @@ class ObjectTests(unittest.TestCase):
         return IUnit, Person, Unit
 
     def test_class_conforms_to_IObject(self):
-        from zope.interface.verify import verifyClass
         from guillotina.schema.interfaces import IObject
+        from zope.interface.verify import verifyClass
 
         verifyClass(IObject, self._getTargetClass())
 
     def test_instance_conforms_to_IObject(self):
-        from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import IObject
+        from zope.interface.verify import verifyObject
 
         verifyObject(IObject, self._makeOne())
 
@@ -1844,20 +1848,20 @@ class ObjectTests(unittest.TestCase):
         objf.validate(object())  # doesn't raise
 
     def test__validate_w_value_not_providing_schema(self):
-        from guillotina.schema.exceptions import SchemaNotProvided
         from guillotina.schema._bootstrapfields import Text
+        from guillotina.schema.exceptions import SchemaNotProvided
 
         schema = self._makeSchema(foo=Text(), bar=Text())
         objf = self._makeOne(schema)
         self.assertRaises(SchemaNotProvided, objf.validate, object())
 
     def test__validate_w_value_providing_invalid_schema(self):
-        from zope.interface import implementer
+        from guillotina.schema._bootstrapfields import Text
+        from guillotina.schema.exceptions import RequiredMissing
         from guillotina.schema.exceptions import SchemaNotProvided
         from guillotina.schema.exceptions import WrongContainedType
-        from guillotina.schema.exceptions import RequiredMissing
         from guillotina.schema.exceptions import WrongType
-        from guillotina.schema._bootstrapfields import Text
+        from zope.interface import implementer
 
         schema = self._makeSchema(foo=Text())
         objf = self._makeOne(schema)
@@ -1873,10 +1877,10 @@ class ObjectTests(unittest.TestCase):
         self.assertRaises(SchemaNotProvided, objf.validate, {"foo": "val", "bar": "val"})
 
     def test__validate_w_value_providing_schema_but_missing_fields(self):
-        from zope.interface import implementer
+        from guillotina.schema._bootstrapfields import Text
         from guillotina.schema.exceptions import RequiredMissing
         from guillotina.schema.exceptions import WrongContainedType
-        from guillotina.schema._bootstrapfields import Text
+        from zope.interface import implementer
 
         schema = self._makeSchema(foo=Text(required=True), bar=Text(required=True))
 
@@ -1893,11 +1897,11 @@ class ObjectTests(unittest.TestCase):
         self.assertTrue(isinstance(err, RequiredMissing))
 
     def test__validate_w_value_providing_schema_but_invalid_fields(self):
-        from zope.interface import implementer
-        from guillotina.schema.exceptions import WrongContainedType
-        from guillotina.schema.exceptions import RequiredMissing
-        from guillotina.schema.exceptions import WrongType
         from guillotina.schema._bootstrapfields import Text
+        from guillotina.schema.exceptions import RequiredMissing
+        from guillotina.schema.exceptions import WrongContainedType
+        from guillotina.schema.exceptions import WrongType
+        from zope.interface import implementer
 
         schema = self._makeSchema(foo=Text(required=True), bar=Text(required=True))
 
@@ -1919,9 +1923,9 @@ class ObjectTests(unittest.TestCase):
         self.assertEqual(err.args[:3], (1, str, "bar"))
 
     def test__validate_w_value_providing_schema(self):
-        from zope.interface import implementer
         from guillotina.schema._bootstrapfields import Text
         from guillotina.schema._field import Choice
+        from zope.interface import implementer
 
         schema = self._makeSchema(foo=Text(), bar=Text(), baz=Choice(values=[1, 2, 3]))
 
@@ -1935,7 +1939,8 @@ class ObjectTests(unittest.TestCase):
         objf.validate(OK())  # doesn't raise
 
     def test__validate_interface_inheritance(self):
-        from guillotina.schema import Int, Object
+        from guillotina.schema import Int
+        from guillotina.schema import Object
         from zope.interface import implementer
         from zope.interface import Interface
 
@@ -2004,14 +2009,14 @@ class DictTests(unittest.TestCase):
         return self._getTargetClass()(*args, **kw)
 
     def test_class_conforms_to_IDict(self):
-        from zope.interface.verify import verifyClass
         from guillotina.schema.interfaces import IDict
+        from zope.interface.verify import verifyClass
 
         verifyClass(IDict, self._getTargetClass())
 
     def test_instance_conforms_to_IDict(self):
-        from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import IDict
+        from zope.interface.verify import verifyObject
 
         verifyObject(IDict, self._makeOne())
 
@@ -2052,8 +2057,8 @@ class DictTests(unittest.TestCase):
         self.assertRaises(RequiredMissing, field.validate, None)
 
     def test_validate_invalid_key_type(self):
-        from guillotina.schema.exceptions import WrongContainedType
         from guillotina.schema._bootstrapfields import Int
+        from guillotina.schema.exceptions import WrongContainedType
 
         field = self._makeOne(key_type=Int())
         field.validate({})
@@ -2062,8 +2067,8 @@ class DictTests(unittest.TestCase):
         self.assertRaises(WrongContainedType, field.validate, {"a": 1})
 
     def test_validate_invalid_value_type(self):
-        from guillotina.schema.exceptions import WrongContainedType
         from guillotina.schema._bootstrapfields import Int
+        from guillotina.schema.exceptions import WrongContainedType
 
         field = self._makeOne(value_type=Int())
         field.validate({})
@@ -2132,21 +2137,21 @@ class UnionFieldTests(unittest.TestCase):
         return UnionField
 
     def _makeOne(self, *args, **kw):
-        from guillotina.schema._field import Text
         from guillotina.schema._field import Int
         from guillotina.schema._field import List
+        from guillotina.schema._field import Text
 
         return self._getTargetClass()(Text(**kw), Int(**kw), List(**kw), *args, **kw)
 
     def test_class_conforms_to_IUnionField(self):
-        from zope.interface.verify import verifyClass
         from guillotina.schema.interfaces import IUnionField
+        from zope.interface.verify import verifyClass
 
         verifyClass(IUnionField, self._getTargetClass())
 
     def test_instance_conforms_to_IUnionField(self):
-        from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import IUnionField
+        from zope.interface.verify import verifyObject
 
         verifyObject(IUnionField, self._makeOne())
 
@@ -2198,8 +2203,8 @@ class DummyInstance(object):
 
 
 def _makeSampleVocabulary():
-    from zope.interface import implementer
     from guillotina.schema.interfaces import IVocabulary
+    from zope.interface import implementer
 
     class SampleTerm(object):
         pass

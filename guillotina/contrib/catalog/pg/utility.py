@@ -41,7 +41,6 @@ import orjson
 import os
 import typing
 
-
 # 2019-06-15T18:37:31.008359+00:00
 PG_FUNCTIONS = [
     """CREATE OR REPLACE FUNCTION f_cast_isots(text) RETURNS timestamptz AS $$

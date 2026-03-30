@@ -24,7 +24,6 @@ from zope.interface import implementedBy
 from zope.interface import Interface
 from zope.interface import providedBy
 
-
 _ = MessageFactory("guillotina")
 
 

@@ -10,7 +10,6 @@ import PIL.Image
 import PIL.ImageDraw
 import warnings
 
-
 with open(os.path.join(TEST_DATA_LOCATION, "logo.png"), "rb") as fio:
     PNG = fio.read()
 with open(os.path.join(TEST_DATA_LOCATION, "logo.gif"), "rb") as fio:

@@ -7,7 +7,6 @@ import copy
 import pickle
 import string
 
-
 app_settings: Dict[str, Any] = {
     "debug": False,
     "databases": [],

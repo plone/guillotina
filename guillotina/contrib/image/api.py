@@ -18,7 +18,6 @@ from guillotina.utils import get_registry
 from guillotina.utils import run_async
 from io import BytesIO
 
-
 BUFFER = 262144
 
 

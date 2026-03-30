@@ -25,7 +25,6 @@ from zope.interface import Interface
 import asyncio
 import logging
 
-
 logger = logging.getLogger("guillotina")
 
 

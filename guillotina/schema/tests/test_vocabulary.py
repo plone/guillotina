@@ -25,14 +25,14 @@ class SimpleTermTests(unittest.TestCase):
         return self._getTargetClass()(*args, **kw)
 
     def test_class_conforms_to_ITokenizedTerm(self):
-        from zope.interface.verify import verifyClass
         from guillotina.schema.interfaces import ITokenizedTerm
+        from zope.interface.verify import verifyClass
 
         verifyClass(ITokenizedTerm, self._getTargetClass())
 
     def test_instance_conforms_to_ITokenizedTerm(self):
-        from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import ITokenizedTerm
+        from zope.interface.verify import verifyObject
 
         verifyObject(ITokenizedTerm, self._makeOne("VALUE"))
 
@@ -73,20 +73,20 @@ class SimpleVocabularyTests(unittest.TestCase):
         return self._getTargetClass()(*args, **kw)
 
     def test_class_conforms_to_IVocabularyTokenized(self):
-        from zope.interface.verify import verifyClass
         from guillotina.schema.interfaces import IVocabularyTokenized
+        from zope.interface.verify import verifyClass
 
         verifyClass(IVocabularyTokenized, self._getTargetClass())
 
     def test_instance_conforms_to_IVocabularyTokenized(self):
-        from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import IVocabularyTokenized
+        from zope.interface.verify import verifyObject
 
         verifyObject(IVocabularyTokenized, self._makeOne(()))
 
     def test_ctor_additional_interfaces(self):
-        from zope.interface import Interface
         from guillotina.schema.vocabulary import SimpleTerm
+        from zope.interface import Interface
 
         class IStupid(Interface):
             pass
@@ -105,8 +105,8 @@ class SimpleVocabularyTests(unittest.TestCase):
             self.assertTrue(vocabulary.getTermByToken(term.token) is term)
 
     def test_fromValues(self):
-        from zope.interface import Interface
         from guillotina.schema.interfaces import ITokenizedTerm
+        from zope.interface import Interface
 
         class IStupid(Interface):
             pass
@@ -121,8 +121,8 @@ class SimpleVocabularyTests(unittest.TestCase):
             self.assertTrue(value in vocabulary)
 
     def test_fromItems(self):
-        from zope.interface import Interface
         from guillotina.schema.interfaces import ITokenizedTerm
+        from zope.interface import Interface
 
         class IStupid(Interface):
             pass
@@ -240,11 +240,11 @@ class TreeVocabularyTests(unittest.TestCase):
         return self._getTargetClass().fromDict(self.business_tree())
 
     def test_implementation(self):
-        from zope.interface.verify import verifyObject
-        from zope.interface.common.mapping import IEnumerableMapping
         from guillotina.schema.interfaces import ITreeVocabulary
         from guillotina.schema.interfaces import IVocabulary
         from guillotina.schema.interfaces import IVocabularyTokenized
+        from zope.interface.common.mapping import IEnumerableMapping
+        from zope.interface.verify import verifyObject
 
         for v in [self.tree_vocab_2(), self.tree_vocab_3()]:
             self.assertTrue(verifyObject(IEnumerableMapping, v))
@@ -508,8 +508,8 @@ class RegistryTests(unittest.TestCase):
         _clear()
 
     def test_setVocabularyRegistry(self):
-        from guillotina.schema.vocabulary import setVocabularyRegistry
         from guillotina.schema.vocabulary import getVocabularyRegistry
+        from guillotina.schema.vocabulary import setVocabularyRegistry
 
         r = _makeDummyRegistry()
         setVocabularyRegistry(r)
@@ -526,8 +526,8 @@ class RegistryTests(unittest.TestCase):
 
 
 def _makeSampleVocabulary():
-    from zope.interface import implementer
     from guillotina.schema.interfaces import IVocabulary
+    from zope.interface import implementer
 
     class SampleTerm(object):
         pass

@@ -30,7 +30,6 @@ import types
 import typing
 import urllib.parse
 
-
 try:
     random = random.SystemRandom()  # type: ignore
     using_sys_random = True

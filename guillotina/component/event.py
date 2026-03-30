@@ -16,7 +16,6 @@ from guillotina.component._api import get_component_registry
 from guillotina.component._api import subscribers as component_subscribers
 from guillotina.component.interfaces import ComponentLookupError
 
-
 async_subscribers = []
 sync_subscribers = []
 

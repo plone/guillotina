@@ -18,7 +18,6 @@ import asyncpg
 import os
 import pytest
 
-
 pytestmark = pytest.mark.asyncio
 
 

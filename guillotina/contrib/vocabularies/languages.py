@@ -1,6 +1,5 @@
 from guillotina import configure
 
-
 _languagelist = {
     "aa": {"native": "магIарул мацI", "name": "Afar"},
     "ab": {"native": "бызшәа", "name": "Abkhazian"},

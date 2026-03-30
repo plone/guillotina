@@ -8,7 +8,6 @@ from guillotina.utils import resolve_dotted_name
 
 import pytest
 
-
 pytestmark = pytest.mark.asyncio
 
 DEFAULT_SETTINGS = {

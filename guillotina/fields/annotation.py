@@ -30,7 +30,6 @@ import time
 import typing
 import uuid
 
-
 logger = logging.getLogger("guillotina")
 
 

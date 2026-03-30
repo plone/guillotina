@@ -9,5 +9,4 @@ from .utils import get_contenttype  # noqa
 from .utils import read_request_data  # noqa
 from guillotina.exceptions import UnRetryableRequestError  # noqa
 
-
 CloudFileManager = FileManager  # b/w compat

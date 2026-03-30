@@ -8,7 +8,6 @@ import logging
 import os
 import pickle
 
-
 logger = logging.getLogger("guillotina")
 
 

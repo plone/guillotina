@@ -4,7 +4,6 @@ from jwcrypto import jwk
 import logging
 import string
 
-
 logger = logging.getLogger("guillotina")
 
 

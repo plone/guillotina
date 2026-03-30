@@ -24,7 +24,6 @@ import json
 import logging
 import pkg_resources
 
-
 logger = logging.getLogger("guillotina.docs")
 
 

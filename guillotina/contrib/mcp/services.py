@@ -32,8 +32,9 @@ class MCPActionPostService(Service):
 
     async def _handle_protocol(self):
         try:
-            import anyio
             from mcp.server.streamable_http import StreamableHTTPServerTransport
+
+            import anyio
         except ImportError as exc:
             raise HTTPServiceUnavailable(
                 content={"reason": 'MCP SDK missing. Install "guillotina[mcp]".'}

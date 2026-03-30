@@ -85,7 +85,7 @@ def settings_for_object(ob):
         if inherit_permissions is not None:
             settings = inherit_permissions.get_locked_permissions()
             data["perminhe"] = []
-            for (p, s) in settings:
+            for p, s in settings:
                 if s is Deny:
                     locked_permissions.append(p)
                 data["perminhe"].append({"permission": p, "setting": s})

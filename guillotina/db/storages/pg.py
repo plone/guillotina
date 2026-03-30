@@ -27,7 +27,6 @@ import concurrent
 import orjson
 import time
 
-
 try:
     import prometheus_client
 

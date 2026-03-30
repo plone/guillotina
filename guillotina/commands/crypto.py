@@ -3,7 +3,6 @@ from jwcrypto import jwk
 
 import logging
 
-
 logger = logging.getLogger("guillotina")
 
 

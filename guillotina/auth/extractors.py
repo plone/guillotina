@@ -6,7 +6,6 @@ import json
 import logging
 import time
 
-
 logger = logging.getLogger("guillotina")
 
 

@@ -21,7 +21,6 @@ from guillotina.interfaces import IResource
 
 import typing
 
-
 logger = glogging.getLogger("guillotina")
 
 

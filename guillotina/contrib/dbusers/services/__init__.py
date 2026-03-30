@@ -6,7 +6,6 @@ from guillotina.api.content import DefaultPOST
 from guillotina.contrib.dbusers.content.groups import IGroupManager
 from guillotina.contrib.dbusers.content.users import IUserManager
 
-
 # override some views...
 configure.service(context=IGroupManager, method="POST", permission="guillotina.AddGroup", allow_access=True)(
     DefaultPOST

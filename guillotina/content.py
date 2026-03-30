@@ -84,7 +84,6 @@ import guillotina.db.orm.base
 import os
 import pathlib
 
-
 _zone = tzutc()  # utz tz is much faster than local tz info
 _marker = object()
 

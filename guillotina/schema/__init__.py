@@ -62,7 +62,6 @@ from guillotina.schema._schema import getValidationErrors
 from guillotina.schema.accessors import accessors
 from guillotina.schema.exceptions import ValidationError
 
-
 getFields = get_fields  # b/w
 getFieldsInOrder = get_fields_in_order  # b/w
 

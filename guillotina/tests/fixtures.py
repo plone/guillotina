@@ -29,7 +29,6 @@ import os
 import pytest
 import pytest_asyncio
 
-
 _dir = os.path.dirname(os.path.realpath(__file__))
 
 DATABASE = os.environ.get("DATABASE", "DUMMY")
@@ -418,8 +417,8 @@ class DummyRequestAsyncContextManager(object):
 
 @pytest.fixture(scope="function")
 def dummy_request(dummy_guillotina, monkeypatch):
-    from guillotina.interfaces import IApplication
     from guillotina.component import get_utility
+    from guillotina.interfaces import IApplication
 
     root = get_utility(IApplication, name="root")
     db = root["db"]
@@ -498,7 +497,8 @@ async def app(event_loop, db, request):
     host = server_settings.get("host", "127.0.0.1")
     port = int(server_settings.get("port", 8000))
 
-    from uvicorn import Config, Server
+    from uvicorn import Config
+    from uvicorn import Server
 
     config = Config(app, host=host, port=port, lifespan="on", server_header=False)
     server = Server(config=config)

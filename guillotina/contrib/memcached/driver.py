@@ -17,10 +17,10 @@ import backoff
 import hashlib
 import logging
 
-
 try:
-    import prometheus_client
     from prometheus_client.utils import INF
+
+    import prometheus_client
 
     _SEND_METRICS = True
 

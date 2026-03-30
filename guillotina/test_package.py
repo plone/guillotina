@@ -46,7 +46,6 @@ import os
 import tempfile
 import typing
 
-
 app_settings = {"applications": ["guillotina"]}
 
 

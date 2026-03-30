@@ -7,7 +7,6 @@ from guillotina.component.interfaces import IObjectEvent
 from guillotina.interfaces import IObjectModifiedEvent
 from guillotina.interfaces import IResource
 
-
 _zone = tzutc()
 
 

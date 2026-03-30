@@ -17,9 +17,9 @@ import unittest
 
 class StateSelectionTest(unittest.TestCase):
     def setUp(self):
+        from guillotina.schema.tests.states import StateVocabulary
         from guillotina.schema.vocabulary import _clear
         from guillotina.schema.vocabulary import getVocabularyRegistry
-        from guillotina.schema.tests.states import StateVocabulary
 
         _clear()
         vr = getVocabularyRegistry()
@@ -31,9 +31,9 @@ class StateSelectionTest(unittest.TestCase):
         _clear()
 
     def _makeSchema(self):
-        from zope.interface import Interface
         from guillotina.schema import Choice
         from guillotina.schema.tests.states import StateVocabulary
+        from zope.interface import Interface
 
         class IBirthInfo(Interface):
             state1 = Choice(
@@ -58,8 +58,8 @@ class StateSelectionTest(unittest.TestCase):
         return IBirthInfo
 
     def test_default_presentation(self):
-        from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import IVocabulary
+        from zope.interface.verify import verifyObject
 
         schema = self._makeSchema()
         field = schema.getDescriptionFor("state1")
@@ -68,9 +68,9 @@ class StateSelectionTest(unittest.TestCase):
         self.assertEqual(bound.vocabulary.getTerm("VA").title, "Virginia")
 
     def test_contains(self):
-        from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import IVocabulary
         from guillotina.schema.tests.states import StateVocabulary
+        from zope.interface.verify import verifyObject
 
         vocab = StateVocabulary()
         self.assertTrue(verifyObject(IVocabulary, vocab))
@@ -88,8 +88,8 @@ class StateSelectionTest(unittest.TestCase):
         self.assertEqual(L, L2)
 
     def test_prebound_vocabulary(self):
-        from zope.interface.verify import verifyObject
         from guillotina.schema.interfaces import IVocabulary
+        from zope.interface.verify import verifyObject
 
         schema = self._makeSchema()
         field = schema.getDescriptionFor("state3")  # type: ignore

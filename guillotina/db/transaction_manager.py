@@ -20,7 +20,6 @@ import asyncio
 import asyncpg
 import typing
 
-
 logger = glogging.getLogger("guillotina")
 
 

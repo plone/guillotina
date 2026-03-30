@@ -18,7 +18,6 @@ from typing import Tuple
 
 import functools
 
-
 ToolHandler = Callable[[Any, Any, Dict[str, Any]], Awaitable[Dict[str, Any]]]
 
 RESOLVE_PATH_SCHEMA = {

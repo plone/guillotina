@@ -2,7 +2,6 @@ from guillotina import app_settings
 from guillotina.contrib.cache.lru import LRU
 from typing import Optional
 
-
 _lru: Optional[LRU] = None
 
 

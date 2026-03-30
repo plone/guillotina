@@ -5,7 +5,6 @@ from guillotina.response import HTTPUnauthorized
 
 import fnmatch
 
-
 logger = glogging.getLogger("guillotina")
 
 

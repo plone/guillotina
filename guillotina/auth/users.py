@@ -3,7 +3,6 @@ from guillotina.interfaces import IPrincipal
 from typing import Optional
 from zope.interface import implementer
 
-
 ROOT_USER_ID = "root"
 ANONYMOUS_USER_ID = "Anonymous User"
 

@@ -12,7 +12,6 @@ from zope.interface import interfaces
 
 import json
 
-
 HISTORY_SCHEMA = json.dumps(
     {
         "type": "object",

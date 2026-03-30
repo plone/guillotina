@@ -12,7 +12,6 @@ from zope.interface import implementer
 
 import weakref
 
-
 T = TypeVar("T")
 
 

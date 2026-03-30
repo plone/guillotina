@@ -2,7 +2,6 @@ from guillotina.auth.recaptcha import VALIDATION_HEADER
 
 import pytest
 
-
 pytestmark = pytest.mark.asyncio
 
 FAKE_RECAPTCHA = "FAKE_RECAPTCHA"

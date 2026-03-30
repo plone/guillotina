@@ -18,7 +18,6 @@ from jsonschema.exceptions import ValidationError
 
 import logging
 
-
 logger = logging.getLogger("guillotina.email_validation")
 
 

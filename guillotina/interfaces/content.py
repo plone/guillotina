@@ -10,7 +10,6 @@ from zope.interface.common.mapping import IEnumerableMapping
 
 import guillotina.schema
 
-
 if TYPE_CHECKING:  # pragma: no cover
     from guillotina.db.interfaces import ITransactionManager
 else:

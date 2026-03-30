@@ -34,7 +34,6 @@ import json
 import logging
 import logging.config
 
-
 app_logger = logging.getLogger("guillotina")
 logger = glogging.getLogger("guillotina")
 

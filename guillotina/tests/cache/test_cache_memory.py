@@ -11,7 +11,6 @@ from unittest.mock import Mock
 import asyncio
 import pytest
 
-
 pytestmark = pytest.mark.asyncio
 
 

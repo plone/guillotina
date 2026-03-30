@@ -1,6 +1,5 @@
 from pytest_docker_fixtures import images
 
-
 images.configure(
     name="cockroach",
     image="cockroachdb/cockroach",

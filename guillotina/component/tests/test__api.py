@@ -17,7 +17,8 @@ import unittest
 
 class Test_get_component_registry(unittest.TestCase):
 
-    from guillotina.component.testing import setUp, tearDown
+    from guillotina.component.testing import setUp
+    from guillotina.component.testing import tearDown
 
     def _callFUT(self, *args, **kw):
         from guillotina.component._api import get_component_registry
@@ -53,9 +54,9 @@ class Test_get_component_registry(unittest.TestCase):
         self.assertRaises(ComponentLookupError, self._callFUT, object())
 
     def test_get_component_registry_w_invalid_context_w_adapter(self):
-        from zope.interface import Interface
         from guillotina.component.globalregistry import get_global_components
         from guillotina.component.interfaces import IComponentLookup
+        from zope.interface import Interface
 
         gsm = get_global_components()
         sm = object()
@@ -69,7 +70,8 @@ class Test_get_component_registry(unittest.TestCase):
 
 class Test_get_adapter(unittest.TestCase):
 
-    from guillotina.component.testing import setUp, tearDown
+    from guillotina.component.testing import setUp
+    from guillotina.component.testing import tearDown
 
     def _callFUT(self, *args, **kw):
         from guillotina.component import get_adapter
@@ -77,8 +79,8 @@ class Test_get_adapter(unittest.TestCase):
         return get_adapter(*args, **kw)
 
     def test_anonymous_nonesuch(self):
-        from zope.interface import Interface
         from guillotina.component.interfaces import ComponentLookupError
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -86,8 +88,8 @@ class Test_get_adapter(unittest.TestCase):
         self.assertRaises(ComponentLookupError, self._callFUT, object(), IFoo, "")
 
     def test_named_nonesuch(self):
-        from zope.interface import Interface
         from guillotina.component.interfaces import ComponentLookupError
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -95,9 +97,9 @@ class Test_get_adapter(unittest.TestCase):
         self.assertRaises(ComponentLookupError, self._callFUT, object(), IFoo, "bar")
 
     def test_anonymous_hit(self):
-        from zope.interface import Interface
-        from zope.interface import implementer
         from guillotina.component import get_global_components
+        from zope.interface import implementer
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -121,9 +123,9 @@ class Test_get_adapter(unittest.TestCase):
         self.assertTrue(adapted.context is bar)
 
     def test_anonymous_hit_registered_for_None(self):
-        from zope.interface import Interface
-        from zope.interface import implementer
         from guillotina.component import get_global_components
+        from zope.interface import implementer
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -140,9 +142,9 @@ class Test_get_adapter(unittest.TestCase):
         self.assertTrue(adapted.context is ctx)
 
     def test_named_hit(self):
-        from zope.interface import Interface
-        from zope.interface import implementer
         from guillotina.component import get_global_components
+        from zope.interface import implementer
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -168,7 +170,8 @@ class Test_get_adapter(unittest.TestCase):
 
 class Test_query_adapter(unittest.TestCase):
 
-    from guillotina.component.testing import setUp, tearDown
+    from guillotina.component.testing import setUp
+    from guillotina.component.testing import tearDown
 
     def _callFUT(self, *args, **kw):
         from guillotina.component import query_adapter
@@ -192,9 +195,9 @@ class Test_query_adapter(unittest.TestCase):
         self.assertEqual(self._callFUT(object(), IFoo, "bar"), None)
 
     def test_anonymous_hit(self):
-        from zope.interface import Interface
-        from zope.interface import implementer
         from guillotina.component import get_global_components
+        from zope.interface import implementer
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -218,9 +221,9 @@ class Test_query_adapter(unittest.TestCase):
         self.assertTrue(adapted.context is bar)
 
     def test_named_hit(self):
-        from zope.interface import Interface
-        from zope.interface import implementer
         from guillotina.component import get_global_components
+        from zope.interface import implementer
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -244,11 +247,11 @@ class Test_query_adapter(unittest.TestCase):
         self.assertTrue(adapted.context is bar)
 
     def test_nested(self):
-        from zope.interface import Interface
-        from zope.interface import implementer
-        from zope.interface.registry import Components
         from guillotina.component import get_global_components
         from guillotina.component.tests.examples import ConformsToIComponentLookup
+        from zope.interface import implementer
+        from zope.interface import Interface
+        from zope.interface.registry import Components
 
         class IFoo(Interface):
             pass
@@ -286,7 +289,8 @@ class Test_query_adapter(unittest.TestCase):
 
 class Test_get_multi_adapter(unittest.TestCase):
 
-    from guillotina.component.testing import setUp, tearDown
+    from guillotina.component.testing import setUp
+    from guillotina.component.testing import tearDown
 
     def _callFUT(self, *args, **kw):
         from guillotina.component import get_multi_adapter
@@ -294,8 +298,8 @@ class Test_get_multi_adapter(unittest.TestCase):
         return get_multi_adapter(*args, **kw)
 
     def test_anonymous_nonesuch(self):
-        from zope.interface import Interface
         from guillotina.component.interfaces import ComponentLookupError
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -303,8 +307,8 @@ class Test_get_multi_adapter(unittest.TestCase):
         self.assertRaises(ComponentLookupError, self._callFUT, (object(), object()), IFoo, "")
 
     def test_named_nonesuch(self):
-        from zope.interface import Interface
         from guillotina.component.interfaces import ComponentLookupError
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -312,9 +316,9 @@ class Test_get_multi_adapter(unittest.TestCase):
         self.assertRaises(ComponentLookupError, self._callFUT, (object(), object()), IFoo, "bar")
 
     def test_anonymous_hit(self):
-        from zope.interface import Interface
-        from zope.interface import implementer
         from guillotina.component import get_global_components
+        from zope.interface import implementer
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -347,9 +351,9 @@ class Test_get_multi_adapter(unittest.TestCase):
         self.assertTrue(adapted.second is baz)
 
     def test_anonymous_hit_registered_for_None(self):
-        from zope.interface import Interface
-        from zope.interface import implementer
         from guillotina.component import get_global_components
+        from zope.interface import implementer
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -378,9 +382,9 @@ class Test_get_multi_adapter(unittest.TestCase):
         self.assertTrue(adapted.second is baz)
 
     def test_named_hit(self):
-        from zope.interface import Interface
-        from zope.interface import implementer
         from guillotina.component import get_global_components
+        from zope.interface import implementer
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -415,7 +419,8 @@ class Test_get_multi_adapter(unittest.TestCase):
 
 class Test_query_multi_adapter(unittest.TestCase):
 
-    from guillotina.component.testing import setUp, tearDown
+    from guillotina.component.testing import setUp
+    from guillotina.component.testing import tearDown
 
     def _callFUT(self, *args, **kw):
         from guillotina.component import query_multi_adapter
@@ -439,9 +444,9 @@ class Test_query_multi_adapter(unittest.TestCase):
         self.assertEqual(self._callFUT((object(), object()), IFoo, "bar"), None)
 
     def test_anonymous_hit(self):
-        from zope.interface import Interface
-        from zope.interface import implementer
         from guillotina.component import get_global_components
+        from zope.interface import implementer
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -474,9 +479,9 @@ class Test_query_multi_adapter(unittest.TestCase):
         self.assertTrue(adapted.second is baz)
 
     def test_named_hit(self):
-        from zope.interface import Interface
-        from zope.interface import implementer
         from guillotina.component import get_global_components
+        from zope.interface import implementer
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -509,11 +514,11 @@ class Test_query_multi_adapter(unittest.TestCase):
         self.assertTrue(adapted.second is baz)
 
     def test_nested(self):
-        from zope.interface import Interface
-        from zope.interface import implementer
-        from zope.interface.registry import Components
         from guillotina.component import get_global_components
         from guillotina.component.tests.examples import ConformsToIComponentLookup
+        from zope.interface import implementer
+        from zope.interface import Interface
+        from zope.interface.registry import Components
 
         class IFoo(Interface):
             pass
@@ -558,9 +563,9 @@ class Test_query_multi_adapter(unittest.TestCase):
         self.assertTrue(adapted.second is baz)
 
     def test_wo_sitemanager(self):
-        from zope.interface import Interface
-        from zope.interface import implementer
         from guillotina.component.interfaces import ComponentLookupError
+        from zope.interface import implementer
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -591,7 +596,8 @@ class Test_query_multi_adapter(unittest.TestCase):
 
 class Test_get_adapters(unittest.TestCase):
 
-    from guillotina.component.testing import setUp, tearDown
+    from guillotina.component.testing import setUp
+    from guillotina.component.testing import tearDown
 
     def _callFUT(self, *args, **kw):
         from guillotina.component import get_adapters
@@ -607,8 +613,8 @@ class Test_get_adapters(unittest.TestCase):
         self.assertEqual(list(self._callFUT((object(),), IFoo)), [])
 
     def test_hit(self):
-        from zope.interface import Interface
         from guillotina.component import get_global_components
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -631,9 +637,9 @@ class Test_get_adapters(unittest.TestCase):
         self.assertTrue(("bar", "BazAdapter") in names)
 
     def test_wo_sitemanager(self):
-        from zope.interface import Interface
-        from zope.interface import implementer
         from guillotina.component.interfaces import ComponentLookupError
+        from zope.interface import implementer
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -664,7 +670,8 @@ class Test_get_adapters(unittest.TestCase):
 
 class Test_subscribers(unittest.TestCase):
 
-    from guillotina.component.testing import setUp, tearDown
+    from guillotina.component.testing import setUp
+    from guillotina.component.testing import tearDown
 
     def _callFUT(self, *args, **kw):
         from guillotina.component import subscribers
@@ -681,8 +688,8 @@ class Test_subscribers(unittest.TestCase):
         self.assertEqual(subscribers, [])
 
     def test_hit(self):
-        from zope.interface import Interface
         from guillotina.component import get_global_components
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -705,8 +712,8 @@ class Test_subscribers(unittest.TestCase):
         self.assertTrue("BazAdapter" in names)
 
     def test_wo_sitemanager(self):
-        from zope.interface import Interface
         from guillotina.component.interfaces import ComponentLookupError
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -721,7 +728,8 @@ class Test_subscribers(unittest.TestCase):
 
 class Test_handle(unittest.TestCase):
 
-    from guillotina.component.testing import setUp, tearDown
+    from guillotina.component.testing import setUp
+    from guillotina.component.testing import tearDown
 
     def _callFUT(self, *args, **kw):
         from guillotina.component import handle
@@ -738,8 +746,8 @@ class Test_handle(unittest.TestCase):
 
     def test_hit(self):
         from guillotina.component import get_global_components
-        from zope.interface import Interface
         from zope.interface import implementer
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -767,7 +775,8 @@ class Test_handle(unittest.TestCase):
 
 class Test_get_utility(unittest.TestCase):
 
-    from guillotina.component.testing import setUp, tearDown
+    from guillotina.component.testing import setUp
+    from guillotina.component.testing import tearDown
 
     def _callFUT(self, *args, **kw):
         from guillotina.component._api import get_utility
@@ -775,8 +784,8 @@ class Test_get_utility(unittest.TestCase):
         return get_utility(*args, **kw)
 
     def test_anonymous_nonesuch(self):
-        from zope.interface import Interface
         from guillotina.component.interfaces import ComponentLookupError
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -784,8 +793,8 @@ class Test_get_utility(unittest.TestCase):
         self.assertRaises(ComponentLookupError, self._callFUT, IFoo)
 
     def test_named_nonesuch(self):
-        from zope.interface import Interface
         from guillotina.component.interfaces import ComponentLookupError
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -793,8 +802,8 @@ class Test_get_utility(unittest.TestCase):
         self.assertRaises(ComponentLookupError, self._callFUT, IFoo, name="bar")
 
     def test_anonymous_hit(self):
-        from zope.interface import Interface
         from guillotina.component import get_global_components
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -804,8 +813,8 @@ class Test_get_utility(unittest.TestCase):
         self.assertTrue(self._callFUT(IFoo) is obj)
 
     def test_named_hit(self):
-        from zope.interface import Interface
         from guillotina.component import get_global_components
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -815,9 +824,9 @@ class Test_get_utility(unittest.TestCase):
         self.assertTrue(self._callFUT(IFoo, name="bar") is obj)
 
     def test_w_conforming_context(self):
-        from zope.interface import Interface
         from guillotina.component import get_global_components
         from guillotina.component.tests.examples import ConformsToIComponentLookup
+        from zope.interface import Interface
 
         class SM(object):
             def __init__(self, obj):
@@ -839,7 +848,8 @@ class Test_get_utility(unittest.TestCase):
 
 class Test_query_utility(unittest.TestCase):
 
-    from guillotina.component.testing import setUp, tearDown
+    from guillotina.component.testing import setUp
+    from guillotina.component.testing import tearDown
 
     def _callFUT(self, *args, **kw):
         from guillotina.component._api import query_utility
@@ -881,8 +891,8 @@ class Test_query_utility(unittest.TestCase):
         self.assertTrue(self._callFUT(IFoo, name="bar", default=obj) is obj)
 
     def test_anonymous_hit(self):
-        from zope.interface import Interface
         from guillotina.component import get_global_components
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -892,8 +902,8 @@ class Test_query_utility(unittest.TestCase):
         self.assertTrue(self._callFUT(IFoo) is obj)
 
     def test_named_hit(self):
-        from zope.interface import Interface
         from guillotina.component import get_global_components
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -903,9 +913,9 @@ class Test_query_utility(unittest.TestCase):
         self.assertTrue(self._callFUT(IFoo, name="bar") is obj)
 
     def test_w_conforming_context(self):
-        from zope.interface import Interface
         from guillotina.component import get_global_components
         from guillotina.component.tests.examples import ConformsToIComponentLookup
+        from zope.interface import Interface
 
         class SM(object):
             def __init__(self, obj):
@@ -927,7 +937,8 @@ class Test_query_utility(unittest.TestCase):
 
 class Test_get_utilities_for(unittest.TestCase):
 
-    from guillotina.component.testing import setUp, tearDown
+    from guillotina.component.testing import setUp
+    from guillotina.component.testing import tearDown
 
     def _callFUT(self, *args, **kw):
         from guillotina.component._api import get_utilities_for
@@ -943,8 +954,8 @@ class Test_get_utilities_for(unittest.TestCase):
         self.assertEqual(list(self._callFUT(IFoo)), [])
 
     def test_hit(self):
-        from zope.interface import Interface
         from guillotina.component import get_global_components
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -961,7 +972,8 @@ class Test_get_utilities_for(unittest.TestCase):
 
 class Test_get_all_utilities_registered_for(unittest.TestCase):
 
-    from guillotina.component.testing import setUp, tearDown
+    from guillotina.component.testing import setUp
+    from guillotina.component.testing import tearDown
 
     def _callFUT(self, *args, **kw):
         from guillotina.component import get_all_utilities_registered_for
@@ -977,8 +989,8 @@ class Test_get_all_utilities_registered_for(unittest.TestCase):
         self.assertEqual(list(self._callFUT(IFoo)), [])
 
     def test_hit(self):
-        from zope.interface import Interface
         from guillotina.component import get_global_components
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -1001,7 +1013,8 @@ class Test_get_all_utilities_registered_for(unittest.TestCase):
 
 class Test_get_factory_interfaces(unittest.TestCase):
 
-    from guillotina.component.testing import setUp, tearDown
+    from guillotina.component.testing import setUp
+    from guillotina.component.testing import tearDown
 
     def _callFUT(self, *args, **kw):
         from guillotina.component import get_factory_interfaces
@@ -1039,7 +1052,8 @@ class Test_get_factory_interfaces(unittest.TestCase):
 
 class Test_get_factories_for(unittest.TestCase):
 
-    from guillotina.component.testing import setUp, tearDown
+    from guillotina.component.testing import setUp
+    from guillotina.component.testing import tearDown
 
     def _callFUT(self, *args, **kw):
         from guillotina.component import get_factories_for
@@ -1055,10 +1069,10 @@ class Test_get_factories_for(unittest.TestCase):
         self.assertEqual(list(self._callFUT(IFoo)), [])
 
     def test_w_factory_returning_spec(self):
-        from zope.interface import Interface
-        from zope.interface import implementer
-        from zope.interface import providedBy
         from guillotina.component.interfaces import IFactory
+        from zope.interface import implementer
+        from zope.interface import Interface
+        from zope.interface import providedBy
 
         class IFoo(Interface):
             pass
@@ -1085,8 +1099,8 @@ class Test_get_factories_for(unittest.TestCase):
         self.assertEqual(list(self._callFUT(IBar, context=Context())), [("test", _factory)])
 
     def test_w_factory_returning_list_of_interfaces(self):
-        from zope.interface import Interface
         from guillotina.component.interfaces import IFactory
+        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -1117,9 +1131,9 @@ IMyUtility = None
 
 def _makeMyUtility(name, sm):
     global IMyUtility
-    from zope.interface import Interface
-    from zope.interface import implementer
     from guillotina.component.tests.examples import ConformsToIComponentLookup
+    from zope.interface import implementer
+    from zope.interface import Interface
 
     if IMyUtility is None:
 

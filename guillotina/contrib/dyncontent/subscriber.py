@@ -28,7 +28,6 @@ import json
 import logging
 import typing
 
-
 SUPPORTED_DIRECTIVES = {
     "index": index_field,
     "read_permission": read_permission,

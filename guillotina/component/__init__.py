@@ -41,7 +41,6 @@ from guillotina.component.interfaces import IComponentRegistrationConvenience
 from guillotina.component.interfaces import IFactory
 from zope.interface import moduleProvides
 
-
 # b/w compat imports. Will be removed in 3.0
 getMultiAdapter = get_multi_adapter
 queryMultiAdapter = query_multi_adapter
