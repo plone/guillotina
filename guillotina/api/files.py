@@ -36,12 +36,12 @@ def _traversed_file_doc(summary, parameters=None, responses=None):
 
 
 TUS_PARAMETERS = [
-    {"name": "Upload-Offset", "in": "headers", "required": True, "schema": {"type": "integer"}},
-    {"name": "UPLOAD-LENGTH", "in": "headers", "required": True, "schema": {"type": "integer"}},
-    {"name": "UPLOAD-MD5", "in": "headers", "required": False, "schema": {"type": "string"}},
-    {"name": "UPLOAD-EXTENSION", "in": "headers", "required": False, "schema": {"type": "string"}},
-    {"name": "TUS-RESUMABLE", "in": "headers", "required": True, "schema": {"type": "string"}},
-    {"name": "UPLOAD-METADATA", "in": "headers", "required": False, "schema": {"type": "string"}},
+    {"name": "Upload-Offset", "in": "header", "required": True, "schema": {"type": "integer"}},
+    {"name": "UPLOAD-LENGTH", "in": "header", "required": True, "schema": {"type": "integer"}},
+    {"name": "UPLOAD-MD5", "in": "header", "required": False, "schema": {"type": "string"}},
+    {"name": "UPLOAD-EXTENSION", "in": "header", "required": False, "schema": {"type": "string"}},
+    {"name": "TUS-RESUMABLE", "in": "header", "required": True, "schema": {"type": "string"}},
+    {"name": "UPLOAD-METADATA", "in": "header", "required": False, "schema": {"type": "string"}},
 ]
 
 
@@ -311,8 +311,8 @@ class TusHeadFile(UploadFile):
     **_traversed_file_doc(
         "TUS endpoint",
         parameters=[
-            {"name": "Upload-Offset", "in": "headers", "required": True, "schema": {"type": "integer"}},
-            {"name": "CONTENT-LENGTH", "in": "headers", "required": True, "schema": {"type": "integer"}},
+            {"name": "Upload-Offset", "in": "header", "required": True, "schema": {"type": "integer"}},
+            {"name": "CONTENT-LENGTH", "in": "header", "required": True, "schema": {"type": "integer"}},
         ],
         responses={
             "204": {
@@ -330,8 +330,8 @@ class TusHeadFile(UploadFile):
     **_traversed_file_doc(
         "TUS endpoint",
         parameters=[
-            {"name": "Upload-Offset", "in": "headers", "required": True, "schema": {"type": "integer"}},
-            {"name": "CONTENT-LENGTH", "in": "headers", "required": True, "schema": {"type": "integer"}},
+            {"name": "Upload-Offset", "in": "header", "required": True, "schema": {"type": "integer"}},
+            {"name": "CONTENT-LENGTH", "in": "header", "required": True, "schema": {"type": "integer"}},
             {"name": "file_key", "in": "path", "required": True, "schema": {"type": "string"}},
         ],
         responses={

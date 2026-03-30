@@ -144,7 +144,7 @@ class Register(Service):
     name="@registry/{dotted_name}",
     summary="Update registry setting",
     validate=True,
-    parameters=[{"in": "path", "name": "dotter_name", "required": True, "schema": {"type": "string"}}],
+    parameters=[{"in": "path", "name": "dotted_name", "required": True, "schema": {"type": "string"}}],
     requestBody={
         "required": True,
         "content": {"application/json": {"schema": {"$ref": "#/components/schemas/UpdateRegistry"}}},

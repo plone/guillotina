@@ -46,7 +46,7 @@ async def default_patch(context, request):
     permission="guillotina.ModifyContent",
     name="@behaviors/{behavior}",
     summary="Remove behavior from resource",
-    parameters=[{"in": "path", "name": "key", "required": True, "schema": {"type": "string"}}],
+    parameters=[{"in": "path", "name": "behavior", "required": True, "schema": {"type": "string"}}],
     requestBody={
         "required": True,
         "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Behavior"}}},

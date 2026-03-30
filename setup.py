@@ -57,7 +57,7 @@ setup(
     install_requires=[
         "uvicorn",
         "websockets",
-        "jsonschema==2.6.0",
+        "jsonschema==4.24.1",
         "python-dateutil",
         "pycryptodome",
         "jwcrypto",
@@ -88,7 +88,7 @@ setup(
             "pytest-docker-fixtures==1.4.2",
             "pytest-rerunfailures>=12.0,<13.0",
             "async-asgi-testclient<2.0.0",
-            "openapi-spec-validator==0.2.9",
+            "openapi-spec-validator==0.8.4",
             "aiohttp>=3.0.0,<4.0.0",
             "asyncmock",
             "prometheus-client",

@@ -3,10 +3,10 @@ import json
 import os
 from urllib.parse import urlparse
 
-import pkg_resources
 from zope.interface import Interface
 
 from guillotina import app_settings, configure
+from guillotina import __version__
 from guillotina.api.service import Service
 from guillotina.utils import (
     get_authenticated_user,
@@ -165,7 +165,7 @@ class SwaggerDefinitionService(Service):
         definition["servers"][0]["url"] = url
 
         if "version" not in definition["info"]:
-            definition["info"]["version"] = pkg_resources.get_distribution("guillotina").version
+            definition["info"]["version"] = __version__
 
         api_defs = app_settings["api_definition"]
 

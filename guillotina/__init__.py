@@ -1,7 +1,9 @@
 # load the patch before anything else.
 import os
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version
+from pathlib import Path
 
-import pkg_resources
 from zope.interface import Interface  # noqa
 
 from guillotina import glogging
@@ -13,7 +15,14 @@ from guillotina._settings import app_settings  # noqa
 from guillotina.i18n import default_message_factory as _  # noqa
 
 
-__version__ = pkg_resources.get_distribution("guillotina").version
+def _resolve_version():
+    try:
+        return version("guillotina")
+    except PackageNotFoundError:
+        return (Path(__file__).resolve().parents[1] / "VERSION").read_text().strip()
+
+
+__version__ = _resolve_version()
 
 
 # create logging

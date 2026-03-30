@@ -6,13 +6,13 @@ from base64 import b64encode
 from typing import Any, Dict, Optional
 
 import docutils.statemachine
-import pkg_resources
 from async_asgi_testclient import TestClient
 from docutils import nodes
 from docutils.parsers.rst import Directive  # type: ignore
 from docutils.parsers.rst import directives  # type: ignore
 from zope.interface import Interface
 
+from guillotina import __version__
 from guillotina import routes
 from guillotina._settings import app_settings
 from guillotina.component import query_multi_adapter
@@ -268,5 +268,4 @@ class APICall(Directive):
 
 def setup(app):
     app.add_directive_to_domain("http", "gapi", APICall)
-    dist = pkg_resources.get_distribution("guillotina")
-    return {"version": dist.version}
+    return {"version": __version__}

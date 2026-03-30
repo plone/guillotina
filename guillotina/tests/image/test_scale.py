@@ -202,7 +202,7 @@ class ScalingTests(TestCase):
         img3 = scaleImage(CMYK, 84, 103, quality=20)[0]
         self.assertNotEqual(img1, img2)
         self.assertNotEqual(img1, img3)
-        self.failUnless(len(img1) > len(img2) > len(img3))
+        self.assertTrue(len(img1) > len(img2) > len(img3))
 
     def testResultBuffer(self):
         img1 = scaleImage(PNG, 84, 103)[0]

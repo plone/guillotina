@@ -2,7 +2,7 @@ import json
 import os
 
 import pytest
-from openapi_spec_validator import validate_v3_spec
+from openapi_spec_validator import validate_spec
 
 
 pytestmark = pytest.mark.asyncio
@@ -42,7 +42,7 @@ async def test_validate_swagger_definition(container_requester):
         for path in ("/", "/db", "/db/guillotina"):
             resp, status = await requester("GET", os.path.join(path, "@swagger"))
             assert status == 200
-            validate_v3_spec(resp)
+            validate_spec(resp)
 
 
 @pytest.mark.app_settings(SWAGGER_SETTINGS)
