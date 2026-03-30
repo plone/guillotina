@@ -1,11 +1,7 @@
 from guillotina import configure
-from guillotina.component import get_multi_adapter
-from guillotina.component import get_utilities_for
-from guillotina.component import query_adapter
+from guillotina.component import get_multi_adapter, get_utilities_for, query_adapter
 from guillotina.content import get_cached_factory
-from guillotina.interfaces import IBehavior
-from guillotina.interfaces import IResource
-from guillotina.interfaces import ISchemaSerializeToJson
+from guillotina.interfaces import IBehavior, IResource, ISchemaSerializeToJson
 from guillotina.response import Response
 from guillotina.utils import resolve_dotted_name
 

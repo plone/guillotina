@@ -1,12 +1,12 @@
+import pytest
+from zope.interface import implementer
+
 from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.content import Item
 from guillotina.db.orm.base import BaseObject
 from guillotina.db.transaction import Transaction
-from guillotina.interfaces import IAnnotations
-from guillotina.interfaces import IResource
-from zope.interface import implementer
+from guillotina.interfaces import IAnnotations, IResource
 
-import pytest
 
 pytestmark = pytest.mark.asyncio
 

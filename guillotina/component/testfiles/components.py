@@ -12,11 +12,9 @@
 #
 ##############################################################################
 # flake8: noqa
+from zope.interface import Attribute, Interface, implementer, named
+
 from guillotina.component import adapter
-from zope.interface import Attribute
-from zope.interface import implementer
-from zope.interface import Interface
-from zope.interface import named
 
 
 class IAppb(Interface):

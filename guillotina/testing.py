@@ -1,11 +1,11 @@
-from copy import deepcopy
-from guillotina.auth.users import ROOT_USER_ID
-from guillotina.utils import lazy_apply
-from typing import Any
-from typing import Dict
-
 import base64
 import os
+from copy import deepcopy
+from typing import Any, Dict
+
+from guillotina.auth.users import ROOT_USER_ID
+from guillotina.utils import lazy_apply
+
 
 TESTING_PORT = 55001
 

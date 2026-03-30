@@ -1,5 +1,6 @@
-from guillotina import schema
 from zope.interface import Interface
+
+from guillotina import schema
 
 
 class IValidationSettings(Interface):

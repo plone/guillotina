@@ -1,19 +1,15 @@
-from functools import partial
-from guillotina import configure
-from guillotina.component import get_multi_adapter
-from guillotina.files.utils import convert_base64_to_binary
-from guillotina.files.utils import guess_content_type
-from guillotina.interfaces import ICloudFileField
-from guillotina.interfaces import IContentBehavior
-from guillotina.interfaces import IFile
-from guillotina.interfaces import IFileManager
-from guillotina.schema.fieldproperty import FieldProperty
-from guillotina.utils import get_current_request
-from guillotina.utils import to_str
-from zope.interface import implementer
-
 import base64
 import uuid
+from functools import partial
+
+from zope.interface import implementer
+
+from guillotina import configure
+from guillotina.component import get_multi_adapter
+from guillotina.files.utils import convert_base64_to_binary, guess_content_type
+from guillotina.interfaces import ICloudFileField, IContentBehavior, IFile, IFileManager
+from guillotina.schema.fieldproperty import FieldProperty
+from guillotina.utils import get_current_request, to_str
 
 
 @configure.value_serializer(for_=IFile)

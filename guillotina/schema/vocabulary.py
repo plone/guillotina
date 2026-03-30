@@ -15,13 +15,17 @@
 """
 
 from collections import OrderedDict
-from guillotina.schema.interfaces import ITitledTokenizedTerm
-from guillotina.schema.interfaces import ITokenizedTerm
-from guillotina.schema.interfaces import ITreeVocabulary
-from guillotina.schema.interfaces import IVocabularyRegistry
-from guillotina.schema.interfaces import IVocabularyTokenized
-from zope.interface import directlyProvides
-from zope.interface import implementer
+
+from zope.interface import directlyProvides, implementer
+
+from guillotina.schema.interfaces import (
+    ITitledTokenizedTerm,
+    ITokenizedTerm,
+    ITreeVocabulary,
+    IVocabularyRegistry,
+    IVocabularyTokenized,
+)
+
 
 # simple vocabularies performing enumerated-like tasks
 _marker = object()

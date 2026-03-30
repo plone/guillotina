@@ -1,12 +1,14 @@
+import asyncio
+
 from guillotina import configure
 from guillotina.component import query_utility
 from guillotina.contrib.mcp.interfaces import IMCPToolRegistry
-from guillotina.interfaces import IBeforeObjectRemovedEvent
-from guillotina.interfaces import IObjectAddedEvent
-from guillotina.interfaces import IObjectModifiedEvent
-from guillotina.interfaces import IResource
-
-import asyncio
+from guillotina.interfaces import (
+    IBeforeObjectRemovedEvent,
+    IObjectAddedEvent,
+    IObjectModifiedEvent,
+    IResource,
+)
 
 
 @configure.subscriber(for_=(IResource, IObjectAddedEvent))

@@ -1,18 +1,14 @@
+import hashlib
+import json
+import logging
 from dataclasses import dataclass
+from typing import Any, Awaitable, Callable, Dict, List, Optional
+
 from guillotina import app_settings
 from guillotina.contrib.mcp import resources as mcp_resources
 from guillotina.contrib.mcp import tools
 from guillotina.contrib.redis import get_driver
-from typing import Any
-from typing import Awaitable
-from typing import Callable
-from typing import Dict
-from typing import List
-from typing import Optional
 
-import hashlib
-import json
-import logging
 
 ToolHandler = Callable[[Any, Any, Dict[str, Any]], Awaitable[Dict[str, Any]]]
 ResourceHandler = Callable[[Any], Awaitable[Dict[str, Any]]]

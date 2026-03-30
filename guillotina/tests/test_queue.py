@@ -1,12 +1,13 @@
-from guillotina.async_util import IAsyncJobPool
-from guillotina.async_util import IQueueUtility
+import asyncio
+
+import pytest
+
+from guillotina.async_util import IAsyncJobPool, IQueueUtility
 from guillotina.browser import View
 from guillotina.component import get_utility
 from guillotina.tests import utils
 from guillotina.transactions import transaction
 
-import asyncio
-import pytest
 
 pytestmark = pytest.mark.asyncio
 

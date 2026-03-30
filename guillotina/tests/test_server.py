@@ -1,12 +1,13 @@
+import asyncio
+from unittest import mock
+
+import pytest
+
 from guillotina.component import get_utility
 from guillotina.exceptions import ConflictError
 from guillotina.factory.app import close_utilities
 from guillotina.test_package import ITestAsyncUtility
 from guillotina.traversal import TraversalRouter
-from unittest import mock
-
-import asyncio
-import pytest
 
 
 def test_make_app(dummy_guillotina):

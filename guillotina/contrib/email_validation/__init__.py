@@ -1,5 +1,6 @@
 from guillotina import configure
 
+
 app_settings = {
     "applications": ["guillotina.contrib.templates"],
     "load_utilities": {

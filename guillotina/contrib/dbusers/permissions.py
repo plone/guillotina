@@ -1,5 +1,6 @@
 from guillotina import configure
 
+
 configure.permission("guillotina.AddUser", title="Add plone user")
 configure.permission("guillotina.AddGroup", title="Add plone group")
 configure.permission("guillotina.Nobody", "Permission not assigned to anyone")

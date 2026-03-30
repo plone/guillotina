@@ -1,5 +1,6 @@
 from guillotina import configure
 
+
 configure.json_schema_definition(
     "Addon",
     {

@@ -1,10 +1,8 @@
+from typing import Any, Dict, List
+
 from guillotina import configure
 from guillotina.db.cache.base import BaseCache
-from guillotina.db.interfaces import ITransaction
-from guillotina.db.interfaces import ITransactionCache
-from typing import Any
-from typing import Dict
-from typing import List
+from guillotina.db.interfaces import ITransaction, ITransactionCache
 
 
 @configure.adapter(for_=ITransaction, provides=ITransactionCache, name="dummy")

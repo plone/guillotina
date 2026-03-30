@@ -11,14 +11,16 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
+import sys
 from copy import copy
-from guillotina import event
-from guillotina.schema import interfaces
-from guillotina.schema._bootstrapinterfaces import NO_VALUE
+
 from zope import interface
 
 import guillotina.schema
-import sys
+from guillotina import event
+from guillotina.schema import interfaces
+from guillotina.schema._bootstrapinterfaces import NO_VALUE
+
 
 _marker = object()
 

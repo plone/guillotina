@@ -13,30 +13,34 @@
 ############################################################################
 # flake8: noqa
 
+from zope.interface import Attribute, Interface
+
+# BBB 2011-09-09, import interfaces from zope.interface
+from zope.interface.interfaces import (
+    ComponentLookupError,
+    IAdapterRegistration,
+    IComponentLookup,
+    IComponentRegistry,
+    IComponents,
+    IHandlerRegistration,
+    Invalid,
+    IObjectEvent,
+    IRegistered,
+    IRegistration,
+    IRegistrationEvent,
+    ISubscriptionAdapterRegistration,
+    IUnregistered,
+    IUtilityRegistration,
+    ObjectEvent,
+    Registered,
+    RegistrationEvent,
+    Unregistered,
+    _IBaseAdapterRegistration,
+)
+
 # fmt: off
 from guillotina.component._compat import _BLANK
-from zope.interface import Attribute
-from zope.interface import Interface
-# BBB 2011-09-09, import interfaces from zope.interface
-from zope.interface.interfaces import _IBaseAdapterRegistration
-from zope.interface.interfaces import ComponentLookupError
-from zope.interface.interfaces import IAdapterRegistration
-from zope.interface.interfaces import IComponentLookup
-from zope.interface.interfaces import IComponentRegistry
-from zope.interface.interfaces import IComponents
-from zope.interface.interfaces import IHandlerRegistration
-from zope.interface.interfaces import Invalid
-from zope.interface.interfaces import IObjectEvent
-from zope.interface.interfaces import IRegistered
-from zope.interface.interfaces import IRegistration
-from zope.interface.interfaces import IRegistrationEvent
-from zope.interface.interfaces import ISubscriptionAdapterRegistration
-from zope.interface.interfaces import IUnregistered
-from zope.interface.interfaces import IUtilityRegistration
-from zope.interface.interfaces import ObjectEvent
-from zope.interface.interfaces import Registered
-from zope.interface.interfaces import RegistrationEvent
-from zope.interface.interfaces import Unregistered
+
 
 # fmt: on
 

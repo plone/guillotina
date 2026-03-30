@@ -590,10 +590,9 @@ class FieldPropertyStoredThroughFieldTests(_Base, _Integration):
 
 
 def _getSchema():
-    from guillotina.schema import Bytes
-    from guillotina.schema import Float
-    from guillotina.schema import Text
     from zope.interface import Interface
+
+    from guillotina.schema import Bytes, Float, Text
 
     class Schema(Interface):
         title = Text(description="Short summary", default="say something")
@@ -608,8 +607,7 @@ class CreateFieldPropertiesTests(unittest.TestCase):
     """Testing ..fieldproperty.createFieldProperties."""
 
     def test_creates_fieldproperties_on_class(self):
-        from guillotina.schema.fieldproperty import createFieldProperties
-        from guillotina.schema.fieldproperty import FieldProperty
+        from guillotina.schema.fieldproperty import FieldProperty, createFieldProperties
 
         schema = _getSchema()
 

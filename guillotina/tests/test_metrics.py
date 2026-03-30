@@ -1,4 +1,11 @@
+import asyncio
+import pickle
+from unittest.mock import MagicMock
+
+import prometheus_client
+import pytest
 from asyncmock import AsyncMock
+
 from guillotina import metrics
 from guillotina.const import ROOT_ID
 from guillotina.content import Container
@@ -8,12 +15,7 @@ from guillotina.db.storages.pg import PostgresqlStorage
 from guillotina.db.transaction import Transaction
 from guillotina.db.transaction_manager import TransactionManager
 from guillotina.tests.utils import create_content
-from unittest.mock import MagicMock
 
-import asyncio
-import pickle
-import prometheus_client
-import pytest
 
 pytestmark = pytest.mark.asyncio
 

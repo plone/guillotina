@@ -1,9 +1,11 @@
+import asyncio
+import json
+
+import pytest
+
 from guillotina.contrib.mcp import resources as mcp_resources
 from guillotina.utils import resolve_dotted_name
 
-import asyncio
-import json
-import pytest
 
 pytestmark = pytest.mark.asyncio
 

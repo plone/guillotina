@@ -1,7 +1,9 @@
-from . import settings
+import pytest
+
 from guillotina.tests.utils import get_container
 
-import pytest
+from . import settings
+
 
 pytestmark = pytest.mark.asyncio
 

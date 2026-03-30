@@ -3,9 +3,7 @@ from guillotina.api.service import Service
 from guillotina.component import query_utility
 from guillotina.contrib.mcp.interfaces import IMCPToolRegistry
 from guillotina.interfaces import IResource
-from guillotina.response import HTTPNotFound
-from guillotina.response import HTTPServiceUnavailable
-from guillotina.response import Response
+from guillotina.response import HTTPNotFound, HTTPServiceUnavailable, Response
 
 
 def _get_registry():
@@ -32,9 +30,8 @@ class MCPActionPostService(Service):
 
     async def _handle_protocol(self):
         try:
-            from mcp.server.streamable_http import StreamableHTTPServerTransport
-
             import anyio
+            from mcp.server.streamable_http import StreamableHTTPServerTransport
         except ImportError as exc:
             raise HTTPServiceUnavailable(
                 content={"reason": 'MCP SDK missing. Install "guillotina[mcp]".'}

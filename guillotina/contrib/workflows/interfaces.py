@@ -1,16 +1,14 @@
+import json
+from typing import Optional
+
+from zope.interface import Attribute, Interface, implementer, interfaces
+
 from guillotina import schema
 from guillotina.component import query_adapter
 from guillotina.directives import index_field
-from guillotina.interfaces import IAsyncUtility
-from guillotina.interfaces import IResource
+from guillotina.interfaces import IAsyncUtility, IResource
 from guillotina.schema.interfaces import IContextAwareDefaultFactory
-from typing import Optional
-from zope.interface import Attribute
-from zope.interface import implementer
-from zope.interface import Interface
-from zope.interface import interfaces
 
-import json
 
 HISTORY_SCHEMA = json.dumps(
     {

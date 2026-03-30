@@ -3,10 +3,11 @@ try:
 except ModuleNotFoundError:
     MemcachedDriver = None  # type: ignore
 
-from asyncmock import AsyncMock
 from unittest import mock
 
 import pytest
+from asyncmock import AsyncMock
+
 
 pytestmark = pytest.mark.asyncio
 MEMCACHED_SETTINGS = {"applications": ["guillotina", "memcached", "guillotina.contrib.memcached"]}

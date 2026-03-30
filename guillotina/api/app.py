@@ -1,9 +1,7 @@
-from guillotina import component
-from guillotina import configure
+from guillotina import component, configure
 from guillotina._settings import app_settings
 from guillotina.component import get_multi_adapter
-from guillotina.interfaces import IApplication
-from guillotina.interfaces import IResourceSerializeToJson
+from guillotina.interfaces import IApplication, IResourceSerializeToJson
 from guillotina.utils import get_dotted_name
 
 

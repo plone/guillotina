@@ -8,10 +8,11 @@ try:
 except ModuleNotFoundError:
     pymemcache = None
 
+import pytest
+
 from guillotina.component import get_utility
 from guillotina.interfaces import ICacheUtility
 
-import pytest
 
 pytestmark = pytest.mark.asyncio
 

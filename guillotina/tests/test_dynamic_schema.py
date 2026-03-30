@@ -1,15 +1,15 @@
-from guillotina import configure
-from guillotina.behaviors.dynamic import IDynamicFields
-from guillotina.behaviors.dynamic import IDynamicFieldValues
-from guillotina.behaviors.properties import FunctionProperty
-from guillotina.content import Item
-from guillotina.content import load_cached_schema
-from guillotina.tests.utils import ContainerRequesterAsyncContextManager
-from zope.interface import Interface
-
 import json
+
 import pytest
 import pytest_asyncio
+from zope.interface import Interface
+
+from guillotina import configure
+from guillotina.behaviors.dynamic import IDynamicFields, IDynamicFieldValues
+from guillotina.behaviors.properties import FunctionProperty
+from guillotina.content import Item, load_cached_schema
+from guillotina.tests.utils import ContainerRequesterAsyncContextManager
+
 
 pytestmark = pytest.mark.asyncio
 

@@ -1,22 +1,24 @@
+import logging
+
+from jsonschema import validate as jsonvalidate
+from jsonschema.exceptions import ValidationError
+
 from guillotina import app_settings
 from guillotina.component import get_utility
 from guillotina.contrib.email_validation.interfaces import IValidationSettings
-from guillotina.contrib.email_validation.utils import extract_validation_token
-from guillotina.contrib.email_validation.utils import generate_validation_token
+from guillotina.contrib.email_validation.utils import extract_validation_token, generate_validation_token
 from guillotina.contrib.templates.interfaces import IJinjaUtility
 from guillotina.event import notify
 from guillotina.events import ValidationEvent
 from guillotina.interfaces import IMailer
-from guillotina.response import HTTPNotImplemented
-from guillotina.response import HTTPPreconditionFailed
-from guillotina.response import HTTPServiceUnavailable
-from guillotina.response import HTTPUnauthorized
-from guillotina.utils import get_registry
-from guillotina.utils import resolve_dotted_name
-from jsonschema import validate as jsonvalidate
-from jsonschema.exceptions import ValidationError
+from guillotina.response import (
+    HTTPNotImplemented,
+    HTTPPreconditionFailed,
+    HTTPServiceUnavailable,
+    HTTPUnauthorized,
+)
+from guillotina.utils import get_registry, resolve_dotted_name
 
-import logging
 
 logger = logging.getLogger("guillotina.email_validation")
 

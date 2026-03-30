@@ -1,8 +1,9 @@
-from guillotina import app_settings
-
 import asyncio
 import logging
 import uuid
+
+from guillotina import app_settings
+
 
 logger = logging.getLogger("guillotina")
 

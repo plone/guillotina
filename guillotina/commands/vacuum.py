@@ -1,9 +1,10 @@
+import logging
+
 from guillotina.commands import Command
 from guillotina.component import query_adapter
 from guillotina.db.interfaces import IVacuumProvider
 from guillotina.utils import iter_databases
 
-import logging
 
 logger = logging.getLogger("guillotina")
 

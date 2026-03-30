@@ -4,8 +4,8 @@ from guillotina.content import create_content_in_container
 from guillotina.event import notify
 from guillotina.events import ObjectAddedEvent
 from guillotina.interfaces import ILayers
-from guillotina.utils import get_authenticated_user_id
-from guillotina.utils import get_registry
+from guillotina.utils import get_authenticated_user_id, get_registry
+
 
 USERS_LAYER = "guillotina.contrib.dbusers.interfaces.IDBUsersLayer"
 

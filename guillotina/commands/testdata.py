@@ -1,19 +1,17 @@
+import asyncio
+
+import aiohttp
+
 from guillotina import task_vars
 from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.commands import Command
 from guillotina.component import get_utility
-from guillotina.content import create_content
-from guillotina.content import create_content_in_container
+from guillotina.content import create_content, create_content_in_container
 from guillotina.event import notify
 from guillotina.events import ObjectAddedEvent
 from guillotina.exceptions import ConflictIdOnContainer
-from guillotina.interfaces import IApplication
-from guillotina.interfaces import IDatabase
-from guillotina.interfaces import IPrincipalRoleManager
+from guillotina.interfaces import IApplication, IDatabase, IPrincipalRoleManager
 from guillotina.tests.utils import login
-
-import aiohttp
-import asyncio
 
 
 class AsyncUrlRetriever:

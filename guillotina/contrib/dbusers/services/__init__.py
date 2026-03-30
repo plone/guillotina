@@ -1,10 +1,12 @@
-from . import groups  # noqa
-from . import roles  # noqa
-from . import users  # noqa
 from guillotina import configure
 from guillotina.api.content import DefaultPOST
 from guillotina.contrib.dbusers.content.groups import IGroupManager
 from guillotina.contrib.dbusers.content.users import IUserManager
+
+from . import groups  # noqa
+from . import roles  # noqa
+from . import users  # noqa
+
 
 # override some views...
 configure.service(context=IGroupManager, method="POST", permission="guillotina.AddGroup", allow_access=True)(

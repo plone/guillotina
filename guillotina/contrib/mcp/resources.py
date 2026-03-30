@@ -1,13 +1,10 @@
-from guillotina import __version__
-from guillotina import app_settings
+from typing import Any, Dict
+
+from guillotina import __version__, app_settings
 from guillotina.component import query_utility
 from guillotina.interfaces.catalog import ICatalogUtility
 from guillotina.transactions import get_transaction
-from guillotina.utils import get_content_path
-from guillotina.utils import get_current_container
-from guillotina.utils import navigate_to
-from typing import Any
-from typing import Dict
+from guillotina.utils import get_content_path, get_current_container, navigate_to
 
 
 async def mcp_info_resource(request) -> Dict[str, Any]:

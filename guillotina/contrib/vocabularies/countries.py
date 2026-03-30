@@ -1,5 +1,6 @@
 from guillotina import configure
 
+
 _countries = {
     "AF": "Afghanistan",
     "AN": "Netherlands Antilles",

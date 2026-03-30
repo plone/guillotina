@@ -1,10 +1,13 @@
-from . import settings
-from guillotina.tests.test_catalog import NOT_POSTGRES
-
 import copy
 import json
+
 import pytest
 import pytest_asyncio
+
+from guillotina.tests.test_catalog import NOT_POSTGRES
+
+from . import settings
+
 
 pytestmark = pytest.mark.asyncio
 

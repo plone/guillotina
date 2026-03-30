@@ -1,11 +1,12 @@
 from datetime import datetime
+
 from dateutil.tz import tzutc
+
 from guillotina import configure
 from guillotina.component._api import get_component_registry
-from guillotina.component.interfaces import ComponentLookupError
-from guillotina.component.interfaces import IObjectEvent
-from guillotina.interfaces import IObjectModifiedEvent
-from guillotina.interfaces import IResource
+from guillotina.component.interfaces import ComponentLookupError, IObjectEvent
+from guillotina.interfaces import IObjectModifiedEvent, IResource
+
 
 _zone = tzutc()
 

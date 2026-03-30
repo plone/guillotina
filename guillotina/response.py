@@ -1,13 +1,10 @@
+from typing import Dict, List, Optional, Tuple, Union
+
+from multidict import CIMultiDict, istr
+from zope.interface import implementer
+
 from guillotina.interfaces import IResponse
 from guillotina.request import Request
-from multidict import CIMultiDict
-from multidict import istr
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Tuple
-from typing import Union
-from zope.interface import implementer
 
 
 @implementer(IResponse)

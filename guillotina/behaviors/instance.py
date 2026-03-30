@@ -1,11 +1,11 @@
-from guillotina.annotations import AnnotationData
-from guillotina.interfaces import IAnnotationData
-from guillotina.interfaces import IAnnotations
-from guillotina.interfaces import IAsyncBehavior
-from guillotina.interfaces import IContentBehavior
-from guillotina.schema.utils import get_default_from_schema
 from typing import Tuple
+
 from zope.interface import implementer
+
+from guillotina.annotations import AnnotationData
+from guillotina.interfaces import IAnnotationData, IAnnotations, IAsyncBehavior, IContentBehavior
+from guillotina.schema.utils import get_default_from_schema
+
 
 _default = object()
 

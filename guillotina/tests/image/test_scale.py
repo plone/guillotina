@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
-from guillotina.contrib.image.scale import scaleImage
-from guillotina.contrib.image.scale import scalePILImage
-from guillotina.tests.image import TEST_DATA_LOCATION
+import os.path
+import warnings
 from io import BytesIO
 from unittest import TestCase
 
-import os.path
 import PIL.Image
 import PIL.ImageDraw
-import warnings
+
+from guillotina.contrib.image.scale import scaleImage, scalePILImage
+from guillotina.tests.image import TEST_DATA_LOCATION
+
 
 with open(os.path.join(TEST_DATA_LOCATION, "logo.png"), "rb") as fio:
     PNG = fio.read()

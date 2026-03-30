@@ -1,44 +1,43 @@
-from collections import OrderedDict
-from guillotina import routes
-from guillotina._settings import app_settings
-from guillotina.configure import component
-from guillotina.configure.behaviors import BehaviorAdapterFactory
-from guillotina.configure.behaviors import BehaviorRegistration
-from guillotina.exceptions import ConfigurationError
-from guillotina.exceptions import ServiceConfigurationError
-from guillotina.gtypes import ConfigurationType
-from guillotina.gtypes import ResolvableType
-from guillotina.interfaces import DEFAULT_ADD_PERMISSION
-from guillotina.interfaces import IBehavior
-from guillotina.interfaces import IBehaviorSchemaAwareFactory
-from guillotina.interfaces import IDefaultLayer
-from guillotina.interfaces import IJSONToValue
-from guillotina.interfaces import ILanguage
-from guillotina.interfaces import IPermission
-from guillotina.interfaces import IRenderer
-from guillotina.interfaces import IRequest
-from guillotina.interfaces import IResource
-from guillotina.interfaces import IResourceFactory
-from guillotina.interfaces import IRole
-from guillotina.interfaces import IValueToJson
-from guillotina.interfaces import IView
-from guillotina.security.permission import Permission
-from guillotina.utils import get_caller_module
-from guillotina.utils import get_module_dotted_name
-from guillotina.utils import resolve_dotted_name
-from guillotina.utils import resolve_module_path
-from pprint import pformat
-from typing import Any
-from typing import Dict
-from typing import Optional
-from typing import Tuple
-from zope.interface import classImplements
-from zope.interface import Interface
-from zope.interface.interfaces import IInterface
-
 import asyncio
 import inspect
 import logging
+from collections import OrderedDict
+from pprint import pformat
+from typing import Any, Dict, Optional, Tuple
+
+from zope.interface import Interface, classImplements
+from zope.interface.interfaces import IInterface
+
+from guillotina import routes
+from guillotina._settings import app_settings
+from guillotina.configure import component
+from guillotina.configure.behaviors import BehaviorAdapterFactory, BehaviorRegistration
+from guillotina.exceptions import ConfigurationError, ServiceConfigurationError
+from guillotina.gtypes import ConfigurationType, ResolvableType
+from guillotina.interfaces import (
+    DEFAULT_ADD_PERMISSION,
+    IBehavior,
+    IBehaviorSchemaAwareFactory,
+    IDefaultLayer,
+    IJSONToValue,
+    ILanguage,
+    IPermission,
+    IRenderer,
+    IRequest,
+    IResource,
+    IResourceFactory,
+    IRole,
+    IValueToJson,
+    IView,
+)
+from guillotina.security.permission import Permission
+from guillotina.utils import (
+    get_caller_module,
+    get_module_dotted_name,
+    resolve_dotted_name,
+    resolve_module_path,
+)
+
 
 _registered_configurations: ConfigurationType = []
 # stored as tuple of (type, configuration) so we get keep it in the order
@@ -632,8 +631,7 @@ def grant_directive(_context, principal=None, role=None, permission=None, permis
 
 def grantAll_directive(_context, principal=None, role=None):  # noqa: N802
     """Grant all permissions to a role or principal"""
-    from guillotina.security.security_code import principal_permission_manager
-    from guillotina.security.security_code import role_permission_manager
+    from guillotina.security.security_code import principal_permission_manager, role_permission_manager
 
     nspecified = (principal is not None) + (role is not None)
 

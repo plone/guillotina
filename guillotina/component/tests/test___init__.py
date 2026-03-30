@@ -17,26 +17,25 @@ import unittest
 
 class Test_package(unittest.TestCase):
     def test_module_conforms_to_IComponentArchitecture(self):
-        from guillotina.component.interfaces import IComponentArchitecture
         from zope.interface.verify import verifyObject
 
         import guillotina.component as zc
+        from guillotina.component.interfaces import IComponentArchitecture
 
         verifyObject(IComponentArchitecture, zc)
 
     def test_module_conforms_to_IComponentRegistrationConvenience(self):
-        from guillotina.component.interfaces import IComponentRegistrationConvenience
         from zope.interface.verify import verifyObject
 
         import guillotina.component as zc
+        from guillotina.component.interfaces import IComponentRegistrationConvenience
 
         verifyObject(IComponentRegistrationConvenience, zc)
 
 
 class Test_Interface_call(unittest.TestCase):
 
-    from guillotina.component.testing import setUp
-    from guillotina.component.testing import tearDown
+    from guillotina.component.testing import setUp, tearDown
 
     def test_miss(self):
         from zope.interface import Interface
@@ -56,9 +55,9 @@ class Test_Interface_call(unittest.TestCase):
         self.assertTrue(IFoo(object(), marker) is marker)
 
     def test_hit(self):
+        from zope.interface import Interface, implementer
+
         from guillotina.component import get_global_components
-        from zope.interface import implementer
-        from zope.interface import Interface
 
         class IFoo(Interface):
             pass
@@ -82,9 +81,9 @@ class Test_Interface_call(unittest.TestCase):
         self.assertTrue(adapted.context is bar)
 
     def test_hit_registered_for_None(self):
+        from zope.interface import Interface, implementer
+
         from guillotina.component import get_global_components
-        from zope.interface import implementer
-        from zope.interface import Interface
 
         class IFoo(Interface):
             pass

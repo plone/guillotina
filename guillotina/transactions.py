@@ -1,9 +1,9 @@
-from guillotina import task_vars
-from guillotina.db.interfaces import ITransaction
-from guillotina.db.interfaces import ITransactionManager
-
 import logging
 import typing
+
+from guillotina import task_vars
+from guillotina.db.interfaces import ITransaction, ITransactionManager
+
 
 logger = logging.getLogger("guillotina")
 

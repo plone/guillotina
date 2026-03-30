@@ -4,23 +4,20 @@ except ImportError:
     print("If you add guillotina.contrib.memcached you need to add emcache on your requirements")
     raise
 
-from guillotina import app_settings
-from guillotina import metrics
-from guillotina.contrib.memcached.exceptions import NoMemcachedConfigured
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-
 import asyncio
-import backoff
 import hashlib
 import logging
+from typing import Any, Dict, List, Optional
+
+import backoff
+
+from guillotina import app_settings, metrics
+from guillotina.contrib.memcached.exceptions import NoMemcachedConfigured
+
 
 try:
-    from prometheus_client.utils import INF
-
     import prometheus_client
+    from prometheus_client.utils import INF
 
     _SEND_METRICS = True
 

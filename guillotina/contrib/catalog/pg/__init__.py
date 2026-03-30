@@ -1,6 +1,7 @@
+import logging
+
 from guillotina import configure
 
-import logging
 
 logger = logging.getLogger("guillotina")
 

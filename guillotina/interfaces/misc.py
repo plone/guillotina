@@ -1,10 +1,9 @@
+from typing import Dict, Optional, Tuple, Type
+
+from zope.interface import Interface
+
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces.content import IApplication
-from typing import Dict
-from typing import Optional
-from typing import Tuple
-from typing import Type
-from zope.interface import Interface
 
 
 class IRequest(Interface):

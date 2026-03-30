@@ -1,11 +1,7 @@
 from guillotina import configure
 from guillotina.api.service import Service
-from guillotina.component import get_multi_adapter
-from guillotina.component import get_utilities_for
-from guillotina.component import query_utility
-from guillotina.interfaces import IContainer
-from guillotina.interfaces import IFactorySerializeToJson
-from guillotina.interfaces import IResourceFactory
+from guillotina.component import get_multi_adapter, get_utilities_for, query_utility
+from guillotina.interfaces import IContainer, IFactorySerializeToJson, IResourceFactory
 from guillotina.response import HTTPNotFound
 
 

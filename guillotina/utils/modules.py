@@ -1,14 +1,14 @@
-from guillotina.gtypes import ResolvableType
-from typing import Any
-from typing import Optional
-from zope.interface.interfaces import IInterface
-
 import importlib
 import inspect
 import os
 import pathlib
 import sys
 import types
+from typing import Any, Optional
+
+from zope.interface.interfaces import IInterface
+
+from guillotina.gtypes import ResolvableType
 
 
 def import_class(import_string: str) -> Optional[types.ModuleType]:

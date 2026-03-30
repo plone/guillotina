@@ -1,10 +1,8 @@
-from guillotina import configure
-from guillotina import fields
-from guillotina import schema
-from guillotina.behaviors.instance import AnnotationBehavior
-from guillotina.behaviors.instance import ContextBehavior
-from guillotina.interfaces import IContentBehavior
 from zope.interface import Interface
+
+from guillotina import configure, fields, schema
+from guillotina.behaviors.instance import AnnotationBehavior, ContextBehavior
+from guillotina.interfaces import IContentBehavior
 
 
 def get_all_fields(content):

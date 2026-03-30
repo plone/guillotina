@@ -1,8 +1,9 @@
-from guillotina.profile import profilable
-
-import asyncpg
 import pickle
 import typing
+
+import asyncpg
+
+from guillotina.profile import profilable
 
 
 @profilable

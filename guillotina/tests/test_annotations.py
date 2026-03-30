@@ -1,3 +1,9 @@
+import os
+import time
+from uuid import uuid4
+
+import pytest
+
 from guillotina.annotations import AnnotationData
 from guillotina.content import create_content_in_container
 from guillotina.fields.annotation import BucketDictValue
@@ -5,11 +11,7 @@ from guillotina.interfaces import IAnnotations
 from guillotina.tests.utils import login
 from guillotina.transactions import transaction
 from guillotina.utils import get_database
-from uuid import uuid4
 
-import os
-import pytest
-import time
 
 pytestmark = pytest.mark.asyncio
 

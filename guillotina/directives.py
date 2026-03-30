@@ -1,8 +1,7 @@
-from typing import Any
-from zope.interface.interface import Element
-from zope.interface.interface import TAGGED_DATA
-
 import sys
+from typing import Any
+
+from zope.interface.interface import TAGGED_DATA, Element
 
 
 class DirectiveClass(type):

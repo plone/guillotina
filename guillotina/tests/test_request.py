@@ -1,8 +1,10 @@
-from guillotina.tests.utils import make_mocked_request
+import asyncio
+
+import pytest
 from multidict import CIMultiDict
 
-import asyncio
-import pytest
+from guillotina.tests.utils import make_mocked_request
+
 
 pytestmark = pytest.mark.asyncio
 

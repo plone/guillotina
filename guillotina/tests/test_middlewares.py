@@ -1,9 +1,10 @@
-from guillotina.middlewares.errors import generate_error_response
-
 import asyncio
-import pytest
 import time
 import unittest
+
+import pytest
+
+from guillotina.middlewares.errors import generate_error_response
 
 
 class AsgiMiddlewate:

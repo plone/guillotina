@@ -1,7 +1,8 @@
+from zope.interface import implementer
+
 from guillotina._settings import app_settings
 from guillotina.component import get_utilities_for
 from guillotina.interfaces import IRole
-from zope.interface import implementer
 
 
 @implementer(IRole)

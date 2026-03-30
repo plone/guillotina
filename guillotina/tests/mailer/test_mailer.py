@@ -1,7 +1,8 @@
+import pytest
+
 from guillotina.component import get_utility
 from guillotina.interfaces import IMailer
 
-import pytest
 
 pytestmark = pytest.mark.asyncio
 

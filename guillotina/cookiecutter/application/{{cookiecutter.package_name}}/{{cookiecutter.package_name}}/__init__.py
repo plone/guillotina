@@ -1,5 +1,6 @@
 from guillotina import configure
 
+
 app_settings = {
     # provide custom application settings here...
 }

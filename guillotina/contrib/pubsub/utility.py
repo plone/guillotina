@@ -1,13 +1,14 @@
+import asyncio
+import logging
+import pickle
+from typing import Any, Callable
+
+import backoff
+
 from guillotina.contrib.pubsub.exceptions import NoPubSubDriver
 from guillotina.profile import profilable
 from guillotina.utils import resolve_dotted_name
-from typing import Any
-from typing import Callable
 
-import asyncio
-import backoff
-import logging
-import pickle
 
 logger = logging.getLogger("guillotina")
 

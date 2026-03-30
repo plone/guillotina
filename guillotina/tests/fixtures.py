@@ -1,33 +1,31 @@
-from async_asgi_testclient import TestClient
-from guillotina import task_vars
-from guillotina import testing
-from guillotina.component import get_utility
-from guillotina.component import globalregistry
-from guillotina.const import ROOT_ID
-from guillotina.const import TRASHED_ID
-from guillotina.db.interfaces import ICockroachStorage
-from guillotina.db.interfaces import IPostgresStorage
-from guillotina.db.storages.cockroach import CockroachStorage
-from guillotina.factory import make_app
-from guillotina.interfaces import IApplication
-from guillotina.interfaces import IDatabase
-from guillotina.tests import mocks
-from guillotina.tests.utils import ContainerRequesterAsyncContextManager
-from guillotina.tests.utils import get_mocked_request
-from guillotina.tests.utils import login
-from guillotina.tests.utils import logout
-from guillotina.tests.utils import wrap_request
-from guillotina.transactions import get_tm
-from guillotina.transactions import transaction
-from guillotina.utils import merge_dicts
-from unittest import mock
-
-import aiohttp
 import asyncio
 import json
 import os
+from unittest import mock
+
+import aiohttp
 import pytest
 import pytest_asyncio
+from async_asgi_testclient import TestClient
+
+from guillotina import task_vars, testing
+from guillotina.component import get_utility, globalregistry
+from guillotina.const import ROOT_ID, TRASHED_ID
+from guillotina.db.interfaces import ICockroachStorage, IPostgresStorage
+from guillotina.db.storages.cockroach import CockroachStorage
+from guillotina.factory import make_app
+from guillotina.interfaces import IApplication, IDatabase
+from guillotina.tests import mocks
+from guillotina.tests.utils import (
+    ContainerRequesterAsyncContextManager,
+    get_mocked_request,
+    login,
+    logout,
+    wrap_request,
+)
+from guillotina.transactions import get_tm, transaction
+from guillotina.utils import merge_dicts
+
 
 _dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -497,8 +495,7 @@ async def app(event_loop, db, request):
     host = server_settings.get("host", "127.0.0.1")
     port = int(server_settings.get("port", 8000))
 
-    from uvicorn import Config
-    from uvicorn import Server
+    from uvicorn import Config, Server
 
     config = Config(app, host=host, port=port, lifespan="on", server_header=False)
     server = Server(config=config)

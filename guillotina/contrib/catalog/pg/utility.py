@@ -1,3 +1,11 @@
+import json
+import os
+import typing
+
+import asyncpg.exceptions
+import orjson
+from zope.interface import implementer
+
 from guillotina.api.content import DefaultGET
 from guillotina.auth.users import AnonymousUser
 from guillotina.catalog.catalog import DefaultSearchUtility
@@ -5,41 +13,28 @@ from guillotina.catalog.utils import parse_query
 from guillotina.component import get_utility
 from guillotina.const import TRASHED_ID
 from guillotina.contrib.catalog.pg import logger
-from guillotina.contrib.catalog.pg.indexes import BasicJsonIndex
-from guillotina.contrib.catalog.pg.indexes import get_pg_index
-from guillotina.contrib.catalog.pg.indexes import get_pg_indexes
+from guillotina.contrib.catalog.pg.indexes import BasicJsonIndex, get_pg_index, get_pg_indexes
 from guillotina.contrib.catalog.pg.parser import ParsedQueryInfo
 from guillotina.contrib.catalog.pg.utils import sqlq
-from guillotina.db.interfaces import IPostgresStorage
-from guillotina.db.interfaces import ITransaction
-from guillotina.db.interfaces import IWriter
+from guillotina.db.interfaces import IPostgresStorage, ITransaction, IWriter
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.db.storages.utils import register_sql
 from guillotina.db.uid import MAX_UID_LENGTH
-from guillotina.exceptions import ContainerNotFound
-from guillotina.exceptions import RequestNotFound
-from guillotina.exceptions import TransactionNotFound
-from guillotina.interfaces import IDatabase
-from guillotina.interfaces import IFolder
-from guillotina.interfaces import IPGCatalogUtility
-from guillotina.interfaces import IResource
+from guillotina.exceptions import ContainerNotFound, RequestNotFound, TransactionNotFound
+from guillotina.interfaces import IDatabase, IFolder, IPGCatalogUtility, IResource
 from guillotina.interfaces.content import IApplication
 from guillotina.response import HTTPNotImplemented
 from guillotina.transactions import get_transaction
-from guillotina.utils import find_container
-from guillotina.utils import get_authenticated_user
-from guillotina.utils import get_content_path
-from guillotina.utils import get_current_request
-from guillotina.utils import get_current_transaction
-from guillotina.utils import get_object_url
-from guillotina.utils import get_roles_principal
-from zope.interface import implementer
+from guillotina.utils import (
+    find_container,
+    get_authenticated_user,
+    get_content_path,
+    get_current_request,
+    get_current_transaction,
+    get_object_url,
+    get_roles_principal,
+)
 
-import asyncpg.exceptions
-import json
-import orjson
-import os
-import typing
 
 # 2019-06-15T18:37:31.008359+00:00
 PG_FUNCTIONS = [

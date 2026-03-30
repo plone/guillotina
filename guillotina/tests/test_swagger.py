@@ -1,8 +1,9 @@
-from openapi_spec_validator import validate_v3_spec
-
 import json
 import os
+
 import pytest
+from openapi_spec_validator import validate_v3_spec
+
 
 pytestmark = pytest.mark.asyncio
 

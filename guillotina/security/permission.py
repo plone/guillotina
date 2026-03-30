@@ -1,6 +1,7 @@
+from zope.interface import implementer
+
 from guillotina.component import get_utilities_for
 from guillotina.interfaces import IPermission
-from zope.interface import implementer
 
 
 @implementer(IPermission)

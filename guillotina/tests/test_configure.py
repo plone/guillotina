@@ -1,22 +1,19 @@
+import pytest
+from zope.interface import Interface
+
 from guillotina import configure
 from guillotina.addons import Addon
 from guillotina.api.service import Service
-from guillotina.component import get_utility
-from guillotina.component import query_multi_adapter
+from guillotina.component import get_utility, query_multi_adapter
 from guillotina.configure.config import ConfigurationMachine
-from guillotina.content import get_all_possible_schemas_for_type
-from guillotina.content import Item
+from guillotina.content import Item, get_all_possible_schemas_for_type
 from guillotina.event import notify
 from guillotina.events import ObjectAddedEvent
-from guillotina.factory.app import ApplicationConfigurator
-from guillotina.factory.app import configure_application
+from guillotina.factory.app import ApplicationConfigurator, configure_application
 from guillotina.factory.content import ApplicationRoot
-from guillotina.interfaces import IApplication
-from guillotina.interfaces import IContainer
+from guillotina.interfaces import IApplication, IContainer
 from guillotina.tests.utils import create_content
-from zope.interface import Interface
 
-import pytest
 
 pytestmark = pytest.mark.asyncio
 

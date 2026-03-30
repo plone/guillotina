@@ -1,8 +1,8 @@
+import typing
+
 from guillotina.catalog.utils import iter_indexes
 from guillotina.contrib.catalog.pg.utils import sqlq
 from guillotina.db.interfaces import IPostgresStorage
-
-import typing
 
 
 class BasicJsonIndex:

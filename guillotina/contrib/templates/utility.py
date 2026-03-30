@@ -1,17 +1,15 @@
+import logging
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
-from guillotina import app_settings
-from guillotina.contrib.templates.interfaces import IJinjaTemplate
-from guillotina.utils import get_current_container
-from guillotina.utils import navigate_to
-from jinja2 import BaseLoader
-from jinja2 import Environment
-from jinja2 import PackageLoader
-from jinja2 import select_autoescape
+
+from jinja2 import BaseLoader, Environment, PackageLoader, select_autoescape
 from jinja2.exceptions import TemplateNotFound
 from lru import LRU
 
-import logging
+from guillotina import app_settings
+from guillotina.contrib.templates.interfaces import IJinjaTemplate
+from guillotina.utils import get_current_container, navigate_to
+
 
 logger = logging.getLogger("guillotina")
 

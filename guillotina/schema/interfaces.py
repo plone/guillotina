@@ -12,17 +12,13 @@
 #
 ##############################################################################
 
-from guillotina.schema._bootstrapfields import Bool
-from guillotina.schema._bootstrapfields import Field
-from guillotina.schema._bootstrapfields import Int
-from guillotina.schema._bootstrapfields import Text
-from guillotina.schema._bootstrapfields import TextLine
-from guillotina.schema._bootstrapinterfaces import IContextAwareDefaultFactory
-from guillotina.schema._bootstrapinterfaces import IFromUnicode
-from guillotina.schema._messageid import _
-from zope.interface import Attribute
-from zope.interface import Interface
+from zope.interface import Attribute, Interface
 from zope.interface.common.mapping import IEnumerableMapping
+
+from guillotina.schema._bootstrapfields import Bool, Field, Int, Text, TextLine
+from guillotina.schema._bootstrapinterfaces import IContextAwareDefaultFactory, IFromUnicode
+from guillotina.schema._messageid import _
+
 
 __docformat__ = "reStructuredText"
 

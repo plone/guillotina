@@ -1,5 +1,6 @@
 from guillotina import configure
 
+
 CACHE_PREFIX = "gcache2-"
 
 app_settings = {

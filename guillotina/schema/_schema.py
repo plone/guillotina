@@ -11,8 +11,9 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-import guillotina.schema
 import zope.interface.verify
+
+import guillotina.schema
 
 
 def getFieldNames(schema):

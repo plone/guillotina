@@ -1,50 +1,44 @@
 # this is for testing.py, do not import into other modules
-from guillotina import configure
-from guillotina import fields
-from guillotina import schema
-from guillotina.async_util import IAsyncUtility
-from guillotina.behaviors.instance import AnnotationBehavior
-from guillotina.behaviors.instance import ContextBehavior
-from guillotina.behaviors.properties import ContextProperty
-from guillotina.component import get_multi_adapter
-from guillotina.content import Item
-from guillotina.content import Resource
-from guillotina.directives import index_field
-from guillotina.directives import metadata
-from guillotina.directives import read_permission
-from guillotina.directives import write_permission
-from guillotina.exceptions import FileNotFoundException
-from guillotina.exceptions import NoIndexField
-from guillotina.fields import CloudFileField
-from guillotina.files import BaseCloudFile
-from guillotina.files.exceptions import RangeNotFound
-from guillotina.interfaces import IApplication
-from guillotina.interfaces import IContainer
-from guillotina.interfaces import IExternalFileStorageManager
-from guillotina.interfaces import IFile
-from guillotina.interfaces import IFileField
-from guillotina.interfaces import IFileNameGenerator
-from guillotina.interfaces import IIDGenerator
-from guillotina.interfaces import IItem
-from guillotina.interfaces import IJSONToValue
-from guillotina.interfaces import IObjectAddedEvent
-from guillotina.interfaces import IRequest
-from guillotina.interfaces import IResource
-from guillotina.response import HTTPUnprocessableEntity
-from guillotina.schema import Object
-from guillotina.schema.interfaces import IContextAwareDefaultFactory
-from guillotina.utils import apply_coroutine
-from guillotina.utils import execute
-from shutil import copyfile
-from typing import AsyncIterator
-from zope.interface import implementer
-from zope.interface import Interface
-
 import asyncio
 import json
 import os
 import tempfile
 import typing
+from shutil import copyfile
+from typing import AsyncIterator
+
+from zope.interface import Interface, implementer
+
+from guillotina import configure, fields, schema
+from guillotina.async_util import IAsyncUtility
+from guillotina.behaviors.instance import AnnotationBehavior, ContextBehavior
+from guillotina.behaviors.properties import ContextProperty
+from guillotina.component import get_multi_adapter
+from guillotina.content import Item, Resource
+from guillotina.directives import index_field, metadata, read_permission, write_permission
+from guillotina.exceptions import FileNotFoundException, NoIndexField
+from guillotina.fields import CloudFileField
+from guillotina.files import BaseCloudFile
+from guillotina.files.exceptions import RangeNotFound
+from guillotina.interfaces import (
+    IApplication,
+    IContainer,
+    IExternalFileStorageManager,
+    IFile,
+    IFileField,
+    IFileNameGenerator,
+    IIDGenerator,
+    IItem,
+    IJSONToValue,
+    IObjectAddedEvent,
+    IRequest,
+    IResource,
+)
+from guillotina.response import HTTPUnprocessableEntity
+from guillotina.schema import Object
+from guillotina.schema.interfaces import IContextAwareDefaultFactory
+from guillotina.utils import apply_coroutine, execute
+
 
 app_settings = {"applications": ["guillotina"]}
 

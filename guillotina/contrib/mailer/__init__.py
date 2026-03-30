@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
+import logging
+
 from guillotina import configure
 from guillotina.component import provide_utility
 from guillotina.interfaces import IMailer
 from guillotina.utils import import_class
 
-import logging
 
 logger = logging.getLogger("guillotina.contrib.mailer")
 

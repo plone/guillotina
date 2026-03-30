@@ -1,68 +1,70 @@
-from guillotina import configure
-from guillotina import content
-from guillotina import error_reasons
-from guillotina import security
+from guillotina import configure, content, error_reasons, security
 from guillotina._cache import FACTORY_CACHE
 from guillotina._settings import app_settings
 from guillotina.api.service import Service
-from guillotina.component import get_adapter
-from guillotina.component import get_multi_adapter
-from guillotina.component import query_adapter
-from guillotina.component import query_multi_adapter
-from guillotina.content import create_content_in_container
-from guillotina.content import get_all_behavior_interfaces
-from guillotina.content import get_all_behaviors
-from guillotina.content import get_cached_factory
-from guillotina.directives import merged_tagged_value_dict
-from guillotina.directives import read_permission
+from guillotina.component import get_adapter, get_multi_adapter, query_adapter, query_multi_adapter
+from guillotina.content import (
+    create_content_in_container,
+    get_all_behavior_interfaces,
+    get_all_behaviors,
+    get_cached_factory,
+)
+from guillotina.directives import merged_tagged_value_dict, read_permission
 from guillotina.event import notify
-from guillotina.events import BeforeObjectModifiedEvent
-from guillotina.events import BeforeObjectRemovedEvent
-from guillotina.events import ObjectAddedEvent
-from guillotina.events import ObjectModifiedEvent
-from guillotina.events import ObjectPermissionsViewEvent
-from guillotina.events import ObjectRemovedEvent
-from guillotina.events import ObjectVisitedEvent
-from guillotina.exceptions import ComponentLookupError
-from guillotina.exceptions import PreconditionFailed
+from guillotina.events import (
+    BeforeObjectModifiedEvent,
+    BeforeObjectRemovedEvent,
+    ObjectAddedEvent,
+    ObjectModifiedEvent,
+    ObjectPermissionsViewEvent,
+    ObjectRemovedEvent,
+    ObjectVisitedEvent,
+)
+from guillotina.exceptions import ComponentLookupError, PreconditionFailed
 from guillotina.i18n import default_message_factory as _
-from guillotina.interfaces import IAnnotations
-from guillotina.interfaces import IAsyncContainer
-from guillotina.interfaces import IConstrainTypes
-from guillotina.interfaces import IContainer
-from guillotina.interfaces import IFieldValueRenderer
-from guillotina.interfaces import IFolder
-from guillotina.interfaces import IGetOwner
-from guillotina.interfaces import IIDChecker
-from guillotina.interfaces import IIDGenerator
-from guillotina.interfaces import IPrincipalPermissionMap
-from guillotina.interfaces import IPrincipalRoleManager
-from guillotina.interfaces import IPrincipalRoleMap
-from guillotina.interfaces import IResource
-from guillotina.interfaces import IResourceDeserializeFromJson
-from guillotina.interfaces import IResourceSerializeToJson
-from guillotina.interfaces import IResourceSerializeToJsonSummary
-from guillotina.interfaces import IResponse
-from guillotina.interfaces import IRolePermissionMap
+from guillotina.interfaces import (
+    IAnnotations,
+    IAsyncContainer,
+    IConstrainTypes,
+    IContainer,
+    IFieldValueRenderer,
+    IFolder,
+    IGetOwner,
+    IIDChecker,
+    IIDGenerator,
+    IPrincipalPermissionMap,
+    IPrincipalRoleManager,
+    IPrincipalRoleMap,
+    IResource,
+    IResourceDeserializeFromJson,
+    IResourceSerializeToJson,
+    IResourceSerializeToJsonSummary,
+    IResponse,
+    IRolePermissionMap,
+)
 from guillotina.json.utils import convert_interfaces_to_schema
 from guillotina.profile import profilable
-from guillotina.response import ErrorResponse
-from guillotina.response import HTTPMethodNotAllowed
-from guillotina.response import HTTPMovedPermanently
-from guillotina.response import HTTPNotFound
-from guillotina.response import HTTPPreconditionFailed
-from guillotina.response import HTTPUnauthorized
-from guillotina.response import Response
+from guillotina.response import (
+    ErrorResponse,
+    HTTPMethodNotAllowed,
+    HTTPMovedPermanently,
+    HTTPNotFound,
+    HTTPPreconditionFailed,
+    HTTPUnauthorized,
+    Response,
+)
 from guillotina.security.utils import apply_sharing
 from guillotina.transactions import get_transaction
-from guillotina.utils import apply_coroutine
-from guillotina.utils import get_authenticated_user_id
-from guillotina.utils import get_behavior
-from guillotina.utils import get_object_by_uid
-from guillotina.utils import get_object_url
-from guillotina.utils import get_security_policy
-from guillotina.utils import iter_parents
-from guillotina.utils import resolve_dotted_name
+from guillotina.utils import (
+    apply_coroutine,
+    get_authenticated_user_id,
+    get_behavior,
+    get_object_by_uid,
+    get_object_url,
+    get_security_policy,
+    iter_parents,
+    resolve_dotted_name,
+)
 
 
 def get_content_json_schema_responses(content):

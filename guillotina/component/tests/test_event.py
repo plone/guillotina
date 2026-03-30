@@ -17,9 +17,10 @@ import unittest
 
 class Test_dispatch(unittest.TestCase):
     def test_it(self):
+        from zope.interface import Interface
+
         from guillotina.component.event import dispatch
         from guillotina.component.globalregistry import get_global_components
-        from zope.interface import Interface
 
         _adapted = []
 

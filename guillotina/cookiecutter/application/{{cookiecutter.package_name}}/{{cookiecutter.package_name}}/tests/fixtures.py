@@ -1,8 +1,9 @@
+import json
+
+import pytest
+
 from guillotina import testing
 from guillotina.tests.fixtures import ContainerRequesterAsyncContextManager
-
-import json
-import pytest
 
 
 def base_settings_configurator(settings):

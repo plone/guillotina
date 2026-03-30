@@ -1,21 +1,15 @@
+import mimetypes
+
 from guillotina import configure
 from guillotina._settings import app_settings
 from guillotina.api.content import DefaultOPTIONS
-from guillotina.api.service import DownloadService
-from guillotina.api.service import TraversableFieldService
+from guillotina.api.service import DownloadService, TraversableFieldService
 from guillotina.component import get_multi_adapter
 from guillotina.event import notify
 from guillotina.events import ObjectModifiedEvent
 from guillotina.exceptions import FileNotFoundException
-from guillotina.interfaces import IAsyncBehavior
-from guillotina.interfaces import IFileManager
-from guillotina.interfaces import IResource
-from guillotina.interfaces import IStaticDirectory
-from guillotina.interfaces import IStaticFile
-from guillotina.response import HTTPNotFound
-from guillotina.response import Response
-
-import mimetypes
+from guillotina.interfaces import IAsyncBehavior, IFileManager, IResource, IStaticDirectory, IStaticFile
+from guillotina.response import HTTPNotFound, Response
 
 
 def _traversed_file_doc(summary, parameters=None, responses=None):

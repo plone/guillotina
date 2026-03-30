@@ -1,12 +1,12 @@
+import pytest
+
 from guillotina.component import get_utility
-from guillotina.contrib.cache import CACHE_PREFIX
-from guillotina.contrib.cache import serialize
+from guillotina.contrib.cache import CACHE_PREFIX, serialize
 from guillotina.contrib.cache.strategy import BasicCache
 from guillotina.interfaces import ICacheUtility
 from guillotina.tests import mocks
 from guillotina.utils import resolve_dotted_name
 
-import pytest
 
 pytestmark = pytest.mark.asyncio
 

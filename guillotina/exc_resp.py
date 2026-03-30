@@ -1,21 +1,24 @@
-from guillotina import configure
-from guillotina import error_reasons
-from guillotina.exceptions import ConflictIdOnContainer
-from guillotina.exceptions import DeserializationError
-from guillotina.exceptions import InvalidContentType
-from guillotina.exceptions import NoPermissionToAdd
-from guillotina.exceptions import NotAllowedContentType
-from guillotina.exceptions import PreconditionFailed
-from guillotina.exceptions import Unauthorized
-from guillotina.exceptions import UnRetryableRequestError
-from guillotina.interfaces import IErrorResponseException
-from guillotina.response import HTTPConflict
-from guillotina.response import HTTPExpectationFailed
-from guillotina.response import HTTPPreconditionFailed
-from guillotina.response import HTTPUnauthorized
-from guillotina.response import Response
-
 import json
+
+from guillotina import configure, error_reasons
+from guillotina.exceptions import (
+    ConflictIdOnContainer,
+    DeserializationError,
+    InvalidContentType,
+    NoPermissionToAdd,
+    NotAllowedContentType,
+    PreconditionFailed,
+    Unauthorized,
+    UnRetryableRequestError,
+)
+from guillotina.interfaces import IErrorResponseException
+from guillotina.response import (
+    HTTPConflict,
+    HTTPExpectationFailed,
+    HTTPPreconditionFailed,
+    HTTPUnauthorized,
+    Response,
+)
 
 
 def render_error_response(error, reason, eid=None):

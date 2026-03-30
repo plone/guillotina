@@ -1,9 +1,12 @@
-from . import settings
-from guillotina.tests.utils import get_container
-
 import base64
 import json
+
 import pytest
+
+from guillotina.tests.utils import get_container
+
+from . import settings
+
 
 pytestmark = pytest.mark.asyncio
 

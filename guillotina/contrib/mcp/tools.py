@@ -1,22 +1,14 @@
+import functools
+from typing import Any, Awaitable, Callable, Dict, List, Tuple
+
 from guillotina.catalog.catalog import DefaultSearchUtility
-from guillotina.component import query_multi_adapter
-from guillotina.component import query_utility
+from guillotina.component import query_multi_adapter, query_utility
 from guillotina.event import notify
 from guillotina.events import ObjectModifiedEvent
-from guillotina.interfaces import IResourceSerializeToJson
-from guillotina.interfaces import IResourceSerializeToJsonSummary
+from guillotina.interfaces import IResourceSerializeToJson, IResourceSerializeToJsonSummary
 from guillotina.interfaces.catalog import ICatalogUtility
-from guillotina.utils import get_content_path
-from guillotina.utils import get_current_container
-from guillotina.utils import navigate_to
-from typing import Any
-from typing import Awaitable
-from typing import Callable
-from typing import Dict
-from typing import List
-from typing import Tuple
+from guillotina.utils import get_content_path, get_current_container, navigate_to
 
-import functools
 
 ToolHandler = Callable[[Any, Any, Dict[str, Any]], Awaitable[Dict[str, Any]]]
 

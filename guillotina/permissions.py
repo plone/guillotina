@@ -1,5 +1,6 @@
 from guillotina import configure
 
+
 configure.permission("guillotina.AccessContent", "Access content")
 configure.permission("guillotina.ModifyContent", "Modify content")
 configure.permission("guillotina.DeleteContent", "Delete content")

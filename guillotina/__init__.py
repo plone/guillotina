@@ -1,4 +1,9 @@
 # load the patch before anything else.
+import os
+
+import pkg_resources
+from zope.interface import Interface  # noqa
+
 from guillotina import glogging
 from guillotina._cache import BEHAVIOR_CACHE  # noqa
 from guillotina._cache import FACTORY_CACHE  # noqa
@@ -6,10 +11,7 @@ from guillotina._cache import PERMISSIONS_CACHE  # noqa
 from guillotina._cache import SCHEMA_CACHE  # noqa
 from guillotina._settings import app_settings  # noqa
 from guillotina.i18n import default_message_factory as _  # noqa
-from zope.interface import Interface  # noqa
 
-import os
-import pkg_resources
 
 __version__ = pkg_resources.get_distribution("guillotina").version
 
@@ -20,8 +22,9 @@ logger = glogging.getLogger("guillotina")
 
 if os.environ.get("GDEBUG", "").lower() in ("true", "t", "1"):  # pragma: no cover
     # patches for extra debugging....
-    import asyncpg
     import time
+
+    import asyncpg
 
     original_execute = asyncpg.connection.Connection._do_execute
     logger.warning("RUNNING IN DEBUG MODE")

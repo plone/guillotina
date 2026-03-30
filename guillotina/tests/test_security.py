@@ -1,21 +1,22 @@
+import json
+
+import pytest
+
 from guillotina.api.container import create_container
 from guillotina.auth.users import GuillotinaUser
 from guillotina.content import create_content_in_container
-from guillotina.interfaces import Allow
-from guillotina.interfaces import IRolePermissionManager
+from guillotina.interfaces import Allow, IRolePermissionManager
 from guillotina.security.policy import cached_roles
-from guillotina.security.utils import get_principals_with_access_content
-from guillotina.security.utils import get_roles_with_access_content
-from guillotina.security.utils import settings_for_object
+from guillotina.security.utils import (
+    get_principals_with_access_content,
+    get_roles_with_access_content,
+    settings_for_object,
+)
 from guillotina.tests import utils
 from guillotina.tests.utils import get_db
 from guillotina.transactions import transaction
-from guillotina.utils import get_authenticated_user
-from guillotina.utils import get_roles_principal
-from guillotina.utils import get_security_policy
+from guillotina.utils import get_authenticated_user, get_roles_principal, get_security_policy
 
-import json
-import pytest
 
 pytestmark = pytest.mark.asyncio
 

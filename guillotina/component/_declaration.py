@@ -12,10 +12,9 @@
 #
 ##############################################################################
 # flake8: noqa
-from guillotina.component._compat import _BLANK
-from guillotina.component._compat import CLASS_TYPES
-
 import sys
+
+from guillotina.component._compat import _BLANK, CLASS_TYPES
 
 
 class adapter(object):

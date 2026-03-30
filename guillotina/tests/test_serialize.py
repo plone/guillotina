@@ -1,30 +1,25 @@
-from datetime import datetime
-from datetime import time
+import uuid
+from datetime import datetime, time
+
+import pytest
 from dateutil.tz import tzutc
-from guillotina import fields
-from guillotina import schema
-from guillotina.component import get_adapter
-from guillotina.component import get_multi_adapter
+from zope.interface import Interface, Invalid
+from zope.interface.interface import invariant
+
+from guillotina import fields, schema
+from guillotina.component import get_adapter, get_multi_adapter
 from guillotina.exceptions import ValueDeserializationError
 from guillotina.fields import patch
 from guillotina.fields.interfaces import IPatchFieldOperation
 from guillotina.files.dbfile import DBFile
-from guillotina.interfaces import IJSONToValue
-from guillotina.interfaces import IResourceDeserializeFromJson
-from guillotina.interfaces import IResourceSerializeToJson
+from guillotina.interfaces import IJSONToValue, IResourceDeserializeFromJson, IResourceSerializeToJson
 from guillotina.json import deserialize_value
 from guillotina.json.deserialize_value import schema_compatible
 from guillotina.json.serialize_value import json_compatible
 from guillotina.json.utils import validate_invariants
 from guillotina.schema.exceptions import WrongType
-from guillotina.tests.utils import create_content
-from guillotina.tests.utils import login
-from zope.interface import Interface
-from zope.interface import Invalid
-from zope.interface.interface import invariant
+from guillotina.tests.utils import create_content, login
 
-import pytest
-import uuid
 
 pytestmark = pytest.mark.asyncio
 
@@ -78,8 +73,7 @@ async def test_serialize_omit_main_interface_field(dummy_request, mock_txn):
 
 async def test_serialize_cloud_file(dummy_request, mock_txn):
     from guillotina.interfaces import IFileManager
-    from guillotina.test_package import FileContent
-    from guillotina.test_package import IFileContent
+    from guillotina.test_package import FileContent, IFileContent
 
     obj = create_content(FileContent)
     obj.file = DBFile(filename="foobar.json", md5="foobar")
@@ -101,8 +95,7 @@ async def test_serialize_cloud_file(dummy_request, mock_txn):
 
 
 async def test_deserialize_cloud_file(dummy_request, mock_txn):
-    from guillotina.test_package import FileContent
-    from guillotina.test_package import IFileContent
+    from guillotina.test_package import FileContent, IFileContent
 
     obj = create_content(FileContent)
     obj.file = None

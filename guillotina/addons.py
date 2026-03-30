@@ -1,10 +1,9 @@
+from zope.interface import implementer
+
 from guillotina import task_vars
 from guillotina._settings import app_settings
-from guillotina.interfaces import IAddOn
-from guillotina.interfaces import IAddons
-from guillotina.utils import apply_coroutine
-from guillotina.utils import get_current_request
-from zope.interface import implementer
+from guillotina.interfaces import IAddOn, IAddons
+from guillotina.utils import apply_coroutine, get_current_request
 
 
 @implementer(IAddOn)

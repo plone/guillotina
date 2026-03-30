@@ -13,12 +13,13 @@
 ##############################################################################
 """Configuration processor
 """
-from guillotina.exceptions import ConfigurationError
-from guillotina.interfaces.configuration import IConfigurationContext
-from zope.interface import implementer
-
 import operator
 import sys
+
+from zope.interface import implementer
+
+from guillotina.exceptions import ConfigurationError
+from guillotina.interfaces.configuration import IConfigurationContext
 
 
 def reraise(tp, value, tb=None):

@@ -1,9 +1,18 @@
 # -*- coding: utf-8 -*-
-from async_asgi_testclient import TestClient
+import asyncio
+import json
+import logging
 from base64 import b64encode
+from typing import Any, Dict, Optional
+
+import docutils.statemachine
+import pkg_resources
+from async_asgi_testclient import TestClient
 from docutils import nodes
 from docutils.parsers.rst import Directive  # type: ignore
 from docutils.parsers.rst import directives  # type: ignore
+from zope.interface import Interface
+
 from guillotina import routes
 from guillotina._settings import app_settings
 from guillotina.component import query_multi_adapter
@@ -13,16 +22,7 @@ from guillotina.tests.utils import get_mocked_request
 from guillotina.transactions import abort
 from guillotina.traversal import traverse
 from guillotina.utils import get_dotted_name
-from typing import Any
-from typing import Dict
-from typing import Optional
-from zope.interface import Interface
 
-import asyncio
-import docutils.statemachine
-import json
-import logging
-import pkg_resources
 
 logger = logging.getLogger("guillotina.docs")
 

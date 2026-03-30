@@ -1,29 +1,26 @@
 # -*- coding: utf-8 -*-
-from guillotina import app_settings
-from guillotina import configure
-from guillotina.component import ComponentLookupError
-from guillotina.component import get_multi_adapter
-from guillotina.component import query_utility
-from guillotina.content import get_all_behaviors
-from guillotina.content import get_cached_factory
-from guillotina.directives import merged_tagged_value_dict
-from guillotina.directives import read_permission
-from guillotina.interfaces import IAsyncBehavior
-from guillotina.interfaces import IFolder
-from guillotina.interfaces import IPermission
-from guillotina.interfaces import IResource
-from guillotina.interfaces import IResourceSerializeToJson
-from guillotina.interfaces import IResourceSerializeToJsonSummary
+import asyncio
+import logging
+
+from zope.interface import Interface
+
+from guillotina import app_settings, configure
+from guillotina.component import ComponentLookupError, get_multi_adapter, query_utility
+from guillotina.content import get_all_behaviors, get_cached_factory
+from guillotina.directives import merged_tagged_value_dict, read_permission
+from guillotina.interfaces import (
+    IAsyncBehavior,
+    IFolder,
+    IPermission,
+    IResource,
+    IResourceSerializeToJson,
+    IResourceSerializeToJsonSummary,
+)
 from guillotina.json.serialize_value import json_compatible
 from guillotina.profile import profilable
 from guillotina.schema import get_fields
-from guillotina.utils import apply_coroutine
-from guillotina.utils import get_object_url
-from guillotina.utils import get_security_policy
-from zope.interface import Interface
+from guillotina.utils import apply_coroutine, get_object_url, get_security_policy
 
-import asyncio
-import logging
 
 logger = logging.getLogger("guillotina")
 

@@ -1,9 +1,10 @@
-from .content import get_content_path
+import posixpath
+import weakref
+
 from guillotina import task_vars
 from guillotina.interfaces import IResource
 
-import posixpath
-import weakref
+from .content import get_content_path
 
 
 class Navigator:

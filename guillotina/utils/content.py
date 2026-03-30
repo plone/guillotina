@@ -1,25 +1,25 @@
-from .misc import get_current_request
-from .misc import list_or_dict_items
-from guillotina import glogging
-from guillotina import task_vars
+import typing
+
+from guillotina import glogging, task_vars
 from guillotina._settings import app_settings
-from guillotina.component import get_adapter
-from guillotina.component import get_utility
-from guillotina.component import query_multi_adapter
+from guillotina.component import get_adapter, get_utility, query_multi_adapter
 from guillotina.const import TRASHED_ID
 from guillotina.db.interfaces import IDatabaseManager
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.exceptions import DatabaseNotFound
-from guillotina.interfaces import IAbsoluteURL
-from guillotina.interfaces import IApplication
-from guillotina.interfaces import IAsyncContainer
-from guillotina.interfaces import IContainer
-from guillotina.interfaces import IDatabase
-from guillotina.interfaces import IPrincipalRoleMap
-from guillotina.interfaces import IRequest
-from guillotina.interfaces import IResource
+from guillotina.interfaces import (
+    IAbsoluteURL,
+    IApplication,
+    IAsyncContainer,
+    IContainer,
+    IDatabase,
+    IPrincipalRoleMap,
+    IRequest,
+    IResource,
+)
 
-import typing
+from .misc import get_current_request, list_or_dict_items
+
 
 logger = glogging.getLogger("guillotina")
 

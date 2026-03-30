@@ -5,17 +5,13 @@ from guillotina.event import notify
 from guillotina.events import RegistryEditedEvent
 from guillotina.exceptions import ComponentLookupError
 from guillotina.i18n import MessageFactory
-from guillotina.interfaces import IContainer
-from guillotina.interfaces import IJSONToValue
+from guillotina.interfaces import IContainer, IJSONToValue
 from guillotina.json.serialize_value import json_compatible
-from guillotina.response import ErrorResponse
-from guillotina.response import HTTPNotFound
-from guillotina.response import Response
+from guillotina.response import ErrorResponse, HTTPNotFound, Response
 from guillotina.schema import get_fields
 from guillotina.schema.exceptions import ValidationError
-from guillotina.utils import get_registry
-from guillotina.utils import import_class
-from guillotina.utils import resolve_dotted_name
+from guillotina.utils import get_registry, import_class, resolve_dotted_name
+
 
 _ = MessageFactory("guillotina")
 

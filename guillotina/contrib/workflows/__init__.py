@@ -1,9 +1,11 @@
-from guillotina import configure
-
 import glob
 import logging
 import typing
+
 import yaml
+
+from guillotina import configure
+
 
 logger = logging.getLogger("guillotina.contrib.workflows")
 

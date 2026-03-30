@@ -1,32 +1,25 @@
-from guillotina import addons
-from guillotina import app_settings
-from guillotina import configure
-from guillotina import error_reasons
-from guillotina import task_vars
+import posixpath
+from typing import Optional
+
+from guillotina import addons, app_settings, configure, error_reasons, task_vars
 from guillotina.api import content
 from guillotina.api.service import Service
-from guillotina.component import get_adapter
-from guillotina.component import get_multi_adapter
+from guillotina.component import get_adapter, get_multi_adapter
 from guillotina.content import create_content
 from guillotina.event import notify
 from guillotina.events import ObjectAddedEvent
-from guillotina.interfaces import IAnnotations
-from guillotina.interfaces import IApplication
-from guillotina.interfaces import IContainer
-from guillotina.interfaces import IDatabase
-from guillotina.interfaces import IPrincipalRoleManager
-from guillotina.interfaces import IResourceSerializeToJson
+from guillotina.interfaces import (
+    IAnnotations,
+    IApplication,
+    IContainer,
+    IDatabase,
+    IPrincipalRoleManager,
+    IResourceSerializeToJson,
+)
 from guillotina.interfaces.content import IGetOwner
 from guillotina.registry import REGISTRY_DATA_KEY
-from guillotina.response import ErrorResponse
-from guillotina.response import HTTPConflict
-from guillotina.response import HTTPNotFound
-from guillotina.response import HTTPNotImplemented
-from guillotina.response import Response
+from guillotina.response import ErrorResponse, HTTPConflict, HTTPNotFound, HTTPNotImplemented, Response
 from guillotina.utils import get_authenticated_user_id
-from typing import Optional
-
-import posixpath
 
 
 @configure.service(

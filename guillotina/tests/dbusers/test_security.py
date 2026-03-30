@@ -1,9 +1,12 @@
-from . import settings
+import json
+
+import pytest
+
 from guillotina import configure
 from guillotina.interfaces import IFolder
 
-import json
-import pytest
+from . import settings
+
 
 pytestmark = pytest.mark.asyncio
 

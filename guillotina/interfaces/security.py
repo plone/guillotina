@@ -1,17 +1,15 @@
-from .misc import IRequest
+import copyreg  # type: ignore
+import typing
+
+from zope.interface import Attribute, Interface
+
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.directives import read_permission
 from guillotina.i18n import MessageFactory
-from guillotina.schema import Dict
-from guillotina.schema import List
-from guillotina.schema import Object
-from guillotina.schema import Text
-from guillotina.schema import TextLine
-from zope.interface import Attribute
-from zope.interface import Interface
+from guillotina.schema import Dict, List, Object, Text, TextLine
 
-import copyreg  # type: ignore
-import typing
+from .misc import IRequest
+
 
 _ = MessageFactory("guillotina")
 

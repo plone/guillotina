@@ -14,4 +14,5 @@
 
 from guillotina.i18n import MessageFactory
 
+
 _ = MessageFactory("guillotina")

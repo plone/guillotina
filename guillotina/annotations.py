@@ -1,16 +1,15 @@
+import logging
 from collections import UserDict
+
+from zope.interface import implementer
+
 from guillotina import configure
 from guillotina.db.interfaces import ITransaction
 from guillotina.db.orm.base import BaseObject
 from guillotina.exceptions import TransactionNotFound
-from guillotina.interfaces import IAnnotationData
-from guillotina.interfaces import IAnnotations
-from guillotina.interfaces import IRegistry
-from guillotina.interfaces import IResource
+from guillotina.interfaces import IAnnotationData, IAnnotations, IRegistry, IResource
 from guillotina.transactions import get_transaction
-from zope.interface import implementer
 
-import logging
 
 logger = logging.getLogger("guillotina")
 _marker = object()

@@ -138,6 +138,7 @@ from .views import IPROPFIND  # noqa
 from .views import IPUT  # noqa
 from .views import IView  # noqa
 
+
 DEFAULT_ADD_PERMISSION = "guillotina.AddContent"
 DEFAULT_READ_PERMISSION = "guillotina.ViewContent"
 DEFAULT_WRITE_PERMISSION = "guillotina.ManageContent"

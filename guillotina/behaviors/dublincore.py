@@ -1,12 +1,14 @@
 from datetime import datetime
+
 from dateutil.tz import tzutc
-from guillotina import configure
-from guillotina import schema
+from zope.interface import Interface
+
+from guillotina import configure, schema
 from guillotina.behaviors.instance import AnnotationBehavior
 from guillotina.behaviors.properties import ContextProperty
 from guillotina.directives import index_field
 from guillotina.fields.patch import PatchField
-from zope.interface import Interface
+
 
 _utc = tzutc()
 
