@@ -87,7 +87,7 @@ def test_vocabulary(dummy_request):
 
     vocab = SimpleVocabulary.fromItems((("Foo", "id_foo"), ("Bar", "id_bar")))
     res = json_compatible(vocab)
-    assert type(res) == list
+    assert isinstance(res, list)
 
 
 def test_SerializeFactoryToJson(dummy_request):  # noqa: N802

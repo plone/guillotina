@@ -199,7 +199,7 @@ class Field(Attribute):
 
     def __eq__(self, other):
         # should be the same type
-        if type(self) != type(other):
+        if type(self) is not type(other):
             return False
 
         # should have the same properties

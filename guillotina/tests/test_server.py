@@ -11,7 +11,7 @@ import pytest
 
 def test_make_app(dummy_guillotina):
     assert dummy_guillotina is not None
-    assert type(dummy_guillotina.router) == TraversalRouter
+    assert isinstance(dummy_guillotina.router, TraversalRouter)
 
 
 @pytest.mark.asyncio
