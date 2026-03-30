@@ -3,10 +3,10 @@ html2text==2019.8.11
 aiosmtplib<4.0.0; python_version <= "3.8"
 aiosmtplib>=4.0.0; python_version >= "3.9"
 pre-commit==1.18.2
-flake8==5.0.4
+flake8==6.1.0
 codecov==2.1.13
 mypy-zope==1.0.11
-black==22.3.0
+black==24.10.0
 isort==4.3.21
 jinja2==2.11.3
 MarkupSafe<2.1.0
