@@ -47,7 +47,7 @@ class MCPToolRegistry:
         self._register_default_tools()
         self._register_default_resources()
         self._key_cache_redis_prefix = "mcp_tool_cache:v1"
-        self._queue_invalidations = asyncio.Queue(maxsize=1)
+        self._queue_invalidations: asyncio.Queue[str] = asyncio.Queue(maxsize=1)
         self._worker_task: asyncio.Task = None
 
     async def initialize(self, app):
