@@ -93,7 +93,6 @@ async def test_create_client_sets_configured_params(mocked_create_client, param,
 @pytest.mark.skipif(pymemcache is None, reason="pymemcache not installed")
 @pytest.mark.app_settings(MEMCACHED_SETTINGS)
 async def test_memcached_ops(memcached_container, guillotina_main, dont_probe_metrics):
-    __import__("pdb").set_trace()
     driver = await resolve_dotted_name("guillotina.contrib.memcached").get_driver()
     assert driver.initialized
     assert driver.client is not None
