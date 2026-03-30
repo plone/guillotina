@@ -500,7 +500,7 @@ async def app(event_loop, db, request):
 
     from uvicorn import Config, Server
 
-    config = Config(app, host=host, port=port, lifespan="on")
+    config = Config(app, host=host, port=port, lifespan="on", server_header=False)
     server = Server(config=config)
     task = asyncio.ensure_future(server.serve(), loop=event_loop)
 
