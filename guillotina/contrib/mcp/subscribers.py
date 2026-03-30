@@ -1,5 +1,3 @@
-import asyncio
-
 from guillotina import configure
 from guillotina.component import query_utility
 from guillotina.contrib.mcp.interfaces import IMCPToolRegistry
@@ -19,5 +17,4 @@ async def invalidate_mcp_cache_on_content_change(obj, event):
     if registry is None:
         return
     object_id = getattr(obj, "id", None) or getattr(obj, "__name__", None) or "unknown"
-    coroutine = registry.invalidate_cache(reason=f"{event.__class__.__name__}:{object_id}")
-    asyncio.create_task(coroutine)
+    registry.schedule_invalidate_cache(reason=f"{event.__class__.__name__}:{object_id}")

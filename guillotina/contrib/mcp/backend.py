@@ -1,3 +1,4 @@
+import asyncio
 import hashlib
 import json
 import logging
@@ -46,6 +47,8 @@ class MCPToolRegistry:
         self._register_default_tools()
         self._register_default_resources()
         self._key_cache_redis_prefix = "mcp_tool_cache:v1"
+        self._queue_invalidations = asyncio.Queue(maxsize=1)
+        self._worker_task: asyncio.Task = None
 
     async def initialize(self, app):
         self._cache_disabled = True
@@ -55,6 +58,37 @@ class MCPToolRegistry:
             self._cache_disabled = False
         except Exception:
             logger.info("redis not enabled to cache")
+        self._worker_task = asyncio.create_task(self.invalidate_cache_worker())
+
+    async def invalidate_cache_worker(self):
+        while True:
+            try:
+                reason_cache = await self._queue_invalidations.get()
+            except asyncio.CancelledError:
+                logger.info("Invalidation cache task cancelled")
+                return
+
+            try:
+                await self._invalidate_cache(reason_cache)
+            except Exception:
+                logger.error("Error in invalidating cache", exc_info=True)
+                await asyncio.sleep(0.5)
+            finally:
+                self._queue_invalidations.task_done()
+
+    async def finalize(self, app=None):
+        # Stop invalidate cache task
+        if self._worker_task is not None:
+            self._worker_task.cancel()
+            await asyncio.gather(self._worker_task, return_exceptions=True)
+
+    def schedule_invalidate_cache(self, reason: str = "manual"):
+        # Keep the existing task running, ignore the new one, drop the
+        # Queue is size 1
+        try:
+            self._queue_invalidations.put_nowait(reason)
+        except asyncio.QueueFull:
+            pass
 
     def _register_default_tools(self) -> None:
         for (
@@ -119,7 +153,9 @@ class MCPToolRegistry:
                 "inputSchema": tool.input_schema,
                 "cacheable": tool.cacheable,
             }
-            for tool in sorted(self._tools.values(), key=lambda registered: registered.name)
+            for tool in sorted(
+                self._tools.values(), key=lambda registered: registered.name
+            )
         ]
 
     # ── Resource management ──────────────────────────────────────────
@@ -158,7 +194,9 @@ class MCPToolRegistry:
             for res in sorted(self._resources.values(), key=lambda r: r.name)
         ]
 
-    async def read_resource(self, resource_name: str, context: Any, request: Any) -> Dict[str, Any]:
+    async def read_resource(
+        self, resource_name: str, context: Any, request: Any
+    ) -> Dict[str, Any]:
         clean_name = str(resource_name or "").strip()
         if clean_name not in self._resources:
             raise ValueError(f"Unknown MCP resource: {resource_name}")
@@ -166,7 +204,9 @@ class MCPToolRegistry:
         return await resource.handler(request)
 
     def _cache_key(self, tool_name: str, arguments: Dict[str, Any]) -> str:
-        payload = json.dumps(arguments, sort_keys=True, separators=(",", ":"), default=str)
+        payload = json.dumps(
+            arguments, sort_keys=True, separators=(",", ":"), default=str
+        )
         digest = hashlib.sha256(payload.encode("utf-8")).hexdigest()
         return f"{self._key_cache_redis_prefix}:{tool_name}:{digest[:16]}"
 
@@ -213,7 +253,9 @@ class MCPToolRegistry:
 
     async def invalidate_cache(self, reason: str = "manual") -> None:
         if self._cache_disabled is False:
-            keys_to_delete = await self._driver_redis.keys_startswith(self._key_cache_redis_prefix)
+            keys_to_delete = await self._driver_redis.keys_startswith(
+                self._key_cache_redis_prefix
+            )
             await self._driver_redis.delete_all(keys_to_delete)
 
     def metadata(self) -> Dict[str, Any]:
