@@ -1,7 +1,6 @@
 # load the patch before anything else.
 import os
-from importlib.metadata import PackageNotFoundError
-from importlib.metadata import version
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 
 from zope.interface import Interface  # noqa

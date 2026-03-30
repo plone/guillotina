@@ -12,8 +12,7 @@ from docutils.parsers.rst import Directive  # type: ignore
 from docutils.parsers.rst import directives  # type: ignore
 from zope.interface import Interface
 
-from guillotina import __version__
-from guillotina import routes
+from guillotina import __version__, routes
 from guillotina._settings import app_settings
 from guillotina.component import query_multi_adapter
 from guillotina.content import load_cached_schema

@@ -1,8 +1,8 @@
 import logging
-from importlib import import_module
-from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
+from importlib import import_module
+from pathlib import Path
 
 from jinja2 import BaseLoader, Environment, FileSystemLoader, select_autoescape
 from jinja2.exceptions import TemplateNotFound

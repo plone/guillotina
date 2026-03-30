@@ -5,8 +5,7 @@ from urllib.parse import urlparse
 
 from zope.interface import Interface
 
-from guillotina import app_settings, configure
-from guillotina import __version__
+from guillotina import __version__, app_settings, configure
 from guillotina.api.service import Service
 from guillotina.utils import (
     get_authenticated_user,

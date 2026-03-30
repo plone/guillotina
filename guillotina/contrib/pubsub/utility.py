@@ -54,6 +54,7 @@ class PubSubUtility:
                 channel.cancel()
         self._initialized = False
         await asyncio.sleep(0.1)
+
     async def real_subscribe(self, channel, channel_name):
         while channel_name in self._subscribers:
             try:
