@@ -4,6 +4,9 @@ CHANGELOG
 7.0.7 (unreleased)
 ------------------
 
+- REAKING CHANGE: Drop support for Python 3.8 and 3.9. Guillotina is
+  now tested and supported on Python 3.10, 3.11, and 3.12.
+  [nilbacardit26]
 - Add `guillotina.contrib.mcp` with low-level MCP server integration
   (`mcp.server.lowlevel`), tool registry utility, MCP services,
   cache invalidation subscribers, and tests/docs coverage.
@@ -11,6 +14,7 @@ CHANGELOG
   fallback to `async_items` when catalog is unavailable.
 - Upgrade the pytest stack so the CI test environment stays compatible
   with the optional MCP SDK and its AnyIO pytest plugin on Python 3.10+.
+  [finalchaz, nilbacardit26]
 - Docs: Update documentation and configuration settings
 - Chore: Update sphinx-guillotina-theme version to 1.0.9
   [rboixaderg]

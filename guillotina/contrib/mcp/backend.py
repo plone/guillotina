@@ -69,7 +69,7 @@ class MCPToolRegistry:
                 return
 
             try:
-                await self._invalidate_cache(reason_cache)
+                await self.invalidate_cache(reason_cache)
             except Exception:
                 logger.error("Error in invalidating cache", exc_info=True)
                 await asyncio.sleep(0.5)
