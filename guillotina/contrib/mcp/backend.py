@@ -153,9 +153,7 @@ class MCPToolRegistry:
                 "inputSchema": tool.input_schema,
                 "cacheable": tool.cacheable,
             }
-            for tool in sorted(
-                self._tools.values(), key=lambda registered: registered.name
-            )
+            for tool in sorted(self._tools.values(), key=lambda registered: registered.name)
         ]
 
     # ── Resource management ──────────────────────────────────────────
@@ -194,9 +192,7 @@ class MCPToolRegistry:
             for res in sorted(self._resources.values(), key=lambda r: r.name)
         ]
 
-    async def read_resource(
-        self, resource_name: str, context: Any, request: Any
-    ) -> Dict[str, Any]:
+    async def read_resource(self, resource_name: str, context: Any, request: Any) -> Dict[str, Any]:
         clean_name = str(resource_name or "").strip()
         if clean_name not in self._resources:
             raise ValueError(f"Unknown MCP resource: {resource_name}")
@@ -204,9 +200,7 @@ class MCPToolRegistry:
         return await resource.handler(request)
 
     def _cache_key(self, tool_name: str, arguments: Dict[str, Any]) -> str:
-        payload = json.dumps(
-            arguments, sort_keys=True, separators=(",", ":"), default=str
-        )
+        payload = json.dumps(arguments, sort_keys=True, separators=(",", ":"), default=str)
         digest = hashlib.sha256(payload.encode("utf-8")).hexdigest()
         return f"{self._key_cache_redis_prefix}:{tool_name}:{digest[:16]}"
 
@@ -253,9 +247,7 @@ class MCPToolRegistry:
 
     async def invalidate_cache(self, reason: str = "manual") -> None:
         if self._cache_disabled is False:
-            keys_to_delete = await self._driver_redis.keys_startswith(
-                self._key_cache_redis_prefix
-            )
+            keys_to_delete = await self._driver_redis.keys_startswith(self._key_cache_redis_prefix)
             await self._driver_redis.delete_all(keys_to_delete)
 
     def metadata(self) -> Dict[str, Any]:
