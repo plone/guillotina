@@ -13,7 +13,7 @@ from zope.interface import Interface
 import copy
 import json
 import os
-import pkg_resources
+import importlib
 
 
 here = os.path.dirname(os.path.realpath(__file__))
@@ -163,7 +163,7 @@ class SwaggerDefinitionService(Service):
         definition["servers"][0]["url"] = url
 
         if "version" not in definition["info"]:
-            definition["info"]["version"] = pkg_resources.get_distribution("guillotina").version
+            definition["info"]["version"] = importlib.metadata.version("guillotina")
 
         api_defs = app_settings["api_definition"]
 
