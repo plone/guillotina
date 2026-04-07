@@ -1,0 +1,1 @@
+Since setuptools **82** `pkg_resources` is removed, see https://github.com/pypa/setuptools/pull/5007
