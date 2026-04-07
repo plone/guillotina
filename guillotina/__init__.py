@@ -9,10 +9,10 @@ from guillotina.i18n import default_message_factory as _  # noqa
 from zope.interface import Interface  # noqa
 
 import os
-import pkg_resources
+import importlib
 
 
-__version__ = pkg_resources.get_distribution("guillotina").version
+__version__ = importlib.metadata.version("guillotina")
 
 
 # create logging
