@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-7.0.7 (unreleased)
+7.1.0 (unreleased)
 ------------------
 
 - REAKING CHANGE: Drop support for Python 3.8 and 3.9. Guillotina is
