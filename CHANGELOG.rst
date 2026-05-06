@@ -4,7 +4,7 @@ CHANGELOG
 7.1.0 (unreleased)
 ------------------
 
-- REAKING CHANGE: Drop support for Python 3.8 and 3.9. Guillotina is
+- BREAKING CHANGE: Drop support for Python 3.8 and 3.9. Guillotina is
   now tested and supported on Python 3.10, 3.11, and 3.12.
   [nilbacardit26]
 - Add `guillotina.contrib.mcp` with low-level MCP server integration
