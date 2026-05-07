@@ -1,6 +1,7 @@
-from guillotina.component._api import get_component_registry
 from zope.interface import alsoProvides
 from zope.interface.interfaces import IInterface
+
+from guillotina.component._api import get_component_registry
 
 
 def provide_interface(id, interface, iface_type=None, info=""):

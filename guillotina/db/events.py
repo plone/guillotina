@@ -1,5 +1,6 @@
-from guillotina.db.interfaces import IStorageCreatedEvent
 from zope.interface import implementer
+
+from guillotina.db.interfaces import IStorageCreatedEvent
 
 
 @implementer(IStorageCreatedEvent)

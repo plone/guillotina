@@ -11,8 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-from zope.interface import implementedBy
-from zope.interface import providedBy
+from zope.interface import implementedBy, providedBy
 from zope.interface.interface import Method
 
 

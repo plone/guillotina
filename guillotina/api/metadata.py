@@ -1,11 +1,8 @@
 from guillotina import configure
 from guillotina._cache import FACTORY_CACHE
 from guillotina.component import get_utilities_for
-from guillotina.directives import index
-from guillotina.directives import merged_tagged_value_dict
-from guillotina.interfaces import IAbsoluteURL
-from guillotina.interfaces import IBehavior
-from guillotina.interfaces import IContainer
+from guillotina.directives import index, merged_tagged_value_dict
+from guillotina.interfaces import IAbsoluteURL, IBehavior, IContainer
 
 
 @configure.service(

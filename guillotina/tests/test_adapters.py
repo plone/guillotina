@@ -1,31 +1,29 @@
-from guillotina import schema
-from guillotina.component import get_adapter
-from guillotina.component import get_multi_adapter
-from guillotina.component import get_utility
-from guillotina.content import Container
-from guillotina.content import Item
-from guillotina.factory.security import ApplicationSpecialPermissions
-from guillotina.factory.security import DatabaseSpecialPermissions
-from guillotina.interfaces import IApplication
-from guillotina.interfaces import IFactorySerializeToJson
-from guillotina.interfaces import IItem
-from guillotina.interfaces import IPrincipalPermissionManager
-from guillotina.interfaces import IResource
-from guillotina.interfaces import IResourceDeserializeFromJson
-from guillotina.interfaces import IResourceFactory
-from guillotina.interfaces import IResourceSerializeToJson
-from guillotina.interfaces import IResourceSerializeToJsonSummary
-from guillotina.interfaces import ISchemaFieldSerializeToJson
-from guillotina.interfaces import ISchemaSerializeToJson
-from guillotina.json import deserialize_content
-from guillotina.json import serialize_schema
-from guillotina.json import serialize_schema_field
-from guillotina.json.serialize_content import DefaultJSONSummarySerializer
-from guillotina.json.serialize_content import SerializeFolderToJson
-from guillotina.json.serialize_content import SerializeToJson
-from guillotina.json.serialize_value import json_compatible
-
 import pytest
+
+from guillotina import schema
+from guillotina.component import get_adapter, get_multi_adapter, get_utility
+from guillotina.content import Container, Item
+from guillotina.factory.security import ApplicationSpecialPermissions, DatabaseSpecialPermissions
+from guillotina.interfaces import (
+    IApplication,
+    IFactorySerializeToJson,
+    IItem,
+    IPrincipalPermissionManager,
+    IResource,
+    IResourceDeserializeFromJson,
+    IResourceFactory,
+    IResourceSerializeToJson,
+    IResourceSerializeToJsonSummary,
+    ISchemaFieldSerializeToJson,
+    ISchemaSerializeToJson,
+)
+from guillotina.json import deserialize_content, serialize_schema, serialize_schema_field
+from guillotina.json.serialize_content import (
+    DefaultJSONSummarySerializer,
+    SerializeFolderToJson,
+    SerializeToJson,
+)
+from guillotina.json.serialize_value import json_compatible
 
 
 @pytest.mark.asyncio
@@ -87,7 +85,7 @@ def test_vocabulary(dummy_request):
 
     vocab = SimpleVocabulary.fromItems((("Foo", "id_foo"), ("Bar", "id_bar")))
     res = json_compatible(vocab)
-    assert type(res) == list
+    assert isinstance(res, list)
 
 
 def test_SerializeFactoryToJson(dummy_request):  # noqa: N802

@@ -1,15 +1,14 @@
-from .services.utils import NoCatalogException
+import typing
+
 from guillotina.component import query_utility
 from guillotina.contrib.catalog.pg.utility import PGSearchUtility
-from guillotina.exceptions import ContainerNotFound
-from guillotina.exceptions import TransactionNotFound
+from guillotina.exceptions import ContainerNotFound, TransactionNotFound
 from guillotina.interfaces import IPrincipal
 from guillotina.interfaces.catalog import ICatalogUtility
 from guillotina.transactions import get_transaction
-from guillotina.utils import get_current_container
-from guillotina.utils import navigate_to
+from guillotina.utils import get_current_container, navigate_to
 
-import typing
+from .services.utils import NoCatalogException
 
 
 class DBUserIdentifier:

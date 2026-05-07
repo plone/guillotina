@@ -255,8 +255,8 @@ class FieldPropertyTests(_Base, _Integration):
         self.assertEqual(_validated, ["123"])
 
     def test_field_event(self):
-        from guillotina.schema import Text
         from guillotina.component.event import sync_subscribers
+        from guillotina.schema import Text
         from guillotina.schema.fieldproperty import FieldUpdatedEvent
 
         log = []
@@ -277,8 +277,8 @@ class FieldPropertyTests(_Base, _Integration):
         )
 
     def test_field_event_update(self):
-        from guillotina.schema import Text
         from guillotina.component.event import sync_subscribers
+        from guillotina.schema import Text
         from guillotina.schema.fieldproperty import FieldUpdatedEvent
 
         field = Text(__name__="testing", description="DESCRIPTION", default="DEFAULT", required=True)
@@ -539,8 +539,8 @@ class FieldPropertyStoredThroughFieldTests(_Base, _Integration):
         self.assertRaises(ValueError, setattr, foo, "testing", "123")
 
     def test_field_event_update(self):
-        from guillotina.schema import Text
         from guillotina.component.event import sync_subscribers
+        from guillotina.schema import Text
         from guillotina.schema.fieldproperty import FieldUpdatedEvent
 
         field = Text(__name__="testing", description="DESCRIPTION", default="DEFAULT", required=True)
@@ -566,8 +566,8 @@ class FieldPropertyStoredThroughFieldTests(_Base, _Integration):
     def test_field_event(self):
         # fieldproperties are everywhere including in field themselfs
         # so event are triggered
-        from guillotina.schema import Text
         from guillotina.component.event import sync_subscribers
+        from guillotina.schema import Text
         from guillotina.schema.fieldproperty import FieldUpdatedEvent
 
         log = []
@@ -591,9 +591,8 @@ class FieldPropertyStoredThroughFieldTests(_Base, _Integration):
 
 def _getSchema():
     from zope.interface import Interface
-    from guillotina.schema import Bytes
-    from guillotina.schema import Float
-    from guillotina.schema import Text
+
+    from guillotina.schema import Bytes, Float, Text
 
     class Schema(Interface):
         title = Text(description="Short summary", default="say something")
@@ -608,8 +607,7 @@ class CreateFieldPropertiesTests(unittest.TestCase):
     """Testing ..fieldproperty.createFieldProperties."""
 
     def test_creates_fieldproperties_on_class(self):
-        from guillotina.schema.fieldproperty import createFieldProperties
-        from guillotina.schema.fieldproperty import FieldProperty
+        from guillotina.schema.fieldproperty import FieldProperty, createFieldProperties
 
         schema = _getSchema()
 

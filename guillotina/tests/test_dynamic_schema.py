@@ -1,14 +1,14 @@
-from guillotina import configure
-from guillotina.behaviors.dynamic import IDynamicFields
-from guillotina.behaviors.dynamic import IDynamicFieldValues
-from guillotina.behaviors.properties import FunctionProperty
-from guillotina.content import Item
-from guillotina.content import load_cached_schema
-from guillotina.tests.utils import ContainerRequesterAsyncContextManager
+import json
+
+import pytest
+import pytest_asyncio
 from zope.interface import Interface
 
-import json
-import pytest
+from guillotina import configure
+from guillotina.behaviors.dynamic import IDynamicFields, IDynamicFieldValues
+from guillotina.behaviors.properties import FunctionProperty
+from guillotina.content import Item, load_cached_schema
+from guillotina.tests.utils import ContainerRequesterAsyncContextManager
 
 
 pytestmark = pytest.mark.asyncio
@@ -42,7 +42,7 @@ class CustomTypeContainerRequesterAsyncContextManager(ContainerRequesterAsyncCon
         return requester
 
 
-@pytest.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function")
 async def custom_type_container_requester(guillotina):
     return CustomTypeContainerRequesterAsyncContextManager(guillotina)
 

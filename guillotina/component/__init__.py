@@ -12,34 +12,39 @@
 #
 ##############################################################################
 # flake8: noqa
-from guillotina.component._api import get_adapter
-from guillotina.component._api import get_adapters
-from guillotina.component._api import get_all_utilities_registered_for
-from guillotina.component._api import get_component_registry
-from guillotina.component._api import get_factories_for
-from guillotina.component._api import get_factory_interfaces
-from guillotina.component._api import get_multi_adapter
-from guillotina.component._api import get_utilities_for
-from guillotina.component._api import get_utility
-from guillotina.component._api import handle
-from guillotina.component._api import query_adapter
-from guillotina.component._api import query_multi_adapter
-from guillotina.component._api import query_utility
-from guillotina.component._api import subscribers
-from guillotina.component._declaration import adaptedBy
-from guillotina.component._declaration import adapter
-from guillotina.component._declaration import adapts
-from guillotina.component.globalregistry import get_global_components
-from guillotina.component.globalregistry import provide_adapter
-from guillotina.component.globalregistry import provide_handler
-from guillotina.component.globalregistry import provide_subscription_adapter
-from guillotina.component.globalregistry import provide_utility
-from guillotina.component.interfaces import ComponentLookupError
-from guillotina.component.interfaces import IComponentArchitecture
-from guillotina.component.interfaces import IComponentLookup
-from guillotina.component.interfaces import IComponentRegistrationConvenience
-from guillotina.component.interfaces import IFactory
 from zope.interface import moduleProvides
+
+from guillotina.component._api import (
+    get_adapter,
+    get_adapters,
+    get_all_utilities_registered_for,
+    get_component_registry,
+    get_factories_for,
+    get_factory_interfaces,
+    get_multi_adapter,
+    get_utilities_for,
+    get_utility,
+    handle,
+    query_adapter,
+    query_multi_adapter,
+    query_utility,
+    subscribers,
+)
+from guillotina.component._declaration import adaptedBy, adapter, adapts
+from guillotina.component.globalregistry import (
+    get_global_components,
+    provide_adapter,
+    provide_handler,
+    provide_subscription_adapter,
+    provide_utility,
+)
+from guillotina.component.interfaces import (
+    ComponentLookupError,
+    IComponentArchitecture,
+    IComponentLookup,
+    IComponentRegistrationConvenience,
+    IFactory,
+)
 
 
 # b/w compat imports. Will be removed in 3.0

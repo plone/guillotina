@@ -1,7 +1,8 @@
-from guillotina.utils import resolve_dotted_name
-
 import asyncio
+
 import pytest
+
+from guillotina.utils import resolve_dotted_name
 
 
 pytestmark = pytest.mark.asyncio

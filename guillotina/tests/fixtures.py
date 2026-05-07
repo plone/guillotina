@@ -1,32 +1,30 @@
-from async_asgi_testclient import TestClient
-from guillotina import task_vars
-from guillotina import testing
-from guillotina.component import get_utility
-from guillotina.component import globalregistry
-from guillotina.const import ROOT_ID
-from guillotina.const import TRASHED_ID
-from guillotina.db.interfaces import ICockroachStorage
-from guillotina.db.interfaces import IPostgresStorage
-from guillotina.db.storages.cockroach import CockroachStorage
-from guillotina.factory import make_app
-from guillotina.interfaces import IApplication
-from guillotina.interfaces import IDatabase
-from guillotina.tests import mocks
-from guillotina.tests.utils import ContainerRequesterAsyncContextManager
-from guillotina.tests.utils import get_mocked_request
-from guillotina.tests.utils import login
-from guillotina.tests.utils import logout
-from guillotina.tests.utils import wrap_request
-from guillotina.transactions import get_tm
-from guillotina.transactions import transaction
-from guillotina.utils import merge_dicts
-from unittest import mock
-
-import aiohttp
 import asyncio
 import json
 import os
+from unittest import mock
+
+import aiohttp
 import pytest
+import pytest_asyncio
+from async_asgi_testclient import TestClient
+
+from guillotina import task_vars, testing
+from guillotina.component import get_utility, globalregistry
+from guillotina.const import ROOT_ID, TRASHED_ID
+from guillotina.db.interfaces import ICockroachStorage, IPostgresStorage
+from guillotina.db.storages.cockroach import CockroachStorage
+from guillotina.factory import make_app
+from guillotina.interfaces import IApplication, IDatabase
+from guillotina.tests import mocks
+from guillotina.tests.utils import (
+    ContainerRequesterAsyncContextManager,
+    get_mocked_request,
+    login,
+    logout,
+    wrap_request,
+)
+from guillotina.transactions import get_tm, transaction
+from guillotina.utils import merge_dicts
 
 
 _dir = os.path.dirname(os.path.realpath(__file__))
@@ -53,7 +51,7 @@ def base_settings_configurator(settings):
 testing.configure_with(base_settings_configurator)
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def event_loop():
     """Create an instance of the default event loop for each test case."""
     # https://github.com/pytest-dev/pytest-asyncio/issues/30#issuecomment-226947196
@@ -389,7 +387,7 @@ def clear_task_vars():
         getattr(task_vars, var).set(None)
 
 
-@pytest.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function")
 async def dummy_guillotina(event_loop, request):
     globalregistry.reset()
     app = make_app(settings=get_dummy_settings(request.node), loop=event_loop)
@@ -417,8 +415,8 @@ class DummyRequestAsyncContextManager(object):
 
 @pytest.fixture(scope="function")
 def dummy_request(dummy_guillotina, monkeypatch):
-    from guillotina.interfaces import IApplication
     from guillotina.component import get_utility
+    from guillotina.interfaces import IApplication
 
     root = get_utility(IApplication, name="root")
     db = root["db"]
@@ -444,7 +442,7 @@ class RootAsyncContextManager:
         await self.txn.abort()
 
 
-@pytest.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function")
 async def dummy_txn_root(dummy_request):
     return RootAsyncContextManager(dummy_request)
 
@@ -487,7 +485,7 @@ SELECT 'DROP INDEX ' || string_agg(indexrelid::regclass::text, ', ')
                 )
 
 
-@pytest.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function")
 async def app(event_loop, db, request):
     globalregistry.reset()
     settings = get_db_settings(request.node)
@@ -499,7 +497,7 @@ async def app(event_loop, db, request):
 
     from uvicorn import Config, Server
 
-    config = Config(app, host=host, port=port, lifespan="on")
+    config = Config(app, host=host, port=port, lifespan="on", server_header=False)
     server = Server(config=config)
     task = asyncio.ensure_future(server.serve(), loop=event_loop)
 
@@ -519,7 +517,7 @@ async def app(event_loop, db, request):
     clear_task_vars()
 
 
-@pytest.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function")
 async def app_client(event_loop, db, request):
     globalregistry.reset()
     app = make_app(settings=get_db_settings(request.node), loop=event_loop)
@@ -529,19 +527,19 @@ async def app_client(event_loop, db, request):
     clear_task_vars()
 
 
-@pytest.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function")
 async def guillotina_main(app_client):
     app, _ = app_client
     return app
 
 
-@pytest.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function")
 async def guillotina(app_client):
     _, client = app_client
     return GuillotinaDBAsgiRequester(client)
 
 
-@pytest.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function")
 async def guillotina_server(app):
     host, port = app
     return GuillotinaDBHttpRequester(host, port)
@@ -557,7 +555,7 @@ def container_install_requester(guillotina, install_addons):
     return ContainerRequesterAsyncContextManager(guillotina, install_addons)
 
 
-@pytest.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function")
 async def container_requester_server(guillotina_server):
     return ContainerRequesterAsyncContextManager(guillotina_server)
 
@@ -650,12 +648,12 @@ def memcached_container(memcached):
     annotations["memcached"] = None
 
 
-@pytest.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function")
 async def dbusers_requester(guillotina):
     return ContainerRequesterAsyncContextManager(guillotina, ["dbusers"])
 
 
-@pytest.fixture(scope="function")
+@pytest_asyncio.fixture(scope="function")
 async def metrics_registry():
     import prometheus_client.registry
 

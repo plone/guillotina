@@ -1,14 +1,9 @@
-from guillotina import configure
-from guillotina import task_vars
-from guillotina.component import adapter
-from guillotina.interfaces import IAbsoluteURL
-from guillotina.interfaces import ILocation
-from guillotina.interfaces import IRequest
-from guillotina.interfaces import IResource
-from guillotina.interfaces import IView
-from guillotina.utils import get_current_request
-from guillotina.utils import get_url
 from zope.interface import implementer
+
+from guillotina import configure, task_vars
+from guillotina.component import adapter
+from guillotina.interfaces import IAbsoluteURL, ILocation, IRequest, IResource, IView
+from guillotina.utils import get_current_request, get_url
 
 
 def get_physical_path(context):

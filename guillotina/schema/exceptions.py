@@ -1,6 +1,6 @@
-from guillotina.schema._messageid import _
-
 import zope.interface
+
+from guillotina.schema._messageid import _
 
 
 class StopValidation(Exception):

@@ -1,22 +1,20 @@
+import asyncio
+import logging
+import pickle
+import uuid
+from sys import getsizeof
+from typing import List, Optional
+
+import asyncpg
+
 from guillotina import app_settings
 from guillotina.component import query_utility
-from guillotina.contrib.cache import CACHE_PREFIX
-from guillotina.contrib.cache import memcache
-from guillotina.contrib.cache import serialize
+from guillotina.contrib.cache import CACHE_PREFIX, memcache, serialize
 from guillotina.contrib.cache.lru import LRU
 from guillotina.exceptions import NoPubSubUtility
 from guillotina.interfaces import IPubSubUtility
 from guillotina.profile import profilable
 from guillotina.utils import resolve_dotted_name
-from sys import getsizeof
-from typing import List
-from typing import Optional
-
-import asyncio
-import asyncpg
-import logging
-import pickle
-import uuid
 
 
 logger = logging.getLogger("guillotina.contrib.cache")

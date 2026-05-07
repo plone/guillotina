@@ -1,14 +1,17 @@
-from guillotina.contrib.image.behaviors import IImageAttachment
-from guillotina.contrib.image.behaviors import IMultiImageAttachment
-from guillotina.contrib.image.behaviors import IMultiImageOrderedAttachment
+import json
+import os
+
+import pytest
+
+from guillotina.contrib.image.behaviors import (
+    IImageAttachment,
+    IMultiImageAttachment,
+    IMultiImageOrderedAttachment,
+)
 from guillotina.directives import index_field
 from guillotina.test_package import IExample
 from guillotina.tests.image import TEST_DATA_LOCATION
 from guillotina.utils import get_behavior
-
-import json
-import os
-import pytest
 
 
 pytestmark = pytest.mark.asyncio

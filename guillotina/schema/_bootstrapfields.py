@@ -11,24 +11,25 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-from guillotina.schema._bootstrapinterfaces import IContextAwareDefaultFactory
-from guillotina.schema._bootstrapinterfaces import IFromUnicode
-from guillotina.schema._schema import get_fields
-from guillotina.schema.exceptions import ConstraintNotSatisfied
-from guillotina.schema.exceptions import InvalidValue
-from guillotina.schema.exceptions import NotAContainer
-from guillotina.schema.exceptions import NotAnIterator
-from guillotina.schema.exceptions import RequiredMissing
-from guillotina.schema.exceptions import StopValidation
-from guillotina.schema.exceptions import TooBig
-from guillotina.schema.exceptions import TooLong
-from guillotina.schema.exceptions import TooShort
-from guillotina.schema.exceptions import TooSmall
-from guillotina.schema.exceptions import WrongType
 from typing import Any
-from zope.interface import Attribute
-from zope.interface import implementer
-from zope.interface import providedBy
+
+from zope.interface import Attribute, implementer, providedBy
+
+from guillotina.schema._bootstrapinterfaces import IContextAwareDefaultFactory, IFromUnicode
+from guillotina.schema._schema import get_fields
+from guillotina.schema.exceptions import (
+    ConstraintNotSatisfied,
+    InvalidValue,
+    NotAContainer,
+    NotAnIterator,
+    RequiredMissing,
+    StopValidation,
+    TooBig,
+    TooLong,
+    TooShort,
+    TooSmall,
+    WrongType,
+)
 
 
 __docformat__ = "restructuredtext"
@@ -199,7 +200,7 @@ class Field(Attribute):
 
     def __eq__(self, other):
         # should be the same type
-        if type(self) != type(other):
+        if type(self) is not type(other):
             return False
 
         # should have the same properties

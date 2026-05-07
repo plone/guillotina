@@ -1,7 +1,7 @@
-from guillotina.interfaces.files import ICloudFileField
-from guillotina.interfaces.files import IFileField
-from guillotina.schema import Object
 from zope.interface import implementer
+
+from guillotina.interfaces.files import ICloudFileField, IFileField
+from guillotina.schema import Object
 
 
 class ICloudPreviewImageFileField(ICloudFileField):

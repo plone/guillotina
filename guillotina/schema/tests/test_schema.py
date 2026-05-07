@@ -12,13 +12,14 @@
 #
 ##############################################################################
 # flake8: noqa
-from zope.interface.interface import InterfaceClass
-
 import unittest
+
+from zope.interface.interface import InterfaceClass
 
 
 def _makeSchema():
     from zope.interface import Interface
+
     from guillotina.schema import Bytes
 
     return InterfaceClass(
@@ -154,6 +155,7 @@ class Test_getValidationErrors(unittest.TestCase):
 
     def test_schema_with_field_errors(self):
         from zope.interface import Interface
+
         from guillotina.schema import Text
         from guillotina.schema.exceptions import SchemaNotFullyImplemented
 
@@ -166,8 +168,7 @@ class Test_getValidationErrors(unittest.TestCase):
         self.assertEqual(errors[0][1].__class__, SchemaNotFullyImplemented)
 
     def test_schema_with_invariant_errors(self):
-        from zope.interface import Interface
-        from zope.interface import invariant
+        from zope.interface import Interface, invariant
         from zope.interface.exceptions import Invalid
 
         class IWithFailingInvariant(Interface):
@@ -181,8 +182,7 @@ class Test_getValidationErrors(unittest.TestCase):
         self.assertEqual(errors[0][1].__class__, Invalid)
 
     def test_schema_with_invariant_ok(self):
-        from zope.interface import Interface
-        from zope.interface import invariant
+        from zope.interface import Interface, invariant
 
         class IWithPassingInvariant(Interface):
             @invariant
@@ -200,8 +200,7 @@ class Test_getSchemaValidationErrors(unittest.TestCase):
         return getSchemaValidationErrors(schema, object)
 
     def test_schema_wo_fields(self):
-        from zope.interface import Interface
-        from zope.interface import Attribute
+        from zope.interface import Attribute, Interface
 
         class INoFields(Interface):
             def method():
@@ -214,6 +213,7 @@ class Test_getSchemaValidationErrors(unittest.TestCase):
 
     def test_schema_with_fields_ok(self):
         from zope.interface import Interface
+
         from guillotina.schema import Text
 
         class IWithFields(Interface):
@@ -229,6 +229,7 @@ class Test_getSchemaValidationErrors(unittest.TestCase):
 
     def test_schema_with_missing_field(self):
         from zope.interface import Interface
+
         from guillotina.schema import Text
         from guillotina.schema.exceptions import SchemaNotFullyImplemented
 
@@ -242,6 +243,7 @@ class Test_getSchemaValidationErrors(unittest.TestCase):
 
     def test_schema_with_invalid_field(self):
         from zope.interface import Interface
+
         from guillotina.schema import Int
         from guillotina.schema.exceptions import TooSmall
 

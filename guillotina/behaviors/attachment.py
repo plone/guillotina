@@ -1,8 +1,8 @@
+from zope.interface import Interface
+
 from guillotina import configure
 from guillotina.fields import CloudFileField
-from guillotina.schema import Dict
-from guillotina.schema import TextLine
-from zope.interface import Interface
+from guillotina.schema import Dict, TextLine
 
 
 class IAttachmentMarker(Interface):

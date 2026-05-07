@@ -1,7 +1,8 @@
-from . import settings
-
 import json
+
 import pytest
+
+from . import settings
 
 
 pytestmark = pytest.mark.asyncio

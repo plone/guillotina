@@ -1,30 +1,34 @@
+from zope.interface import Interface, implementedBy
+
 from guillotina import configure
 from guillotina.component import get_multi_adapter
 from guillotina.fields.interfaces import IPatchField
-from guillotina.interfaces import ICloudFileField
-from guillotina.interfaces import IFileField
-from guillotina.interfaces import ISchemaFieldSerializeToJson
-from guillotina.interfaces import ISchemaSerializeToJson
+from guillotina.interfaces import (
+    ICloudFileField,
+    IFileField,
+    ISchemaFieldSerializeToJson,
+    ISchemaSerializeToJson,
+)
 from guillotina.json.serialize_value import json_compatible
 from guillotina.profile import profilable
 from guillotina.schema import get_fields
-from guillotina.schema.interfaces import IBool
-from guillotina.schema.interfaces import IChoice
-from guillotina.schema.interfaces import ICollection
-from guillotina.schema.interfaces import IDate
-from guillotina.schema.interfaces import IDatetime
-from guillotina.schema.interfaces import IDecimal
-from guillotina.schema.interfaces import IDict
-from guillotina.schema.interfaces import IField
-from guillotina.schema.interfaces import IFloat
-from guillotina.schema.interfaces import IInt
-from guillotina.schema.interfaces import IJSONField
-from guillotina.schema.interfaces import IObject
-from guillotina.schema.interfaces import IText
-from guillotina.schema.interfaces import ITextLine
-from guillotina.schema.interfaces import ITime
-from zope.interface import implementedBy
-from zope.interface import Interface
+from guillotina.schema.interfaces import (
+    IBool,
+    IChoice,
+    ICollection,
+    IDate,
+    IDatetime,
+    IDecimal,
+    IDict,
+    IField,
+    IFloat,
+    IInt,
+    IJSONField,
+    IObject,
+    IText,
+    ITextLine,
+    ITime,
+)
 
 
 FIELDS_CACHE: dict = {}

@@ -1,10 +1,10 @@
 from collections import OrderedDict as NativeOrderedDict
+
+from zope.interface import Interface
+
 from guillotina import configure
 from guillotina.contrib.image.image import CloudImageFileField
-from guillotina.schema import Dict
-from guillotina.schema import OrderedDict
-from guillotina.schema import TextLine
-from zope.interface import Interface
+from guillotina.schema import Dict, OrderedDict, TextLine
 
 
 class IImageAttachmentMarker(Interface):

@@ -1,11 +1,10 @@
-from guillotina import configure
-from guillotina import schema
+from zope.interface import implementer
+
+from guillotina import configure, schema
 from guillotina.content import Folder
 from guillotina.contrib.dbusers import _
 from guillotina.directives import index_field
-from guillotina.interfaces import IFolder
-from guillotina.interfaces import IPrincipal
-from zope.interface import implementer
+from guillotina.interfaces import IFolder, IPrincipal
 
 
 class IGroupManager(IFolder):

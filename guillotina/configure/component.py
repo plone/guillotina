@@ -13,16 +13,14 @@
 ##############################################################################
 """Component Architecture configuration handlers
 """
+from zope.interface import Interface, implementedBy, providedBy
+
 from guillotina.component._api import get_component_registry
 from guillotina.component._compat import _BLANK
-from guillotina.component._declaration import adaptedBy
-from guillotina.component._declaration import getName
+from guillotina.component._declaration import adaptedBy, getName
 from guillotina.component.interface import provide_interface
 from guillotina.exceptions import ComponentConfigurationError
 from guillotina.i18n import MessageFactory
-from zope.interface import implementedBy
-from zope.interface import Interface
-from zope.interface import providedBy
 
 
 _ = MessageFactory("guillotina")

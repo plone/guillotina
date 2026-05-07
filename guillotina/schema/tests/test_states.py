@@ -17,9 +17,8 @@ import unittest
 
 class StateSelectionTest(unittest.TestCase):
     def setUp(self):
-        from guillotina.schema.vocabulary import _clear
-        from guillotina.schema.vocabulary import getVocabularyRegistry
         from guillotina.schema.tests.states import StateVocabulary
+        from guillotina.schema.vocabulary import _clear, getVocabularyRegistry
 
         _clear()
         vr = getVocabularyRegistry()
@@ -32,6 +31,7 @@ class StateSelectionTest(unittest.TestCase):
 
     def _makeSchema(self):
         from zope.interface import Interface
+
         from guillotina.schema import Choice
         from guillotina.schema.tests.states import StateVocabulary
 
@@ -59,6 +59,7 @@ class StateSelectionTest(unittest.TestCase):
 
     def test_default_presentation(self):
         from zope.interface.verify import verifyObject
+
         from guillotina.schema.interfaces import IVocabulary
 
         schema = self._makeSchema()
@@ -69,6 +70,7 @@ class StateSelectionTest(unittest.TestCase):
 
     def test_contains(self):
         from zope.interface.verify import verifyObject
+
         from guillotina.schema.interfaces import IVocabulary
         from guillotina.schema.tests.states import StateVocabulary
 
@@ -89,6 +91,7 @@ class StateSelectionTest(unittest.TestCase):
 
     def test_prebound_vocabulary(self):
         from zope.interface.verify import verifyObject
+
         from guillotina.schema.interfaces import IVocabulary
 
         schema = self._makeSchema()

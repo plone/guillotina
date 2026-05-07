@@ -1,7 +1,7 @@
-from guillotina import configure
-from guillotina import schema
-from guillotina.addons import Addon
 from zope.interface import Interface
+
+from guillotina import configure, schema
+from guillotina.addons import Addon
 
 
 class IRegistryData(Interface):

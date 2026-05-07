@@ -1,7 +1,7 @@
+import logging
+
 from guillotina import app_settings
 from guillotina.utils import get_current_request
-
-import logging
 
 
 logger = logging.getLogger("guillotina")

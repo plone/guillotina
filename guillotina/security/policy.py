@@ -1,30 +1,32 @@
+from typing import Dict, List, Optional, Union
+
+from lru import LRU
+
 from guillotina import configure
 from guillotina.auth.users import SystemUser
-from guillotina.component import get_utility
-from guillotina.component import query_adapter
+from guillotina.component import get_utility, query_adapter
 from guillotina.db.orm.interfaces import IBaseObject
-from guillotina.interfaces import Allow
-from guillotina.interfaces import AllowSingle
-from guillotina.interfaces import Deny
-from guillotina.interfaces import IGroups
-from guillotina.interfaces import IInheritPermissionMap
-from guillotina.interfaces import IPrincipal
-from guillotina.interfaces import IPrincipalPermissionMap
-from guillotina.interfaces import IPrincipalRoleMap
-from guillotina.interfaces import IRolePermissionMap
-from guillotina.interfaces import ISecurityPolicy
-from guillotina.interfaces import IView
-from guillotina.interfaces import Public
-from guillotina.interfaces import Unset
+from guillotina.interfaces import (
+    Allow,
+    AllowSingle,
+    Deny,
+    IGroups,
+    IInheritPermissionMap,
+    IPrincipal,
+    IPrincipalPermissionMap,
+    IPrincipalRoleMap,
+    IRolePermissionMap,
+    ISecurityPolicy,
+    IView,
+    Public,
+    Unset,
+)
 from guillotina.profile import profilable
-from guillotina.security.security_code import principal_permission_manager
-from guillotina.security.security_code import principal_role_manager
-from guillotina.security.security_code import role_permission_manager
-from lru import LRU
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Union
+from guillotina.security.security_code import (
+    principal_permission_manager,
+    principal_role_manager,
+    role_permission_manager,
+)
 
 
 code_principal_permission_setting = principal_permission_manager.get_setting

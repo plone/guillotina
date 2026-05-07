@@ -24,9 +24,10 @@ class Test_handler(unittest.TestCase):  # noqa: N801
 
     def test_uses_configured_site_manager(self):
         from zope.interface.registry import Components
+
         from guillotina.component import get_component_registry
-        from guillotina.component.testfiles.components import comp, IApp
         from guillotina.component._compat import _BLANK
+        from guillotina.component.testfiles.components import IApp, comp
 
         registry = Components()
 
@@ -87,6 +88,7 @@ class Test_adapter(unittest.TestCase):  # noqa: N801
 
     def test_empty_factory(self):
         from zope.interface import Interface
+
         from guillotina.configure.component import ComponentConfigurationError
 
         class IFoo(Interface):
@@ -97,6 +99,7 @@ class Test_adapter(unittest.TestCase):  # noqa: N801
 
     def test_multiple_factory_multiple_for_(self):
         from zope.interface import Interface
+
         from guillotina.configure.component import ComponentConfigurationError
 
         class IFoo(Interface):
@@ -134,8 +137,9 @@ class Test_adapter(unittest.TestCase):  # noqa: N801
         class IBar(Interface):
             pass
 
-        from guillotina.component import adapter
         from zope.interface import implementer, named
+
+        from guillotina.component import adapter
 
         @adapter(IFoo)
         @implementer(IBar)
@@ -152,6 +156,7 @@ class Test_adapter(unittest.TestCase):  # noqa: N801
 
     def test_no_for__factory_adapts_no_provides_factory_not_implement(self):
         from zope.interface import Interface
+
         from guillotina.component._declaration import adapter
 
         @adapter(Interface)
@@ -164,6 +169,7 @@ class Test_adapter(unittest.TestCase):  # noqa: N801
 
     def test_multiple_factory_single_for__w_name(self):
         from zope.interface import Interface
+
         from guillotina.component.interface import provide_interface
         from guillotina.configure.component import handler
 
@@ -203,8 +209,8 @@ class Test_adapter(unittest.TestCase):  # noqa: N801
         self.assertEqual(action["args"], ("", Interface))
 
     def test_no_for__no_provides_factory_adapts_factory_implement(self):
-        from zope.interface import Interface
-        from zope.interface import implementer
+        from zope.interface import Interface, implementer
+
         from guillotina.component._declaration import adapter
         from guillotina.configure.component import handler
 
@@ -287,6 +293,7 @@ class Test_subscriber(unittest.TestCase):  # noqa: N801
 
     def test_no_factory_w_handler_no_provides(self):
         from zope.interface import Interface
+
         from guillotina.component.interface import provide_interface
         from guillotina.configure.component import handler
 
@@ -314,6 +321,7 @@ class Test_subscriber(unittest.TestCase):  # noqa: N801
 
     def test_w_factory_w_provides(self):
         from zope.interface import Interface
+
         from guillotina.component.interface import provide_interface
         from guillotina.configure.component import handler
 
@@ -381,6 +389,7 @@ class Test_utility(unittest.TestCase):  # noqa: N801
 
     def test_w_factory_w_provides(self):
         from zope.interface import Interface
+
         from guillotina.component.interface import provide_interface
         from guillotina.configure.component import handler
 
@@ -411,8 +420,8 @@ class Test_utility(unittest.TestCase):  # noqa: N801
         self.assertEqual(action["args"], ("", IFoo))
 
     def test_w_factory_wo_provides_factory_implement(self):
-        from zope.interface import Interface
-        from zope.interface import implementer
+        from zope.interface import Interface, implementer
+
         from guillotina.component.interface import provide_interface
         from guillotina.configure.component import handler
 
@@ -445,6 +454,7 @@ class Test_utility(unittest.TestCase):  # noqa: N801
 
     def test_w_component_w_provides_w_name(self):
         from zope.interface import Interface
+
         from guillotina.component.interface import provide_interface
         from guillotina.configure.component import handler
 
@@ -491,8 +501,8 @@ class Test_utility(unittest.TestCase):  # noqa: N801
         self.assertEqual(action["args"][3], "foo")
 
     def test_w_component_wo_provides_component_provides(self):
-        from zope.interface import Interface
-        from zope.interface import directlyProvides
+        from zope.interface import Interface, directlyProvides
+
         from guillotina.component.interface import provide_interface
         from guillotina.configure.component import handler
 
@@ -532,6 +542,7 @@ class Test_interface(unittest.TestCase):  # noqa: N801
 
     def test_wo_name_wo_type(self):
         from zope.interface import Interface
+
         from guillotina.component.interface import provide_interface
 
         class IFoo(Interface):
@@ -548,6 +559,7 @@ class Test_interface(unittest.TestCase):  # noqa: N801
 
     def test_w_name_w_type(self):
         from zope.interface import Interface
+
         from guillotina.component.interface import provide_interface
 
         class IFoo(Interface):
@@ -574,6 +586,7 @@ class Test_view(unittest.TestCase):  # noqa: N801
 
     def test_w_factory_as_empty(self):
         from zope.interface import Interface
+
         from guillotina.configure.component import ComponentConfigurationError
 
         class IViewType(Interface):
@@ -592,6 +605,7 @@ class Test_view(unittest.TestCase):  # noqa: N801
 
     def test_w_multiple_factory_multiple_for_(self):
         from zope.interface import Interface
+
         from guillotina.configure.component import ComponentConfigurationError
 
         class IViewType(Interface):
@@ -616,6 +630,7 @@ class Test_view(unittest.TestCase):  # noqa: N801
 
     def test_w_for__as_empty(self):
         from zope.interface import Interface
+
         from guillotina.configure.component import ComponentConfigurationError
 
         class IViewType(Interface):
@@ -632,8 +647,9 @@ class Test_view(unittest.TestCase):  # noqa: N801
 
     def test_w_single_factory_single_for__wo_permission_w_name(self):
         from zope.interface import Interface
-        from guillotina.configure.component import handler
+
         from guillotina.component.interface import provide_interface
+        from guillotina.configure.component import handler
 
         class IViewType(Interface):
             pass
@@ -675,6 +691,7 @@ class Test_view(unittest.TestCase):  # noqa: N801
 
     def test_w_multiple_factory_single_for__wo_permission(self):
         from zope.interface import Interface
+
         from guillotina.configure.component import handler
 
         class IViewType(Interface):
@@ -737,10 +754,11 @@ def test_suite():
 
 
 def test_configuration_machine_allows_overriding():
-    from guillotina.configure.config import ConfigurationMachine
-    from guillotina.configure import component
+    from zope.interface import Interface, implementer, named
+
     from guillotina.component import adapter, get_adapter
-    from zope.interface import implementer, Interface, named
+    from guillotina.configure import component
+    from guillotina.configure.config import ConfigurationMachine
 
     class IFoo(Interface):
         pass

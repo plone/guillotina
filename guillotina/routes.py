@@ -1,6 +1,6 @@
-from guillotina.response import InvalidRoute
-
 import re
+
+from guillotina.response import InvalidRoute
 
 
 URL_MATCH_RE = re.compile(r"\{[a-zA-Z0-9\_\-]+\}")

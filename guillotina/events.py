@@ -1,43 +1,46 @@
-from guillotina.component.interfaces import IObjectEvent
-from guillotina.db.orm.interfaces import IBaseObject
-from guillotina.interfaces import IAfterAsyncUtilityLoadedEvent
-from guillotina.interfaces import IApplicationCleanupEvent
-from guillotina.interfaces import IApplicationConfiguredEvent
-from guillotina.interfaces import IApplicationEvent
-from guillotina.interfaces import IApplicationInitializedEvent
-from guillotina.interfaces import IBeforeAsyncUtilityLoadedEvent
-from guillotina.interfaces import IBeforeObjectAddedEvent
-from guillotina.interfaces import IBeforeObjectModifiedEvent
-from guillotina.interfaces import IBeforeObjectMovedEvent
-from guillotina.interfaces import IBeforeObjectRemovedEvent
-from guillotina.interfaces import IBeforeRenderViewEvent
-from guillotina.interfaces import IDatabaseInitializedEvent
-from guillotina.interfaces import IFileBeforeFinishUploaded
-from guillotina.interfaces import IFileFinishUploaded
-from guillotina.interfaces import IFileStartedUpload
-from guillotina.interfaces import INewUserAdded
-from guillotina.interfaces import IObjectAddedEvent
-from guillotina.interfaces import IObjectDuplicatedEvent
-from guillotina.interfaces import IObjectLoadedEvent
-from guillotina.interfaces import IObjectLocationEvent
-from guillotina.interfaces import IObjectModifiedEvent
-from guillotina.interfaces import IObjectMovedEvent
-from guillotina.interfaces import IObjectPermissionsModifiedEvent
-from guillotina.interfaces import IObjectPermissionsViewEvent
-from guillotina.interfaces import IObjectRemovedEvent
-from guillotina.interfaces import IObjectVisitedEvent
-from guillotina.interfaces import IRegistry
-from guillotina.interfaces import IRegistryEditedEvent
-from guillotina.interfaces import ITraversalMissEvent
-from guillotina.interfaces import ITraversalResourceMissEvent
-from guillotina.interfaces import ITraversalRouteMissEvent
-from guillotina.interfaces import ITraversalViewMissEvent
-from guillotina.interfaces import IUserLogin
-from guillotina.interfaces import IUserRefreshToken
-from guillotina.interfaces import IValidationEvent
+import typing
+
 from zope.interface import implementer
 
-import typing
+from guillotina.component.interfaces import IObjectEvent
+from guillotina.db.orm.interfaces import IBaseObject
+from guillotina.interfaces import (
+    IAfterAsyncUtilityLoadedEvent,
+    IApplicationCleanupEvent,
+    IApplicationConfiguredEvent,
+    IApplicationEvent,
+    IApplicationInitializedEvent,
+    IBeforeAsyncUtilityLoadedEvent,
+    IBeforeObjectAddedEvent,
+    IBeforeObjectModifiedEvent,
+    IBeforeObjectMovedEvent,
+    IBeforeObjectRemovedEvent,
+    IBeforeRenderViewEvent,
+    IDatabaseInitializedEvent,
+    IFileBeforeFinishUploaded,
+    IFileFinishUploaded,
+    IFileStartedUpload,
+    INewUserAdded,
+    IObjectAddedEvent,
+    IObjectDuplicatedEvent,
+    IObjectLoadedEvent,
+    IObjectLocationEvent,
+    IObjectModifiedEvent,
+    IObjectMovedEvent,
+    IObjectPermissionsModifiedEvent,
+    IObjectPermissionsViewEvent,
+    IObjectRemovedEvent,
+    IObjectVisitedEvent,
+    IRegistry,
+    IRegistryEditedEvent,
+    ITraversalMissEvent,
+    ITraversalResourceMissEvent,
+    ITraversalRouteMissEvent,
+    ITraversalViewMissEvent,
+    IUserLogin,
+    IUserRefreshToken,
+    IValidationEvent,
+)
 
 
 @implementer(IObjectEvent)

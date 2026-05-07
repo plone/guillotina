@@ -1,15 +1,13 @@
+import pickle
+
 from guillotina import configure
 from guillotina._settings import app_settings
 from guillotina.catalog.catalog import DefaultCatalogDataAdapter
 from guillotina.component import query_adapter
-from guillotina.db.interfaces import IJSONDBSerializer
-from guillotina.db.interfaces import IWriter
+from guillotina.db.interfaces import IJSONDBSerializer, IWriter
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces import IResource
-from guillotina.utils import find_container
-from guillotina.utils import get_dotted_name
-
-import pickle
+from guillotina.utils import find_container, get_dotted_name
 
 
 @configure.adapter(for_=IResource, provides=IJSONDBSerializer)

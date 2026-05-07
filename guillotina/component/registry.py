@@ -13,11 +13,13 @@
 ##############################################################################
 from guillotina.component._api import handle
 from guillotina.component._declaration import adapter
-from guillotina.component.interfaces import IAdapterRegistration
-from guillotina.component.interfaces import IHandlerRegistration
-from guillotina.component.interfaces import IRegistrationEvent
-from guillotina.component.interfaces import ISubscriptionAdapterRegistration
-from guillotina.component.interfaces import IUtilityRegistration
+from guillotina.component.interfaces import (
+    IAdapterRegistration,
+    IHandlerRegistration,
+    IRegistrationEvent,
+    ISubscriptionAdapterRegistration,
+    IUtilityRegistration,
+)
 
 
 @adapter(IUtilityRegistration, IRegistrationEvent)

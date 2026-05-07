@@ -1,32 +1,19 @@
-from guillotina import app_settings
-from guillotina import BEHAVIOR_CACHE
-from guillotina import configure
-from guillotina import FACTORY_CACHE
-from guillotina.component import get_global_components
-from guillotina.component import get_utility
-from guillotina.component import query_utility
-from guillotina.content import get_cached_factory
-from guillotina.content import load_cached_schema
-from guillotina.contrib.dyncontent import behaviors
-from guillotina.contrib.dyncontent import contents
-from guillotina.contrib.dyncontent.vocabularies import AppSettingSource
-from guillotina.directives import index_field
-from guillotina.directives import metadata
-from guillotina.directives import read_permission
-from guillotina.directives import write_permission
-from guillotina.interfaces import IApplication
-from guillotina.interfaces import IApplicationInitializedEvent
-from guillotina.interfaces import IBehavior
-from guillotina.interfaces import IResourceFactory
-from guillotina.schema.vocabulary import SimpleTerm
-from guillotina.schema.vocabulary import SimpleVocabulary
-from guillotina.utils import import_class
-from zope.interface import Interface
-from zope.interface.interface import InterfaceClass
-
 import json
 import logging
 import typing
+
+from zope.interface import Interface
+from zope.interface.interface import InterfaceClass
+
+from guillotina import BEHAVIOR_CACHE, FACTORY_CACHE, app_settings, configure
+from guillotina.component import get_global_components, get_utility, query_utility
+from guillotina.content import get_cached_factory, load_cached_schema
+from guillotina.contrib.dyncontent import behaviors, contents
+from guillotina.contrib.dyncontent.vocabularies import AppSettingSource
+from guillotina.directives import index_field, metadata, read_permission, write_permission
+from guillotina.interfaces import IApplication, IApplicationInitializedEvent, IBehavior, IResourceFactory
+from guillotina.schema.vocabulary import SimpleTerm, SimpleVocabulary
+from guillotina.utils import import_class
 
 
 SUPPORTED_DIRECTIVES = {

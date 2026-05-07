@@ -1,10 +1,12 @@
 from guillotina import configure
-from guillotina.interfaces import IApplication
-from guillotina.interfaces import IDatabase
-from guillotina.interfaces import IRequest
-from guillotina.interfaces import IResourceSerializeToJson
-from guillotina.interfaces import IStaticDirectory
-from guillotina.interfaces import IStaticFile
+from guillotina.interfaces import (
+    IApplication,
+    IDatabase,
+    IRequest,
+    IResourceSerializeToJson,
+    IStaticDirectory,
+    IStaticFile,
+)
 from guillotina.utils import get_security_policy
 
 

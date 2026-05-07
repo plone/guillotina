@@ -2,8 +2,7 @@ from guillotina import app_settings
 from guillotina.auth import authenticate_user
 from guillotina.content import create_content_in_container
 from guillotina.event import notify
-from guillotina.events import ObjectAddedEvent
-from guillotina.events import UserLogin
+from guillotina.events import ObjectAddedEvent, UserLogin
 from guillotina.utils import get_current_container
 
 

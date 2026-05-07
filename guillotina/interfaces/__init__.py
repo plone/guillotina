@@ -11,6 +11,7 @@ from .behaviors import IBehavior  # noqa
 from .behaviors import IBehaviorAdapterFactory  # noqa
 from .behaviors import IBehaviorSchemaAwareFactory  # noqa
 from .behaviors import IContentBehavior  # noqa
+from .catalog import ICatalogDataAdapter  # noqa; noqa
 from .catalog import ICatalogUtility  # noqa
 from .catalog import IPGCatalogUtility  # noqa
 from .catalog import ISearchParser  # noqa
@@ -136,9 +137,6 @@ from .views import IPOST  # noqa
 from .views import IPROPFIND  # noqa
 from .views import IPUT  # noqa
 from .views import IView  # noqa
-
-
-from .catalog import ICatalogDataAdapter  # noqa; noqa
 
 
 DEFAULT_ADD_PERMISSION = "guillotina.AddContent"

@@ -1,19 +1,19 @@
+import io
+import json
+import os
 from contextlib import redirect_stdout
+from tempfile import mkstemp
+
+import pytest
+
 from guillotina import testing
-from guillotina.commands import Command
-from guillotina.commands import get_settings
+from guillotina.commands import Command, get_settings
 from guillotina.commands.crypto import CryptoCommand
 from guillotina.commands.migrate import MigrateCommand
 from guillotina.commands.run import RunCommand
 from guillotina.commands.vacuum import VacuumCommand
 from guillotina.exceptions import TransactionNotFound
 from guillotina.utils import get_current_transaction
-from tempfile import mkstemp
-
-import io
-import json
-import os
-import pytest
 
 
 DATABASE = os.environ.get("DATABASE", "DUMMY")

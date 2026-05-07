@@ -1,8 +1,9 @@
+import json
+
+import pytest
+
 from guillotina.tests.utils import make_mocked_request
 from guillotina.utils import get_url
-
-import json
-import pytest
 
 
 def test_url(dummy_guillotina):

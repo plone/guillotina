@@ -1,20 +1,14 @@
 from collections import namedtuple
-from guillotina import configure
-from guillotina import schema
-from guillotina.component import get_adapter
-from guillotina.component import query_adapter
-from guillotina.exceptions import ValueDeserializationError
-from guillotina.fields.interfaces import IPatchField
-from guillotina.fields.interfaces import IPatchFieldOperation
-from guillotina.interfaces import IJSONToValue
-from guillotina.schema.interfaces import IArrayJSONField
-from guillotina.schema.interfaces import IDict
-from guillotina.schema.interfaces import IInt
-from guillotina.schema.interfaces import IList
-from guillotina.schema.interfaces import IObjectJSONField
-from guillotina.schema.interfaces import ITuple
-from guillotina.utils import apply_coroutine
+
 from zope.interface import implementer
+
+from guillotina import configure, schema
+from guillotina.component import get_adapter, query_adapter
+from guillotina.exceptions import ValueDeserializationError
+from guillotina.fields.interfaces import IPatchField, IPatchFieldOperation
+from guillotina.interfaces import IJSONToValue
+from guillotina.schema.interfaces import IArrayJSONField, IDict, IInt, IList, IObjectJSONField, ITuple
+from guillotina.utils import apply_coroutine
 
 
 @implementer(IPatchField)

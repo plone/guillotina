@@ -1,7 +1,7 @@
+import pytest
+
 from guillotina import routes
 from guillotina.response import InvalidRoute
-
-import pytest
 
 
 def test_convert_simple_route_to_view_name():

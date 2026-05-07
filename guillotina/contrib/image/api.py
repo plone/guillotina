@@ -1,7 +1,8 @@
 from functools import partial
+from io import BytesIO
+
 from guillotina import configure
-from guillotina.api.files import _traversed_file_doc
-from guillotina.api.files import DownloadFile
+from guillotina.api.files import DownloadFile, _traversed_file_doc
 from guillotina.api.service import TraversableFieldService
 from guillotina.component import get_multi_adapter
 from guillotina.contrib.image.interfaces import IImagingSettings
@@ -11,12 +12,9 @@ from guillotina.event import notify
 from guillotina.events import ObjectModifiedEvent
 from guillotina.interfaces import IFileManager
 from guillotina.interfaces.content import IResource
-from guillotina.response import HTTPNoContent
-from guillotina.response import HTTPNotFound
+from guillotina.response import HTTPNoContent, HTTPNotFound
 from guillotina.schema.interfaces import IOrderedDict
-from guillotina.utils import get_registry
-from guillotina.utils import run_async
-from io import BytesIO
+from guillotina.utils import get_registry, run_async
 
 
 BUFFER = 262144

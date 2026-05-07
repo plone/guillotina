@@ -1,28 +1,26 @@
-from .dbfile import DBFile
-from .exceptions import RangeNotFound
-from .exceptions import RangeNotSupported
+import time
+from typing import AsyncIterator
+
 from guillotina import configure
 from guillotina.blob import Blob
 from guillotina.event import notify
-from guillotina.events import FileBeforeUploadFinishedEvent
-from guillotina.events import FileUploadFinishedEvent
-from guillotina.events import FileUploadStartedEvent
-from guillotina.exceptions import BlobChunkNotFound
-from guillotina.exceptions import FileNotFoundException
-from guillotina.files.utils import generate_key
-from guillotina.files.utils import guess_content_type
-from guillotina.interfaces import IDBFileField
-from guillotina.interfaces import IFileCleanup
-from guillotina.interfaces import IFileField
-from guillotina.interfaces import IFileNameGenerator
-from guillotina.interfaces import IFileStorageManager
-from guillotina.interfaces import IRequest
-from guillotina.interfaces import IResource
-from guillotina.interfaces import IUploadDataManager
+from guillotina.events import FileBeforeUploadFinishedEvent, FileUploadFinishedEvent, FileUploadStartedEvent
+from guillotina.exceptions import BlobChunkNotFound, FileNotFoundException
+from guillotina.files.utils import generate_key, guess_content_type
+from guillotina.interfaces import (
+    IDBFileField,
+    IFileCleanup,
+    IFileField,
+    IFileNameGenerator,
+    IFileStorageManager,
+    IRequest,
+    IResource,
+    IUploadDataManager,
+)
 from guillotina.response import HTTPPreconditionFailed
-from typing import AsyncIterator
 
-import time
+from .dbfile import DBFile
+from .exceptions import RangeNotFound, RangeNotSupported
 
 
 @configure.adapter(for_=(IResource, IFileField), provides=IFileNameGenerator)

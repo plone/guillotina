@@ -1,28 +1,20 @@
+import json
+import os
 from datetime import datetime
-from guillotina import configure
-from guillotina import task_vars
+
+import pytest
+
+from guillotina import configure, task_vars
 from guillotina.catalog import index
-from guillotina.catalog.utils import get_index_fields
-from guillotina.catalog.utils import get_metadata_fields
-from guillotina.catalog.utils import parse_query
-from guillotina.component import get_adapter
-from guillotina.component import query_utility
-from guillotina.content import Container
-from guillotina.content import create_content
-from guillotina.content import Resource
+from guillotina.catalog.utils import get_index_fields, get_metadata_fields, parse_query
+from guillotina.component import get_adapter, query_utility
+from guillotina.content import Container, Resource, create_content
 from guillotina.directives import index_field
 from guillotina.event import notify
 from guillotina.events import ObjectModifiedEvent
-from guillotina.interfaces import ICatalogDataAdapter
-from guillotina.interfaces import ICatalogUtility
-from guillotina.interfaces import IResource
-from guillotina.interfaces import ISecurityInfo
+from guillotina.interfaces import ICatalogDataAdapter, ICatalogUtility, IResource, ISecurityInfo
 from guillotina.tests import mocks
 from guillotina.tests import utils as test_utils
-
-import json
-import os
-import pytest
 
 
 pytestmark = pytest.mark.asyncio

@@ -1,7 +1,7 @@
+import pytest
+
 from guillotina.contentapi import ContentAPI
 from guillotina.utils import get_content_path
-
-import pytest
 
 
 pytestmark = pytest.mark.asyncio

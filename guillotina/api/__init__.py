@@ -1,4 +1,6 @@
 # these imports are done to force loading services
+from guillotina.json import definitions  # noqa
+
 from . import addons  # noqa
 from . import aggregation  # noqa
 from . import app  # noqa
@@ -16,4 +18,3 @@ from . import types  # noqa
 from . import user  # noqa
 from . import vocabularies  # noqa
 from . import ws  # noqa
-from guillotina.json import definitions  # noqa

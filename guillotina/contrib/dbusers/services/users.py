@@ -1,21 +1,21 @@
-from guillotina import configure
-from guillotina.api.content import DefaultDELETE
-from guillotina.api.content import DefaultPATCH
-from guillotina.api.service import Service
-from guillotina.component import get_multi_adapter
-from guillotina.component import queryMultiAdapter
-from guillotina.contrib.dbusers.content.users import User
-from guillotina.contrib.dbusers.services.utils import ListGroupsOrUsersService
-from guillotina.interfaces import IContainer
-from guillotina.interfaces import IPATCH
-from guillotina.interfaces import IResourceSerializeToJson
-from guillotina.interfaces import IResourceSerializeToJsonSummary
-from guillotina.response import HTTPNotFound
-from guillotina.utils import get_authenticated_user
-from guillotina.utils import navigate_to
+import typing
+
 from zope.interface import alsoProvides
 
-import typing
+from guillotina import configure
+from guillotina.api.content import DefaultDELETE, DefaultPATCH
+from guillotina.api.service import Service
+from guillotina.component import get_multi_adapter, queryMultiAdapter
+from guillotina.contrib.dbusers.content.users import User
+from guillotina.contrib.dbusers.services.utils import ListGroupsOrUsersService
+from guillotina.interfaces import (
+    IPATCH,
+    IContainer,
+    IResourceSerializeToJson,
+    IResourceSerializeToJsonSummary,
+)
+from guillotina.response import HTTPNotFound
+from guillotina.utils import get_authenticated_user, navigate_to
 
 
 @configure.service(

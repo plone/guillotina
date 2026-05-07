@@ -1,7 +1,8 @@
+from zope.interface import Interface
+
 from guillotina import schema
 from guillotina.contrib.image.preview import CloudPreviewImageFileField
 from guillotina.interfaces import IFile
-from zope.interface import Interface
 
 
 class IImageFile(IFile):

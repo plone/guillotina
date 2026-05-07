@@ -1,7 +1,6 @@
-from guillotina.interfaces import IBehavior
-from guillotina.interfaces import IBehaviorAdapterFactory
-from zope.interface import implementer
-from zope.interface import Interface
+from zope.interface import Interface, implementer
+
+from guillotina.interfaces import IBehavior, IBehaviorAdapterFactory
 
 
 REGISTRATION_REPR = """\

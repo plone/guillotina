@@ -1,9 +1,10 @@
-from guillotina.middlewares.errors import generate_error_response
-
 import asyncio
-import pytest
 import time
 import unittest
+
+import pytest
+
+from guillotina.middlewares.errors import generate_error_response
 
 
 class AsgiMiddlewate:
@@ -41,9 +42,9 @@ class Test_generate_error_response(unittest.TestCase):
     def test_cancelled_error(self):
         resp = self._makeOne(asyncio.CancelledError())
         assert resp.content["message"].startswith("Cancelled execution")
-        self.assertEquals(resp.content["reason"], "unknownError")
+        self.assertEqual(resp.content["reason"], "unknownError")
 
     def test_other_error(self):
         resp = self._makeOne(ValueError())
         assert resp.content["message"].startswith("Error on execution")
-        self.assertEquals(resp.content["reason"], "unknownError")
+        self.assertEqual(resp.content["reason"], "unknownError")

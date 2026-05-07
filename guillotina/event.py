@@ -1,5 +1,4 @@
-from guillotina.component.event import async_subscribers
-from guillotina.component.event import sync_subscribers
+from guillotina.component.event import async_subscribers, sync_subscribers
 
 
 async def notify(event):

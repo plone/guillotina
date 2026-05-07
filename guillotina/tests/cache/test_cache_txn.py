@@ -1,13 +1,12 @@
+import pytest
+
 from guillotina import app_settings
 from guillotina.annotations import AnnotationData
 from guillotina.api.container import create_container
 from guillotina.component import get_utility
-from guillotina.interfaces import IAnnotations
-from guillotina.interfaces import ICacheUtility
+from guillotina.interfaces import IAnnotations, ICacheUtility
 from guillotina.transactions import transaction
 from guillotina.utils import get_database
-
-import pytest
 
 
 pytestmark = pytest.mark.asyncio

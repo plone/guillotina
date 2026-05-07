@@ -1,9 +1,10 @@
-from guillotina.auth.users import ROOT_USER_ID
-from guillotina.testing import TESTING_SETTINGS
-
 import json
+
 import jwt
 import pytest
+
+from guillotina.auth.users import ROOT_USER_ID
+from guillotina.testing import TESTING_SETTINGS
 
 
 pytestmark = pytest.mark.asyncio

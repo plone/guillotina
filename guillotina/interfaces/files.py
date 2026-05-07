@@ -1,7 +1,9 @@
+from typing import AsyncIterator
+
+from zope.interface import Interface
+
 from guillotina import schema
 from guillotina.schema.interfaces import IObject
-from typing import AsyncIterator
-from zope.interface import Interface
 
 
 class IUploadDataManager(Interface):

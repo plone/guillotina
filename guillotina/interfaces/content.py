@@ -1,14 +1,14 @@
+from typing import TYPE_CHECKING
+
+from zope.interface import Attribute, Interface
+from zope.interface.common.mapping import IEnumerableMapping
+
+import guillotina.schema
 from guillotina.component.interfaces import IFactory
 from guillotina.component.interfaces import ISite as IComponentSite
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces.common import IMapping
 from guillotina.schema import TextLine
-from typing import TYPE_CHECKING
-from zope.interface import Attribute
-from zope.interface import Interface
-from zope.interface.common.mapping import IEnumerableMapping
-
-import guillotina.schema
 
 
 if TYPE_CHECKING:  # pragma: no cover

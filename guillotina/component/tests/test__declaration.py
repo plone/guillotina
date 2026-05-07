@@ -124,8 +124,10 @@ class Test_adapts(unittest.TestCase):
 
     def test_called_from_function(self):
         import warnings
-        from guillotina.component._declaration import adapts
+
         from zope.interface import Interface
+
+        from guillotina.component._declaration import adapts
 
         class IFoo(Interface):
             pass
@@ -142,9 +144,11 @@ class Test_adapts(unittest.TestCase):
 
     def test_called_twice_from_class(self):
         import warnings
-        from guillotina.component._declaration import adapts
+
         from zope.interface import Interface
         from zope.interface._compat import PYTHON3
+
+        from guillotina.component._declaration import adapts
 
         class IFoo(Interface):
             pass
@@ -166,8 +170,9 @@ class Test_adapts(unittest.TestCase):
                 self.fail("Didn't raise TypeError")
 
     def test_called_once_from_class(self):
-        from guillotina.component._declaration import adapts
         from zope.interface import Interface
+
+        from guillotina.component._declaration import adapts
 
         class IFoo(Interface):
             pass
@@ -206,6 +211,7 @@ class Test_adaptedBy(unittest.TestCase):
 
     def test__call___w_inst_of_decorated_class(self):
         from zope.interface import Interface
+
         from guillotina.component._declaration import _adapts_descr
 
         class IFoo(Interface):

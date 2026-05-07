@@ -131,6 +131,7 @@ class DefaultPropertyTests(unittest.TestCase):
 
     def test___get___w_defaultFactory_w_ICAF_w_check(self):
         from zope.interface import directlyProvides
+
         from guillotina.schema._bootstrapinterfaces import IContextAwareDefaultFactory
 
         _checked = []
@@ -590,12 +591,14 @@ class TextLineTests(unittest.TestCase):
 
     def test_class_conforms_to_ITextLine(self):
         from zope.interface.verify import verifyClass
+
         from guillotina.schema.interfaces import ITextLine
 
         verifyClass(ITextLine, self._getTargetClass())
 
     def test_instance_conforms_to_ITextLine(self):
         from zope.interface.verify import verifyObject
+
         from guillotina.schema.interfaces import ITextLine
 
         verifyObject(ITextLine, self._makeOne())
@@ -784,8 +787,7 @@ class IntTests(unittest.TestCase):
         self.assertRaises(TooBig, field.validate, 20)
 
     def test_validate_min_and_max(self):
-        from guillotina.schema.exceptions import TooBig
-        from guillotina.schema.exceptions import TooSmall
+        from guillotina.schema.exceptions import TooBig, TooSmall
 
         field = self._makeOne(min=0, max=10)
         field.validate(0)
