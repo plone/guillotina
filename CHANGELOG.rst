@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-7.1.0 (unreleased)
+7.1.0 (2026-05-07)
 ------------------
 
 - BREAKING CHANGE: Drop support for Python 3.8 and 3.9. Guillotina is
