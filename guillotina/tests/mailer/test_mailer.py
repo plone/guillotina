@@ -1,10 +1,43 @@
 import pytest
 
 from guillotina.component import get_utility
+from guillotina.contrib.mailer.utility import MailerUtility
 from guillotina.interfaces import IMailer
 
 
 pytestmark = pytest.mark.asyncio
+
+
+class CapturingMailerUtility(MailerUtility):
+    async def _send(self, sender, recipients, message, endpoint_name="default"):
+        self.sender = sender
+        self.recipients = recipients
+        self.message = message
+        self.endpoint_name = endpoint_name
+
+
+async def test_send_mail_formats_list_address_headers():
+    mailer = CapturingMailerUtility(
+        {"mailer": {"default_sender": "sender@example.com", "domain": "example.com"}}
+    )
+
+    await mailer.send(
+        recipient=["primary@example.com", "other@example.com"],
+        subject="Test Mail",
+        text="Good mail",
+        cc=["cc@example.com", "second-cc@example.com"],
+    )
+
+    assert mailer.recipients == [
+        "primary@example.com",
+        "other@example.com",
+        "cc@example.com",
+        "second-cc@example.com",
+    ]
+    assert mailer.message["To"] == "primary@example.com, other@example.com"
+    assert mailer.message["Cc"] == "cc@example.com, second-cc@example.com"
+    assert "To: primary@example.com, other@example.com" in mailer.message.as_string()
+    assert "Cc: cc@example.com, second-cc@example.com" in mailer.message.as_string()
 
 
 @pytest.mark.app_settings(
