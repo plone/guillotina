@@ -33,6 +33,12 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
+def format_address_header(value):
+    if isinstance(value, (list, tuple)):
+        return ", ".join(item for item in value if item)
+    return value
+
+
 @configure.utility(provides=IMailEndpoint, name="smtp")
 class SMTPMailEndpoint(object):
     def __init__(self):
@@ -178,9 +184,10 @@ class MailerUtility:
 
         message["Subject"] = subject
         message["From"] = sender
-        message["To"] = recipient
-        if cc is not None:
-            message["Cc"] = cc
+        message["To"] = format_address_header(recipient)
+        cc_header = format_address_header(cc)
+        if cc_header:
+            message["Cc"] = cc_header
         if message_id is not None:
             message["Message-Id"] = message_id
         else:
