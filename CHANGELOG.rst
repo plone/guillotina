@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-7.1.1 (unreleased)
+7.1.1 (2026-05-15)
 ------------------
 
 - Fix list-valued mailer recipient headers for ``To`` and ``Cc``.
