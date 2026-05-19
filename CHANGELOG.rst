@@ -4,6 +4,9 @@ CHANGELOG
 7.0.7 (unreleased)
 ------------------
 
+- Docs: Replace stale linkcheck-ignored external references for Hypercorn and
+  plone.restapi users/groups, and clear the docs linkcheck ignore list
+  [nilbacardit26]
 - Docs: Expose Developer Guides section from documentation index
   [nilbacardit26]
 - Docs: Add final documentation quality and rollout readiness report

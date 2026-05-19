@@ -49,7 +49,7 @@ POST /db/container/groups {
 
 ### Management
 
-dbusers follows the same implementation as [plone.restapi](https://plonerestapi.readthedocs.io/en/latest/) for managing users
+dbusers follows the same implementation as [plone.restapi](https://6.docs.plone.org/plone.restapi/docs/source/) for managing users
 
-- [Plone REST API Users](https://plonerestapi.readthedocs.io/en/latest/users.html)
-- [Plone Rest API Groups](https://plonerestapi.readthedocs.io/en/latest/groups.html)
+- [Plone REST API Users](https://6.docs.plone.org/plone.restapi/docs/source/endpoints/users.html)
+- [Plone REST API Groups](https://6.docs.plone.org/plone.restapi/docs/source/endpoints/groups.html)
