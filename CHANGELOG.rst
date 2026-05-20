@@ -4,7 +4,10 @@ CHANGELOG
 7.1.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Copy backing file storage when duplicating content with cloud file fields,
+  including dict-valued multi-file fields, so duplicated content does not share
+  mutable file blobs with the source object.
+  [nilbacardit26]
 
 
 7.1.1 (2026-05-15)
