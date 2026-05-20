@@ -387,6 +387,83 @@ async def test_copy_file_ob(manager_type, redis_container, container_requester):
 
 
 @pytest.mark.parametrize("manager_type", _pytest_params)
+async def test_duplicate_copies_file_storage(manager_type, redis_container, container_requester):
+    async with container_requester as requester:
+        _, status = await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps(
+                {
+                    "@type": "Item",
+                    "@behaviors": [IAttachment.__identifier__, IMultiAttachment.__identifier__],
+                    "id": "source",
+                }
+            ),
+        )
+        assert status == 201
+
+        response, status = await requester(
+            "PATCH",
+            "/db/guillotina/source/@upload/file",
+            data=b"single-file",
+            headers={"x-upload-size": str(len(b"single-file"))},
+        )
+        assert status == 200
+
+        response, status = await requester(
+            "PATCH",
+            "/db/guillotina/source/@upload/files/key1",
+            data=b"multi-file",
+            headers={"x-upload-size": str(len(b"multi-file"))},
+        )
+        assert status == 200
+
+        response, status = await requester(
+            "POST", "/db/guillotina/source/@duplicate", data=json.dumps({"new_id": "copy"})
+        )
+        assert status == 200
+
+        async with transaction(db=requester.db, abort_when_done=True) as txn:
+            root = await txn.manager.get_root(txn)
+            container = await root.async_get("guillotina")
+            source = await container.async_get("source")
+            duplicate = await container.async_get("copy")
+            source_attachment = IAttachment(source)
+            duplicate_attachment = IAttachment(duplicate)
+            source_multi = IMultiAttachment(source)
+            duplicate_multi = IMultiAttachment(duplicate)
+            await source_attachment.load()
+            await duplicate_attachment.load()
+            await source_multi.load()
+            await duplicate_multi.load()
+            if manager_type == "db":
+                assert source_attachment.file._blob.bid != duplicate_attachment.file._blob.bid
+                assert source_multi.files["key1"]._blob.bid != duplicate_multi.files["key1"]._blob.bid
+            else:
+                assert source_attachment.file.uri != duplicate_attachment.file.uri
+                assert source_multi.files["key1"].uri != duplicate_multi.files["key1"].uri
+
+        response, status = await requester("GET", "/db/guillotina/copy/@download/file")
+        assert status == 200
+        assert response == b"single-file"
+        response, status = await requester("GET", "/db/guillotina/copy/@download/files/key1")
+        assert status == 200
+        assert response == b"multi-file"
+
+        response, status = await requester("DELETE", "/db/guillotina/copy/@delete/file")
+        assert status == 200
+        response, status = await requester("DELETE", "/db/guillotina/copy/@delete/files/key1")
+        assert status == 200
+
+        response, status = await requester("GET", "/db/guillotina/source/@download/file")
+        assert status == 200
+        assert response == b"single-file"
+        response, status = await requester("GET", "/db/guillotina/source/@download/files/key1")
+        assert status == 200
+        assert response == b"multi-file"
+
+
+@pytest.mark.parametrize("manager_type", _pytest_params)
 async def test_tus_unfinished_error(manager_type, redis_container, container_requester):
     async with container_requester as requester:
         _, status = await requester(
