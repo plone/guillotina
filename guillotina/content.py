@@ -13,7 +13,6 @@ from guillotina import configure, task_vars
 from guillotina._cache import BEHAVIOR_CACHE, FACTORY_CACHE, PERMISSIONS_CACHE, SCHEMA_CACHE
 from guillotina._settings import app_settings
 from guillotina.annotations import AnnotationData
-from guillotina.api.service import DictFieldProxy
 from guillotina.auth.users import ANONYMOUS_USER_ID, ROOT_USER_ID
 from guillotina.behaviors import apply_markers
 from guillotina.browser import get_physical_path
@@ -691,6 +690,8 @@ async def _copy_duplicated_cloud_files(source, destination, request) -> None:
                     request,
                 )
             elif IDict.providedBy(field) and ICloudFileField.providedBy(field.value_type):
+                from guillotina.api.service import DictFieldProxy
+
                 values = getattr(source_field_context, name, None) or {}
                 if getattr(destination_field_context, name, None) is values:
                     setattr(destination_field_context, name, copy.copy(values))

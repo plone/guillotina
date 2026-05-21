@@ -8,6 +8,10 @@ CHANGELOG
   including dict-valued multi-file fields, so duplicated content does not share
   mutable file blobs with the source object.
   [nilbacardit26]
+- Replace the docs build usage of deprecated ``pkg_resources`` with
+  ``importlib.metadata`` and update ``sphinxcontrib-httpexample`` for
+  compatibility with current setuptools.
+  [nilbacardit26]
 
 
 7.1.1 (2026-05-15)
