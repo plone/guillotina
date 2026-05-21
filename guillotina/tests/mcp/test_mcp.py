@@ -81,11 +81,7 @@ async def test_protocol_tools_list(container_requester):
         response, status = await _protocol(requester, "tools/list")
         assert status == 200
         names = {t["name"] for t in response["result"]["tools"]}
-        assert "search" in names
-        assert "list_children" in names
-        assert "resolve_path" in names
-        assert "serialize_resource" in names
-        assert "notify_modified" in names
+        assert names == {"list_children", "resolve_path", "search"}
 
 
 @pytest.mark.app_settings(MCP_SETTINGS)

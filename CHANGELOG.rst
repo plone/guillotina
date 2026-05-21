@@ -4,7 +4,10 @@ CHANGELOG
 7.1.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- MCP: remove redundant ``serialize_resource`` and confusing
+  ``notify_modified`` built-in tools. Use ``resolve_path`` with
+  ``include_serialized=true`` for full resource JSON.
+  [rboixaderg]
 
 
 7.1.1 (2026-05-15)
