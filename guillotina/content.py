@@ -1,3 +1,4 @@
+import copy
 import os
 import pathlib
 from datetime import datetime
@@ -15,7 +16,7 @@ from guillotina.annotations import AnnotationData
 from guillotina.auth.users import ANONYMOUS_USER_ID, ROOT_USER_ID
 from guillotina.behaviors import apply_markers
 from guillotina.browser import get_physical_path
-from guillotina.component import get_adapter, get_utilities_for, get_utility, query_utility
+from guillotina.component import get_adapter, get_multi_adapter, get_utilities_for, get_utility, query_utility
 from guillotina.component.factory import Factory
 from guillotina.db import uid
 from guillotina.db.interfaces import ITransaction
@@ -36,14 +37,17 @@ from guillotina.exceptions import (
     PreconditionFailed,
     TransactionNotFound,
 )
+from guillotina.fields import CloudFileField
 from guillotina.interfaces import (
     DEFAULT_ADD_PERMISSION,
     IAddons,
     IAnnotations,
     IAsyncBehavior,
     IBehavior,
+    ICloudFileField,
     IConstrainTypes,
     IContainer,
+    IFileManager,
     IFolder,
     IGetOwner,
     IIDChecker,
@@ -62,10 +66,17 @@ from guillotina.interfaces import (
 from guillotina.profile import profilable
 from guillotina.registry import REGISTRY_DATA_KEY
 from guillotina.response import HTTPConflict
+from guillotina.schema.interfaces import IDict
 from guillotina.schema.utils import get_default_from_schema
 from guillotina.security.security_code import PrincipalPermissionManager
 from guillotina.transactions import get_transaction
-from guillotina.utils import get_object_by_uid, get_security_policy, navigate_to, valid_id
+from guillotina.utils import (
+    get_current_request,
+    get_object_by_uid,
+    get_security_policy,
+    navigate_to,
+    valid_id,
+)
 from guillotina.utils.auth import get_authenticated_user_id
 
 
@@ -647,6 +658,57 @@ async def get_all_behaviors(content, create=False, load=True) -> list:
     return behaviors
 
 
+async def _copy_cloud_file_field(
+    source_context, source_field, destination_context, destination_field, request
+) -> None:
+    file = source_field.get(source_field.context or source_context)
+    if file is None:
+        return
+
+    destination_field.set(destination_field.context or destination_context, None)
+    source_manager = get_multi_adapter((source_context, request, source_field), IFileManager)
+    destination_manager = get_multi_adapter((destination_context, request, destination_field), IFileManager)
+    await source_manager.copy(destination_manager)
+
+
+async def _copy_duplicated_cloud_files(source, destination, request) -> None:
+    factory = get_cached_factory(source.type_name)
+    contexts = [(factory.schema, source, destination)]
+    destination_behaviors = dict(await get_all_behaviors(destination, load=True))
+    for behavior_schema, source_behavior in await get_all_behaviors(source, load=True):
+        contexts.append((behavior_schema, source_behavior, destination_behaviors[behavior_schema]))
+
+    for schema, source_field_context, destination_field_context in contexts:
+        for name in schema.names(all=True):
+            field = schema[name]
+            if ICloudFileField.providedBy(field):
+                await _copy_cloud_file_field(
+                    source,
+                    field.bind(source_field_context),
+                    destination,
+                    field.bind(destination_field_context),
+                    request,
+                )
+            elif IDict.providedBy(field) and ICloudFileField.providedBy(field.value_type):
+                from guillotina.api.service import DictFieldProxy
+
+                values = getattr(source_field_context, name, None) or {}
+                if getattr(destination_field_context, name, None) is values:
+                    setattr(destination_field_context, name, copy.copy(values))
+                for key, file in list(values.items()):
+                    if file is None:
+                        continue
+                    source_proxy = DictFieldProxy(key, source_field_context, name)
+                    destination_proxy = DictFieldProxy(key, destination_field_context, name)
+                    await _copy_cloud_file_field(
+                        source,
+                        CloudFileField(__name__=name).bind(source_proxy),
+                        destination,
+                        CloudFileField(__name__=name).bind(destination_proxy),
+                        request,
+                    )
+
+
 async def duplicate(
     context: IResource,
     destination: Optional[Union[IResource, str]] = None,
@@ -744,6 +806,8 @@ async def duplicate(
         for key, value in anno_data.items():
             new_anno_data[key] = value
         await annotations_container.async_set(anno_id, new_anno_data)
+
+    await _copy_duplicated_cloud_files(context, new_obj, get_current_request())
 
     await notify(
         ObjectDuplicatedEvent(

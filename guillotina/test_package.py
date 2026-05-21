@@ -497,7 +497,9 @@ class InMemoryFileManager:
 
     async def copy(self, to_storage_manager, to_dm):
         file = self.field.get(self.field.context or self.context)
-        generator = get_multi_adapter((self.context, self.field), IFileNameGenerator)
+        generator = get_multi_adapter(
+            (to_storage_manager.context, to_storage_manager.field), IFileNameGenerator
+        )
         new_uri = await apply_coroutine(generator)
         _tmp_files[new_uri] = _tmp_files[file.uri]
         _tmp_files[new_uri] = tempfile.mkstemp()[1]
