@@ -4,6 +4,10 @@ CHANGELOG
 7.1.2 (unreleased)
 ------------------
 
+- MCP: remove redundant ``serialize_resource`` and confusing
+  ``notify_modified`` built-in tools. Use ``resolve_path`` with
+  ``include_serialized=true`` for full resource JSON.
+  [rboixaderg]
 - Copy backing file storage when duplicating content with cloud file fields,
   including dict-valued multi-file fields, so duplicated content does not share
   mutable file blobs with the source object.

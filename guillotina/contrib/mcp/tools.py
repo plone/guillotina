@@ -3,8 +3,6 @@ from typing import Any, Awaitable, Callable, Dict, List, Tuple
 
 from guillotina.catalog.catalog import DefaultSearchUtility
 from guillotina.component import query_multi_adapter, query_utility
-from guillotina.event import notify
-from guillotina.events import ObjectModifiedEvent
 from guillotina.interfaces import IResourceSerializeToJson, IResourceSerializeToJsonSummary
 from guillotina.interfaces.catalog import ICatalogUtility
 from guillotina.utils import get_content_path, get_current_container, navigate_to
@@ -16,7 +14,14 @@ RESOLVE_PATH_SCHEMA = {
     "type": "object",
     "properties": {
         "path": {"type": "string", "description": "Absolute or relative Guillotina path", "default": "/"},
-        "include_serialized": {"type": "boolean", "default": False},
+        "include_serialized": {
+            "type": "boolean",
+            "default": False,
+            "description": (
+                "When true, include full JSON from Guillotina serializers "
+                "(same as GET on the resource). Default response is minimal: id, @type, title, path."
+            ),
+        },
     },
 }
 
@@ -37,24 +42,12 @@ LIST_CHILDREN_SCHEMA = {
             "default": 1,
             "description": "Page number (1-based). Use with limit to paginate.",
         },
-        "include_serialized": {"type": "boolean", "default": False},
+        "include_serialized": {
+            "type": "boolean",
+            "default": False,
+            "description": "When true, include full serialized JSON per child (heavier response).",
+        },
     },
-}
-
-SERIALIZE_RESOURCE_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "path": {"type": "string", "description": "Absolute or relative Guillotina path", "default": "/"}
-    },
-}
-
-NOTIFY_MODIFIED_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "path": {"type": "string", "description": "Absolute or relative Guillotina path"},
-        "payload": {"type": "object", "description": "Payload sent to ObjectModifiedEvent", "default": {}},
-    },
-    "required": ["path"],
 }
 
 SEARCH_SCHEMA = {
@@ -265,20 +258,6 @@ async def _list_children_from_async_items(
     }
 
 
-async def serialize_resource_tool(context: Any, request: Any, arguments: Dict[str, Any]) -> Dict[str, Any]:
-    target, resolved_path = await _resolve_target(context, arguments.get("path", "/"))
-    return {"path": resolved_path, "serialized": await _serialize_resource(target, request)}
-
-
-async def notify_modified_tool(context: Any, request: Any, arguments: Dict[str, Any]) -> Dict[str, Any]:
-    target, resolved_path = await _resolve_target(context, arguments.get("path"))
-    payload = arguments.get("payload", {})
-    if not isinstance(payload, dict):
-        raise ValueError("Tool argument 'payload' must be an object")
-    await notify(ObjectModifiedEvent(target, payload=payload))
-    return {"path": resolved_path, "notified": True, "payload_keys": sorted(payload.keys())}
-
-
 async def search_tool(context: Any, request: Any, arguments: Dict[str, Any]) -> Dict[str, Any]:
     catalog = _get_catalog_utility()
     if catalog is None:
@@ -292,31 +271,24 @@ def default_tools(default_child_limit: int = 50) -> List[Tuple[str, str, Dict[st
     return [
         (
             "resolve_path",
-            "Resolve a Guillotina path and return basic resource metadata.",
+            (
+                "Resolve a Guillotina path. By default returns minimal metadata "
+                "(id, @type, title, path). Set include_serialized=true for full JSON (like GET)."
+            ),
             RESOLVE_PATH_SCHEMA,
             resolve_path_tool,
             True,
         ),
         (
             "list_children",
-            "List child resources from a folder-like Guillotina resource. Max 200 per page; use 'page' to paginate.",
+            (
+                "List child resources from a folder-like Guillotina resource. "
+                "Max 200 per page; use 'page' to paginate. "
+                "Set include_serialized=true for full JSON per child."
+            ),
             LIST_CHILDREN_SCHEMA,
             functools.partial(list_children_tool, default_limit=default_child_limit),
             True,
-        ),
-        (
-            "serialize_resource",
-            "Serialize a Guillotina resource using the registered serializers.",
-            SERIALIZE_RESOURCE_SCHEMA,
-            serialize_resource_tool,
-            False,
-        ),
-        (
-            "notify_modified",
-            "Emit an ObjectModifiedEvent for a resource path, triggering subscribers.",
-            NOTIFY_MODIFIED_SCHEMA,
-            notify_modified_tool,
-            False,
         ),
         (
             "search",
