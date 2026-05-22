@@ -251,7 +251,7 @@ class DBFileStorageManagerAdapter:
         # too much storage manager logic here? only way to give file manager
         # more control for plugins
         await to_storage_manager.start(dm)
-        await to_storage_manager.append(dm, to_storage_manager.iter_data(), 0)
+        await to_storage_manager.append(dm, self.iter_data(), 0)
         await to_storage_manager.finish(dm)
         await dm.finish()
 
