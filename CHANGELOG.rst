@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-7.1.2 (unreleased)
+7.1.2 (2026-05-22)
 ------------------
 
 - MCP: remove redundant ``serialize_resource`` and confusing
