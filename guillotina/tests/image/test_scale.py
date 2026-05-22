@@ -319,7 +319,7 @@ class ScalingTests(TestCase):
         import guillotina.contrib.image.scale
 
         # clear warnings registry, so the test actually sees the warning
-        guillotina.contrib.image.scale.__warningregistry__.clear()
+        getattr(guillotina.contrib.image.scale, "__warningregistry__", {}).clear()
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             scaleImage(PNG, 16, 16, direction="keep")

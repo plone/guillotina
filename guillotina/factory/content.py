@@ -58,9 +58,12 @@ class ApplicationRoot:  # type: ignore
             kw["name"] = config["name"]
         provide_utility(utility_object, interface, **kw)
         if hasattr(utility_object, "initialize"):
-            func = lazy_apply(utility_object.initialize, app=self.app)
 
-            task = asyncio.ensure_future(notice_on_error(key, func), loop=loop or self._loop)
+            async def initialize_utility():
+                func = lazy_apply(utility_object.initialize, app=self.app)
+                return await notice_on_error(key, func)
+
+            task = asyncio.ensure_future(initialize_utility(), loop=loop or self._loop)
             self.add_async_task(key, task, config)
             return utility_object, task
         else:
