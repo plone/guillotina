@@ -1,7 +1,7 @@
 import base64
 import hashlib
 import json
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, urlencode, urlparse
 
 import pytest
 
@@ -45,7 +45,7 @@ async def authorize_code(requester, client, *, scope="guillotina:mcp.read", reso
     value, status, headers = await requester.make_request(
         "POST",
         "/db/guillotina/oauth/authorize",
-        data="&".join(f"{k}={v}" for k, v in data.items()),
+        data=urlencode(data),
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         allow_redirects=False,
     )
@@ -55,9 +55,14 @@ async def authorize_code(requester, client, *, scope="guillotina:mcp.read", reso
 
 
 async def token_from_code(requester, client, code, verifier):
-    body = (
-        f"grant_type=authorization_code&client_id={client['client_id']}&redirect_uri={client['redirect_uris'][0]}"
-        f"&code={code}&code_verifier={verifier}"
+    body = urlencode(
+        {
+            "grant_type": "authorization_code",
+            "client_id": client["client_id"],
+            "redirect_uri": client["redirect_uris"][0],
+            "code": code,
+            "code_verifier": verifier,
+        }
     )
     response, status = await requester(
         "POST",
@@ -65,5 +70,5 @@ async def token_from_code(requester, client, code, verifier):
         data=body,
         headers={"Content-Type": "application/x-www-form-urlencoded"},
     )
-    assert status == 200
+    assert status == 200, response
     return response

@@ -132,7 +132,7 @@ class JWTValidator:
             user = await find_user(token)
             if user is not None and user.id == token["id"]:
                 return user
-        except (jwt.exceptions.DecodeError, jwt.exceptions.ExpiredSignatureError, KeyError):
+        except (jwt.exceptions.PyJWTError, KeyError):
             pass
 
         return
@@ -167,7 +167,7 @@ class JWTSessionValidator:
                         return user
             else:
                 return
-        except (jwt.exceptions.DecodeError, jwt.exceptions.ExpiredSignatureError, KeyError):
+        except (jwt.exceptions.PyJWTError, KeyError):
             pass
 
         return

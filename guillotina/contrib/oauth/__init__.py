@@ -16,6 +16,7 @@ app_settings = {
             "guillotina:mcp.content.read",
         ],
     },
+    "check_writable_request": "guillotina.contrib.oauth.utils.check_writable_request",
     "auth_token_validators": [
         "guillotina.contrib.oauth.validators.OAuthJWTValidator",
         "guillotina.auth.validators.SaltedHashPasswordValidator",

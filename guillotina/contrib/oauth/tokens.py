@@ -1,3 +1,4 @@
+import calendar
 import hashlib
 import hmac
 import secrets
@@ -13,7 +14,7 @@ def utcnow():
 
 
 def timestamp(dt):
-    return int(dt.timestamp())
+    return int(calendar.timegm(dt.utctimetuple()))
 
 
 def opaque_token(prefix=""):

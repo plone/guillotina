@@ -59,6 +59,7 @@ pip-wheel-metadata
 /.idea/
 /.Python
 /venv
+/.venv
 # files
 *.log
 *.swp

@@ -3,10 +3,17 @@ from urllib.parse import parse_qs, urlencode, urlparse
 from uuid import uuid4
 
 from guillotina import app_settings, task_vars
+from guillotina.interfaces import WRITING_VERBS
 from guillotina.contrib.oauth.content import OAUTH_STORAGE_KEY, new_oauth_storage
 from guillotina.contrib.oauth.tokens import token_hash, utcnow
 from guillotina.interfaces import IAddons, IAnnotations
 from guillotina.response import HTTPBadRequest, HTTPPreconditionFailed
+
+
+def check_writable_request(request):
+    return request.method in WRITING_VERBS or (
+        request.method == "GET" and str(getattr(request, "path", "")).endswith("/oauth/authorize")
+    )
 
 
 def container_url(request, container):
