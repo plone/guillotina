@@ -17,4 +17,5 @@ Contents:
    swagger
    mailer
    dbusers
+   oauth
    mcp
