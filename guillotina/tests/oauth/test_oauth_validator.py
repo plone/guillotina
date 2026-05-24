@@ -12,7 +12,13 @@ async def test_oauth_access_token_authenticates(container_install_requester):
         client = await register_client(requester)
         code, verifier = await authorize_code(requester, client, resource="http://localhost/db/guillotina")
         token = await token_from_code(requester, client, code, verifier)
-        response, status = await requester("GET", "/db/guillotina/@addons", authenticated=True, auth_type="Bearer", token=token["access_token"])
+        response, status = await requester(
+            "GET",
+            "/db/guillotina/@addons",
+            authenticated=True,
+            auth_type="Bearer",
+            token=token["access_token"],
+        )
         assert status == 200
         assert "oauth" in response["installed"]
 
@@ -22,7 +28,15 @@ async def test_oauth_access_token_authenticates(container_install_requester):
 async def test_oauth_access_token_wrong_audience_fails_generic_api(container_install_requester):
     async with container_install_requester as requester:
         client = await register_client(requester)
-        code, verifier = await authorize_code(requester, client, resource="http://localhost/db/guillotina/@mcp/protocol")
+        code, verifier = await authorize_code(
+            requester, client, resource="http://localhost/db/guillotina/@mcp/protocol"
+        )
         token = await token_from_code(requester, client, code, verifier)
-        _response, status = await requester("GET", "/db/guillotina/@addons", authenticated=True, auth_type="Bearer", token=token["access_token"])
+        _response, status = await requester(
+            "GET",
+            "/db/guillotina/@addons",
+            authenticated=True,
+            auth_type="Bearer",
+            token=token["access_token"],
+        )
         assert status in (401, 403)

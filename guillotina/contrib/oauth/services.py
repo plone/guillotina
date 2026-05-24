@@ -26,6 +26,11 @@ from guillotina.utils import get_authenticated_user
 
 
 OAUTH_SCOPES = ["guillotina:mcp.read", "guillotina:mcp.search", "guillotina:mcp.content.read"]
+WELL_KNOWN_HANDLERS = {}
+
+
+def register_well_known_handler(name, handler):
+    WELL_KNOWN_HANDLERS[name] = handler
 
 
 def _metadata(request, container):
@@ -44,13 +49,8 @@ def _metadata(request, container):
     }
 
 
-def _protected_resource_metadata(request, container):
-    issuer = container_url(request, container)
-    return {
-        "resource": f"{issuer}/@mcp/protocol",
-        "authorization_servers": [issuer],
-        "scopes_supported": OAUTH_SCOPES,
-    }
+register_well_known_handler("oauth-authorization-server", _metadata)
+register_well_known_handler("openid-configuration", _metadata)
 
 
 class OAuthService(Service):
@@ -69,10 +69,8 @@ class OAuthWellKnown(OAuthService):
     async def __call__(self):
         await self.storage()
         action = self.request.matchdict.get("action", "")
-        if action in ("oauth-authorization-server", "openid-configuration"):
-            return _metadata(self.request, self.context)
-        if action == "oauth-protected-resource":
-            return _protected_resource_metadata(self.request, self.context)
+        if action in WELL_KNOWN_HANDLERS:
+            return WELL_KNOWN_HANDLERS[action](self.request, self.context)
         raise HTTPNotFound(content={"reason": f"Unknown well-known endpoint: {action}"})
 
 
@@ -166,9 +164,13 @@ async def _authorize(service, storage):
     if params.get("response_type") != "code":
         raise HTTPBadRequest(content={"error": "unsupported_response_type"})
     if not params.get("code_challenge"):
-        return HTTPFound(redirect_with_params(redirect_uri, {"error": "invalid_request", "state": params.get("state")}))
+        return HTTPFound(
+            redirect_with_params(redirect_uri, {"error": "invalid_request", "state": params.get("state")})
+        )
     if params.get("code_challenge_method") != "S256":
-        return HTTPFound(redirect_with_params(redirect_uri, {"error": "invalid_request", "state": params.get("state")}))
+        return HTTPFound(
+            redirect_with_params(redirect_uri, {"error": "invalid_request", "state": params.get("state")})
+        )
     scopes = normalize_list(params.get("scope"))
     resources = validate_resource(service.request, service.context, params.get("resource"))
     user = get_authenticated_user()
@@ -185,7 +187,9 @@ async def _authorize(service, storage):
     ckey = consent_key(user.id, client["client_id"], scopes, resources)
     if ckey not in storage["consents"] and params.get("decision") != "allow":
         if params.get("decision") == "deny":
-            return HTTPFound(redirect_with_params(redirect_uri, {"error": "access_denied", "state": params.get("state")}))
+            return HTTPFound(
+                redirect_with_params(redirect_uri, {"error": "access_denied", "state": params.get("state")})
+            )
         return _html(
             "<form method='post'><p>Allow {}</p><button name='decision' value='allow'>Allow</button>"
             "<button name='decision' value='deny'>Deny</button></form>".format(client["client_name"])
@@ -252,7 +256,9 @@ def _authorization_code(service, storage, data):
         "user_id": record["user_id"],
         "scope": record["scope"],
         "resource": resources,
-        "expires_at": (now + timedelta(seconds=app_settings["oauth"].get("refresh_token_ttl", 2592000))).isoformat(),
+        "expires_at": (
+            now + timedelta(seconds=app_settings["oauth"].get("refresh_token_ttl", 2592000))
+        ).isoformat(),
         "revoked_at": None,
         "rotated_from": None,
         "created_at": now.isoformat(),

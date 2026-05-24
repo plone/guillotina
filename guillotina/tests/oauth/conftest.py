@@ -22,13 +22,26 @@ async def register_client(requester, redirect_uri="http://127.0.0.1:12345/callba
     response, status = await requester(
         "POST",
         "/db/guillotina/oauth/register",
-        data=json.dumps({"client_name": "Test", "redirect_uris": [redirect_uri], "scope": "guillotina:mcp.read guillotina:mcp.search"}),
+        data=json.dumps(
+            {
+                "client_name": "Test",
+                "redirect_uris": [redirect_uri],
+                "scope": "guillotina:mcp.read guillotina:mcp.search",
+            }
+        ),
     )
     assert status == 200
     return response
 
 
-async def authorize_code(requester, client, *, scope="guillotina:mcp.read", resource=None, verifier="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"):
+async def authorize_code(
+    requester,
+    client,
+    *,
+    scope="guillotina:mcp.read",
+    resource=None,
+    verifier="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+):
     verifier, challenge = verifier_pair(verifier)
     data = {
         "response_type": "code",
