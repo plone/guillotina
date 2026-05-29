@@ -4,7 +4,10 @@ CHANGELOG
 7.1.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Make ``X-Wait`` wait for async-pool jobs spawned by request futures, so
+  catalog reindex work scheduled after move/security events can be awaited
+  deterministically.
+  [nilbacardit26]
 
 
 7.1.2 (2026-05-22)

@@ -1,3 +1,4 @@
+import asyncio
 import base64
 import json
 from datetime import datetime, time
@@ -19,7 +20,6 @@ from guillotina.tests import utils
 from guillotina.tests.dbusers.settings import DEFAULT_SETTINGS as DBUSERS_DEFAULT_SETTINGS
 from guillotina.transactions import transaction
 from guillotina.utils import get_behavior
-
 
 pytestmark = pytest.mark.asyncio
 
@@ -925,6 +925,7 @@ async def test_wait_headers(container_requester):
         assert TESTING_VALUE["started"]
         assert TESTING_VALUE["executed"] is False
         assert headers["XG-Wait"] == "pending"
+        await asyncio.sleep(1.1)
 
         TESTING_VALUE["started"] = False
         TESTING_VALUE["executed"] = False
@@ -933,6 +934,78 @@ async def test_wait_headers(container_requester):
         assert TESTING_VALUE["started"]
         assert TESTING_VALUE["executed"] is False
         assert "XG-Wait" not in headers
+        await asyncio.sleep(1.1)
+
+
+async def test_wait_headers_wait_for_pool_jobs(container_requester):
+    async with container_requester as requester:
+        from guillotina.test_package import TESTING_VALUE
+
+        TESTING_VALUE["pool_started"] = False
+        TESTING_VALUE["pool_executed"] = False
+
+        _, _, headers = await requester.make_request("GET", "/@wait-pool-future", headers={"X-Wait": "10"})
+        assert TESTING_VALUE["pool_started"]
+        assert TESTING_VALUE["pool_executed"]
+        assert headers["XG-Wait"] == "done"
+
+        TESTING_VALUE["pool_started"] = False
+        TESTING_VALUE["pool_executed"] = False
+
+        _, _, headers = await requester.make_request("GET", "/@wait-pool-future", headers={"X-Wait": "0"})
+        assert TESTING_VALUE["pool_executed"] is False
+        assert headers["XG-Wait"] == "pending"
+        await asyncio.sleep(1.1)
+
+        TESTING_VALUE["pool_started"] = False
+        TESTING_VALUE["pool_executed"] = False
+
+        _, _, headers = await requester.make_request("GET", "/@wait-pool-future")
+        assert TESTING_VALUE["pool_executed"] is False
+        assert "XG-Wait" not in headers
+        await asyncio.sleep(1.1)
+
+
+async def test_wait_headers_wait_for_move_reindex_pool_job(container_requester, monkeypatch):
+    from guillotina.catalog import utils as catalog_utils
+
+    reindex_state = {"started": False, "executed": False}
+
+    async def slow_reindex(search, context, security):
+        reindex_state["started"] = True
+        await asyncio.sleep(0.1)
+        reindex_state["executed"] = True
+
+    monkeypatch.setattr(catalog_utils, "_reindex_all_content", slow_reindex)
+
+    async with container_requester as requester:
+        resp, status = await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps({"@type": "Folder", "title": "Folder", "id": "folder"}),
+            headers={"X-Wait": "10"},
+        )
+        assert status == 201
+
+        resp, status = await requester(
+            "POST",
+            "/db/guillotina/",
+            data=json.dumps({"@type": "Item", "title": "Item", "id": "item"}),
+            headers={"X-Wait": "10"},
+        )
+        assert status == 201
+
+        _, status, headers = await requester.make_request(
+            "POST",
+            "/db/guillotina/item/@move",
+            data=json.dumps({"destination": "/folder"}),
+            headers={"X-Wait": "10"},
+        )
+
+        assert status == 200
+        assert reindex_state["started"] is True
+        assert reindex_state["executed"] is True
+        assert headers["XG-Wait"] == "done"
 
 
 async def test_adapter_exception_handlers(container_requester):

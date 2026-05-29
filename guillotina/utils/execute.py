@@ -71,7 +71,13 @@ in_queue_with_func = in_queue
 async def __add_to_pool(func: Callable[..., Coroutine[Any, Any, Any]], *args, **kwargs):
     # make add_job async
     util = get_utility(IAsyncJobPool)
-    util.add_job(func, args=args, kwargs=kwargs)
+    job = util.add_job(func, args=args, kwargs=kwargs)
+    # Keep request futures pending until request-spawned pool work is finished.
+    wait = getattr(job, "wait", None)
+    if wait is not None:
+        result = wait()
+        if asyncio.iscoroutine(result) or asyncio.isfuture(result):
+            await result
 
 
 def in_pool(func: Callable[..., Coroutine[Any, Any, Any]], *args, **kwargs) -> ExecuteContext:

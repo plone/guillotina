@@ -90,10 +90,16 @@ class Job:
         self._task_vars = _task_vars
         self._args = args
         self._kwargs = kwargs
+        self._task = None
 
     @property
     def func(self):
         return self._func
+
+    async def wait(self):
+        while self._task is None:
+            await asyncio.sleep(0.01)
+        await asyncio.shield(self._task)
 
     async def run(self):
         if self._task_vars is not None:
@@ -166,6 +172,7 @@ class AsyncJobPool:
         if len(self._running) < self._max_size and len(self._pending) > 0:
             job = self._pending.pop()
             task = self.get_loop().create_task(job.run())
+            job._task = task
             task._job = job
             self._running.append(task)
             task.add_done_callback(self._done_callback)

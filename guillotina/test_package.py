@@ -39,7 +39,6 @@ from guillotina.schema import Object
 from guillotina.schema.interfaces import IContextAwareDefaultFactory
 from guillotina.utils import apply_coroutine, execute
 
-
 app_settings = {"applications": ["guillotina"]}
 
 
@@ -246,11 +245,24 @@ async def future_func():
     TESTING_VALUE["executed"] = True
 
 
+async def pool_future_func():
+    TESTING_VALUE["pool_started"] = True
+    await asyncio.sleep(1)
+    TESTING_VALUE["pool_executed"] = True
+
+
 @configure.service(
     context=IApplication, method="GET", permission="guillotina.AccessContent", name="@wait-future"
 )
 async def wait_future(context, request):
     execute.add_future("testing", future_func)
+
+
+@configure.service(
+    context=IApplication, method="GET", permission="guillotina.AccessContent", name="@wait-pool-future"
+)
+async def wait_pool_future(context, request):
+    execute.in_pool(pool_future_func).after_request(_name="testing-pool")
 
 
 # Create a new permission and grant it to authenticated users only
