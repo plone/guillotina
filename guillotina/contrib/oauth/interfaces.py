@@ -1,5 +1,5 @@
 from zope.interface import Interface
 
 
-class IOAuthSettings(Interface):
-    """OAuth contrib registry settings marker."""
+class IOAuthStorageUtility(Interface):
+    """Utility that initializes OAuth storage backends and runs periodic cleanup."""

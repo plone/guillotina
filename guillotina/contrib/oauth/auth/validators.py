@@ -2,7 +2,7 @@ import jwt
 
 from guillotina import app_settings, task_vars
 from guillotina.auth import find_user
-from guillotina.contrib.oauth.utils import container_url
+from guillotina.contrib.oauth.api.urls import container_url
 
 
 class OAuthJWTValidator:

@@ -9,6 +9,13 @@ CHANGELOG
   responses by principal/container/context, and invalidate MCP cache on
   permission changes.
   [rboixaderg]
+- OAuth: add extensible ``resource`` resolvers (:mod:`guillotina.contrib.oauth.flow.resources`), apply MCP
+  protocol URLs only when ``guillotina.contrib.mcp`` is enabled, require redirect URIs to be merged via
+  ``POST /oauth/register`` before ``/oauth/authorize``, validate PKCE ``code_verifier`` (RFC 7636),
+  atomically finalize authorization-code exchange after checks, defend refresh-token rotation against reuse.
+  [rboixaderg]
+- OAuth: drop in-memory and Redis storage backends; PostgreSQL is the only store.
+  [rboixaderg]
 
 
 7.1.2 (2026-05-22)

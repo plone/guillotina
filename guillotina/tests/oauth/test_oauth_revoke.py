@@ -1,8 +1,15 @@
 import pytest
 
-from guillotina.tests.oauth.conftest import OAUTH_SETTINGS, authorize_code, register_client, token_from_code
+from guillotina.tests.oauth.conftest import (
+    OAUTH_SETTINGS,
+    authorize_code,
+    register_client,
+    requires_pg,
+    token_from_code,
+)
 
-pytestmark = pytest.mark.asyncio
+
+pytestmark = [pytest.mark.asyncio, requires_pg]
 
 
 @pytest.mark.app_settings(OAUTH_SETTINGS)

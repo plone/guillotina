@@ -1,0 +1,21 @@
+    <p class="muted">Sign in to continue authorizing <strong>$client_name</strong>.</p>
+    <div class="panel">
+      <dl>
+        <dt>Application</dt>
+        <dd>$client_name</dd>
+        <dt>Client ID</dt>
+        <dd><code>$client_id</code></dd>
+        <dt>Redirect URI</dt>
+        <dd><code>$redirect_uri</code></dd>
+      </dl>
+    </div>
+    <form method="post">
+$hidden_inputs
+      <label for="username">Username</label>
+      <input id="username" name="username" autocomplete="username" required autofocus>
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+      <div class="actions">
+        <button type="submit">Login</button>
+      </div>
+    </form>

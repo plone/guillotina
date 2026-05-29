@@ -1,8 +1,16 @@
 import pytest
 
-from guillotina.tests.oauth.conftest import OAUTH_SETTINGS, authorize_code, register_client, token_from_code
+from guillotina.tests.oauth.conftest import (
+    OAUTH_MCP_SETTINGS,
+    OAUTH_SETTINGS,
+    authorize_code,
+    register_client,
+    requires_pg,
+    token_from_code,
+)
 
-pytestmark = pytest.mark.asyncio
+
+pytestmark = [pytest.mark.asyncio, requires_pg]
 
 
 @pytest.mark.app_settings(OAUTH_SETTINGS)
@@ -23,8 +31,8 @@ async def test_oauth_access_token_authenticates(container_install_requester):
         assert "oauth" in response["installed"]
 
 
-@pytest.mark.app_settings(OAUTH_SETTINGS)
-@pytest.mark.parametrize("install_addons", [["oauth"]])
+@pytest.mark.app_settings(OAUTH_MCP_SETTINGS)
+@pytest.mark.parametrize("install_addons", [["oauth", "mcp"]])
 async def test_oauth_access_token_wrong_audience_fails_generic_api(container_install_requester):
     async with container_install_requester as requester:
         client = await register_client(requester)

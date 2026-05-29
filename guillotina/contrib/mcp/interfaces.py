@@ -30,3 +30,14 @@ class IMCPToolRegistry(Interface):
 
     def create_lowlevel_server(context=None, request=None):
         """Build a low-level MCP server object."""
+
+
+class IMCPAuthPolicy(Interface):
+    def is_enabled(request, context):
+        """Return whether this policy applies to the current MCP request."""
+
+    def unauthorized_headers(request, context):
+        """Return extra headers for an unauthenticated MCP protocol response."""
+
+    def is_authorized(request, context):
+        """Return whether the current authenticated request may use this MCP endpoint."""

@@ -1,0 +1,33 @@
+    <p class="muted">
+      <strong>$client_name</strong> is requesting access to this Guillotina container as
+      <strong>$user_id</strong>. Review the permissions before continuing.
+    </p>
+    <div class="panel">
+      <dl>
+        <dt>Application</dt>
+        <dd>$client_name</dd>
+        <dt>Client ID</dt>
+        <dd><code>$client_id</code></dd>
+        <dt>Redirect URI</dt>
+        <dd><code>$redirect_uri</code></dd>
+      </dl>
+    </div>
+    <div class="panel">
+      <p><strong>Requested permissions</strong></p>
+      <ul>$scope_items</ul>
+    </div>
+    <div class="panel">
+      <p><strong>Resources this client can access</strong></p>
+      <ul>$resource_items</ul>
+    </div>
+    <p class="muted">
+      If you allow access, Guillotina will send an authorization code back to the redirect URI above.
+      Denying access returns an <code>access_denied</code> response to the application.
+    </p>
+    <form method="post">
+$hidden_inputs
+      <div class="actions">
+        <button name="decision" value="allow" type="submit">Allow $client_name</button>
+        <button class="danger" name="decision" value="deny" type="submit">Deny access</button>
+      </div>
+    </form>

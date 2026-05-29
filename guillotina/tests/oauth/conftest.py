@@ -5,11 +5,34 @@ from urllib.parse import parse_qs, urlencode, urlparse
 
 import pytest
 
+from guillotina.tests.fixtures import annotations
+
 
 pytestmark = pytest.mark.asyncio
 
-OAUTH_SETTINGS = {"applications": ["guillotina", "guillotina.contrib.oauth"]}
-OAUTH_MCP_SETTINGS = {"applications": ["guillotina", "guillotina.contrib.oauth", "guillotina.contrib.mcp"]}
+requires_pg = pytest.mark.skipif(
+    annotations["testdatabase"] == "DUMMY",
+    reason="requires PostgreSQL (set DATABASE=postgresql)",
+)
+
+OAUTH_SETTINGS = {
+    "applications": ["guillotina", "guillotina.contrib.oauth"],
+    "auth_extractors": [
+        "guillotina.auth.extractors.BearerAuthPolicy",
+        "guillotina.auth.extractors.BasicAuthPolicy",
+        "guillotina.auth.extractors.WSTokenAuthPolicy",
+        "guillotina.auth.extractors.CookiePolicy",
+    ],
+}
+OAUTH_MCP_SETTINGS = {
+    "applications": ["guillotina", "guillotina.contrib.oauth", "guillotina.contrib.mcp"],
+    "auth_extractors": [
+        "guillotina.auth.extractors.BearerAuthPolicy",
+        "guillotina.auth.extractors.BasicAuthPolicy",
+        "guillotina.auth.extractors.WSTokenAuthPolicy",
+        "guillotina.auth.extractors.CookiePolicy",
+    ],
+}
 
 
 def verifier_pair(verifier="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"):
@@ -26,7 +49,7 @@ async def register_client(requester, redirect_uri="http://127.0.0.1:12345/callba
             {
                 "client_name": "Test",
                 "redirect_uris": [redirect_uri],
-                "scope": "guillotina:mcp.read guillotina:mcp.search",
+                "scope": "guillotina:access",
             }
         ),
     )
@@ -38,7 +61,7 @@ async def authorize_code(
     requester,
     client,
     *,
-    scope="guillotina:mcp.read",
+    scope="guillotina:access",
     resource=None,
     verifier="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
 ):
