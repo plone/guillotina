@@ -4,7 +4,11 @@ CHANGELOG
 7.1.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- MCP: enforce Guillotina content permissions for tools and resources,
+  require ``ViewContent`` for full serialized JSON, isolate cached tool
+  responses by principal/container/context, and invalidate MCP cache on
+  permission changes.
+  [rboixaderg]
 
 
 7.1.2 (2026-05-22)
