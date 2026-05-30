@@ -9,6 +9,7 @@ from guillotina import app_settings
 from guillotina.contrib.mcp import resources as mcp_resources
 from guillotina.contrib.mcp import tools
 from guillotina.contrib.redis import get_driver
+from guillotina.utils import get_authenticated_user, get_content_path, get_current_container
 
 
 ToolHandler = Callable[[Any, Any, Dict[str, Any]], Awaitable[Dict[str, Any]]]
@@ -199,8 +200,18 @@ class MCPToolRegistry:
         resource = self._resources[clean_name]
         return await resource.handler(request)
 
-    def _cache_key(self, tool_name: str, arguments: Dict[str, Any]) -> str:
-        payload = json.dumps(arguments, sort_keys=True, separators=(",", ":"), default=str)
+    def _cache_key(self, tool_name: str, context: Any, arguments: Dict[str, Any]) -> str:
+        principal = get_authenticated_user()
+        container = get_current_container()
+        payload = {
+            "arguments": arguments,
+            "container_id": getattr(container, "id", None),
+            "container_uid": getattr(container, "__uuid__", None),
+            "context_path": get_content_path(context),
+            "context_uid": getattr(context, "__uuid__", None),
+            "principal_id": getattr(principal, "id", None),
+        }
+        payload = json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str)
         digest = hashlib.sha256(payload.encode("utf-8")).hexdigest()
         return f"{self._key_cache_redis_prefix}:{tool_name}:{digest[:16]}"
 
@@ -230,7 +241,7 @@ class MCPToolRegistry:
             raise ValueError("Tool arguments must be an object")
 
         tool = self._tools[clean_name]
-        cache_key = self._cache_key(clean_name, clean_arguments)
+        cache_key = self._cache_key(clean_name, context, clean_arguments)
         if tool.cacheable and self._cache_disabled is False:
             result = await self._driver_redis.get(cache_key)
             if result is not None:

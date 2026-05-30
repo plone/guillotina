@@ -2,6 +2,7 @@ from typing import Any, Dict
 
 from guillotina import __version__, app_settings
 from guillotina.component import query_utility
+from guillotina.contrib.mcp.security import require_access_content, require_permission
 from guillotina.interfaces.catalog import ICatalogUtility
 from guillotina.transactions import get_transaction
 from guillotina.utils import get_content_path, get_current_container, navigate_to
@@ -36,6 +37,9 @@ async def mcp_health_resource(request) -> Dict[str, Any]:
 
 
 async def mcp_config_resource(request) -> Dict[str, Any]:
+    container = get_current_container()
+    if container is not None:
+        require_permission("guillotina.ReadConfiguration", container)
     mcp_settings = app_settings.get("mcp", {})
     return {
         "mcp": {
@@ -54,6 +58,7 @@ async def mcp_users_resource(request) -> Dict[str, Any]:
     container = get_current_container()
     if not container:
         return {"error": "No container available"}
+    require_permission("guillotina.ManageUsers", container)
 
     try:
         users_folder = await navigate_to(container, "users")
@@ -132,6 +137,7 @@ async def mcp_summary_resource(request) -> Dict[str, Any]:
             resource = container
         else:
             resource = await navigate_to(container, path)
+        require_access_content(resource)
 
         summary = {
             "path": get_content_path(resource),

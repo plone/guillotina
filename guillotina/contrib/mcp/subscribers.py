@@ -5,12 +5,14 @@ from guillotina.interfaces import (
     IBeforeObjectRemovedEvent,
     IObjectAddedEvent,
     IObjectModifiedEvent,
+    IObjectPermissionsModifiedEvent,
     IResource,
 )
 
 
 @configure.subscriber(for_=(IResource, IObjectAddedEvent))
 @configure.subscriber(for_=(IResource, IObjectModifiedEvent))
+@configure.subscriber(for_=(IResource, IObjectPermissionsModifiedEvent))
 @configure.subscriber(for_=(IResource, IBeforeObjectRemovedEvent))
 async def invalidate_mcp_cache_on_content_change(obj, event):
     registry = query_utility(IMCPToolRegistry)

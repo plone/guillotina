@@ -2,6 +2,7 @@ from guillotina import configure
 from guillotina.api.service import Service
 from guillotina.component import query_utility
 from guillotina.contrib.mcp.interfaces import IMCPToolRegistry
+from guillotina.contrib.mcp.security import require_access_content
 from guillotina.interfaces import IResource
 from guillotina.response import HTTPNotFound, HTTPServiceUnavailable, Response
 
@@ -10,6 +11,8 @@ def _get_registry():
     registry = query_utility(IMCPToolRegistry)
     if registry is None:
         raise HTTPServiceUnavailable(content={"reason": "MCP registry utility is not available"})
+    if not registry.is_enabled():
+        raise HTTPServiceUnavailable(content={"reason": "MCP integration is disabled"})
     return registry
 
 
@@ -23,6 +26,7 @@ def _get_registry():
 )
 class MCPActionPostService(Service):
     async def __call__(self):
+        require_access_content(self.context)
         action = self.request.matchdict.get("action", "")
         if action == "protocol":
             return await self._handle_protocol()
