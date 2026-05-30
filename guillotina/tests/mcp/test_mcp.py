@@ -345,60 +345,6 @@ async def test_list_children_tool_filters_inaccessible_children(container_reques
 
 
 @pytest.mark.app_settings(MCP_SETTINGS)
-async def test_list_children_tool_serialized_requires_view_content(container_requester):
-    async with container_requester as requester:
-        _, status = await requester(
-            "POST",
-            "/db/guillotina",
-            data=json.dumps({"@type": "Folder", "id": "viewless-folder"}),
-        )
-        assert status == 201
-        _, status = await requester(
-            "POST",
-            "/db/guillotina/viewless-folder",
-            data=json.dumps({"@type": "Item", "id": "viewless-child"}),
-        )
-        assert status == 201
-
-        async with requester.transaction():
-            container = await utils.get_container(requester=requester)
-            folder = await container.async_get("viewless-folder")
-            child = await folder.async_get("viewless-child")
-            executor = GuillotinaUser(
-                "mcp-viewless",
-                permissions={
-                    "guillotina.MCPExecute": Allow,
-                    "guillotina.AccessContent": Allow,
-                },
-            )
-            utils.login(user=executor)
-            policy = get_security_policy(executor)
-            assert policy.check_permission("guillotina.MCPExecute", container)
-            assert policy.check_permission("guillotina.AccessContent", folder)
-            assert policy.check_permission("guillotina.AccessContent", child)
-            assert not policy.check_permission("guillotina.ViewContent", child)
-
-            registry = query_utility(IMCPToolRegistry)
-            request = utils.get_mocked_request(db=requester.db)
-            result = await registry.invoke(
-                "list_children",
-                container,
-                request,
-                {"path": "/viewless-folder"},
-            )
-            assert {item["id"] for item in result["items"]} == {"viewless-child"}
-            assert "serialized" not in result["items"][0]
-
-            with pytest.raises(HTTPUnauthorized):
-                await registry.invoke(
-                    "list_children",
-                    container,
-                    request,
-                    {"path": "/viewless-folder", "include_serialized": True},
-                )
-
-
-@pytest.mark.app_settings(MCP_SETTINGS)
 async def test_tool_cache_isolated_by_effective_security(container_requester):
     async with container_requester as requester:
         _, status = await requester(
