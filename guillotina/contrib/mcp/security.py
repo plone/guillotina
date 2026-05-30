@@ -1,7 +1,7 @@
 from typing import Any
 
 from guillotina.response import HTTPUnauthorized
-from guillotina.utils import get_roles_principal, get_security_policy
+from guillotina.utils import get_security_policy
 
 
 def has_permission(permission: str, context: Any) -> bool:
@@ -19,7 +19,3 @@ def require_access_content(context: Any) -> None:
 
 def require_view_content(context: Any) -> None:
     require_permission("guillotina.ViewContent", context)
-
-
-def has_manager_role(context: Any) -> bool:
-    return "guillotina.Manager" in get_roles_principal(context)

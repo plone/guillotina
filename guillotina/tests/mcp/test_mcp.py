@@ -439,6 +439,22 @@ async def test_search_tool_uses_catalog_security_filter(container_requester):
         assert status == 200
         _, status = await requester(
             "POST",
+            "/db/guillotina/@sharing",
+            data=json.dumps(
+                {
+                    "prinperm": [
+                        {
+                            "principal": "mcp-manager",
+                            "permission": "guillotina.SearchContent",
+                            "setting": "Allow",
+                        }
+                    ]
+                }
+            ),
+        )
+        assert status == 200
+        _, status = await requester(
+            "POST",
             "/db/guillotina/secret-item/@sharing",
             data=json.dumps({"perminhe": [{"permission": "guillotina.AccessContent", "setting": "Deny"}]}),
         )
@@ -452,6 +468,7 @@ async def test_search_tool_uses_catalog_security_filter(container_requester):
             utils.login(user=manager)
             policy = get_security_policy(manager)
             assert policy.check_permission("guillotina.MCPExecute", container)
+            assert policy.check_permission("guillotina.SearchContent", container)
             assert policy.check_permission("guillotina.AccessContent", visible)
             assert not policy.check_permission("guillotina.AccessContent", secret)
 
@@ -644,7 +661,7 @@ async def test_search_tool_requires_search_content_permission(container_requeste
 
         async with requester.transaction():
             container = await utils.get_container(requester=requester)
-            executor = GuillotinaUser("mcp-executor", permissions={"guillotina.MCPExecute": Allow})
+            executor = GuillotinaUser("mcp-executor", roles={"guillotina.Manager": Allow})
             utils.login(user=executor)
             policy = get_security_policy(executor)
             assert policy.check_permission("guillotina.MCPExecute", container)

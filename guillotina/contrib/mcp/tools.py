@@ -4,7 +4,6 @@ from typing import Any, Awaitable, Callable, Dict, List, Tuple
 from guillotina.catalog.catalog import DefaultSearchUtility
 from guillotina.component import query_multi_adapter, query_utility
 from guillotina.contrib.mcp.security import (
-    has_manager_role,
     has_permission,
     require_access_content,
     require_permission,
@@ -272,8 +271,7 @@ async def _list_children_from_async_items(
 
 
 async def search_tool(context: Any, request: Any, arguments: Dict[str, Any]) -> Dict[str, Any]:
-    if not has_permission("guillotina.SearchContent", context) and not has_manager_role(context):
-        require_permission("guillotina.SearchContent", context)
+    require_permission("guillotina.SearchContent", context)
     catalog = _get_catalog_utility()
     if catalog is None:
         raise ValueError("Catalog utility is not available")
