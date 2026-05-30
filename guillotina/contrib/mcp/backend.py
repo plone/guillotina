@@ -211,8 +211,8 @@ class MCPToolRegistry:
             "context_uid": getattr(context, "__uuid__", None),
             "principal_id": getattr(principal, "id", None),
         }
-        payload = json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str)
-        digest = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+        payload_json = json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str)
+        digest = hashlib.sha256(payload_json.encode("utf-8")).hexdigest()
         return f"{self._key_cache_redis_prefix}:{tool_name}:{digest[:16]}"
 
     def _serialize_cache_value(self, value: Dict[str, Any]) -> str:
