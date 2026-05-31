@@ -1,14 +1,15 @@
-from base64 import b64encode
-from functools import lru_cache
-from html import escape as html_escape
-from pathlib import Path
-from string import Template
-
 from guillotina import app_settings, configure
 from guillotina.api.service import Service
 from guillotina.auth.utils import set_authenticated_user
-from guillotina.contrib.oauth.api.request import normalize_list, parse_form_encoded
+from guillotina.contrib.oauth.api.request import (
+    client_identifier,
+    form_content_type_valid,
+    normalize_list,
+    parse_form_encoded,
+    reject_duplicate_params,
+)
 from guillotina.contrib.oauth.api.urls import container_url, validate_resource
+from guillotina.contrib.oauth.api.views import consent_form, login_form, oauth_error_page
 from guillotina.contrib.oauth.api.well_known import rfc_well_known_response
 from guillotina.contrib.oauth.flow.clients import (
     consent_key,
@@ -16,18 +17,41 @@ from guillotina.contrib.oauth.flow.clients import (
     redirect_uri_registered_for_client,
     redirect_with_params,
 )
-from guillotina.contrib.oauth.flow.pkce import verify_s256
-from guillotina.contrib.oauth.flow.scopes import OAUTH_SCOPE_DESCRIPTIONS, oauth_scopes_supported
+from guillotina.contrib.oauth.flow.csrf import OAUTH_CSRF_FIELD, csrf_valid
+from guillotina.contrib.oauth.flow.pkce import pkce_challenge_valid, verify_s256
+from guillotina.contrib.oauth.flow.ratelimit import rate_limit_exceeded
+from guillotina.contrib.oauth.flow.scopes import OAUTH_DEFAULT_SCOPE, oauth_scopes_supported
 from guillotina.contrib.oauth.flow.tokens import issue_access_token, opaque_token, token_hash
 from guillotina.contrib.oauth.storage.access import get_oauth_store
 from guillotina.interfaces import IApplication, IContainer
-from guillotina.response import HTTPBadRequest, HTTPFound, HTTPNotFound, Response
+from guillotina.response import HTTPBadRequest, HTTPFound, HTTPNotFound, HTTPTooManyRequests, Response
 from guillotina.utils import get_authenticated_user
 
 
 WELL_KNOWN_HANDLERS = {}
-TEMPLATE_DIR = Path(__file__).parent / "templates"
-BRAND_LOGO_PATH = Path(__file__).parents[3] / "static" / "assets" / "brand" / "guillotina-logo-horizontal.svg"
+AUTHORIZE_SINGLETON_PARAMS = {
+    "response_type",
+    "client_id",
+    "redirect_uri",
+    "scope",
+    "state",
+    "code_challenge",
+    "code_challenge_method",
+    "decision",
+    "username",
+    "password",
+    OAUTH_CSRF_FIELD,
+}
+TOKEN_SINGLETON_PARAMS = {
+    "grant_type",
+    "client_id",
+    "redirect_uri",
+    "code",
+    "code_verifier",
+    "refresh_token",
+    "scope",
+}
+REVOKE_SINGLETON_PARAMS = {"client_id", "token", "token_type_hint"}
 
 
 def register_well_known_handler(name, handler):
@@ -46,6 +70,8 @@ def _metadata(request, container):
         "grant_types_supported": ["authorization_code", "refresh_token"],
         "code_challenge_methods_supported": ["S256"],
         "token_endpoint_auth_methods_supported": ["none"],
+        "revocation_endpoint_auth_methods_supported": ["none"],
+        "resource_indicators_supported": True,
         "scopes_supported": oauth_scopes_supported(),
     }
 
@@ -133,6 +159,18 @@ class OAuthPost(OAuthService):
 
 
 async def _register(service, store):
+    oauth_settings = app_settings.get("oauth", {})
+    if rate_limit_exceeded(
+        f"oauth-register:{client_identifier(service.request)}",
+        limit=oauth_settings.get("registration_rate_limit", 20),
+        window=oauth_settings.get("registration_rate_window", 600),
+    ):
+        return HTTPTooManyRequests(
+            content={
+                "error": "temporarily_unavailable",
+                "error_description": "client registration rate limit exceeded",
+            }
+        )
     data = await service.request.json()
     try:
         client = make_client(data)
@@ -163,147 +201,40 @@ async def _authenticate_basic(username, password):
             return user
 
 
-def _html(body, status=200):
-    return Response(body=body.encode("utf-8"), status=status, content_type="text/html")
-
-
-@lru_cache(maxsize=None)
-def _template(name):
-    return Template((TEMPLATE_DIR / name).read_text(encoding="utf-8"))
-
-
-@lru_cache(maxsize=None)
-def _template_text(name):
-    return (TEMPLATE_DIR / name).read_text(encoding="utf-8")
-
-
-@lru_cache(maxsize=None)
-def _logo_data_uri():
-    encoded = b64encode(BRAND_LOGO_PATH.read_bytes()).decode("ascii")
-    return f"data:image/svg+xml;base64,{encoded}"
-
-
-def _render_template(template_name, **context):
-    return _template(template_name).substitute(context)
-
-
-def _oauth_page(title, heading, body, *, status=200, tone="default"):
-    return _html(
-        _render_template(
-            "base.html",
-            title=html_escape(title),
-            logo_src=_logo_data_uri(),
-            style=_template_text("oauth.css"),
-            tone=html_escape(tone),
-            heading=html_escape(heading),
-            body=body,
-        ),
-        status=status,
+def _token_response(content):
+    return Response(
+        content=content,
+        headers={
+            "Cache-Control": "no-store",
+            "Pragma": "no-cache",
+        },
     )
-
-
-def _hidden_inputs(params):
-    fields = (
-        "response_type",
-        "client_id",
-        "redirect_uri",
-        "scope",
-        "state",
-        "code_challenge",
-        "code_challenge_method",
-        "resource",
-    )
-    html = []
-    for field in fields:
-        value = params.get(field)
-        if value is None:
-            continue
-        values = value if isinstance(value, list) else [value]
-        for item in values:
-            html.append(
-                _render_template(
-                    "hidden_input.html",
-                    name=html_escape(field, quote=True),
-                    value=html_escape(str(item), quote=True),
-                )
-            )
-    return "\n".join(html)
-
-
-def _oauth_error_page(title, message, *, status):
-    return _oauth_page(
-        title,
-        title,
-        _render_template("error.html", message=html_escape(message)),
-        status=status,
-        tone="error",
-    )
-
-
-def _login_form(params, client):
-    client_name = html_escape(client.get("client_name") or client["client_id"])
-    body = _render_template(
-        "login.html",
-        client_name=client_name,
-        client_id=html_escape(client["client_id"]),
-        redirect_uri=html_escape(params.get("redirect_uri", "")),
-        hidden_inputs=_hidden_inputs(params),
-    )
-    return _oauth_page("Login to Guillotina", "Login required", body)
-
-
-def _list_items(values, *, empty):
-    if not values:
-        return _render_template("plain_item.html", value=html_escape(empty))
-    return "".join(_render_template("list_item.html", value=html_escape(str(value))) for value in values)
-
-
-def _scope_items(scopes):
-    if not scopes:
-        return _render_template("plain_item.html", value="No extra scopes were requested.")
-    return "".join(
-        _render_template(
-            "scope_item.html",
-            scope=html_escape(str(scope)),
-            description=html_escape(
-                OAUTH_SCOPE_DESCRIPTIONS.get(scope, "Access requested by this OAuth client.")
-            ),
-        )
-        for scope in scopes
-    )
-
-
-def _consent_form(params, client, scopes, resources, user):
-    raw_client_name = client.get("client_name") or client["client_id"]
-    client_name = html_escape(raw_client_name)
-    body = _render_template(
-        "consent.html",
-        client_name=client_name,
-        user_id=html_escape(str(user.id)),
-        client_id=html_escape(client["client_id"]),
-        redirect_uri=html_escape(params.get("redirect_uri", "")),
-        scope_items=_scope_items(scopes),
-        resource_items=_list_items(resources, empty="Default Guillotina container"),
-        hidden_inputs=_hidden_inputs(params),
-    )
-    return _oauth_page("Authorize OAuth Client", f"Allow {raw_client_name}?", body)
 
 
 async def _authorize(service, store):
     params = dict(service.request.query)
+    try:
+        reject_duplicate_params(service.request.query, AUTHORIZE_SINGLETON_PARAMS)
+    except HTTPBadRequest as exc:
+        return exc
     if service.request.method == "POST":
         content_type = service.request.headers.get("content-type", "")
         if "application/json" in content_type:
             data = await service.request.json()
         else:
-            data = parse_form_encoded(await service.request.text())
+            try:
+                data = parse_form_encoded(
+                    await service.request.text(), singleton_fields=AUTHORIZE_SINGLETON_PARAMS
+                )
+            except HTTPBadRequest as exc:
+                return exc
         params.update(data)
     client = await store.get_client(params.get("client_id"))
     if client is None:
-        return _oauth_error_page("Unknown OAuth client", "The application is not registered.", status=400)
+        return oauth_error_page("Unknown OAuth client", "The application is not registered.", status=400)
     redirect_uri = params.get("redirect_uri")
     if not redirect_uri_registered_for_client(client, redirect_uri):
-        return _oauth_error_page(
+        return oauth_error_page(
             "Invalid redirect URI",
             "The requested redirect URI is not allowed for this OAuth client.",
             status=400,
@@ -314,6 +245,10 @@ async def _authorize(service, store):
                 redirect_uri, {"error": "unsupported_response_type", "state": params.get("state")}
             )
         )
+    if "code" not in set(client.get("response_types") or []):
+        return HTTPFound(
+            redirect_with_params(redirect_uri, {"error": "unauthorized_client", "state": params.get("state")})
+        )
     require_pkce = app_settings.get("oauth", {}).get("require_pkce", True)
     allowed_methods = app_settings.get("oauth", {}).get("allowed_code_challenge_methods", ["S256"])
     code_challenge = params.get("code_challenge")
@@ -323,13 +258,17 @@ async def _authorize(service, store):
         return HTTPFound(
             redirect_with_params(redirect_uri, {"error": "invalid_request", "state": params.get("state")})
         )
+    if code_challenge and not pkce_challenge_valid(code_challenge):
+        return HTTPFound(
+            redirect_with_params(redirect_uri, {"error": "invalid_request", "state": params.get("state")})
+        )
     if code_challenge and code_challenge_method not in allowed_methods:
         return HTTPFound(
             redirect_with_params(redirect_uri, {"error": "invalid_request", "state": params.get("state")})
         )
     scopes = normalize_list(params.get("scope"))
     supported_scopes = set(oauth_scopes_supported())
-    if scopes and not set(scopes).issubset(supported_scopes):
+    if not scopes or OAUTH_DEFAULT_SCOPE not in scopes or not set(scopes).issubset(supported_scopes):
         return HTTPFound(
             redirect_with_params(redirect_uri, {"error": "invalid_scope", "state": params.get("state")})
         )
@@ -341,11 +280,12 @@ async def _authorize(service, store):
         )
     user = get_authenticated_user()
     newly_authenticated_token = None
+    authenticated_on_this_request = False
     if user is None or getattr(user, "id", "Anonymous User") == "Anonymous User":
         if service.request.method == "POST" and params.get("username"):
             user = await _authenticate_basic(params.get("username"), params.get("password", ""))
             if user is None:
-                return _oauth_error_page(
+                return oauth_error_page(
                     "Login failed",
                     "The username or password could not be verified.",
                     status=401,
@@ -353,19 +293,32 @@ async def _authorize(service, store):
             from guillotina.auth import authenticate_user
 
             newly_authenticated_token, _ = authenticate_user(user.id)
+            authenticated_on_this_request = True
         else:
-            return _login_form(params, client)
+            return login_form(params, client)
     response_obj = None
     ckey = consent_key(user.id, client["client_id"], scopes, resources)
-    if not await store.has_consent(ckey) and params.get("decision") != "allow":
-        if params.get("decision") == "deny":
+    existing_consent = await store.has_consent(ckey)
+    decision = (
+        params.get("decision")
+        if service.request.method == "POST" and not authenticated_on_this_request
+        else None
+    )
+    if decision in ("allow", "deny") and not csrf_valid(
+        params.get(OAUTH_CSRF_FIELD), params, user.id, scopes, resources
+    ):
+        response_obj = HTTPFound(
+            redirect_with_params(redirect_uri, {"error": "invalid_request", "state": params.get("state")})
+        )
+    elif not existing_consent and decision != "allow":
+        if decision == "deny":
             response_obj = HTTPFound(
                 redirect_with_params(redirect_uri, {"error": "access_denied", "state": params.get("state")})
             )
         else:
-            response_obj = _consent_form(params, client, scopes, resources, user)
+            response_obj = consent_form(params, client, scopes, resources, user)
     else:
-        if not await store.has_consent(ckey):
+        if not existing_consent:
             await store.create_consent(
                 ckey,
                 user_id=user.id,
@@ -398,7 +351,14 @@ async def _authorize(service, store):
 
 
 async def _token(service, store):
-    data = parse_form_encoded(await service.request.text())
+    if not form_content_type_valid(service.request):
+        return HTTPBadRequest(
+            content={"error": "invalid_request", "error_description": "invalid content type"}
+        )
+    try:
+        data = parse_form_encoded(await service.request.text(), singleton_fields=TOKEN_SINGLETON_PARAMS)
+    except HTTPBadRequest as exc:
+        return exc
     grant_type = data.get("grant_type")
     if grant_type == "authorization_code":
         return await _authorization_code(service, store, data)
@@ -417,6 +377,8 @@ async def _authorization_code(service, store, data):
         return HTTPBadRequest(content={"error": "invalid_grant"})
     if client is None or record["client_id"] != client["client_id"]:
         return HTTPBadRequest(content={"error": "invalid_grant"})
+    if "authorization_code" not in set(client.get("grant_types") or []):
+        return HTTPBadRequest(content={"error": "unauthorized_client"})
     if record["redirect_uri"] != data.get("redirect_uri"):
         return HTTPBadRequest(content={"error": "invalid_grant"})
     require_pkce = app_settings.get("oauth", {}).get("require_pkce", True)
@@ -451,13 +413,15 @@ async def _authorization_code(service, store, data):
         resource=resources,
         auth_code_hash=record["code_hash"],
     )
-    return {
-        "access_token": access_token,
-        "token_type": "Bearer",
-        "expires_in": app_settings["oauth"].get("access_token_ttl", 3600),
-        "refresh_token": refresh_token,
-        "scope": " ".join(record["scope"]),
-    }
+    return _token_response(
+        {
+            "access_token": access_token,
+            "token_type": "Bearer",
+            "expires_in": app_settings["oauth"].get("access_token_ttl", 3600),
+            "refresh_token": refresh_token,
+            "scope": " ".join(record["scope"]),
+        }
+    )
 
 
 async def _refresh_token(service, store, data):
@@ -475,6 +439,8 @@ async def _refresh_token(service, store, data):
         return HTTPBadRequest(content={"error": "invalid_grant"})
     if client is None or record["client_id"] != client["client_id"]:
         return HTTPBadRequest(content={"error": "invalid_grant"})
+    if "refresh_token" not in set(client.get("grant_types") or []):
+        return HTTPBadRequest(content={"error": "unauthorized_client"})
     scopes = normalize_list(data.get("scope")) or record["scope"]
     resources = normalize_list(data.get("resource")) or record["resource"]
     if not set(scopes).issubset(set(record["scope"])) or not set(resources).issubset(set(record["resource"])):
@@ -496,18 +462,31 @@ async def _refresh_token(service, store, data):
         client_id=client["client_id"],
         scope=scopes,
     )
-    return {
-        "access_token": access_token,
-        "token_type": "Bearer",
-        "expires_in": app_settings["oauth"].get("access_token_ttl", 3600),
-        "refresh_token": new_refresh,
-        "scope": " ".join(scopes),
-    }
+    return _token_response(
+        {
+            "access_token": access_token,
+            "token_type": "Bearer",
+            "expires_in": app_settings["oauth"].get("access_token_ttl", 3600),
+            "refresh_token": new_refresh,
+            "scope": " ".join(scopes),
+        }
+    )
 
 
 async def _revoke(service, store):
-    data = parse_form_encoded(await service.request.text())
+    if not form_content_type_valid(service.request):
+        return HTTPBadRequest(
+            content={"error": "invalid_request", "error_description": "invalid content type"}
+        )
+    try:
+        data = parse_form_encoded(await service.request.text(), singleton_fields=REVOKE_SINGLETON_PARAMS)
+    except HTTPBadRequest as exc:
+        return exc
     record = await store.get_refresh_token(data.get("token", ""))
     if record is not None and record.get("client_id") == data.get("client_id"):
-        await store.delete_refresh_token(data.get("token", ""))
+        await store.revoke_refresh_family(
+            client_id=record["client_id"],
+            user_id=record["user_id"],
+            auth_code_hash=record.get("auth_code_hash"),
+        )
     return {}

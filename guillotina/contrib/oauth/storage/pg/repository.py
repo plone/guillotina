@@ -281,8 +281,11 @@ class OAuthRepository:
         async with txn.lock:
             result = await conn.execute(
                 """
-                DELETE FROM oauth_refresh_tokens
-                WHERE container_db_key = $1 AND auth_code_hash = $2
+                UPDATE oauth_refresh_tokens
+                SET revoked_at = COALESCE(revoked_at, now())
+                WHERE container_db_key = $1
+                  AND auth_code_hash = $2
+                  AND revoked_at IS NULL
                 """,
                 self.container_db_key,
                 auth_code_hash,
@@ -290,11 +293,19 @@ class OAuthRepository:
         return int(result.split()[-1]) > 0
 
     async def revoke_refresh_family_for_reuse(self, *, client_id, user_id, auth_code_hash):
+        return await self.revoke_refresh_family(
+            client_id=client_id,
+            user_id=user_id,
+            auth_code_hash=auth_code_hash,
+        )
+
+    async def revoke_refresh_family(self, *, client_id, user_id, auth_code_hash):
         txn, conn = await self._connection()
         async with txn.lock:
-            await conn.execute(
+            result = await conn.execute(
                 """
-                DELETE FROM oauth_refresh_tokens
+                UPDATE oauth_refresh_tokens
+                SET revoked_at = COALESCE(revoked_at, now())
                 WHERE container_db_key = $1
                   AND client_id = $2
                   AND user_id = $3
@@ -302,12 +313,14 @@ class OAuthRepository:
                     ($4::text IS NULL AND auth_code_hash IS NULL)
                     OR auth_code_hash = $4
                   )
+                  AND revoked_at IS NULL
                 """,
                 self.container_db_key,
                 client_id,
                 user_id,
                 auth_code_hash,
             )
+        return int(result.split()[-1]) > 0
 
     async def create_refresh_token(
         self,
@@ -431,12 +444,13 @@ class OAuthRepository:
             )
         return _row_to_refresh(row)
 
-    async def delete_refresh_token(self, token):
+    async def revoke_refresh_token(self, token):
         txn, conn = await self._connection()
         async with txn.lock:
             await conn.execute(
                 """
-                DELETE FROM oauth_refresh_tokens
+                UPDATE oauth_refresh_tokens
+                SET revoked_at = COALESCE(revoked_at, now())
                 WHERE container_db_key = $1 AND token_hash = $2
                 """,
                 self.container_db_key,

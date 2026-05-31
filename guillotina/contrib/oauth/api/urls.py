@@ -3,6 +3,7 @@ from urllib.parse import urlparse
 from guillotina import app_settings
 from guillotina.interfaces import IContainer
 from guillotina.utils import get_current_container, get_full_content_path, get_url
+from guillotina.utils.misc import build_url
 
 
 def container_url(request, container):
@@ -16,7 +17,14 @@ def container_url(request, container):
             pass
     if not IContainer.providedBy(container):
         raise RuntimeError("OAuth container URL requires a container context")
-    return get_url(request, get_full_content_path(container)).rstrip("/")
+    path = get_full_content_path(container)
+    if app_settings.get("oauth", {}).get("trust_proxy_headers", False):
+        return get_url(request, path).rstrip("/")
+    # Secure default: do not honor client-spoofable forwarding/virtualhost headers
+    # (X-Forwarded-Proto, X-VirtualHost-*) when deriving the OAuth issuer. Only the
+    # transport scheme and the Host header are used. For HTTPS deployments behind a
+    # trusted reverse proxy set oauth.trust_proxy_headers=True, or pin oauth.issuer.
+    return build_url(scheme=request.scheme, host=request.host, path=path, query="").rstrip("/")
 
 
 def mcp_resource(request, container):

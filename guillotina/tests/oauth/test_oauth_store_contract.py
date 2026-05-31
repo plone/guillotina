@@ -62,8 +62,9 @@ async def run_oauth_store_contract(store):
         resource=resources,
     )
     assert await store.get_valid_refresh(standalone_refresh) is not None
-    await store.delete_refresh_token(standalone_refresh)
-    assert await store.get_refresh_token(standalone_refresh) is None
+    await store.revoke_refresh_token(standalone_refresh)
+    assert await store.get_valid_refresh(standalone_refresh) is None
+    assert (await store.get_refresh_token(standalone_refresh))["revoked_at"] is not None
 
     linked_refresh = opaque_token("gor_")
     await store.create_refresh_token(
@@ -78,6 +79,7 @@ async def run_oauth_store_contract(store):
     assert await store.get_active_code(raw_code) is None
     assert await store.revoke_refresh_tokens_by_auth_code(code_record["code_hash"]) is True
     assert await store.get_valid_refresh(linked_refresh) is None
+    assert (await store.get_refresh_token(linked_refresh))["revoked_at"] is not None
 
     await store.delete_container_data()
     assert await store.get_client("contract-client") is None

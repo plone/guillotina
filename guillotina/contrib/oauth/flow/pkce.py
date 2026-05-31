@@ -5,6 +5,7 @@ from typing import Optional
 
 
 _VERIFIER_CHARS = re.compile(r"^[A-Za-z0-9\-._~]{43,128}$")
+_CHALLENGE_CHARS = re.compile(r"^[A-Za-z0-9\-._~]{43,128}$")
 
 
 def pkce_verifier_valid(verifier: Optional[str]) -> bool:
@@ -13,6 +14,14 @@ def pkce_verifier_valid(verifier: Optional[str]) -> bool:
     if not verifier or not isinstance(verifier, str):
         return False
     return _VERIFIER_CHARS.fullmatch(verifier) is not None
+
+
+def pkce_challenge_valid(challenge: Optional[str]) -> bool:
+    """Return True when ``code_challenge`` conforms to RFC 7636 syntax."""
+
+    if not challenge or not isinstance(challenge, str):
+        return False
+    return _CHALLENGE_CHARS.fullmatch(challenge) is not None
 
 
 def s256_challenge_from_bytes(verifier: bytes) -> str:

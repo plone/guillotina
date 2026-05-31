@@ -44,7 +44,7 @@ class IOAuthStore(Interface):
         """Remove an authorization code after use or cleanup."""
 
     def revoke_refresh_tokens_by_auth_code(self, auth_code_hash):
-        """Revoke refresh tokens issued from a code; return ``True`` if any were removed."""
+        """Revoke refresh tokens issued from a code; return ``True`` if any were changed."""
 
     def create_refresh_token(
         self,
@@ -64,14 +64,17 @@ class IOAuthStore(Interface):
     def revoke_refresh_family_for_reuse(self, *, client_id, user_id, auth_code_hash):
         """Revoke all refresh tokens in the reuse-compromise rotation family."""
 
+    def revoke_refresh_family(self, *, client_id, user_id, auth_code_hash):
+        """Revoke all refresh tokens in one authorization grant family."""
+
     def get_valid_refresh(self, token):
         """Return a valid, unexpired refresh token record or ``None``."""
 
     def get_refresh_token(self, token):
         """Return a refresh token record regardless of expiry, or ``None``."""
 
-    def delete_refresh_token(self, token):
-        """Remove a refresh token."""
+    def revoke_refresh_token(self, token):
+        """Revoke a refresh token without removing its replay-detection record."""
 
     def delete_container_data(self):
         """Remove all OAuth state for this container (addon uninstall)."""

@@ -1,11 +1,12 @@
 import json
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, urlencode, urlparse
 
 import pytest
 
 from guillotina.tests.oauth.conftest import (
     OAUTH_SETTINGS,
     authorize_code,
+    oauth_csrf_from_body,
     register_client,
     requires_pg,
     token_from_code,
@@ -152,22 +153,77 @@ async def test_authorize_pkce_required(challenge_method, container_install_reque
 
 @pytest.mark.app_settings(OAUTH_SETTINGS)
 @pytest.mark.parametrize("install_addons", [["oauth"]])
+async def test_authorize_rejects_invalid_code_challenge(container_install_requester):
+    async with container_install_requester as requester:
+        client = await register_client(requester)
+        _value, status, headers = await requester.make_request(
+            "GET",
+            "/db/guillotina/oauth/authorize",
+            params={
+                "client_id": client["client_id"],
+                "redirect_uri": client["redirect_uris"][0],
+                "response_type": "code",
+                "scope": "guillotina:access",
+                "code_challenge": "short",
+                "code_challenge_method": "S256",
+            },
+            allow_redirects=False,
+        )
+        assert status == 302
+        assert "error=invalid_request" in headers["Location"]
+
+
+@pytest.mark.app_settings(OAUTH_SETTINGS)
+@pytest.mark.parametrize("install_addons", [["oauth"]])
+async def test_authorize_rejects_duplicate_singleton_parameter(container_install_requester):
+    async with container_install_requester as requester:
+        client = await register_client(requester)
+        _verifier, challenge = verifier_pair()
+        _value, status, headers = await requester.make_request(
+            "GET",
+            "/db/guillotina/oauth/authorize",
+            params=[
+                ("client_id", client["client_id"]),
+                ("client_id", client["client_id"]),
+                ("redirect_uri", client["redirect_uris"][0]),
+                ("response_type", "code"),
+                ("scope", "guillotina:access"),
+                ("code_challenge", challenge),
+                ("code_challenge_method", "S256"),
+            ],
+            allow_redirects=False,
+        )
+        assert status == 400
+
+
+@pytest.mark.app_settings(OAUTH_SETTINGS)
+@pytest.mark.parametrize("install_addons", [["oauth"]])
 async def test_authorize_allow_and_remember_consent(container_install_requester):
     async with container_install_requester as requester:
         client = await register_client(requester)
         _verifier, challenge = verifier_pair()
-        body = (
-            "response_type=code"
-            f"&client_id={client['client_id']}"
-            f"&redirect_uri={client['redirect_uris'][0]}"
-            "&scope=guillotina:access&state=s"
-            f"&code_challenge={challenge}"
-            "&code_challenge_method=S256&decision=allow"
+        params = {
+            "response_type": "code",
+            "client_id": client["client_id"],
+            "redirect_uri": client["redirect_uris"][0],
+            "scope": "guillotina:access",
+            "state": "s",
+            "code_challenge": challenge,
+            "code_challenge_method": "S256",
+        }
+        value, status, _headers = await requester.make_request(
+            "GET",
+            "/db/guillotina/oauth/authorize",
+            params=params,
+            allow_redirects=False,
         )
+        assert status == 200
+        params["oauth_csrf"] = oauth_csrf_from_body(value)
+        params["decision"] = "allow"
         _value, status, headers = await requester.make_request(
             "POST",
             "/db/guillotina/oauth/authorize",
-            data=body,
+            data=urlencode(params),
             headers={"Content-Type": "application/x-www-form-urlencoded"},
             allow_redirects=False,
         )
@@ -197,13 +253,74 @@ async def test_authorize_deny(container_install_requester):
     async with container_install_requester as requester:
         client = await register_client(requester)
         _verifier, challenge = verifier_pair()
+        params = {
+            "response_type": "code",
+            "client_id": client["client_id"],
+            "redirect_uri": client["redirect_uris"][0],
+            "scope": "guillotina:access",
+            "code_challenge": challenge,
+            "code_challenge_method": "S256",
+        }
+        value, status, _headers = await requester.make_request(
+            "GET",
+            "/db/guillotina/oauth/authorize",
+            params=params,
+            allow_redirects=False,
+        )
+        assert status == 200
+        params["oauth_csrf"] = oauth_csrf_from_body(value)
+        params["decision"] = "deny"
+        _value, status, headers = await requester.make_request(
+            "POST",
+            "/db/guillotina/oauth/authorize",
+            data=urlencode(params),
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            allow_redirects=False,
+        )
+        assert status == 302
+        assert "error=access_denied" in headers["Location"]
+
+
+@pytest.mark.app_settings(OAUTH_SETTINGS)
+@pytest.mark.parametrize("install_addons", [["oauth"]])
+async def test_authorize_get_decision_allow_does_not_create_code(container_install_requester):
+    async with container_install_requester as requester:
+        client = await register_client(requester)
+        _verifier, challenge = verifier_pair()
+        value, status, _headers = await requester.make_request(
+            "GET",
+            "/db/guillotina/oauth/authorize",
+            params={
+                "response_type": "code",
+                "client_id": client["client_id"],
+                "redirect_uri": client["redirect_uris"][0],
+                "scope": "guillotina:access",
+                "state": "s",
+                "code_challenge": challenge,
+                "code_challenge_method": "S256",
+                "decision": "allow",
+            },
+            allow_redirects=False,
+        )
+        assert status == 200
+        body = value.decode("utf-8") if isinstance(value, bytes) else value
+        assert "Allow Test" in body
+        assert "code=" not in body
+
+
+@pytest.mark.app_settings(OAUTH_SETTINGS)
+@pytest.mark.parametrize("install_addons", [["oauth"]])
+async def test_authorize_post_decision_requires_csrf(container_install_requester):
+    async with container_install_requester as requester:
+        client = await register_client(requester)
+        _verifier, challenge = verifier_pair()
         body = (
             "response_type=code"
             f"&client_id={client['client_id']}"
             f"&redirect_uri={client['redirect_uris'][0]}"
-            "&scope=guillotina:access"
+            "&scope=guillotina:access&state=s"
             f"&code_challenge={challenge}"
-            "&code_challenge_method=S256&decision=deny"
+            "&code_challenge_method=S256&decision=allow"
         )
         _value, status, headers = await requester.make_request(
             "POST",
@@ -213,7 +330,7 @@ async def test_authorize_deny(container_install_requester):
             allow_redirects=False,
         )
         assert status == 302
-        assert "error=access_denied" in headers["Location"]
+        assert "error=invalid_request" in headers["Location"]
 
 
 @pytest.mark.app_settings(OAUTH_SETTINGS)
@@ -263,9 +380,21 @@ async def test_authorize_invalid_scope_redirects(container_install_requester):
 async def test_authorize_without_scope(container_install_requester):
     async with container_install_requester as requester:
         client = await register_client(requester)
-        code, verifier = await authorize_code(requester, client, scope="")
-        token = await token_from_code(requester, client, code, verifier)
-        assert token["access_token"]
+        _verifier, challenge = verifier_pair()
+        _value, status, headers = await requester.make_request(
+            "GET",
+            "/db/guillotina/oauth/authorize",
+            params={
+                "client_id": client["client_id"],
+                "redirect_uri": client["redirect_uris"][0],
+                "response_type": "code",
+                "code_challenge": challenge,
+                "code_challenge_method": "S256",
+            },
+            allow_redirects=False,
+        )
+        assert status == 302
+        assert "error=invalid_scope" in headers["Location"]
 
 
 @pytest.mark.app_settings(OAUTH_SETTINGS)
@@ -281,6 +410,7 @@ async def test_authorize_invalid_target_redirects(container_install_requester):
                 "client_id": client["client_id"],
                 "redirect_uri": client["redirect_uris"][0],
                 "response_type": "code",
+                "scope": "guillotina:access",
                 "resource": "http://invalid-target.com",
                 "code_challenge": challenge,
                 "code_challenge_method": "S256",
@@ -304,6 +434,7 @@ async def test_authorize_oauth_only_rejects_mcp_protocol_resource(container_inst
                 "client_id": client["client_id"],
                 "redirect_uri": client["redirect_uris"][0],
                 "response_type": "code",
+                "scope": "guillotina:access",
                 "resource": "http://localhost/db/guillotina/@mcp/protocol",
                 "code_challenge": challenge,
                 "code_challenge_method": "S256",
@@ -337,9 +468,10 @@ async def test_authorize_sets_auth_token_cookie(container_install_requester):
             authenticated=False,
             allow_redirects=False,
         )
-        assert status == 302
+        assert status == 200
         assert "Set-Cookie" in headers
         assert "auth_token=" in headers["Set-Cookie"]
+        assert b"Allow Test" in _value
 
 
 @pytest.mark.app_settings(OAUTH_SETTINGS)

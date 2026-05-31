@@ -99,11 +99,13 @@ register_oauth_resource_resolver(my_resolver)
 
 ## Dynamic client registration and redirect URIs
 
-`/oauth/authorize` accepts only redirect URIs that are already present on the client record. `/oauth/register` always creates a new public client and returns a server-issued `client_id`; client-supplied `client_id` values are rejected. The registration endpoint does not update existing clients. Public clients that need multiple callbacks, such as Cursor native and loopback redirects, must include all allowed `redirect_uris` in the same dynamic client registration request.
+`/oauth/authorize` accepts only redirect URIs that are already present on the client record. `/oauth/register` always creates a new public client and returns a server-issued `client_id`; client-supplied `client_id` values are rejected. The registration endpoint does not update existing clients. Public clients that need multiple callbacks, such as Cursor native and loopback redirects, must include all allowed `redirect_uris` in the same dynamic client registration request. HTTPS redirect URIs are accepted for web clients. Plain HTTP is accepted only for loopback/native redirects (`localhost`, `127.0.0.1`, `::1`). Redirect URIs with fragments are rejected.
 
 ## Supported flow
 
 The contrib implements public-client OAuth 2.1 Authorization Code with PKCE (`S256`), dynamic client registration, opaque refresh tokens, revocation, and JWT access tokens signed with Guillotina's configured JWT secret.
+
+![OAuth 2.1 authorization code flow with PKCE in Guillotina](../_static/oauth-flow.svg)
 
 Endpoints are container scoped:
 
@@ -224,7 +226,7 @@ For an **MCP client**, include the MCP protocol endpoint as `resource`:
 http://localhost:8080/db/container/oauth/authorize?response_type=code&client_id=CLIENT_ID&redirect_uri=http://127.0.0.1:12345/callback&scope=guillotina:access&code_challenge=YOUR_CODE_CHALLENGE&code_challenge_method=S256&state=some_random_state&resource=http://localhost:8080/db/container/@mcp/protocol
 ```
 
-The `scope` parameter is optional. When omitted, the token is issued with an empty `scope` claim. When present, use `guillotina:access`.
+The `scope` parameter is required and must include `guillotina:access`.
 
 Once the user logs in and consents, they will be redirected back to your `redirect_uri` with an authorization code parameter:
 `http://127.0.0.1:12345/callback?code=goc_XYZ123&state=some_random_state`
@@ -250,7 +252,21 @@ curl -X POST http://localhost:8080/db/container/oauth/token \
   -d 'grant_type=refresh_token&client_id=CLIENT_ID&refresh_token=YOUR_REFRESH_TOKEN'
 ```
 
-Refresh tokens are rotated on every successful refresh. Reusing an older refresh token fails and revokes the token family created from the same authorization code.
+Guillotina rotates refresh tokens on every successful refresh. The response contains a new `access_token` and a new `refresh_token`:
+
+```json
+{
+  "access_token": "NEW_ACCESS_TOKEN",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "refresh_token": "NEW_REFRESH_TOKEN",
+  "scope": "guillotina:access"
+}
+```
+
+Clients must persist the new `refresh_token` and discard the old one immediately. The previous refresh token is revoked as soon as the rotation succeeds.
+
+If an older refresh token is reused, Guillotina treats it as a replay signal and revokes the refresh-token family created from the same authorization code. OAuth clients should serialize refresh operations so two concurrent requests do not try to use the same refresh token at the same time.
 
 To revoke an active refresh token:
 
@@ -270,7 +286,7 @@ OAuth provides **authentication** and **resource binding**. **Authorization** is
 | Which resource? | Token audience (`aud`) — container URL or MCP endpoint |
 | What can they do? | Guillotina roles and ACLs (`AddContent`, `ModifyContent`, `MCPExecute`, …) |
 
-The OAuth scope `guillotina:access` is **protocol metadata only**. It appears in discovery, consent screens, and token claims, but it is **not checked** when calling the REST API or MCP tools.
+OAuth access tokens must include the `guillotina:access` scope. Authorization is still enforced with native Guillotina permissions on the authenticated user.
 
 ### REST API clients
 

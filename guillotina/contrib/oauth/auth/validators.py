@@ -3,6 +3,7 @@ import jwt
 from guillotina import app_settings, task_vars
 from guillotina.auth import find_user
 from guillotina.contrib.oauth.api.urls import container_url
+from guillotina.contrib.oauth.flow.scopes import OAUTH_DEFAULT_SCOPE
 
 
 class OAuthJWTValidator:
@@ -37,6 +38,9 @@ class OAuthJWTValidator:
                 return
         if not claims.get("client_id"):
             return
+        scopes = set((claims.get("scope") or "").split())
+        if OAUTH_DEFAULT_SCOPE not in scopes:
+            return
         token["id"] = claims.get("id", claims.get("sub"))
         token["decoded"] = claims
         user = await find_user(token)
@@ -44,7 +48,7 @@ class OAuthJWTValidator:
             if request is not None:
                 request.oauth = {
                     "client_id": claims.get("client_id"),
-                    "scopes": set((claims.get("scope") or "").split()),
+                    "scopes": scopes,
                     "resources": set(claims.get("aud") or []),
                     "claims": claims,
                 }

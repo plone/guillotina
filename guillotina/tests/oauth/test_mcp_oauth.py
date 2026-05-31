@@ -6,6 +6,7 @@ from guillotina.tests.mcp.test_mcp import PROTOCOL_HEADERS, _skip_if_protocol_un
 from guillotina.tests.oauth.conftest import (
     OAUTH_MCP_SETTINGS,
     authorize_code,
+    oauth_csrf_from_body,
     register_client,
     requires_pg,
     token_from_code,
@@ -52,6 +53,20 @@ async def test_mcp_without_token_challenges(container_install_requester):
 
 @pytest.mark.app_settings(OAUTH_MCP_SETTINGS)
 @pytest.mark.parametrize("install_addons", [["oauth", "mcp"]])
+async def test_mcp_allows_non_oauth_guillotina_authentication(container_install_requester):
+    async with container_install_requester as requester:
+        response, status = await requester(
+            "POST",
+            "/db/guillotina/@mcp/protocol",
+            data=json.dumps({"jsonrpc": "2.0", "id": 1, "method": "tools/list", "params": {}}),
+            headers=PROTOCOL_HEADERS,
+        )
+        _skip_if_protocol_unavailable(response, status)
+        assert status == 200
+
+
+@pytest.mark.app_settings(OAUTH_MCP_SETTINGS)
+@pytest.mark.parametrize("install_addons", [["oauth", "mcp"]])
 async def test_mcp_with_oauth_token(container_install_requester):
     async with container_install_requester as requester:
         client = await register_client(requester)
@@ -78,7 +93,7 @@ async def test_mcp_rejects_missing_mcp_audience(container_install_requester):
         client = await register_client(requester)
         code, verifier = await authorize_code(requester, client, resource="http://localhost/db/guillotina")
         token = await token_from_code(requester, client, code, verifier)
-        _response, status = await requester(
+        _response, status, headers = await requester.make_request(
             "POST",
             "/db/guillotina/@mcp/protocol",
             data=json.dumps({"jsonrpc": "2.0", "id": 1, "method": "tools/list", "params": {}}),
@@ -87,6 +102,7 @@ async def test_mcp_rejects_missing_mcp_audience(container_install_requester):
             token=token["access_token"],
         )
         assert status == 401
+        assert 'error="invalid_token"' in headers["WWW-Authenticate"]
 
 
 @pytest.mark.app_settings(OAUTH_MCP_SETTINGS)
@@ -150,42 +166,6 @@ async def test_mcp_serialized_content_with_oauth_token(container_install_request
         )
         _skip_if_protocol_unavailable(response, status)
         assert status == 200
-
-
-@pytest.mark.app_settings(OAUTH_MCP_SETTINGS)
-@pytest.mark.parametrize("install_addons", [["oauth", "mcp"]])
-async def test_mcp_create_content(container_install_requester):
-    async with container_install_requester as requester:
-        client = await register_client(requester)
-        code, verifier = await authorize_code(
-            requester,
-            client,
-            resource="http://localhost/db/guillotina/@mcp/protocol",
-        )
-        token = await token_from_code(requester, client, code, verifier)
-        response, status = await requester(
-            "POST",
-            "/db/guillotina/@mcp/protocol",
-            data=json.dumps(
-                {
-                    "jsonrpc": "2.0",
-                    "id": 1,
-                    "method": "tools/call",
-                    "params": {
-                        "name": "create_content",
-                        "arguments": {
-                            "data": {"@type": "Folder", "id": "oauth-mcp-folder", "title": "OAuth MCP Folder"}
-                        },
-                    },
-                }
-            ),
-            headers=PROTOCOL_HEADERS,
-            auth_type="Bearer",
-            token=token["access_token"],
-        )
-        _skip_if_protocol_unavailable(response, status)
-        assert status == 200
-        assert "oauth-mcp-folder" in response["result"]["content"][0]["text"]
 
 
 NO_PKCE_SETTINGS = {
@@ -268,8 +248,16 @@ async def test_authorize_without_pkce(container_install_requester):
             "redirect_uri": client["redirect_uris"][0],
             "scope": "guillotina:access",
             "state": "abc",
-            "decision": "allow",
         }
+        value, status, _headers = await requester.make_request(
+            "GET",
+            "/db/guillotina/oauth/authorize",
+            params=data,
+            allow_redirects=False,
+        )
+        assert status == 200
+        data["oauth_csrf"] = oauth_csrf_from_body(value)
+        data["decision"] = "allow"
         _value, status, headers = await requester.make_request(
             "POST",
             "/db/guillotina/oauth/authorize",

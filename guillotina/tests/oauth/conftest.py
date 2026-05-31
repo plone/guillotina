@@ -1,6 +1,8 @@
 import base64
 import hashlib
+from html import unescape
 import json
+import re
 from urllib.parse import parse_qs, urlencode, urlparse
 
 import pytest
@@ -17,6 +19,7 @@ requires_pg = pytest.mark.skipif(
 
 OAUTH_SETTINGS = {
     "applications": ["guillotina", "guillotina.contrib.oauth"],
+    "oauth": {"registration_rate_limit": 0},
     "auth_extractors": [
         "guillotina.auth.extractors.BearerAuthPolicy",
         "guillotina.auth.extractors.BasicAuthPolicy",
@@ -26,6 +29,7 @@ OAUTH_SETTINGS = {
 }
 OAUTH_MCP_SETTINGS = {
     "applications": ["guillotina", "guillotina.contrib.oauth", "guillotina.contrib.mcp"],
+    "oauth": {"registration_rate_limit": 0},
     "auth_extractors": [
         "guillotina.auth.extractors.BearerAuthPolicy",
         "guillotina.auth.extractors.BasicAuthPolicy",
@@ -39,6 +43,13 @@ def verifier_pair(verifier="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ
     digest = hashlib.sha256(verifier.encode("ascii")).digest()
     challenge = base64.urlsafe_b64encode(digest).rstrip(b"=").decode("ascii")
     return verifier, challenge
+
+
+def oauth_csrf_from_body(value):
+    body = value.decode("utf-8") if isinstance(value, bytes) else value
+    match = re.search(r'name="oauth_csrf" value="([^"]+)"', body)
+    assert match is not None, body
+    return unescape(match.group(1))
 
 
 async def register_client(requester, redirect_uri="http://127.0.0.1:12345/callback"):
@@ -74,10 +85,23 @@ async def authorize_code(
         "state": "abc",
         "code_challenge": challenge,
         "code_challenge_method": "S256",
-        "decision": "allow",
     }
     if resource:
         data["resource"] = resource
+
+    value, status, headers = await requester.make_request(
+        "GET",
+        "/db/guillotina/oauth/authorize",
+        params=data,
+        allow_redirects=False,
+    )
+    if status == 302:
+        query = parse_qs(urlparse(headers["Location"]).query)
+        return query["code"][0], verifier
+    assert status == 200
+
+    data["oauth_csrf"] = oauth_csrf_from_body(value)
+    data["decision"] = "allow"
     value, status, headers = await requester.make_request(
         "POST",
         "/db/guillotina/oauth/authorize",

@@ -23,7 +23,12 @@ def opaque_token(prefix=""):
 
 
 def token_hash(token: str) -> str:
-    secret = app_settings.get("jwt", {}).get("secret", "") or "guillotina-oauth-dev-secret"
+    secret = app_settings.get("jwt", {}).get("secret")
+    if not secret:
+        raise RuntimeError(
+            "OAuth token hashing requires `jwt.secret` to be configured; "
+            "refusing to fall back to an insecure default secret."
+        )
     return hmac.new(secret.encode("utf-8"), token.encode("utf-8"), hashlib.sha256).hexdigest()
 
 

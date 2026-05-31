@@ -1,0 +1,228 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="2048" viewBox="0 0 1600 2048" role="img" aria-labelledby="title desc">
+  <title id="title">Guillotina OAuth requests and discovery paths</title>
+  <desc id="desc">Sequence diagram showing every request a client can use to discover Guillotina OAuth metadata, register, authorize with PKCE, exchange tokens, call REST or MCP resources, refresh, and revoke.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#28545a"/>
+    </marker>
+    <marker id="arrow-muted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#72818a"/>
+    </marker>
+    <style>
+      .bg { fill: #f6f8fa; }
+      .title { fill: #17252b; font: 700 28px Arial, sans-serif; }
+      .subtitle { fill: #52666f; font: 14px Arial, sans-serif; }
+      .actor { stroke-width: 1.2; rx: 10; ry: 10; }
+      .client { fill: #eef7ff; stroke: #4f83b8; }
+      .browser { fill: #fff7e8; stroke: #c8892d; }
+      .oauth { fill: #eefaf4; stroke: #4d9b72; }
+      .resource { fill: #f7f0ff; stroke: #8f60bd; }
+      .actor-title { fill: #152329; font: 700 16px Arial, sans-serif; }
+      .actor-sub { fill: #52666f; font: 12px Arial, sans-serif; }
+      .lifeline { stroke: #d5dee6; stroke-width: 2; stroke-dasharray: 6 7; }
+      .phase { fill: #e8edf3; stroke: #cfd9e3; stroke-width: 1; rx: 8; ry: 8; }
+      .phase-text { fill: #24343b; font: 700 13px Arial, sans-serif; }
+      .request { stroke: #28545a; stroke-width: 2.1; fill: none; marker-end: url(#arrow); }
+      .response { stroke: #72818a; stroke-width: 2; fill: none; stroke-dasharray: 6 5; marker-end: url(#arrow-muted); }
+      .local { stroke: #8899a5; stroke-width: 2; fill: none; stroke-dasharray: 3 5; }
+      .card { fill: #ffffff; stroke: #cbd6df; stroke-width: 1; rx: 7; ry: 7; }
+      .note { fill: #fffdf7; stroke: #dfc773; stroke-width: 1; rx: 8; ry: 8; }
+      .ok { fill: #f0fbf5; stroke: #9bcfab; stroke-width: 1; rx: 8; ry: 8; }
+      .card-title { fill: #17252b; font: 700 12px Arial, sans-serif; }
+      .card-text { fill: #334a54; font: 12px Arial, sans-serif; }
+      .card-small { fill: #61737c; font: 11px Arial, sans-serif; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1600" height="2048"/>
+  <text class="title" x="800" y="38" text-anchor="middle">Guillotina OAuth: discovery, registration, authorization and token requests</text>
+  <text class="subtitle" x="800" y="62" text-anchor="middle">The diagram shows the implemented request paths, including REST discovery, MCP cold-start discovery, PKCE, token refresh, and revoke.</text>
+
+  <rect class="actor client" x="55" y="92" width="250" height="70"/>
+  <text class="actor-title" x="180" y="120" text-anchor="middle">Client app</text>
+  <text class="actor-sub" x="180" y="141" text-anchor="middle">Cursor, CLI, SPA, native app</text>
+
+  <rect class="actor browser" x="420" y="92" width="250" height="70"/>
+  <text class="actor-title" x="545" y="120" text-anchor="middle">Browser + user</text>
+  <text class="actor-sub" x="545" y="141" text-anchor="middle">login and consent UI</text>
+
+  <rect class="actor oauth" x="785" y="92" width="250" height="70"/>
+  <text class="actor-title" x="910" y="120" text-anchor="middle">Guillotina OAuth</text>
+  <text class="actor-sub" x="910" y="141" text-anchor="middle">authorization server in container</text>
+
+  <rect class="actor resource" x="1160" y="92" width="330" height="70"/>
+  <text class="actor-title" x="1325" y="120" text-anchor="middle">Protected resource</text>
+  <text class="actor-sub" x="1325" y="141" text-anchor="middle">REST API or /@mcp/protocol</text>
+
+  <line class="lifeline" x1="180" y1="162" x2="180" y2="2025"/>
+  <line class="lifeline" x1="545" y1="162" x2="545" y2="2025"/>
+  <line class="lifeline" x1="910" y1="162" x2="910" y2="2025"/>
+  <line class="lifeline" x1="1325" y1="162" x2="1325" y2="2025"/>
+
+  <rect class="phase" x="45" y="188" width="1510" height="30"/>
+  <text class="phase-text" x="62" y="208">0. Cold-start discovery: how the client learns the OAuth URLs</text>
+
+  <path class="request" d="M180 260 L910 260"/>
+  <rect class="card" x="280" y="226" width="660" height="82"/>
+  <text class="card-title" x="340" y="247">0A. REST/client already knows the container URL</text>
+  <text class="card-text" x="340" y="266">GET /db/container/.well-known/oauth-authorization-server</text>
+  <text class="card-small" x="340" y="282">Alternative RFC 8414 root path: /.well-known/oauth-authorization-server/db/container</text>
+  <text class="card-small" x="340" y="298">Compatibility alias: /.well-known/openid-configuration/db/container</text>
+
+  <path class="response" d="M910 322 L180 322"/>
+  <rect class="card" x="350" y="318" width="620" height="48"/>
+  <text class="card-title" x="365" y="338">200 authorization server metadata</text>
+  <text class="card-text" x="365" y="355">issuer, authorization_endpoint, token_endpoint, registration_endpoint, revocation_endpoint</text>
+
+  <path class="request" d="M180 395 L1325 395"/>
+  <rect class="card" x="395" y="370" width="585" height="70"/>
+  <text class="card-title" x="420" y="391">0B. MCP client knows only the MCP endpoint</text>
+  <text class="card-text" x="420" y="410">POST /db/container/@mcp/protocol without Authorization header</text>
+  <text class="card-small" x="420" y="426">This is the initial MCP cold start when no access token is available yet.</text>
+
+  <path class="response" d="M1325 455 L180 455"/>
+  <rect class="card" x="420" y="435" width="615" height="64"/>
+  <text class="card-title" x="483" y="456">401 WWW-Authenticate</text>
+  <text class="card-text" x="483" y="474">Bearer resource_metadata=</text>
+  <text class="card-small" x="483" y="490">"/.well-known/oauth-protected-resource/db/container/@mcp/protocol"</text>
+
+  <path class="request" d="M180 535 L910 535"/>
+  <rect class="card" x="330" y="512" width="560" height="76"/>
+  <text class="card-title" x="355" y="533">0C. Client follows resource_metadata</text>
+  <text class="card-text" x="355" y="552">GET /.well-known/oauth-protected-resource/db/container/@mcp/protocol</text>
+  <text class="card-small" x="355" y="568">Container-scoped equivalent: /db/container/.well-known/oauth-protected-resource</text>
+
+  <path class="response" d="M910 596 L180 596"/>
+  <rect class="card" x="392" y="578" width="315" height="46"/>
+  <text class="card-title" x="407" y="598">200 protected resource metadata</text>
+  <text class="card-text" x="407" y="615">resource, authorization_servers, scopes_supported</text>
+
+  <rect class="note" x="1010" y="505" width="455" height="93"/>
+  <text class="card-title" x="1030" y="528">Implemented discovery variants</text>
+  <text class="card-text" x="1030" y="548">OAuth AS metadata: oauth-authorization-server and openid-configuration alias.</text>
+  <text class="card-text" x="1030" y="568">MCP protected-resource metadata: oauth-protected-resource.</text>
+  <text class="card-small" x="1030" y="588">The OpenID URL returns OAuth metadata only; this is not full OIDC.</text>
+
+  <rect class="phase" x="45" y="650" width="1510" height="30"/>
+  <text class="phase-text" x="62" y="670">1. Dynamic client registration</text>
+
+  <path class="request" d="M180 735 L910 735"/>
+  <rect class="card" x="330" y="700" width="515" height="70"/>
+  <text class="card-title" x="355" y="721">1. Register public client</text>
+  <text class="card-text" x="355" y="740">POST /db/container/oauth/register</text>
+  <text class="card-small" x="355" y="756">JSON: client_name, redirect_uris[], token_endpoint_auth_method=&quot;none&quot;</text>
+
+  <path class="response" d="M910 795 L180 795"/>
+  <rect class="card" x="350" y="778" width="430" height="44"/>
+  <text class="card-title" x="375" y="798">200 registration response</text>
+  <text class="card-text" x="375" y="814">server-issued client_id; client-supplied client_id is rejected</text>
+
+  <rect class="ok" x="1010" y="707" width="455" height="88"/>
+  <text class="card-title" x="1030" y="730">Security behavior</text>
+  <text class="card-text" x="1030" y="750">Registration is create-only: no upsert and no redirect_uri merge.</text>
+  <text class="card-text" x="1030" y="770">Clients needing several callbacks must register all redirect_uris at once.</text>
+
+  <rect class="phase" x="45" y="855" width="1510" height="30"/>
+  <text class="phase-text" x="62" y="875">2. Authorization code with PKCE</text>
+
+  <path class="local" d="M180 930 C120 930 120 980 180 980"/>
+  <rect class="note" x="58" y="905" width="330" height="88"/>
+  <text class="card-title" x="76" y="928">2A. Local PKCE step</text>
+  <text class="card-text" x="76" y="948">No HTTP request.</text>
+  <text class="card-text" x="76" y="966">Generate code_verifier and S256 code_challenge.</text>
+  <text class="card-small" x="76" y="982">Keep code_verifier on the client.</text>
+
+  <path class="request" d="M180 1030 L545 1030"/>
+  <rect class="card" x="260" y="1005" width="230" height="52"/>
+  <text class="card-title" x="275" y="1026">2B. Open browser</text>
+  <text class="card-text" x="275" y="1043">Navigate user to authorization URL</text>
+
+  <path class="request" d="M545 1110 L910 1110"/>
+  <rect class="card" x="555" y="1068" width="395" height="84"/>
+  <text class="card-title" x="595" y="1089">2C. GET authorize</text>
+  <text class="card-text" x="595" y="1108">GET /db/container/oauth/authorize</text>
+  <text class="card-small" x="595" y="1124">response_type=code, client_id, redirect_uri, state</text>
+  <text class="card-small" x="595" y="1140">code_challenge, code_challenge_method=S256</text>
+  <text class="card-small" x="595" y="1155">scope optional; resource optional</text>
+
+  <path class="response" d="M910 1185 L545 1185"/>
+  <rect class="card" x="590" y="1168" width="340" height="46"/>
+  <text class="card-title" x="615" y="1188">HTML login/consent page</text>
+  <text class="card-text" x="615" y="1205">shown when authentication or consent is needed</text>
+
+  <path class="request" d="M545 1260 L910 1260"/>
+  <rect class="card" x="585" y="1228" width="355" height="64"/>
+  <text class="card-title" x="610" y="1249">2D. POST consent decision</text>
+  <text class="card-text" x="610" y="1268">POST /db/container/oauth/authorize</text>
+  <text class="card-small" x="610" y="1284">decision=allow plus original authorize parameters</text>
+
+  <path class="response" d="M910 1322 L545 1322"/>
+  <rect class="card" x="590" y="1304" width="360" height="46"/>
+  <text class="card-title" x="615" y="1324">302 redirect</text>
+  <text class="card-text" x="615" y="1341">Location: redirect_uri?code=goc_...&amp;state=...</text>
+
+  <path class="response" d="M545 1375 L180 1375"/>
+  <rect class="card" x="252" y="1356" width="315" height="46"/>
+  <text class="card-title" x="287" y="1376">2E. Callback to client</text>
+  <text class="card-text" x="287" y="1393">Client receives code and validates state</text>
+
+  <rect class="ok" x="1010" y="1072" width="455" height="110"/>
+  <text class="card-title" x="1030" y="1095">Implemented authorize variants</text>
+  <text class="card-text" x="1030" y="1115">resource omitted: defaults to the container issuer URL.</text>
+  <text class="card-text" x="1030" y="1135">resource = /@mcp/protocol: token audience is the MCP endpoint.</text>
+  <text class="card-text" x="1030" y="1155">scope omitted: empty scope claim; otherwise use guillotina:access.</text>
+  <text class="card-small" x="1030" y="1175">PKCE is required by default; tests can disable it via configuration.</text>
+
+  <rect class="phase" x="45" y="1430" width="1510" height="30"/>
+  <text class="phase-text" x="62" y="1450">3. Token endpoint grants</text>
+
+  <path class="request" d="M180 1510 L910 1510"/>
+  <rect class="card" x="320" y="1472" width="510" height="76"/>
+  <text class="card-title" x="345" y="1493">3A. Exchange authorization code</text>
+  <text class="card-text" x="345" y="1512">POST /db/container/oauth/token</text>
+  <text class="card-small" x="345" y="1528">grant_type=authorization_code, client_id, redirect_uri, code</text>
+  <text class="card-small" x="345" y="1544">code_verifier, optional resource subset</text>
+
+  <path class="response" d="M910 1575 L180 1575"/>
+  <rect class="card" x="360" y="1556" width="380" height="52"/>
+  <text class="card-title" x="375" y="1576">200 token response</text>
+  <text class="card-text" x="375" y="1593">access_token = JWT, refresh_token = opaque token</text>
+  <text class="card-small" x="375" y="1606">JWT aud equals container URL or MCP protocol URL.</text>
+
+  <path class="request" d="M180 1648 L910 1648"/>
+  <rect class="card" x="330" y="1620" width="425" height="58"/>
+  <text class="card-title" x="345" y="1641">3B. Refresh token grant</text>
+  <text class="card-text" x="345" y="1660">POST /db/container/oauth/token</text>
+  <text class="card-small" x="345" y="1676">grant_type=refresh_token, client_id, refresh_token</text>
+
+  <path class="response" d="M910 1710 L180 1710"/>
+  <rect class="card" x="358" y="1688" width="382" height="52"/>
+  <text class="card-title" x="373" y="1708">200 rotated token response</text>
+  <text class="card-text" x="373" y="1725">new access_token and new refresh_token</text>
+  <text class="card-small" x="373" y="1738">Reusing an old refresh token revokes its rotation family.</text>
+
+  <rect class="phase" x="45" y="1765" width="1510" height="30"/>
+  <text class="phase-text" x="62" y="1785">4. Use and revoke</text>
+
+  <path class="request" d="M180 1818 L1325 1818"/>
+  <rect class="card" x="395" y="1788" width="660" height="76"/>
+  <text class="card-title" x="440" y="1809">4A. Call protected resource</text>
+  <text class="card-text" x="440" y="1828">REST: GET /db/container/... or MCP: POST /db/container/@mcp/protocol</text>
+  <text class="card-small" x="440" y="1844">Header: Authorization: Bearer ACCESS_TOKEN</text>
+  <text class="card-small" x="440" y="1860">Guillotina then checks normal user permissions.</text>
+
+  <path class="response" d="M1325 1885 L180 1885"/>
+  <rect class="card" x="485" y="1874" width="460" height="46"/>
+  <text class="card-title" x="520" y="1886">200 / 401 / 403 response</text>
+  <text class="card-text" x="520" y="1903">Depends on token validity, audience/resource, and Guillotina permissions.</text>
+
+  <path class="request" d="M180 1950 L910 1950"/>
+  <rect class="card" x="330" y="1928" width="500" height="64"/>
+  <text class="card-title" x="353" y="1939">4B. Optional revoke</text>
+  <text class="card-text" x="353" y="1958">POST /db/container/oauth/revoke</text>
+  <text class="card-small" x="353" y="1974">client_id, token=REFRESH_TOKEN, token_type_hint=refresh_token</text>
+
+  <path class="response" d="M910 2008 L180 2008"/>
+  <rect class="card" x="423" y="1992" width="250" height="34"/>
+  <text class="card-title" x="438" y="2013">200 revoke response</text>
+</svg>

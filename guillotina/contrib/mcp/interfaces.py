@@ -39,5 +39,8 @@ class IMCPAuthPolicy(Interface):
     def unauthorized_headers(request, context):
         """Return extra headers for an unauthenticated MCP protocol response."""
 
+    def forbidden_headers(request, context):
+        """Return extra headers for an authenticated but unauthorized MCP protocol response."""
+
     def is_authorized(request, context):
         """Return whether the current authenticated request may use this MCP endpoint."""

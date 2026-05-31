@@ -8,6 +8,12 @@ from guillotina.tests.oauth.conftest import OAUTH_SETTINGS, requires_pg
 pytestmark = [pytest.mark.asyncio, requires_pg]
 
 
+RATE_LIMITED_SETTINGS = {
+    **OAUTH_SETTINGS,
+    "oauth": {"registration_rate_limit": 2, "registration_rate_window": 600},
+}
+
+
 @pytest.mark.app_settings(OAUTH_SETTINGS)
 @pytest.mark.parametrize("install_addons", [["oauth"]])
 async def test_register_client(container_install_requester):
@@ -30,7 +36,11 @@ async def test_register_client(container_install_requester):
         {"redirect_uris": []},
         {"redirect_uris": ["javascript:alert(1)"]},
         {"redirect_uris": ["https://example.com/*"]},
+        {"redirect_uris": ["https://example.com/cb#fragment"]},
+        {"redirect_uris": ["http://example.com/callback"]},
         {"redirect_uris": ["http://localhost/cb"], "token_endpoint_auth_method": "client_secret_basic"},
+        {"redirect_uris": ["http://localhost/cb"], "grant_types": ["implicit"]},
+        {"redirect_uris": ["http://localhost/cb"], "response_types": ["token"]},
     ],
 )
 @pytest.mark.parametrize("install_addons", [["oauth"]])
@@ -117,3 +127,24 @@ async def test_register_rejects_client_supplied_client_id(container_install_requ
         assert status == 400
         assert response["error"] == "invalid_request"
         assert response["error_description"] == "client_id is server-issued"
+
+
+@pytest.mark.app_settings(RATE_LIMITED_SETTINGS)
+@pytest.mark.parametrize("install_addons", [["oauth"]])
+async def test_register_rate_limited(container_install_requester):
+    from guillotina.contrib.oauth.flow.ratelimit import reset_rate_limits
+
+    reset_rate_limits()
+    payload = json.dumps({"redirect_uris": ["http://localhost:9999/callback"]})
+    async with container_install_requester as requester:
+        for _ in range(2):
+            _response, status = await requester(
+                "POST", "/db/guillotina/oauth/register", data=payload, authenticated=False
+            )
+            assert status == 200
+        response, status = await requester(
+            "POST", "/db/guillotina/oauth/register", data=payload, authenticated=False
+        )
+        assert status == 429
+        assert response["error"] == "temporarily_unavailable"
+    reset_rate_limits()

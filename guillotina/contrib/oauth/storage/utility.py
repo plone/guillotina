@@ -67,7 +67,25 @@ class OAuthStorageUtility:
         self._task = None
         self._closing = False
 
+    def _warn_issuer_not_pinned(self):
+        oauth = app_settings.get("oauth") or {}
+        if oauth.get("issuer") or app_settings.get("debug"):
+            return
+        if oauth.get("trust_proxy_headers"):
+            logger.warning(
+                "oauth.issuer is not configured and oauth.trust_proxy_headers is enabled: "
+                "the OAuth issuer/audience will be derived from client-supplied forwarding "
+                "headers. Pin oauth.issuer to your canonical public URL to prevent spoofing."
+            )
+        else:
+            logger.warning(
+                "oauth.issuer is not configured: the OAuth issuer/audience will be derived "
+                "from the request Host header. Pin oauth.issuer to your canonical public URL "
+                "(or set oauth.trust_proxy_headers=True behind a trusted reverse proxy)."
+            )
+
     async def initialize(self, app=None):
+        self._warn_issuer_not_pinned()
         initialized = False
         root = get_utility(IApplication, name="root")
         for _id, db in root:
