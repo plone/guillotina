@@ -2,7 +2,8 @@ from urllib.parse import urlencode, urlparse
 from uuid import uuid4
 
 from guillotina.contrib.oauth.api.request import normalize_list, oauth_error
-from guillotina.contrib.oauth.flow.tokens import utcnow
+from guillotina.contrib.oauth.flow.scopes import OAUTH_DEFAULT_SCOPE, oauth_scopes_supported
+from guillotina.contrib.oauth.flow.tokens import timestamp, utcnow
 
 
 SUPPORTED_GRANT_TYPES = {"authorization_code", "refresh_token"}
@@ -53,8 +54,8 @@ def make_client(data):
     method = data.get("token_endpoint_auth_method", "none")
     if method != "none":
         oauth_error("unsupported_token_endpoint_auth_method")
-    grant_types = data.get("grant_types") or ["authorization_code", "refresh_token"]
-    response_types = data.get("response_types") or ["code"]
+    grant_types = data["grant_types"] if "grant_types" in data else ["authorization_code", "refresh_token"]
+    response_types = data["response_types"] if "response_types" in data else ["code"]
     if not isinstance(grant_types, list) or not grant_types:
         oauth_error("invalid_client_metadata", "grant_types must be a non-empty array")
     if not isinstance(response_types, list) or not response_types:
@@ -63,7 +64,17 @@ def make_client(data):
         oauth_error("invalid_client_metadata", "unsupported grant_type")
     if any(response_type not in SUPPORTED_RESPONSE_TYPES for response_type in response_types):
         oauth_error("invalid_client_metadata", "unsupported response_type")
-    now = utcnow().isoformat()
+    if "authorization_code" in grant_types and "code" not in response_types:
+        oauth_error("invalid_client_metadata", "authorization_code grant requires code response_type")
+    if "code" in response_types and "authorization_code" not in grant_types:
+        oauth_error("invalid_client_metadata", "code response_type requires authorization_code grant")
+    scope = normalize_list(data.get("scope")) or [OAUTH_DEFAULT_SCOPE]
+    if OAUTH_DEFAULT_SCOPE not in scope:
+        oauth_error("invalid_client_metadata", f"{OAUTH_DEFAULT_SCOPE} scope is required")
+    if not set(scope).issubset(set(oauth_scopes_supported())):
+        oauth_error("invalid_client_metadata", "unsupported scope")
+    now_dt = utcnow()
+    now = now_dt.isoformat()
     return {
         "client_id": uuid4().hex,
         "client_name": data.get("client_name") or "OAuth Client",
@@ -71,10 +82,16 @@ def make_client(data):
         "grant_types": grant_types,
         "response_types": response_types,
         "token_endpoint_auth_method": "none",
-        "scope": " ".join(normalize_list(data.get("scope"))),
+        "scope": " ".join(scope),
+        "client_id_issued_at": timestamp(now_dt),
         "created_at": now,
         "updated_at": now,
     }
+
+
+def scopes_registered_for_client(client, scopes):
+    allowed = normalize_list(client.get("scope")) or [OAUTH_DEFAULT_SCOPE]
+    return set(scopes).issubset(set(allowed))
 
 
 def consent_key(user_id, client_id, scopes, resources):

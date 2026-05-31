@@ -3,11 +3,13 @@ import jwt
 from guillotina import app_settings, task_vars
 from guillotina.auth import find_user
 from guillotina.contrib.oauth.api.urls import container_url
+from guillotina.contrib.oauth.flow.resources import oauth_required_audience
 from guillotina.contrib.oauth.flow.scopes import OAUTH_DEFAULT_SCOPE
+from guillotina.contrib.oauth.flow.tokens import access_token_key
 
 
 class OAuthJWTValidator:
-    for_validators = ("bearer", "wstoken", "cookie")
+    for_validators = ("bearer",)
 
     async def validate(self, token):
         if token.get("type") not in self.for_validators:
@@ -18,7 +20,7 @@ class OAuthJWTValidator:
         try:
             claims = jwt.decode(
                 raw,
-                app_settings["jwt"]["secret"],
+                access_token_key(),
                 algorithms=[app_settings["jwt"]["algorithm"]],
                 options={"verify_aud": False},
             )
@@ -33,8 +35,7 @@ class OAuthJWTValidator:
             if claims.get("iss") != issuer:
                 return
             aud = set(claims.get("aud") or [])
-            # Generic API accepts the container audience. MCP performs stricter audience checks.
-            if issuer not in aud and not request.path.endswith("/@mcp/protocol"):
+            if oauth_required_audience(request, container) not in aud:
                 return
         if not claims.get("client_id"):
             return

@@ -14,7 +14,15 @@ BRAND_LOGO_PATH = Path(__file__).parents[3] / "static" / "assets" / "brand" / "g
 
 
 def _html(body, status=200):
-    return Response(body=body.encode("utf-8"), status=status, content_type="text/html")
+    return Response(
+        body=body.encode("utf-8"),
+        status=status,
+        content_type="text/html",
+        headers={
+            "Content-Security-Policy": "frame-ancestors 'none'",
+            "X-Frame-Options": "DENY",
+        },
+    )
 
 
 @lru_cache(maxsize=None)

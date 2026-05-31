@@ -6,6 +6,7 @@ import json
 import time
 
 from guillotina import app_settings
+from guillotina.contrib.oauth.flow.keys import derive_key
 
 
 OAUTH_CSRF_FIELD = "oauth_csrf"
@@ -36,7 +37,7 @@ def _b64url_decode(value):
 
 
 def _csrf_signature(body):
-    secret = app_settings["jwt"]["secret"].encode("utf-8")
+    secret = derive_key("csrf")
     return _b64url_encode(hmac.new(secret, body.encode("ascii"), hashlib.sha256).digest())
 
 

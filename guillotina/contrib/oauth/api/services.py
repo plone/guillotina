@@ -16,10 +16,11 @@ from guillotina.contrib.oauth.flow.clients import (
     make_client,
     redirect_uri_registered_for_client,
     redirect_with_params,
+    scopes_registered_for_client,
 )
 from guillotina.contrib.oauth.flow.csrf import OAUTH_CSRF_FIELD, csrf_valid
 from guillotina.contrib.oauth.flow.pkce import pkce_challenge_valid, verify_s256
-from guillotina.contrib.oauth.flow.ratelimit import rate_limit_exceeded
+from guillotina.contrib.oauth.flow.ratelimit import rate_limit_check, rate_limit_exceeded
 from guillotina.contrib.oauth.flow.scopes import OAUTH_DEFAULT_SCOPE, oauth_scopes_supported
 from guillotina.contrib.oauth.flow.tokens import issue_access_token, opaque_token, token_hash
 from guillotina.contrib.oauth.storage.access import get_oauth_store
@@ -72,6 +73,7 @@ def _metadata(request, container):
         "token_endpoint_auth_methods_supported": ["none"],
         "revocation_endpoint_auth_methods_supported": ["none"],
         "resource_indicators_supported": True,
+        "authorization_response_iss_parameter_supported": True,
         "scopes_supported": oauth_scopes_supported(),
     }
 
@@ -160,7 +162,7 @@ class OAuthPost(OAuthService):
 
 async def _register(service, store):
     oauth_settings = app_settings.get("oauth", {})
-    if rate_limit_exceeded(
+    if await rate_limit_exceeded(
         f"oauth-register:{client_identifier(service.request)}",
         limit=oauth_settings.get("registration_rate_limit", 20),
         window=oauth_settings.get("registration_rate_window", 600),
@@ -171,13 +173,18 @@ async def _register(service, store):
                 "error_description": "client registration rate limit exceeded",
             }
         )
+    content_type = service.request.headers.get("content-type", "")
+    if content_type.split(";", 1)[0].strip().lower() != "application/json":
+        return HTTPBadRequest(
+            content={"error": "invalid_request", "error_description": "invalid content type"}
+        )
     data = await service.request.json()
     try:
         client = make_client(data)
     except HTTPBadRequest as exc:
         return exc
     await store.create_client(client)
-    return {
+    content = {
         key: client[key]
         for key in (
             "client_id",
@@ -185,9 +192,19 @@ async def _register(service, store):
             "redirect_uris",
             "grant_types",
             "response_types",
+            "scope",
             "token_endpoint_auth_method",
         )
     }
+    content["client_id_issued_at"] = client["client_id_issued_at"]
+    return Response(
+        content=content,
+        status=201,
+        headers={
+            "Cache-Control": "no-store",
+            "Pragma": "no-cache",
+        },
+    )
 
 
 async def _authenticate_basic(username, password):
@@ -239,52 +256,60 @@ async def _authorize(service, store):
             "The requested redirect URI is not allowed for this OAuth client.",
             status=400,
         )
+    # Mix-up defense (RFC 9207): include the issuer identifier in every
+    # authorization response so the client can verify which AS responded.
+    issuer = container_url(service.request, service.context)
+
+    def _authz_redirect(extra):
+        payload = {"state": params.get("state"), "iss": issuer}
+        payload.update(extra)
+        return HTTPFound(redirect_with_params(redirect_uri, payload))
+
     if params.get("response_type") != "code":
-        return HTTPFound(
-            redirect_with_params(
-                redirect_uri, {"error": "unsupported_response_type", "state": params.get("state")}
-            )
-        )
+        return _authz_redirect({"error": "unsupported_response_type"})
     if "code" not in set(client.get("response_types") or []):
-        return HTTPFound(
-            redirect_with_params(redirect_uri, {"error": "unauthorized_client", "state": params.get("state")})
-        )
-    require_pkce = app_settings.get("oauth", {}).get("require_pkce", True)
+        return _authz_redirect({"error": "unauthorized_client"})
     allowed_methods = app_settings.get("oauth", {}).get("allowed_code_challenge_methods", ["S256"])
     code_challenge = params.get("code_challenge")
     code_challenge_method = params.get("code_challenge_method")
 
-    if require_pkce and not code_challenge:
-        return HTTPFound(
-            redirect_with_params(redirect_uri, {"error": "invalid_request", "state": params.get("state")})
-        )
+    if not code_challenge:
+        return _authz_redirect({"error": "invalid_request"})
     if code_challenge and not pkce_challenge_valid(code_challenge):
-        return HTTPFound(
-            redirect_with_params(redirect_uri, {"error": "invalid_request", "state": params.get("state")})
-        )
+        return _authz_redirect({"error": "invalid_request"})
     if code_challenge and code_challenge_method not in allowed_methods:
-        return HTTPFound(
-            redirect_with_params(redirect_uri, {"error": "invalid_request", "state": params.get("state")})
-        )
+        return _authz_redirect({"error": "invalid_request"})
     scopes = normalize_list(params.get("scope"))
     supported_scopes = set(oauth_scopes_supported())
-    if not scopes or OAUTH_DEFAULT_SCOPE not in scopes or not set(scopes).issubset(supported_scopes):
-        return HTTPFound(
-            redirect_with_params(redirect_uri, {"error": "invalid_scope", "state": params.get("state")})
-        )
+    if (
+        not scopes
+        or OAUTH_DEFAULT_SCOPE not in scopes
+        or not set(scopes).issubset(supported_scopes)
+        or not scopes_registered_for_client(client, scopes)
+    ):
+        return _authz_redirect({"error": "invalid_scope"})
     try:
         resources = validate_resource(service.request, service.context, params.get("resource"))
     except HTTPBadRequest:
-        return HTTPFound(
-            redirect_with_params(redirect_uri, {"error": "invalid_target", "state": params.get("state")})
-        )
+        return _authz_redirect({"error": "invalid_target"})
     user = get_authenticated_user()
     newly_authenticated_token = None
     authenticated_on_this_request = False
     if user is None or getattr(user, "id", "Anonymous User") == "Anonymous User":
         if service.request.method == "POST" and params.get("username"):
+            oauth_settings = app_settings.get("oauth", {})
+            login_limit = oauth_settings.get("login_rate_limit", 10)
+            login_window = oauth_settings.get("login_rate_window", 300)
+            login_key = f"oauth-login:{client_identifier(service.request)}:{params.get('username')}"
+            if await rate_limit_check(login_key, limit=login_limit, window=login_window):
+                return oauth_error_page(
+                    "Too many attempts",
+                    "Too many failed login attempts. Please wait and try again.",
+                    status=429,
+                )
             user = await _authenticate_basic(params.get("username"), params.get("password", ""))
             if user is None:
+                await rate_limit_exceeded(login_key, limit=login_limit, window=login_window)
                 return oauth_error_page(
                     "Login failed",
                     "The username or password could not be verified.",
@@ -307,14 +332,10 @@ async def _authorize(service, store):
     if decision in ("allow", "deny") and not csrf_valid(
         params.get(OAUTH_CSRF_FIELD), params, user.id, scopes, resources
     ):
-        response_obj = HTTPFound(
-            redirect_with_params(redirect_uri, {"error": "invalid_request", "state": params.get("state")})
-        )
+        response_obj = _authz_redirect({"error": "invalid_request"})
     elif not existing_consent and decision != "allow":
         if decision == "deny":
-            response_obj = HTTPFound(
-                redirect_with_params(redirect_uri, {"error": "access_denied", "state": params.get("state")})
-            )
+            response_obj = _authz_redirect({"error": "access_denied"})
         else:
             response_obj = consent_form(params, client, scopes, resources, user)
     else:
@@ -336,9 +357,7 @@ async def _authorize(service, store):
             resource=resources,
             code_challenge=params.get("code_challenge"),
         )
-        response_obj = HTTPFound(
-            redirect_with_params(redirect_uri, {"code": raw_code, "state": params.get("state")})
-        )
+        response_obj = _authz_redirect({"code": raw_code})
 
     if newly_authenticated_token is not None:
         secure = ""
@@ -360,6 +379,15 @@ async def _token(service, store):
     except HTTPBadRequest as exc:
         return exc
     grant_type = data.get("grant_type")
+    oauth_settings = app_settings.get("oauth", {})
+    if await rate_limit_exceeded(
+        f"oauth-token:{client_identifier(service.request)}",
+        limit=oauth_settings.get("token_rate_limit", 120),
+        window=oauth_settings.get("token_rate_window", 60),
+    ):
+        return HTTPTooManyRequests(
+            content={"error": "temporarily_unavailable", "error_description": "token rate limit exceeded"}
+        )
     if grant_type == "authorization_code":
         return await _authorization_code(service, store, data)
     if grant_type == "refresh_token":
@@ -381,11 +409,11 @@ async def _authorization_code(service, store, data):
         return HTTPBadRequest(content={"error": "unauthorized_client"})
     if record["redirect_uri"] != data.get("redirect_uri"):
         return HTTPBadRequest(content={"error": "invalid_grant"})
-    require_pkce = app_settings.get("oauth", {}).get("require_pkce", True)
     if record.get("code_challenge"):
         if not verify_s256(data.get("code_verifier", ""), record["code_challenge"]):
             return HTTPBadRequest(content={"error": "invalid_grant"})
-    elif require_pkce:
+    else:
+        # PKCE is mandatory for public clients. A code without a bound challenge is invalid.
         return HTTPBadRequest(content={"error": "invalid_grant"})
     requested_resources = normalize_list(data.get("resource"))
     if requested_resources and not set(requested_resources).issubset(set(record["resource"])):
@@ -482,6 +510,18 @@ async def _revoke(service, store):
         data = parse_form_encoded(await service.request.text(), singleton_fields=REVOKE_SINGLETON_PARAMS)
     except HTTPBadRequest as exc:
         return exc
+    oauth_settings = app_settings.get("oauth", {})
+    if await rate_limit_exceeded(
+        f"oauth-revoke:{client_identifier(service.request)}",
+        limit=oauth_settings.get("revoke_rate_limit", 120),
+        window=oauth_settings.get("revoke_rate_window", 60),
+    ):
+        return HTTPTooManyRequests(
+            content={
+                "error": "temporarily_unavailable",
+                "error_description": "revocation rate limit exceeded",
+            }
+        )
     record = await store.get_refresh_token(data.get("token", ""))
     if record is not None and record.get("client_id") == data.get("client_id"):
         await store.revoke_refresh_family(

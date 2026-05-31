@@ -3,17 +3,31 @@ from zope.interface import implementer
 from guillotina import app_settings, configure
 from guillotina.contrib.mcp.interfaces import IMCPAuthPolicy
 from guillotina.contrib.oauth.api.services import register_well_known_handler
-from guillotina.contrib.oauth.api.urls import container_url, mcp_resource, well_known_protected_resource_url
-from guillotina.contrib.oauth.flow.resources import register_oauth_resource_resolver
+from guillotina.contrib.oauth.api.urls import container_url, well_known_protected_resource_url
+from guillotina.contrib.oauth.flow.resources import (
+    register_oauth_audience_resolver,
+    register_oauth_resource_resolver,
+)
 from guillotina.contrib.oauth.flow.scopes import OAUTH_DEFAULT_SCOPE, oauth_scopes_supported
+
+
+def mcp_resource(request, container):
+    return f"{container_url(request, container)}/@mcp/protocol"
 
 
 def _mcp_protocol_resource_resolver(request, container):
     return {mcp_resource(request, container)}
 
 
+def _mcp_protocol_audience_resolver(request, container):
+    if str(getattr(request, "path", "") or "").endswith("/@mcp/protocol"):
+        return mcp_resource(request, container)
+
+
 _mcp_protocol_resource_resolver._oauth_resource_source = "mcp"
+_mcp_protocol_audience_resolver._oauth_resource_source = "mcp"
 register_oauth_resource_resolver(_mcp_protocol_resource_resolver)
+register_oauth_audience_resolver(_mcp_protocol_audience_resolver)
 
 
 def _protected_resource_metadata(request, context):
@@ -38,6 +52,9 @@ class OAuthMCPAuthPolicy:
         return "guillotina.contrib.oauth" in applications and "guillotina.contrib.mcp" in applications
 
     def unauthorized_headers(self, request, context):
+        authz = request.headers.get("AUTHORIZATION", "") or request.headers.get("Authorization", "")
+        if authz.lower().startswith("bearer "):
+            return self.forbidden_headers(request, context)
         return self._challenge_headers(request, context)
 
     def forbidden_headers(self, request, context):

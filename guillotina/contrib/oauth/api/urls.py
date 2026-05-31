@@ -9,7 +9,7 @@ from guillotina.utils.misc import build_url
 def container_url(request, container):
     issuer = app_settings.get("oauth", {}).get("issuer")
     if issuer:
-        return issuer.rstrip("/")
+        return validate_issuer(issuer)
     if not IContainer.providedBy(container):
         try:
             container = get_current_container()
@@ -27,8 +27,18 @@ def container_url(request, container):
     return build_url(scheme=request.scheme, host=request.host, path=path, query="").rstrip("/")
 
 
-def mcp_resource(request, container):
-    return f"{container_url(request, container)}/@mcp/protocol"
+def validate_issuer(issuer):
+    issuer = str(issuer).rstrip("/")
+    parsed = urlparse(issuer)
+    if parsed.scheme not in ("https", "http") or not parsed.netloc:
+        raise RuntimeError("oauth.issuer must be an absolute HTTP(S) URL")
+    if parsed.query or parsed.fragment:
+        raise RuntimeError("oauth.issuer must not include query or fragment components")
+    if parsed.username or parsed.password:
+        raise RuntimeError("oauth.issuer must not include userinfo")
+    if parsed.scheme != "https" and parsed.hostname not in {"localhost", "127.0.0.1", "::1"}:
+        raise RuntimeError("oauth.issuer must use https except for localhost development")
+    return issuer
 
 
 def issuer_path(request, container):
@@ -50,7 +60,9 @@ def well_known_openid_configuration_url(request, container):
 
 
 def well_known_protected_resource_url(request, container):
-    parsed = urlparse(mcp_resource(request, container))
+    from guillotina.contrib.oauth.flow.resources import oauth_required_audience
+
+    parsed = urlparse(oauth_required_audience(request, container))
     return f"{parsed.scheme}://{parsed.netloc}/.well-known/oauth-protected-resource/{parsed.path.lstrip('/')}"
 
 

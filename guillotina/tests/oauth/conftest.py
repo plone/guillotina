@@ -19,7 +19,7 @@ requires_pg = pytest.mark.skipif(
 
 OAUTH_SETTINGS = {
     "applications": ["guillotina", "guillotina.contrib.oauth"],
-    "oauth": {"registration_rate_limit": 0},
+    "oauth": {"registration_rate_limit": 0, "token_rate_limit": 0, "revoke_rate_limit": 0},
     "auth_extractors": [
         "guillotina.auth.extractors.BearerAuthPolicy",
         "guillotina.auth.extractors.BasicAuthPolicy",
@@ -29,7 +29,7 @@ OAUTH_SETTINGS = {
 }
 OAUTH_MCP_SETTINGS = {
     "applications": ["guillotina", "guillotina.contrib.oauth", "guillotina.contrib.mcp"],
-    "oauth": {"registration_rate_limit": 0},
+    "oauth": {"registration_rate_limit": 0, "token_rate_limit": 0, "revoke_rate_limit": 0},
     "auth_extractors": [
         "guillotina.auth.extractors.BearerAuthPolicy",
         "guillotina.auth.extractors.BasicAuthPolicy",
@@ -63,8 +63,9 @@ async def register_client(requester, redirect_uri="http://127.0.0.1:12345/callba
                 "scope": "guillotina:access",
             }
         ),
+        headers={"Content-Type": "application/json"},
     )
-    assert status == 200
+    assert status == 201
     return response
 
 

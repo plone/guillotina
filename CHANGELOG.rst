@@ -16,6 +16,15 @@ CHANGELOG
   [rboixaderg]
 - OAuth: drop in-memory and Redis storage backends; PostgreSQL is the only store.
   [rboixaderg]
+- OAuth: harden per RFC 9700 security BCP: throttle failed credential logins at the authorization endpoint,
+  reject PKCE downgrade (``code_verifier`` without a bound ``code_challenge``), emit the ``iss`` authorization
+  response parameter (RFC 9207) and advertise it in metadata, and derive purpose-specific keys for token
+  hashing and CSRF signing instead of reusing the raw ``jwt.secret``.
+  [rboixaderg]
+- OAuth: require PKCE for all public-client authorization-code flows, enforce registered client scopes,
+  add Redis-backed rate limiting when Redis is configured, and tighten dynamic client registration responses
+  with ``201 Created``, no-store cache headers and ``client_id_issued_at``.
+  [rboixaderg]
 
 
 7.1.2 (2026-05-22)

@@ -12,13 +12,22 @@ app_settings = {
         "authorization_code_ttl": 600,
         "access_token_ttl": 3600,
         "refresh_token_ttl": 2592000,
-        "require_pkce": True,
         "allowed_code_challenge_methods": ["S256"],
         "scopes_supported": ["guillotina:access"],
         # Dynamic client registration throttling (per client IP, sliding window).
         # Set ``registration_rate_limit`` to 0 to disable.
         "registration_rate_limit": 20,
         "registration_rate_window": 600,
+        # Failed-login throttling at the authorization endpoint (per client IP +
+        # username, sliding window). Set ``login_rate_limit`` to 0 to disable.
+        "login_rate_limit": 10,
+        "login_rate_window": 300,
+        # Token and revocation endpoint throttling (per client IP).
+        # Set the limit to 0 to disable.
+        "token_rate_limit": 120,
+        "token_rate_window": 60,
+        "revoke_rate_limit": 120,
+        "revoke_rate_window": 60,
     },
     "check_writable_request": "guillotina.contrib.oauth.api.request.check_writable_request",
     "auth_token_validators": [

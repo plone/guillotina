@@ -43,9 +43,10 @@ async def test_authorize_accepts_cursor_redirect_registered_with_client(containe
                     ],
                 }
             ),
+            headers={"Content-Type": "application/json"},
             authenticated=False,
         )
-        assert status == 200
+        assert status == 201
         client = response
         _response, status = await requester(
             "GET",
@@ -107,6 +108,7 @@ async def test_register_rejects_client_supplied_client_id(container_install_requ
                     "redirect_uris": ["cursor://anysphere.cursor-mcp/oauth/callback"],
                 }
             ),
+            headers={"Content-Type": "application/json"},
             authenticated=False,
         )
         assert status == 400
@@ -525,3 +527,112 @@ async def test_authorize_cookie_authenticates_get_request(container_install_requ
         )
         assert status == 200
         assert b"Allow Test" in value
+
+
+OAUTH_LOGIN_LIMIT_SETTINGS = {
+    **OAUTH_SETTINGS,
+    "oauth": {**OAUTH_SETTINGS["oauth"], "login_rate_limit": 2, "login_rate_window": 300},
+}
+OAUTH_EXTRA_SCOPE_SETTINGS = {
+    **OAUTH_SETTINGS,
+    "oauth": {**OAUTH_SETTINGS["oauth"], "scopes_supported": ["guillotina:access", "guillotina:extra"]},
+}
+
+
+@pytest.mark.app_settings(OAUTH_SETTINGS)
+@pytest.mark.parametrize("install_addons", [["oauth"]])
+async def test_authorize_response_includes_iss(container_install_requester):
+    """RFC 9207: the authorization response must carry the issuer identifier."""
+    async with container_install_requester as requester:
+        client = await register_client(requester)
+        _verifier, challenge = verifier_pair()
+        params = {
+            "response_type": "code",
+            "client_id": client["client_id"],
+            "redirect_uri": client["redirect_uris"][0],
+            "scope": "guillotina:access",
+            "state": "s",
+            "code_challenge": challenge,
+            "code_challenge_method": "S256",
+        }
+        value, status, _headers = await requester.make_request(
+            "GET",
+            "/db/guillotina/oauth/authorize",
+            params=params,
+            allow_redirects=False,
+        )
+        assert status == 200
+        params["oauth_csrf"] = oauth_csrf_from_body(value)
+        params["decision"] = "allow"
+        _value, status, headers = await requester.make_request(
+            "POST",
+            "/db/guillotina/oauth/authorize",
+            data=urlencode(params),
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            allow_redirects=False,
+        )
+        assert status == 302
+        query = parse_qs(urlparse(headers["Location"]).query)
+        assert query["code"][0]
+        assert query["iss"][0].endswith("/db/guillotina")
+
+
+@pytest.mark.app_settings(OAUTH_LOGIN_LIMIT_SETTINGS)
+@pytest.mark.parametrize("install_addons", [["oauth"]])
+async def test_authorize_login_rate_limited_after_failures(container_install_requester):
+    """Failed credential logins at the authorization endpoint are throttled."""
+    from guillotina.contrib.oauth.flow.ratelimit import reset_rate_limits
+
+    reset_rate_limits()
+    async with container_install_requester as requester:
+        client = await register_client(requester)
+        _verifier, challenge = verifier_pair()
+        body = (
+            "response_type=code"
+            f"&client_id={client['client_id']}"
+            f"&redirect_uri={client['redirect_uris'][0]}"
+            "&scope=guillotina:access"
+            f"&code_challenge={challenge}"
+            "&code_challenge_method=S256"
+            "&username=root&password=wrong-password"
+        )
+
+        async def _attempt():
+            _value, status, _headers = await requester.make_request(
+                "POST",
+                "/db/guillotina/oauth/authorize",
+                data=body,
+                headers={"Content-Type": "application/x-www-form-urlencoded"},
+                authenticated=False,
+                allow_redirects=False,
+            )
+            return status
+
+        assert await _attempt() == 401
+        assert await _attempt() == 401
+        # Third failed attempt is blocked by the sliding-window limiter.
+        assert await _attempt() == 429
+        reset_rate_limits()
+
+
+@pytest.mark.app_settings(OAUTH_EXTRA_SCOPE_SETTINGS)
+@pytest.mark.parametrize("install_addons", [["oauth"]])
+async def test_authorize_rejects_scope_not_registered_for_client(container_install_requester):
+    async with container_install_requester as requester:
+        client = await register_client(requester)
+        _verifier, challenge = verifier_pair()
+        _value, status, headers = await requester.make_request(
+            "GET",
+            "/db/guillotina/oauth/authorize",
+            params={
+                "client_id": client["client_id"],
+                "redirect_uri": client["redirect_uris"][0],
+                "response_type": "code",
+                "scope": "guillotina:access guillotina:extra",
+                "code_challenge": challenge,
+                "code_challenge_method": "S256",
+            },
+            allow_redirects=False,
+        )
+        assert status == 302
+        assert "error=invalid_scope" in headers["Location"]

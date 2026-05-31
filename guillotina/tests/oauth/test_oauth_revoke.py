@@ -1,5 +1,6 @@
 import pytest
 
+from guillotina.contrib.oauth.flow.ratelimit import reset_rate_limits
 from guillotina.tests.oauth.conftest import (
     OAUTH_SETTINGS,
     authorize_code,
@@ -10,6 +11,11 @@ from guillotina.tests.oauth.conftest import (
 
 
 pytestmark = [pytest.mark.asyncio, requires_pg]
+
+REVOKE_RATE_LIMIT_SETTINGS = {
+    **OAUTH_SETTINGS,
+    "oauth": {**OAUTH_SETTINGS["oauth"], "revoke_rate_limit": 2, "revoke_rate_window": 300},
+}
 
 
 @pytest.mark.app_settings(OAUTH_SETTINGS)
@@ -133,3 +139,30 @@ async def test_revoke_rejects_duplicate_singleton_parameter(container_install_re
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
         assert status == 400
+
+
+@pytest.mark.app_settings(REVOKE_RATE_LIMIT_SETTINGS)
+@pytest.mark.parametrize("install_addons", [["oauth"]])
+async def test_revoke_endpoint_rate_limited(container_install_requester):
+    reset_rate_limits()
+    async with container_install_requester as requester:
+        client = await register_client(requester)
+        body = f"client_id={client['client_id']}&token=unknown"
+
+        async def _attempt():
+            response, status = await requester(
+                "POST",
+                "/db/guillotina/oauth/revoke",
+                data=body,
+                headers={"Content-Type": "application/x-www-form-urlencoded"},
+            )
+            return response, status
+
+        _response, status = await _attempt()
+        assert status == 200
+        _response, status = await _attempt()
+        assert status == 200
+        response, status = await _attempt()
+        assert status == 429
+        assert response["error"] == "temporarily_unavailable"
+    reset_rate_limits()

@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 import jwt
 
 from guillotina import app_settings
+from guillotina.contrib.oauth.flow.keys import derive_key
 
 
 def utcnow():
@@ -23,13 +24,12 @@ def opaque_token(prefix=""):
 
 
 def token_hash(token: str) -> str:
-    secret = app_settings.get("jwt", {}).get("secret")
-    if not secret:
-        raise RuntimeError(
-            "OAuth token hashing requires `jwt.secret` to be configured; "
-            "refusing to fall back to an insecure default secret."
-        )
-    return hmac.new(secret.encode("utf-8"), token.encode("utf-8"), hashlib.sha256).hexdigest()
+    key = derive_key("token-hash")
+    return hmac.new(key, token.encode("utf-8"), hashlib.sha256).hexdigest()
+
+
+def access_token_key() -> bytes:
+    return derive_key("access-token")
 
 
 def issue_access_token(*, issuer, subject, audience, client_id, scope):
@@ -46,5 +46,5 @@ def issue_access_token(*, issuer, subject, audience, client_id, scope):
         "exp": timestamp(now + timedelta(seconds=ttl)),
         "token_type": "oauth_access_token",
     }
-    token = jwt.encode(claims, app_settings["jwt"]["secret"], algorithm=app_settings["jwt"]["algorithm"])
+    token = jwt.encode(claims, access_token_key(), algorithm=app_settings["jwt"]["algorithm"])
     return token, claims

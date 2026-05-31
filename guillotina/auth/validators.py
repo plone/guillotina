@@ -127,6 +127,8 @@ class JWTValidator:
             validated_jwt = jwt.decode(
                 token["token"], app_settings["jwt"]["secret"], algorithms=[app_settings["jwt"]["algorithm"]]
             )
+            if validated_jwt.get("token_type") == "oauth_access_token":
+                return
             token["id"] = validated_jwt.get("id", validated_jwt.get("sub"))
             token["decoded"] = validated_jwt
             user = await find_user(token)
@@ -153,6 +155,8 @@ class JWTSessionValidator:
             validated_jwt = jwt.decode(
                 token["token"], app_settings["jwt"]["secret"], algorithms=[app_settings["jwt"]["algorithm"]]
             )
+            if validated_jwt.get("token_type") == "oauth_access_token":
+                return
 
             session_manager = query_utility(ISessionManagerUtility)
             if session_manager is not None:

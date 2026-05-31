@@ -1,7 +1,8 @@
 import jwt
 import pytest
-
 from guillotina import app_settings
+from guillotina.contrib.oauth.flow.ratelimit import reset_rate_limits
+from guillotina.contrib.oauth.flow.tokens import access_token_key
 from guillotina.tests.oauth.conftest import (
     OAUTH_SETTINGS,
     authorize_code,
@@ -21,6 +22,10 @@ EXPIRED_CODE_SETTINGS = {
 EXPIRED_REFRESH_SETTINGS = {
     "applications": ["guillotina", "guillotina.contrib.oauth"],
     "oauth": {"refresh_token_ttl": 0},
+}
+TOKEN_RATE_LIMIT_SETTINGS = {
+    **OAUTH_SETTINGS,
+    "oauth": {**OAUTH_SETTINGS["oauth"], "token_rate_limit": 2, "token_rate_window": 300},
 }
 
 
@@ -47,7 +52,7 @@ async def test_code_token_and_refresh_rotation(container_install_requester):
         assert token_headers["Pragma"] == "no-cache"
         claims = jwt.decode(
             token["access_token"],
-            app_settings["jwt"]["secret"],
+            access_token_key(),
             algorithms=[app_settings["jwt"]["algorithm"]],
             options={"verify_aud": False},
         )
@@ -290,3 +295,30 @@ async def test_code_reuse_revokes_tokens(container_install_requester):
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
         assert status == 400
+
+
+@pytest.mark.app_settings(TOKEN_RATE_LIMIT_SETTINGS)
+@pytest.mark.parametrize("install_addons", [["oauth"]])
+async def test_token_endpoint_rate_limited(container_install_requester):
+    reset_rate_limits()
+    async with container_install_requester as requester:
+        client = await register_client(requester)
+        body = f"grant_type=refresh_token&client_id={client['client_id']}&refresh_token=missing"
+
+        async def _attempt():
+            response, status = await requester(
+                "POST",
+                "/db/guillotina/oauth/token",
+                data=body,
+                headers={"Content-Type": "application/x-www-form-urlencoded"},
+            )
+            return response, status
+
+        _response, status = await _attempt()
+        assert status == 400
+        _response, status = await _attempt()
+        assert status == 400
+        response, status = await _attempt()
+        assert status == 429
+        assert response["error"] == "temporarily_unavailable"
+    reset_rate_limits()
