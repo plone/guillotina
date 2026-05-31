@@ -100,6 +100,20 @@ def _row_to_refresh(row):
     }
 
 
+def _row_to_consent(row):
+    if row is None:
+        return None
+    return {
+        "consent_key": row["consent_key"],
+        "user_id": row["user_id"],
+        "client_id": row["client_id"],
+        "scope": _load_jsonb(row["scope"]),
+        "resource": _load_jsonb(row["resource"]),
+        "granted_at": _iso(row["granted_at"]),
+        "expires_at": _iso(row["expires_at"]),
+    }
+
+
 @implementer(IOAuthStore)
 class OAuthRepository:
     def __init__(self, container_db_key: str):
@@ -155,21 +169,33 @@ class OAuthRepository:
                 """
                 SELECT 1 FROM oauth_consents
                 WHERE container_db_key = $1 AND consent_key = $2
+                  AND (expires_at IS NULL OR expires_at > $3)
                 """,
                 self.container_db_key,
                 consent_key,
+                _aware(utcnow()),
             )
         return row is not None
 
     async def create_consent(self, consent_key, *, user_id, client_id, scope, resource):
+        now = utcnow()
+        ttl = app_settings.get("oauth", {}).get("consent_ttl", 2592000)
+        # ttl == 0 means the consent never expires; any other value (including a
+        # negative one, used by tests to force expiry) yields an explicit timestamp.
+        expires_at = None if ttl == 0 else _aware(now + timedelta(seconds=ttl))
         txn, conn = await self._connection()
         async with txn.lock:
             await conn.execute(
                 """
                 INSERT INTO oauth_consents (
-                    container_db_key, consent_key, user_id, client_id, scope, resource
-                ) VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb)
-                ON CONFLICT (container_db_key, consent_key) DO NOTHING
+                    container_db_key, consent_key, user_id, client_id, scope, resource,
+                    granted_at, expires_at
+                ) VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $8)
+                ON CONFLICT (container_db_key, consent_key) DO UPDATE
+                SET scope = EXCLUDED.scope,
+                    resource = EXCLUDED.resource,
+                    granted_at = EXCLUDED.granted_at,
+                    expires_at = EXCLUDED.expires_at
                 """,
                 self.container_db_key,
                 consent_key,
@@ -177,7 +203,68 @@ class OAuthRepository:
                 client_id,
                 _jsonb(list(scope)),
                 _jsonb(list(resource)),
+                _aware(now),
+                expires_at,
             )
+
+    async def list_consents(self, user_id):
+        txn, conn = await self._connection()
+        async with txn.lock:
+            rows = await conn.fetch(
+                """
+                SELECT consent_key, user_id, client_id, scope, resource, granted_at, expires_at
+                FROM oauth_consents
+                WHERE container_db_key = $1 AND user_id = $2
+                  AND (expires_at IS NULL OR expires_at > $3)
+                ORDER BY granted_at DESC
+                """,
+                self.container_db_key,
+                user_id,
+                _aware(utcnow()),
+            )
+        return [_row_to_consent(row) for row in rows]
+
+    async def delete_consent(self, consent_key, *, user_id=None):
+        txn, conn = await self._connection()
+        async with txn.lock:
+            if user_id is None:
+                result = await conn.execute(
+                    """
+                    DELETE FROM oauth_consents
+                    WHERE container_db_key = $1 AND consent_key = $2
+                    """,
+                    self.container_db_key,
+                    consent_key,
+                )
+            else:
+                result = await conn.execute(
+                    """
+                    DELETE FROM oauth_consents
+                    WHERE container_db_key = $1 AND consent_key = $2 AND user_id = $3
+                    """,
+                    self.container_db_key,
+                    consent_key,
+                    user_id,
+                )
+        return int(result.split()[-1]) > 0
+
+    async def revoke_user_client_refresh_tokens(self, *, user_id, client_id):
+        txn, conn = await self._connection()
+        async with txn.lock:
+            result = await conn.execute(
+                """
+                UPDATE oauth_refresh_tokens
+                SET revoked_at = COALESCE(revoked_at, now())
+                WHERE container_db_key = $1
+                  AND user_id = $2
+                  AND client_id = $3
+                  AND revoked_at IS NULL
+                """,
+                self.container_db_key,
+                user_id,
+                client_id,
+            )
+        return int(result.split()[-1]) > 0
 
     async def create_code(
         self,

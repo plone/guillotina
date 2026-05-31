@@ -14,6 +14,9 @@ app_settings = {
         "refresh_token_ttl": 2592000,
         "allowed_code_challenge_methods": ["S256"],
         "scopes_supported": ["guillotina:access"],
+        # Lifetime of a remembered consent (seconds). After it expires the user
+        # is prompted to consent again. Set to 0 to keep consents indefinitely.
+        "consent_ttl": 2592000,
         # Dynamic client registration throttling (per client IP, sliding window).
         # Set ``registration_rate_limit`` to 0 to disable.
         "registration_rate_limit": 20,

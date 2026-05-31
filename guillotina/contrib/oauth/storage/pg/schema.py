@@ -74,8 +74,21 @@ CREATE TABLE IF NOT EXISTS oauth_consents (
     scope jsonb NOT NULL DEFAULT '[]',
     resource jsonb NOT NULL DEFAULT '[]',
     granted_at timestamptz NOT NULL DEFAULT now(),
+    expires_at timestamptz,
     PRIMARY KEY (container_db_key, consent_key)
 )
+""",
+    """
+ALTER TABLE oauth_consents ADD COLUMN IF NOT EXISTS expires_at timestamptz
+""",
+    """
+CREATE INDEX IF NOT EXISTS oauth_consents_user_idx
+    ON oauth_consents (container_db_key, user_id)
+""",
+    """
+CREATE INDEX IF NOT EXISTS oauth_consents_expires_idx
+    ON oauth_consents (expires_at)
+    WHERE expires_at IS NOT NULL
 """,
     """
 CREATE OR REPLACE FUNCTION oauth_cleanup_expired(batch_size int DEFAULT 5000)
@@ -100,6 +113,16 @@ BEGIN
         LIMIT batch_size
     )
     DELETE FROM oauth_refresh_tokens o
+    USING doomed d WHERE o.ctid = d.ctid;
+    GET DIAGNOSTICS batch = ROW_COUNT;
+    deleted := deleted + batch;
+
+    WITH doomed AS (
+        SELECT ctid FROM oauth_consents
+        WHERE expires_at IS NOT NULL AND expires_at < now()
+        LIMIT batch_size
+    )
+    DELETE FROM oauth_consents o
     USING doomed d WHERE o.ctid = d.ctid;
     GET DIAGNOSTICS batch = ROW_COUNT;
     deleted := deleted + batch;

@@ -25,6 +25,12 @@ CHANGELOG
   add Redis-backed rate limiting when Redis is configured, and tighten dynamic client registration responses
   with ``201 Created``, no-store cache headers and ``client_id_issued_at``.
   [rboixaderg]
+- OAuth: manage stored consents — add a configurable ``consent_ttl`` (default 30 days, ``0`` disables
+  expiry) with an ``expires_at`` column purged by ``oauth_cleanup_expired``, expose
+  ``GET``/``POST /oauth/consents`` for an authenticated user to list and revoke their grants, and make
+  revocation (via the consent endpoint or refresh-token ``/oauth/revoke``) drop the consent so a new
+  authorization can no longer be re-issued silently.
+  [rboixaderg]
 
 
 7.1.2 (2026-05-22)

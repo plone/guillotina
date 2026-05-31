@@ -25,7 +25,14 @@ from guillotina.contrib.oauth.flow.scopes import OAUTH_DEFAULT_SCOPE, oauth_scop
 from guillotina.contrib.oauth.flow.tokens import issue_access_token, opaque_token, token_hash
 from guillotina.contrib.oauth.storage.access import get_oauth_store
 from guillotina.interfaces import IApplication, IContainer
-from guillotina.response import HTTPBadRequest, HTTPFound, HTTPNotFound, HTTPTooManyRequests, Response
+from guillotina.response import (
+    HTTPBadRequest,
+    HTTPFound,
+    HTTPNotFound,
+    HTTPTooManyRequests,
+    HTTPUnauthorized,
+    Response,
+)
 from guillotina.utils import get_authenticated_user
 
 
@@ -53,6 +60,7 @@ TOKEN_SINGLETON_PARAMS = {
     "scope",
 }
 REVOKE_SINGLETON_PARAMS = {"client_id", "token", "token_type_hint"}
+CONSENT_SINGLETON_PARAMS = {"consent_key", "client_id"}
 
 
 def register_well_known_handler(name, handler):
@@ -135,6 +143,8 @@ class OAuthGet(OAuthService):
         action = self.request.matchdict.get("action", "")
         if action == "authorize":
             return await _authorize(self, self.oauth_store())
+        if action == "consents":
+            return await _list_consents(self, self.oauth_store())
         return HTTPNotFound(content={"reason": f"Unknown OAuth GET action: {action}"})
 
 
@@ -157,6 +167,8 @@ class OAuthPost(OAuthService):
             return await _token(self, store)
         if action == "revoke":
             return await _revoke(self, store)
+        if action == "consents":
+            return await _revoke_consent(self, store)
         return HTTPNotFound(content={"reason": f"Unknown OAuth POST action: {action}"})
 
 
@@ -529,4 +541,69 @@ async def _revoke(service, store):
             user_id=record["user_id"],
             auth_code_hash=record.get("auth_code_hash"),
         )
+        # Drop the remembered consent so the grant cannot be silently re-issued
+        # after the user revoked their tokens (RFC 9700 deauthorization hygiene).
+        await store.delete_consent(
+            consent_key(
+                record["user_id"],
+                record["client_id"],
+                record.get("scope") or [],
+                record.get("resource") or [],
+            ),
+            user_id=record["user_id"],
+        )
+    return {}
+
+
+async def _list_consents(service, store):
+    user = get_authenticated_user()
+    if user is None or getattr(user, "id", "Anonymous User") == "Anonymous User":
+        return HTTPUnauthorized(content={"error": "invalid_token"})
+    consents = await store.list_consents(user.id)
+    clients = {}
+    items = []
+    for consent in consents:
+        client_id = consent["client_id"]
+        if client_id not in clients:
+            clients[client_id] = await store.get_client(client_id)
+        client = clients[client_id] or {}
+        items.append(
+            {
+                "consent_key": consent["consent_key"],
+                "client_id": client_id,
+                "client_name": client.get("client_name"),
+                "scope": consent["scope"],
+                "resource": consent["resource"],
+                "granted_at": consent["granted_at"],
+                "expires_at": consent["expires_at"],
+            }
+        )
+    return Response(content={"consents": items}, headers={"Cache-Control": "no-store"})
+
+
+async def _revoke_consent(service, store):
+    user = get_authenticated_user()
+    if user is None or getattr(user, "id", "Anonymous User") == "Anonymous User":
+        return HTTPUnauthorized(content={"error": "invalid_token"})
+    if not form_content_type_valid(service.request):
+        return HTTPBadRequest(
+            content={"error": "invalid_request", "error_description": "invalid content type"}
+        )
+    try:
+        data = parse_form_encoded(await service.request.text(), singleton_fields=CONSENT_SINGLETON_PARAMS)
+    except HTTPBadRequest as exc:
+        return exc
+    ckey = data.get("consent_key")
+    if not ckey:
+        return HTTPBadRequest(
+            content={"error": "invalid_request", "error_description": "consent_key is required"}
+        )
+    consents = {c["consent_key"]: c for c in await store.list_consents(user.id)}
+    consent = consents.get(ckey)
+    if consent is None:
+        return HTTPNotFound(content={"error": "not_found", "error_description": "unknown consent"})
+    await store.delete_consent(ckey, user_id=user.id)
+    # Complete deauthorization: revoke every refresh token this user holds for
+    # the client so revoking consent also kills active sessions.
+    await store.revoke_user_client_refresh_tokens(user_id=user.id, client_id=consent["client_id"])
     return {}

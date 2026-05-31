@@ -26,10 +26,19 @@ class IOAuthStore(Interface):
         """Create a dynamically registered client."""
 
     def has_consent(self, consent_key):
-        """Return whether the user already granted consent for this key."""
+        """Return whether the user already granted (and not-yet-expired) consent for this key."""
 
     def create_consent(self, consent_key, user_id, client_id, scope, resource):
-        """Persist a consent decision."""
+        """Persist a consent decision, refreshing its expiry on re-grant."""
+
+    def list_consents(self, user_id):
+        """Return the user's active (unexpired) consent records (newest first)."""
+
+    def delete_consent(self, consent_key, *, user_id=None):
+        """Delete a consent (optionally scoped to ``user_id``). Return ``True`` if removed."""
+
+    def revoke_user_client_refresh_tokens(self, *, user_id, client_id):
+        """Revoke every refresh token a user holds for a client. Return ``True`` if any changed."""
 
     def create_code(self, raw_code, client_id, user_id, redirect_uri, scope, resource, code_challenge):
         """Store a new authorization code and return its record."""
