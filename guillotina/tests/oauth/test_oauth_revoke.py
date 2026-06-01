@@ -130,6 +130,36 @@ async def test_revoke_requires_form_content_type(container_install_requester):
 
 @pytest.mark.app_settings(OAUTH_SETTINGS)
 @pytest.mark.parametrize("install_addons", [["oauth"]])
+async def test_revoke_requires_token(container_install_requester):
+    async with container_install_requester as requester:
+        client = await register_client(requester)
+        response, status = await requester(
+            "POST",
+            "/db/guillotina/oauth/revoke",
+            data=f"client_id={client['client_id']}",
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        assert status == 400
+        assert response["error"] == "invalid_request"
+
+
+@pytest.mark.app_settings(OAUTH_SETTINGS)
+@pytest.mark.parametrize("install_addons", [["oauth"]])
+async def test_revoke_reports_unsupported_access_token_revocation(container_install_requester):
+    async with container_install_requester as requester:
+        client = await register_client(requester)
+        response, status = await requester(
+            "POST",
+            "/db/guillotina/oauth/revoke",
+            data=f"client_id={client['client_id']}&token=token&token_type_hint=access_token",
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        assert status == 400
+        assert response["error"] == "unsupported_token_type"
+
+
+@pytest.mark.app_settings(OAUTH_SETTINGS)
+@pytest.mark.parametrize("install_addons", [["oauth"]])
 async def test_revoke_rejects_duplicate_singleton_parameter(container_install_requester):
     async with container_install_requester as requester:
         _response, status = await requester(

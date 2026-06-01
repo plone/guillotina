@@ -258,6 +258,7 @@ async def _authorize(service, store):
             except HTTPBadRequest as exc:
                 return exc
         params.update(data)
+    service.request.oauth_request_params = params
     client = await store.get_client(params.get("client_id"))
     if client is None:
         return oauth_error_page("Unknown OAuth client", "The application is not registered.", status=400)
@@ -391,6 +392,8 @@ async def _token(service, store):
     except HTTPBadRequest as exc:
         return exc
     grant_type = data.get("grant_type")
+    if not grant_type:
+        return HTTPBadRequest(content={"error": "invalid_request"})
     oauth_settings = app_settings.get("oauth", {})
     if await rate_limit_exceeded(
         f"oauth-token:{client_identifier(service.request)}",
@@ -408,6 +411,8 @@ async def _token(service, store):
 
 
 async def _authorization_code(service, store, data):
+    if not data.get("client_id") or not data.get("code") or not data.get("redirect_uri"):
+        return HTTPBadRequest(content={"error": "invalid_request"})
     client = await store.get_client(data.get("client_id"))
     code_raw = data.get("code", "")
     code_hash_val = token_hash(code_raw)
@@ -465,6 +470,8 @@ async def _authorization_code(service, store, data):
 
 
 async def _refresh_token(service, store, data):
+    if not data.get("client_id") or not data.get("refresh_token"):
+        return HTTPBadRequest(content={"error": "invalid_request"})
     refresh_raw = data.get("refresh_token", "")
     client = await store.get_client(data.get("client_id"))
     record = await store.get_valid_refresh(refresh_raw)
@@ -522,6 +529,10 @@ async def _revoke(service, store):
         data = parse_form_encoded(await service.request.text(), singleton_fields=REVOKE_SINGLETON_PARAMS)
     except HTTPBadRequest as exc:
         return exc
+    if not data.get("client_id") or not data.get("token"):
+        return HTTPBadRequest(content={"error": "invalid_request"})
+    if data.get("token_type_hint") == "access_token":
+        return HTTPBadRequest(content={"error": "unsupported_token_type"})
     oauth_settings = app_settings.get("oauth", {})
     if await rate_limit_exceeded(
         f"oauth-revoke:{client_identifier(service.request)}",

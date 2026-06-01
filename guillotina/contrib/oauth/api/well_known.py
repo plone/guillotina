@@ -12,18 +12,20 @@ def _container_path_parts(path_value, *, allow_mcp_suffix=False):
         raise HTTPNotFound(content={"reason": "Invalid path"})
     suffix = parts[2:]
     if allow_mcp_suffix:
-        if suffix and suffix != ["@mcp", "protocol"]:
+        if suffix and suffix[-2:] != ["@mcp", "protocol"]:
             raise HTTPNotFound(content={"reason": "Invalid resource path"})
     elif suffix:
         raise HTTPNotFound(content={"reason": "Invalid issuer path"})
-    return parts[0], parts[1]
+    return parts[0], parts[1], "/" + "/".join(parts)
 
 
 async def rfc_well_known_response(request, action, target_path, handlers):
     if action == "oauth-protected-resource":
-        db_id, container_id = _container_path_parts(target_path, allow_mcp_suffix=True)
+        db_id, container_id, protected_resource_path = _container_path_parts(
+            target_path, allow_mcp_suffix=True
+        )
     else:
-        db_id, container_id = _container_path_parts(target_path)
+        db_id, container_id, protected_resource_path = _container_path_parts(target_path)
     db = await get_database(db_id)
     async with transaction(db=db):
         root = await db.get_transaction_manager().get_root()
@@ -37,4 +39,6 @@ async def rfc_well_known_response(request, action, target_path, handlers):
         task_vars.registry.set(None)
         await get_registry(container)
         get_oauth_store(container, require_installed=True)
+        if action == "oauth-protected-resource":
+            request.oauth_protected_resource_path = protected_resource_path
         return handlers[action](request, container)

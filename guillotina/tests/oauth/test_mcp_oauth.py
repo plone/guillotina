@@ -188,7 +188,15 @@ async def test_subresource_mcp_unauthorized(container_install_requester):
         assert status == 401
         www_authenticate = headers["WWW-Authenticate"]
         assert "resource_metadata" in www_authenticate
-        assert "/.well-known/oauth-protected-resource/db/guillotina/@mcp/protocol" in www_authenticate
+        assert (
+            "/.well-known/oauth-protected-resource/db/guillotina/subfolder/@mcp/protocol" in www_authenticate
+        )
+
+        response, status = await requester(
+            "GET", "/.well-known/oauth-protected-resource/db/guillotina/subfolder/@mcp/protocol"
+        )
+        assert status == 200
+        assert response["resource"].endswith("/db/guillotina/subfolder/@mcp/protocol")
 
 
 @pytest.mark.app_settings(OAUTH_MCP_SETTINGS)
@@ -204,7 +212,7 @@ async def test_subresource_mcp_authorized(container_install_requester):
 
         client = await register_client(requester)
         code, verifier = await authorize_code(
-            requester, client, resource="http://localhost/db/guillotina/@mcp/protocol"
+            requester, client, resource="http://localhost/db/guillotina/subfolder/@mcp/protocol"
         )
         token = await token_from_code(requester, client, code, verifier)
 

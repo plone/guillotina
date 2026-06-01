@@ -1,5 +1,6 @@
 import jwt
 import pytest
+
 from guillotina import app_settings
 from guillotina.contrib.oauth.flow.ratelimit import reset_rate_limits
 from guillotina.contrib.oauth.flow.tokens import access_token_key
@@ -131,6 +132,20 @@ async def test_token_requires_form_content_type(container_install_requester):
             headers={"Content-Type": "text/plain"},
         )
         assert status == 400
+
+
+@pytest.mark.app_settings(OAUTH_SETTINGS)
+@pytest.mark.parametrize("install_addons", [["oauth"]])
+async def test_token_requires_grant_type(container_install_requester):
+    async with container_install_requester as requester:
+        response, status = await requester(
+            "POST",
+            "/db/guillotina/oauth/token",
+            data="client_id=client&refresh_token=token",
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        assert status == 400
+        assert response["error"] == "invalid_request"
 
 
 @pytest.mark.app_settings(OAUTH_SETTINGS)
