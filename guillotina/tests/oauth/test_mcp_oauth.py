@@ -1,14 +1,20 @@
 import json
+from urllib.parse import parse_qs, urlencode, urlparse
 
+import jwt
 import pytest
 
+from guillotina import app_settings
+from guillotina.contrib.oauth.flow.tokens import access_token_key
 from guillotina.tests.mcp.test_mcp import PROTOCOL_HEADERS, _skip_if_protocol_unavailable
 from guillotina.tests.oauth.conftest import (
     OAUTH_MCP_SETTINGS,
     authorize_code,
+    oauth_csrf_from_body,
     register_client,
     requires_pg,
     token_from_code,
+    verifier_pair,
 )
 
 
@@ -83,6 +89,60 @@ async def test_mcp_with_oauth_token(container_install_requester):
         )
         _skip_if_protocol_unavailable(response, status)
         assert status == 200
+
+
+@pytest.mark.app_settings(OAUTH_MCP_SETTINGS)
+@pytest.mark.parametrize("install_addons", [["oauth", "mcp"]])
+async def test_authorize_get_preserves_multiple_resource_parameters(container_install_requester):
+    async with container_install_requester as requester:
+        client = await register_client(requester)
+        verifier, challenge = verifier_pair()
+        params = [
+            ("response_type", "code"),
+            ("client_id", client["client_id"]),
+            ("redirect_uri", client["redirect_uris"][0]),
+            ("scope", "guillotina:access"),
+            ("state", "abc"),
+            ("resource", "http://localhost/db/guillotina"),
+            ("resource", "http://localhost/db/guillotina/@mcp/protocol"),
+            ("code_challenge", challenge),
+            ("code_challenge_method", "S256"),
+        ]
+        value, status, _headers = await requester.make_request(
+            "GET",
+            "/db/guillotina/oauth/authorize",
+            params=params,
+            allow_redirects=False,
+        )
+        assert status == 200
+        body = value.decode("utf-8") if isinstance(value, bytes) else value
+        assert body.count('name="resource"') == 2
+
+        post_params = params + [
+            ("oauth_csrf", oauth_csrf_from_body(value)),
+            ("decision", "allow"),
+        ]
+        _value, status, headers = await requester.make_request(
+            "POST",
+            "/db/guillotina/oauth/authorize",
+            data=urlencode(post_params),
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            allow_redirects=False,
+        )
+        assert status == 302
+
+        code = parse_qs(urlparse(headers["Location"]).query)["code"][0]
+        token = await token_from_code(requester, client, code, verifier)
+        claims = jwt.decode(
+            token["access_token"],
+            access_token_key(),
+            algorithms=[app_settings["jwt"]["algorithm"]],
+            options={"verify_aud": False},
+        )
+        assert set(claims["aud"]) == {
+            "http://localhost/db/guillotina",
+            "http://localhost/db/guillotina/@mcp/protocol",
+        }
 
 
 @pytest.mark.app_settings(OAUTH_MCP_SETTINGS)

@@ -5,6 +5,7 @@ from guillotina.contrib.oauth.api.request import (
     client_identifier,
     form_content_type_valid,
     normalize_list,
+    params_preserving_repeated,
     parse_form_encoded,
     reject_duplicate_params,
 )
@@ -241,7 +242,7 @@ def _token_response(content):
 
 
 async def _authorize(service, store):
-    params = dict(service.request.query)
+    params = params_preserving_repeated(service.request.query)
     try:
         reject_duplicate_params(service.request.query, AUTHORIZE_SINGLETON_PARAMS)
     except HTTPBadRequest as exc:

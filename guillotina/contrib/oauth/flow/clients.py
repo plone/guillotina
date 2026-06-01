@@ -8,6 +8,21 @@ from guillotina.contrib.oauth.flow.tokens import timestamp, utcnow
 
 SUPPORTED_GRANT_TYPES = {"authorization_code", "refresh_token"}
 SUPPORTED_RESPONSE_TYPES = {"code"}
+LOOPBACK_HOSTS = {"localhost", "127.0.0.1", "::1"}
+
+
+def _is_loopback_http_redirect(parsed):
+    return parsed.scheme == "http" and parsed.hostname in LOOPBACK_HOSTS and parsed.path.startswith("/")
+
+
+def _is_private_use_redirect(parsed):
+    if parsed.scheme in ("http", "https", "javascript", "data"):
+        return False
+    if not parsed.path.startswith("/"):
+        return False
+    if "." in parsed.scheme:
+        return True
+    return parsed.scheme.isalpha() and bool(parsed.netloc)
 
 
 def validate_redirect_uri(uri):
@@ -22,11 +37,9 @@ def validate_redirect_uri(uri):
         return False
     if parsed.scheme == "https":
         return bool(parsed.netloc and parsed.path.startswith("/"))
-    if parsed.scheme == "http":
-        return parsed.hostname in {"localhost", "127.0.0.1", "::1"} and parsed.path.startswith("/")
-    if parsed.scheme.isalpha() and parsed.netloc and parsed.path.startswith("/"):
+    if _is_loopback_http_redirect(parsed):
         return True
-    return False
+    return _is_private_use_redirect(parsed)
 
 
 def is_native_redirect_uri(uri):
@@ -40,7 +53,23 @@ def redirect_uri_registered_for_client(client, redirect_uri):
     Native redirects must be included in the client's dynamic registration request.
     """
     redirect_uris = client.get("redirect_uris") or []
-    return redirect_uri in redirect_uris
+    if redirect_uri in redirect_uris:
+        return True
+    requested = urlparse(redirect_uri or "")
+    if not _is_loopback_http_redirect(requested):
+        return False
+    for registered_uri in redirect_uris:
+        registered = urlparse(registered_uri)
+        if not _is_loopback_http_redirect(registered):
+            continue
+        if (
+            requested.scheme == registered.scheme
+            and requested.hostname == registered.hostname
+            and requested.path == registered.path
+            and requested.query == registered.query
+        ):
+            return True
+    return False
 
 
 def make_client(data):
@@ -48,9 +77,9 @@ def make_client(data):
         oauth_error("invalid_request", "client_id is server-issued")
     redirect_uris = data.get("redirect_uris") or []
     if not redirect_uris or not isinstance(redirect_uris, list):
-        oauth_error("invalid_request", "redirect_uris is required")
+        oauth_error("invalid_client_metadata", "redirect_uris is required")
     if any(not validate_redirect_uri(uri) for uri in redirect_uris):
-        oauth_error("invalid_request", "unsafe redirect_uri")
+        oauth_error("invalid_redirect_uri", "unsafe redirect_uri")
     method = data.get("token_endpoint_auth_method", "none")
     if method != "none":
         oauth_error("unsupported_token_endpoint_auth_method")

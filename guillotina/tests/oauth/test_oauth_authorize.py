@@ -5,11 +5,9 @@ import pytest
 
 from guillotina.tests.oauth.conftest import (
     OAUTH_SETTINGS,
-    authorize_code,
     oauth_csrf_from_body,
     register_client,
     requires_pg,
-    token_from_code,
     verifier_pair,
 )
 
@@ -63,6 +61,26 @@ async def test_authorize_accepts_cursor_redirect_registered_with_client(containe
         assert status == 200
         body = _response.decode("utf-8") if isinstance(_response, bytes) else _response
         assert "Login" in body or "Allow" in body
+
+
+@pytest.mark.app_settings(OAUTH_SETTINGS)
+@pytest.mark.parametrize("install_addons", [["oauth"]])
+async def test_authorize_accepts_loopback_redirect_with_different_port(container_install_requester):
+    async with container_install_requester as requester:
+        client = await register_client(requester, redirect_uri="http://127.0.0.1:12345/callback")
+        _response, status = await requester(
+            "GET",
+            "/db/guillotina/oauth/authorize",
+            params={
+                "client_id": client["client_id"],
+                "redirect_uri": "http://127.0.0.1:54321/callback",
+                "response_type": "code",
+                "code_challenge": verifier_pair()[1],
+                "code_challenge_method": "S256",
+                "scope": "guillotina:access",
+            },
+        )
+        assert status == 200
 
 
 @pytest.mark.app_settings(OAUTH_SETTINGS)

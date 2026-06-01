@@ -119,6 +119,26 @@ async def test_register_accepts_cursor_native_redirect(container_install_request
 
 @pytest.mark.app_settings(OAUTH_SETTINGS)
 @pytest.mark.parametrize("install_addons", [["oauth"]])
+async def test_register_accepts_reverse_domain_native_redirect(container_install_requester):
+    async with container_install_requester as requester:
+        response, status = await requester(
+            "POST",
+            "/db/guillotina/oauth/register",
+            data=json.dumps(
+                {
+                    "client_name": "Native App",
+                    "redirect_uris": ["com.example.app:/oauth2redirect/example-provider"],
+                }
+            ),
+            headers={"Content-Type": "application/json"},
+            authenticated=False,
+        )
+        assert status == 201
+        assert response["redirect_uris"] == ["com.example.app:/oauth2redirect/example-provider"]
+
+
+@pytest.mark.app_settings(OAUTH_SETTINGS)
+@pytest.mark.parametrize("install_addons", [["oauth"]])
 async def test_register_accepts_multiple_redirect_uris(container_install_requester):
     async with container_install_requester as requester:
         response, status = await requester(
@@ -165,6 +185,21 @@ async def test_register_rejects_client_supplied_client_id(container_install_requ
         assert status == 400
         assert response["error"] == "invalid_request"
         assert response["error_description"] == "client_id is server-issued"
+
+
+@pytest.mark.app_settings(OAUTH_SETTINGS)
+@pytest.mark.parametrize("install_addons", [["oauth"]])
+async def test_register_reports_invalid_redirect_uri(container_install_requester):
+    async with container_install_requester as requester:
+        response, status = await requester(
+            "POST",
+            "/db/guillotina/oauth/register",
+            data=json.dumps({"redirect_uris": ["https://example.com/cb#fragment"]}),
+            headers={"Content-Type": "application/json"},
+            authenticated=False,
+        )
+        assert status == 400
+        assert response["error"] == "invalid_redirect_uri"
 
 
 @pytest.mark.app_settings(RATE_LIMITED_SETTINGS)

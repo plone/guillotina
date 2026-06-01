@@ -21,6 +21,27 @@ def normalize_list(value):
     return [item for item in str(value).split() if item]
 
 
+def params_preserving_repeated(query):
+    params = {}
+    seen = set()
+    keys = query.keys() if hasattr(query, "keys") else []
+    for key in keys:
+        if key in seen:
+            continue
+        seen.add(key)
+        getall = getattr(query, "getall", None)
+        if callable(getall):
+            try:
+                values = getall(key, [])
+            except TypeError:
+                values = getall(key)
+        else:
+            value = query.get(key) if hasattr(query, "get") else None
+            values = value if isinstance(value, (list, tuple)) else [value]
+        params[key] = values if len(values) > 1 else values[0]
+    return params
+
+
 def form_content_type_valid(request):
     content_type = request.headers.get("content-type", "")
     return content_type.split(";", 1)[0].strip().lower() == "application/x-www-form-urlencoded"

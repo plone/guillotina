@@ -4,7 +4,7 @@ Install `guillotina.contrib.oauth` as an application and install the `oauth` add
 
 ## Configuration
 
-To enable and configure the OAuth 2.1 authorization server, the following settings must be defined in your Guillotina configuration (e.g., `config.yaml`).
+To enable and configure the OAuth 2.0 Authorization Code + PKCE public-client profile, the following settings must be defined in your Guillotina configuration (e.g., `config.yaml`).
 
 ### 1. Enable the Application
 
@@ -61,7 +61,7 @@ oauth:
   authorization_code_ttl: 600     # Time to live in seconds for Authorization Codes (default 10 min)
   access_token_ttl: 3600          # Time to live in seconds for Access Tokens (default 1 hour)
   refresh_token_ttl: 2592000      # Time to live in seconds for Refresh Tokens (default 30 days)
-  require_pkce: true              # Whether PKCE is strictly required (always true for OAuth 2.1)
+  require_pkce: true              # PKCE S256 is required for public clients
   scopes_supported:               # Optional OAuth protocol label (not used for authorization)
     - guillotina:access
 
@@ -99,13 +99,13 @@ register_oauth_resource_resolver(my_resolver)
 
 ## Dynamic client registration and redirect URIs
 
-`/oauth/authorize` accepts only redirect URIs that are already present on the client record. `/oauth/register` always creates a new public client and returns a server-issued `client_id`; client-supplied `client_id` values are rejected. The registration endpoint does not update existing clients. Public clients that need multiple callbacks, such as Cursor native and loopback redirects, must include all allowed `redirect_uris` in the same dynamic client registration request. HTTPS redirect URIs are accepted for web clients. Plain HTTP is accepted only for loopback/native redirects (`localhost`, `127.0.0.1`, `::1`). Redirect URIs with fragments are rejected.
+`/oauth/authorize` accepts only redirect URIs that are already present on the client record. Loopback redirect URIs may use a different runtime port than the registered URI, as recommended for native apps. `/oauth/register` always creates a new public client and returns a server-issued `client_id`; client-supplied `client_id` values are rejected. The registration endpoint does not update existing clients and does not issue client secrets. Public clients that need multiple callbacks, such as Cursor native and loopback redirects, must include all allowed `redirect_uris` in the same dynamic client registration request. HTTPS redirect URIs are accepted for web clients. Plain HTTP is accepted only for loopback/native redirects (`localhost`, `127.0.0.1`, `::1`). Private-use native redirects using reverse-domain schemes such as `com.example.app:/oauth2redirect/provider` are accepted. Redirect URIs with fragments are rejected.
 
 ## Supported flow
 
-The contrib implements public-client OAuth 2.1 Authorization Code with PKCE (`S256`), dynamic client registration, opaque refresh tokens, revocation, and JWT access tokens signed with Guillotina's configured JWT secret.
+The contrib implements an OAuth 2.0 Authorization Code + PKCE (`S256`) public-client profile, aligned with RFC 9700 guidance and selected extensions including dynamic client registration, authorization server metadata, resource indicators, issuer identification, protected resource metadata, opaque refresh tokens, revocation, and JWT access tokens signed with Guillotina's configured JWT secret.
 
-![OAuth 2.1 authorization code flow with PKCE in Guillotina](../_static/oauth-flow.svg)
+![OAuth 2.0 authorization code flow with PKCE in Guillotina](../_static/oauth-flow.svg)
 
 Endpoints are container scoped:
 
