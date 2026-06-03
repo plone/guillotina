@@ -28,7 +28,7 @@ class IOAuthStore(Interface):
     def has_consent(self, consent_key):
         """Return whether the user already granted (and not-yet-expired) consent for this key."""
 
-    def create_consent(self, consent_key, user_id, client_id, scope, resource):
+    def create_consent(self, consent_key, *, user_id, client_id, scope, resource):
         """Persist a consent decision, refreshing its expiry on re-grant."""
 
     def list_consents(self, user_id):
@@ -40,7 +40,7 @@ class IOAuthStore(Interface):
     def revoke_user_client_refresh_tokens(self, *, user_id, client_id):
         """Revoke every refresh token a user holds for a client. Return ``True`` if any changed."""
 
-    def create_code(self, raw_code, client_id, user_id, redirect_uri, scope, resource, code_challenge):
+    def create_code(self, *, raw_code, client_id, user_id, redirect_uri, scope, resource, code_challenge):
         """Store a new authorization code and return its record."""
 
     def get_active_code(self, code):
@@ -57,6 +57,7 @@ class IOAuthStore(Interface):
 
     def create_refresh_token(
         self,
+        *,
         raw_token,
         client_id,
         user_id,

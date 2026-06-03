@@ -1,4 +1,5 @@
 import pytest
+
 from guillotina.contrib.oauth.flow.clients import consent_key
 from guillotina.tests.oauth.conftest import (
     OAUTH_SETTINGS,

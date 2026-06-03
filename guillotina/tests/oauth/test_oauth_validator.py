@@ -1,4 +1,5 @@
 import pytest
+
 from guillotina.tests.oauth.conftest import (
     OAUTH_MCP_SETTINGS,
     OAUTH_SETTINGS,

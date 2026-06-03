@@ -1,9 +1,9 @@
-from base64 import b64decode, b64encode
-from binascii import Error as BinasciiError
 import hashlib
 import hmac
 import json
 import time
+from base64 import b64decode, b64encode
+from binascii import Error as BinasciiError
 
 from guillotina import app_settings
 from guillotina.contrib.oauth.flow.keys import derive_key

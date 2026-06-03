@@ -64,8 +64,8 @@ def _mcp_protocol_audience_resolver(request, container):
         return mcp_resource(request, container)
 
 
-_mcp_protocol_resource_resolver._oauth_resource_source = "mcp"
-_mcp_protocol_audience_resolver._oauth_resource_source = "mcp"
+setattr(_mcp_protocol_resource_resolver, "_oauth_resource_source", "mcp")
+setattr(_mcp_protocol_audience_resolver, "_oauth_resource_source", "mcp")
 register_oauth_resource_resolver(_mcp_protocol_resource_resolver)
 register_oauth_audience_resolver(_mcp_protocol_audience_resolver)
 

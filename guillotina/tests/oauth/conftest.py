@@ -1,8 +1,9 @@
 import base64
 import hashlib
-from html import unescape
 import json
 import re
+from html import unescape
+from typing import Any
 from urllib.parse import parse_qs, urlencode, urlparse
 
 import pytest
@@ -17,7 +18,7 @@ requires_pg = pytest.mark.skipif(
     reason="requires PostgreSQL (set DATABASE=postgresql)",
 )
 
-OAUTH_SETTINGS = {
+OAUTH_SETTINGS: dict[str, Any] = {
     "applications": ["guillotina", "guillotina.contrib.oauth"],
     "oauth": {"registration_rate_limit": 0, "token_rate_limit": 0, "revoke_rate_limit": 0},
     "auth_extractors": [
@@ -27,7 +28,7 @@ OAUTH_SETTINGS = {
         "guillotina.auth.extractors.CookiePolicy",
     ],
 }
-OAUTH_MCP_SETTINGS = {
+OAUTH_MCP_SETTINGS: dict[str, Any] = {
     "applications": ["guillotina", "guillotina.contrib.oauth", "guillotina.contrib.mcp"],
     "oauth": {"registration_rate_limit": 0, "token_rate_limit": 0, "revoke_rate_limit": 0},
     "auth_extractors": [

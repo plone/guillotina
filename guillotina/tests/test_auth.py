@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 
 import jwt
 import pytest
-from guillotina.response import HTTPBadRequest
 
 from guillotina._settings import app_settings
 from guillotina.auth import validators
@@ -11,12 +10,10 @@ from guillotina.contrib.oauth.api.urls import container_url, validate_issuer
 from guillotina.contrib.oauth.api.views import oauth_error_page
 from guillotina.contrib.oauth.auth.validators import OAuthJWTValidator
 from guillotina.contrib.oauth.flow.clients import make_client, scopes_registered_for_client
-from guillotina.contrib.oauth.flow.resources import (
-    oauth_required_audience,
-    register_oauth_audience_resolver,
-)
 from guillotina.contrib.oauth.flow.ratelimit import rate_limit_check, rate_limit_exceeded, reset_rate_limits
+from guillotina.contrib.oauth.flow.resources import oauth_required_audience, register_oauth_audience_resolver
 from guillotina.contrib.oauth.flow.tokens import issue_access_token
+from guillotina.response import HTTPBadRequest
 from guillotina.tests.utils import make_mocked_request
 
 
