@@ -90,45 +90,4 @@ CREATE INDEX IF NOT EXISTS oauth_consents_expires_idx
     ON oauth_consents (expires_at)
     WHERE expires_at IS NOT NULL
 """,
-    """
-CREATE OR REPLACE FUNCTION oauth_cleanup_expired(batch_size int DEFAULT 5000)
-RETURNS int AS $$
-DECLARE
-    deleted int := 0;
-    batch int;
-BEGIN
-    WITH doomed AS (
-        SELECT ctid FROM oauth_authorization_codes
-        WHERE expires_at < now()
-        LIMIT batch_size
-    )
-    DELETE FROM oauth_authorization_codes o
-    USING doomed d WHERE o.ctid = d.ctid;
-    GET DIAGNOSTICS batch = ROW_COUNT;
-    deleted := deleted + batch;
-
-    WITH doomed AS (
-        SELECT ctid FROM oauth_refresh_tokens
-        WHERE expires_at < now()
-        LIMIT batch_size
-    )
-    DELETE FROM oauth_refresh_tokens o
-    USING doomed d WHERE o.ctid = d.ctid;
-    GET DIAGNOSTICS batch = ROW_COUNT;
-    deleted := deleted + batch;
-
-    WITH doomed AS (
-        SELECT ctid FROM oauth_consents
-        WHERE expires_at IS NOT NULL AND expires_at < now()
-        LIMIT batch_size
-    )
-    DELETE FROM oauth_consents o
-    USING doomed d WHERE o.ctid = d.ctid;
-    GET DIAGNOSTICS batch = ROW_COUNT;
-    deleted := deleted + batch;
-
-    RETURN deleted;
-END;
-$$ LANGUAGE plpgsql
-""",
 ]

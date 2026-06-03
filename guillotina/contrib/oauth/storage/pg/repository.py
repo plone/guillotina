@@ -560,4 +560,39 @@ class OAuthRepository:
 
 
 async def cleanup_expired(conn, batch_size=5000):
-    await conn.execute("SELECT oauth_cleanup_expired($1)", batch_size)
+    await conn.execute(
+        """
+        DELETE FROM oauth_authorization_codes
+        WHERE (container_db_key, code_hash) IN (
+            SELECT container_db_key, code_hash
+            FROM oauth_authorization_codes
+            WHERE expires_at < now()
+            LIMIT $1
+        )
+        """,
+        batch_size,
+    )
+    await conn.execute(
+        """
+        DELETE FROM oauth_refresh_tokens
+        WHERE (container_db_key, token_hash) IN (
+            SELECT container_db_key, token_hash
+            FROM oauth_refresh_tokens
+            WHERE expires_at < now()
+            LIMIT $1
+        )
+        """,
+        batch_size,
+    )
+    await conn.execute(
+        """
+        DELETE FROM oauth_consents
+        WHERE (container_db_key, consent_key) IN (
+            SELECT container_db_key, consent_key
+            FROM oauth_consents
+            WHERE expires_at IS NOT NULL AND expires_at < now()
+            LIMIT $1
+        )
+        """,
+        batch_size,
+    )

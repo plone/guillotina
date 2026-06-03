@@ -38,6 +38,12 @@ def test_oauth_schema_uses_container_db_key():
     assert "container_id text NOT NULL" not in ddl
 
 
+def test_oauth_schema_avoids_postgresql_specific_cleanup_function():
+    ddl = "\n".join(OAUTH_DDL).lower()
+    assert "create or replace function oauth_cleanup_expired" not in ddl
+    assert "ctid" not in ddl
+
+
 def test_get_oauth_store_without_pg_raises():
     with pytest.raises(RuntimeError, match="PostgreSQL"):
         get_oauth_store(type("Container", (), {"id": "guillotina"})(), require_installed=False)
