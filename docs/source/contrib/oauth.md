@@ -303,12 +303,14 @@ Authorize with `resource` set to the MCP protocol URL. MCP additionally verifies
 Example Cursor `mcp.json`:
 
 ```json
-{
-  "auth": {
-    "CLIENT_ID": "...",
-    "scopes": ["guillotina:access"]
+"mcp-name": {
+    "url": "http://localhost:8080/db/container/@mcp/protocol",
+    "auth": {
+      "scopes": [
+        "guillotina:access"
+      ]
+    }
   }
-}
 ```
 
 `@login` JWTs authenticate Guillotina sessions directly. OAuth access tokens include `token_type=oauth_access_token`, `client_id`, `scope` and audience/resource claims and are validated by the OAuth validator. MCP clients should use OAuth discovery and must not store manually copied bearer tokens in configuration.
