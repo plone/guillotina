@@ -1,8 +1,8 @@
 from collections import Counter
+
 from guillotina import configure
 from guillotina.component import query_utility
-from guillotina.interfaces import ICatalogUtility
-from guillotina.interfaces import IResource
+from guillotina.interfaces import ICatalogUtility, IResource
 from guillotina.response import HTTPServiceUnavailable
 
 

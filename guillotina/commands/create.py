@@ -1,8 +1,8 @@
-from guillotina.commands import Command
-
-import guillotina
 import os
 import sys
+
+import guillotina
+from guillotina.commands import Command
 
 
 class CreateCommand(Command):

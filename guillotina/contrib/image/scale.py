@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # Code from plone.scale
-from io import BytesIO
-
 import math
-import PIL.Image
-import PIL.ImageFile
 import sys
 import warnings
+from io import BytesIO
+
+import PIL.Image
+import PIL.ImageFile
 
 
 def none_as_int(the_int):

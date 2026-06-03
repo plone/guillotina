@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-from guillotina.contrib.image.scale import scaleImage
-from guillotina.contrib.image.scale import scalePILImage
-from guillotina.tests.image import TEST_DATA_LOCATION
+import os.path
+import warnings
 from io import BytesIO
 from unittest import TestCase
 
-import os.path
 import PIL.Image
 import PIL.ImageDraw
-import warnings
+
+from guillotina.contrib.image.scale import scaleImage, scalePILImage
+from guillotina.tests.image import TEST_DATA_LOCATION
 
 
 with open(os.path.join(TEST_DATA_LOCATION, "logo.png"), "rb") as fio:
@@ -202,7 +202,7 @@ class ScalingTests(TestCase):
         img3 = scaleImage(CMYK, 84, 103, quality=20)[0]
         self.assertNotEqual(img1, img2)
         self.assertNotEqual(img1, img3)
-        self.failUnless(len(img1) > len(img2) > len(img3))
+        self.assertTrue(len(img1) > len(img2) > len(img3))
 
     def testResultBuffer(self):
         img1 = scaleImage(PNG, 84, 103)[0]

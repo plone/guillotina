@@ -1,17 +1,16 @@
+import typing
+import urllib
+
 from dateutil.parser import parse
+
 from guillotina import configure
-from guillotina.catalog.parser import BaseParser
-from guillotina.catalog.parser import to_list
+from guillotina.catalog.parser import BaseParser, to_list
 from guillotina.catalog.types import BasicParsedQueryInfo
 from guillotina.catalog.utils import get_index_definition
 from guillotina.contrib.catalog.pg import logger
 from guillotina.contrib.catalog.pg.indexes import get_pg_index
-from guillotina.interfaces import IResource
-from guillotina.interfaces import ISearchParser
+from guillotina.interfaces import IResource, ISearchParser
 from guillotina.interfaces.catalog import ICatalogUtility
-
-import typing
-import urllib
 
 
 _type_mapping = {"int": int, "float": float}

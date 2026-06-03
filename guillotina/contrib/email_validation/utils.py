@@ -1,13 +1,14 @@
+import logging
+import time
 from datetime import datetime
-from guillotina import app_settings
-from guillotina.utils import get_jwk_key
+
+import orjson
+import pytz
 from jwcrypto import jwe
 from jwcrypto.common import json_encode
 
-import logging
-import orjson
-import pytz
-import time
+from guillotina import app_settings
+from guillotina.utils import get_jwk_key
 
 
 logger = logging.getLogger("guillotina.email_validation")

@@ -1,6 +1,6 @@
-from guillotina.auth.recaptcha import VALIDATION_HEADER
-
 import pytest
+
+from guillotina.auth.recaptcha import VALIDATION_HEADER
 
 
 pytestmark = pytest.mark.asyncio

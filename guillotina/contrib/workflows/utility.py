@@ -1,22 +1,15 @@
-from guillotina import app_settings
-from guillotina import configure
-from guillotina.component import provide_adapter
-from guillotina.component import query_adapter
+import datetime
+
+from guillotina import app_settings, configure
+from guillotina.component import provide_adapter, query_adapter
 from guillotina.contrib.workflows import logger
 from guillotina.contrib.workflows.events import WorkflowChangedEvent
-from guillotina.contrib.workflows.interfaces import IWorkflow
-from guillotina.contrib.workflows.interfaces import IWorkflowBehavior
-from guillotina.contrib.workflows.interfaces import IWorkflowUtility
+from guillotina.contrib.workflows.interfaces import IWorkflow, IWorkflowBehavior, IWorkflowUtility
 from guillotina.event import notify
 from guillotina.events import ObjectModifiedEvent
-from guillotina.response import HTTPPreconditionFailed
-from guillotina.response import HTTPUnauthorized
+from guillotina.response import HTTPPreconditionFailed, HTTPUnauthorized
 from guillotina.security.utils import apply_sharing
-from guillotina.utils import get_authenticated_user_id
-from guillotina.utils import get_security_policy
-from guillotina.utils import import_class
-
-import datetime
+from guillotina.utils import get_authenticated_user_id, get_security_policy, import_class
 
 
 def create_workflow_factory(proto_name, proto_definition):

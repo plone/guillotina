@@ -1,10 +1,7 @@
-from guillotina import addons
-from guillotina import configure
-from guillotina import error_reasons
+from guillotina import addons, configure, error_reasons
 from guillotina._settings import app_settings
 from guillotina.i18n import MessageFactory
-from guillotina.interfaces import IAddons
-from guillotina.interfaces import IContainer
+from guillotina.interfaces import IAddons, IContainer
 from guillotina.response import ErrorResponse
 from guillotina.utils import get_registry
 

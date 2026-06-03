@@ -23,12 +23,13 @@ class ServerCommand(Command):
             from uvicorn import Server  # type: ignore
             from uvicorn.config import LOGGING_CONFIG  # type: ignore
 
+            uvicorn_settings = {"server_header": False, **app.server_settings.get("uvicorn", {})}
             config = Config(
                 app,
                 host=host,
                 port=port,
                 log_config=loggers or LOGGING_CONFIG,
-                **app.server_settings.get("uvicorn", {}),
+                **uvicorn_settings,
             )
             server = Server(config)
             await server.serve()

@@ -39,6 +39,7 @@ class FieldReadAccessorTests(unittest.TestCase):
 
     def test_ctor_created_inside_interface(self):
         from zope.interface import Interface
+
         from guillotina.schema import Text
 
         field = Text(title="Hmm")
@@ -51,15 +52,14 @@ class FieldReadAccessorTests(unittest.TestCase):
         self.assertEqual(getter.__doc__, "get Hmm")
 
     def test___provides___w_field_no_provides(self):
-        from zope.interface import implementedBy
-        from zope.interface import providedBy
+        from zope.interface import implementedBy, providedBy
 
         wrapped = self._makeOne(object())
         self.assertEqual(list(providedBy(wrapped)), list(implementedBy(self._getTargetClass())))
 
     def test___provides___w_field_w_provides(self):
-        from zope.interface import implementedBy
-        from zope.interface import providedBy
+        from zope.interface import implementedBy, providedBy
+
         from guillotina.schema import Text
 
         field = Text()
@@ -152,6 +152,7 @@ class FieldReadAccessorTests(unittest.TestCase):
 
     def test_set_readonly(self):
         from zope.interface import Interface
+
         from guillotina.schema import Text
 
         field = Text(readonly=True)
@@ -242,6 +243,7 @@ class FieldWriteAccessorTests(unittest.TestCase):
 
     def test_ctor_created_inside_interface(self):
         from zope.interface import Interface
+
         from guillotina.schema import Text
 
         field = Text(title="Hmm")
@@ -275,6 +277,7 @@ class Test_accessors(unittest.TestCase):
 
     def test_w_only_read_accessor(self):
         from zope.interface import Interface
+
         from guillotina.schema import Text
 
         field = Text(title="Hmm", readonly=True)
@@ -295,6 +298,7 @@ class Test_accessors(unittest.TestCase):
 
     def test_w_read_and_write_accessors(self):
         from zope.interface import Interface
+
         from guillotina.schema import Text
 
         field = Text(title="Hmm")

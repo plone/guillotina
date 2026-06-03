@@ -1,10 +1,10 @@
+from zope.interface import alsoProvides, implementer
+
 from guillotina.annotations import AnnotationData
 from guillotina.browser import get_physical_path
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces import IRegistry
 from guillotina.schema._bootstrapinterfaces import IContextAwareDefaultFactory
-from zope.interface import alsoProvides
-from zope.interface import implementer
 
 
 REGISTRY_DATA_KEY = "_registry"

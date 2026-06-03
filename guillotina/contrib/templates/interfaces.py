@@ -1,6 +1,5 @@
 from guillotina import schema
-from guillotina.interfaces import IAsyncUtility
-from guillotina.interfaces import IItem
+from guillotina.interfaces import IAsyncUtility, IItem
 
 
 class IJinjaUtility(IAsyncUtility):

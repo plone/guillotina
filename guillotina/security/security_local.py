@@ -1,14 +1,16 @@
 from guillotina import configure
-from guillotina.interfaces import Allow
-from guillotina.interfaces import AllowSingle
-from guillotina.interfaces import Deny
-from guillotina.interfaces import IInheritPermissionManager
-from guillotina.interfaces import INHERIT_KEY
-from guillotina.interfaces import IPrincipalPermissionManager
-from guillotina.interfaces import IPrincipalRoleManager
-from guillotina.interfaces import IResource
-from guillotina.interfaces import IRolePermissionManager
-from guillotina.interfaces import Unset
+from guillotina.interfaces import (
+    INHERIT_KEY,
+    Allow,
+    AllowSingle,
+    Deny,
+    IInheritPermissionManager,
+    IPrincipalPermissionManager,
+    IPrincipalRoleManager,
+    IResource,
+    IRolePermissionManager,
+    Unset,
+)
 from guillotina.security.securitymap import GuillotinaSecurityMap
 
 

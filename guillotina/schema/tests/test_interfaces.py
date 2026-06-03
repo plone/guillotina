@@ -23,11 +23,7 @@ class Test__is_field(unittest.TestCase):
         self.assertEqual(self._callFUT(object()), False)
 
     def test_w_normal_fields(self):
-        from guillotina.schema import Text
-        from guillotina.schema import Bytes
-        from guillotina.schema import Int
-        from guillotina.schema import Float
-        from guillotina.schema import Decimal
+        from guillotina.schema import Bytes, Decimal, Float, Int, Text
 
         self.assertEqual(self._callFUT(Text()), True)
         self.assertEqual(self._callFUT(Bytes()), True)
@@ -37,6 +33,7 @@ class Test__is_field(unittest.TestCase):
 
     def test_w_explicitly_provided(self):
         from zope.interface import directlyProvides
+
         from guillotina.schema.interfaces import IField
 
         class Foo(object):
@@ -64,11 +61,7 @@ class Test__fields(unittest.TestCase):
         self.assertEqual(self._callFUT([object()]), False)
 
     def test_w_fields(self):
-        from guillotina.schema import Text
-        from guillotina.schema import Bytes
-        from guillotina.schema import Int
-        from guillotina.schema import Float
-        from guillotina.schema import Decimal
+        from guillotina.schema import Bytes, Decimal, Float, Int, Text
 
         self.assertEqual(self._callFUT([Text()]), True)
         self.assertEqual(self._callFUT([Bytes()]), True)
@@ -78,11 +71,7 @@ class Test__fields(unittest.TestCase):
         self.assertEqual(self._callFUT([Text(), Bytes(), Int(), Float(), Decimal()]), True)
 
     def test_w_mixed(self):
-        from guillotina.schema import Text
-        from guillotina.schema import Bytes
-        from guillotina.schema import Int
-        from guillotina.schema import Float
-        from guillotina.schema import Decimal
+        from guillotina.schema import Bytes, Decimal, Float, Int, Text
 
         self.assertEqual(self._callFUT([Text(), 0]), False)
         self.assertEqual(self._callFUT([Text(), Bytes(), Int(), Float(), Decimal(), 0]), False)

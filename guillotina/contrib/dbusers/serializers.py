@@ -1,11 +1,10 @@
+from zope.interface import Interface
+
 from guillotina import configure
 from guillotina.contrib.dbusers.content.groups import IGroup
 from guillotina.contrib.dbusers.content.users import IUser
-from guillotina.interfaces import IPATCH
-from guillotina.interfaces import IResourceDeserializeFromJson
-from guillotina.interfaces import IResourceSerializeToJsonSummary
+from guillotina.interfaces import IPATCH, IResourceDeserializeFromJson, IResourceSerializeToJsonSummary
 from guillotina.json.serialize_content import DefaultJSONSummarySerializer
-from zope.interface import Interface
 
 
 @configure.adapter(for_=(IUser, Interface), provides=IResourceSerializeToJsonSummary)

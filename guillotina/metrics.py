@@ -1,15 +1,11 @@
-from typing import Dict
-from typing import Optional
-from typing import Type
-
 import asyncio
 import time
 import traceback
+from typing import Dict, Optional, Type
 
 
 try:
-    from prometheus_client import Counter
-    from prometheus_client import Histogram
+    from prometheus_client import Counter, Histogram
 except ImportError:
     Counter = Histogram = None
 

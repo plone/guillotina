@@ -1,7 +1,6 @@
 from guillotina import configure
 from guillotina.component import get_utility
-from guillotina.interfaces import ICacheUtility
-from guillotina.interfaces import IContainer
+from guillotina.interfaces import ICacheUtility, IContainer
 
 
 @configure.service(context=IContainer, name="@cache-stats", method="GET", permission="guillotina.CacheManage")

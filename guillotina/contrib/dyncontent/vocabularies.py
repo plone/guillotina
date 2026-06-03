@@ -1,8 +1,8 @@
-from guillotina import app_settings
-from guillotina import configure
+from zope.interface import implementer
+
+from guillotina import app_settings, configure
 from guillotina.contrib.dyncontent.exceptions import VocabularySettingNotFound
 from guillotina.schema.interfaces import ISource
-from zope.interface import implementer
 
 
 @implementer(ISource)

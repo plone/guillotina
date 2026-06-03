@@ -1,20 +1,28 @@
+import logging
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
-from guillotina import app_settings
-from guillotina.contrib.templates.interfaces import IJinjaTemplate
-from guillotina.utils import get_current_container
-from guillotina.utils import navigate_to
-from jinja2 import BaseLoader
-from jinja2 import Environment
-from jinja2 import PackageLoader
-from jinja2 import select_autoescape
+from importlib import import_module
+from pathlib import Path
+
+from jinja2 import BaseLoader, Environment, FileSystemLoader, select_autoescape
 from jinja2.exceptions import TemplateNotFound
 from lru import LRU
 
-import logging
+from guillotina import app_settings
+from guillotina.contrib.templates.interfaces import IJinjaTemplate
+from guillotina.utils import get_current_container, navigate_to
 
 
 logger = logging.getLogger("guillotina")
+
+
+def _resolve_template_dir(package_name, folder):
+    module = import_module(package_name)
+    if getattr(module, "__file__", None):
+        package_dir = Path(module.__file__).resolve().parent
+    else:  # pragma: no cover
+        package_dir = Path(next(iter(module.__path__))).resolve()
+    return package_dir / folder
 
 
 class JinjaUtility:
@@ -35,7 +43,8 @@ class JinjaUtility:
         for template in self.templates:
             package, folder = template.split(":")
             env = Environment(
-                loader=PackageLoader(package, folder), autoescape=select_autoescape(["html", "xml", "pt"])
+                loader=FileSystemLoader(str(_resolve_template_dir(package, folder))),
+                autoescape=select_autoescape(["html", "xml", "pt"]),
             )
             self.envs.append(env)
 

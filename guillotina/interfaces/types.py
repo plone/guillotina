@@ -1,5 +1,6 @@
-from .content import IResource
 from zope.interface import Interface
+
+from .content import IResource
 
 
 class IConstrainTypes(Interface):  # pylint: disable=E0239

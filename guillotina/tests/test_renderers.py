@@ -1,7 +1,8 @@
 from datetime import datetime
-from guillotina.renderers import guillotina_json_default
 
 import pytest
+
+from guillotina.renderers import guillotina_json_default
 
 
 def test_guillotina_json_default_doesnt_serialize_datetime():

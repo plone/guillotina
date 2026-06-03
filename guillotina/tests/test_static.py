@@ -1,7 +1,7 @@
+import pytest
+
 from guillotina.component import get_utility
 from guillotina.interfaces import IApplication
-
-import pytest
 
 
 pytestmark = pytest.mark.asyncio

@@ -1,7 +1,7 @@
+import pytest
+
 from guillotina import configure
 from guillotina.schema.vocabulary import getVocabularyRegistry
-
-import pytest
 
 
 @configure.vocabulary(name="testvocab")

@@ -4,18 +4,16 @@ except ImportError:
     print("If you add guillotina.contrib.redis you need to add redis>4.2.0rc1 on your requirements")
     raise
 
-from guillotina import app_settings
-from guillotina import metrics
-from guillotina.contrib.redis.exceptions import NoRedisConfigured
+import asyncio
+import logging
+from typing import Dict, List, Optional
+
+import backoff
 from redis.asyncio.client import PubSub
 from redis.exceptions import ConnectionError
-from typing import Dict
-from typing import List
-from typing import Optional
 
-import asyncio
-import backoff
-import logging
+from guillotina import app_settings, metrics
+from guillotina.contrib.redis.exceptions import NoRedisConfigured
 
 
 try:

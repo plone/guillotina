@@ -1,12 +1,10 @@
-from guillotina import app_settings
-from guillotina import configure
-from guillotina.content import get_cached_factory
-from guillotina.interfaces import IConstrainTypes
-from guillotina.interfaces import IDatabase
-from guillotina.interfaces import IResource
-from typing import List
-from typing import Optional
+from typing import List, Optional
+
 from zope.interface import Interface
+
+from guillotina import app_settings, configure
+from guillotina.content import get_cached_factory
+from guillotina.interfaces import IConstrainTypes, IDatabase, IResource
 
 
 @configure.adapter(for_=Interface, provides=IConstrainTypes)

@@ -1,9 +1,8 @@
-from guillotina import app_settings
-from guillotina import glogging
+import fnmatch
+
+from guillotina import app_settings, glogging
 from guillotina.interfaces import IRequest
 from guillotina.response import HTTPUnauthorized
-
-import fnmatch
 
 
 logger = glogging.getLogger("guillotina")

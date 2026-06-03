@@ -1,10 +1,8 @@
-from guillotina import app_settings
-from guillotina import configure
-from guillotina.auth.users import GuillotinaUser
-from guillotina.interfaces import IGroups
-from guillotina.interfaces import IPrincipal
-
 import typing
+
+from guillotina import app_settings, configure
+from guillotina.auth.users import GuillotinaUser
+from guillotina.interfaces import IGroups, IPrincipal
 
 
 class GuillotinaGroup(GuillotinaUser):

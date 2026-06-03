@@ -1,8 +1,5 @@
-from typing import Any
-from typing import Coroutine
-from typing import List
-from typing import Optional
-from typing import Union
+from typing import Any, Coroutine, List, Optional, Union
+
 from zope.interface import Interface
 
 

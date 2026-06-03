@@ -11,21 +11,16 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
+from typing import Any, Dict, List, Optional
+
+import zope.interface.interface
+from zope.interface import Interface, providedBy
+
 from guillotina.component import globalregistry
 from guillotina.component._compat import _BLANK
 from guillotina.component._declaration import adapter  # noqa
 from guillotina.component.hookable import hookable
-from guillotina.component.interfaces import ComponentLookupError
-from guillotina.component.interfaces import IComponentLookup
-from guillotina.component.interfaces import IFactory
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from zope.interface import Interface
-from zope.interface import providedBy
-
-import zope.interface.interface
+from guillotina.component.interfaces import ComponentLookupError, IComponentLookup, IFactory
 
 
 _MISSING = object()
@@ -276,7 +271,7 @@ def get_factory_interfaces(name, context=None):
 def get_factories_for(interface, context=None):
     """Return info on all factories implementing the given interface."""
     utils = get_component_registry(context)
-    for (name, factory) in utils.getUtilitiesFor(IFactory):
+    for name, factory in utils.getUtilitiesFor(IFactory):
         interfaces = factory.get_interfaces()
         try:
             if interfaces.isOrExtends(interface):

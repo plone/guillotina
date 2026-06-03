@@ -1,6 +1,4 @@
-from zope.interface import Attribute
-from zope.interface import Interface
-from zope.interface import interfaces
+from zope.interface import Attribute, Interface, interfaces
 
 
 class IBeforeObjectModifiedEvent(interfaces.IObjectEvent):

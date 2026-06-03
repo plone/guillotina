@@ -1,26 +1,21 @@
 # -*- coding: utf-8 -*-
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.utils import formatdate
-from guillotina import app_settings
-from guillotina import configure
-from guillotina.component import query_utility
-from guillotina.contrib.mailer import encoding
-from guillotina.contrib.mailer.exceptions import NoEndpointDefinedException
-from guillotina.interfaces import IMailEndpoint
-from guillotina.interfaces import IMailer
-from guillotina.utils import get_random_string
-from guillotina.utils import notice_on_error
-from typing import Any
-from typing import List
-from typing import Optional
-from typing import Union
-from zope.interface import implementer
-
 import asyncio
 import logging
 import socket
 import time
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.utils import formatdate
+from typing import Any, List, Optional, Union
+
+from zope.interface import implementer
+
+from guillotina import app_settings, configure
+from guillotina.component import query_utility
+from guillotina.contrib.mailer import encoding
+from guillotina.contrib.mailer.exceptions import NoEndpointDefinedException
+from guillotina.interfaces import IMailEndpoint, IMailer
+from guillotina.utils import get_random_string, notice_on_error
 
 
 try:
@@ -36,6 +31,12 @@ except ImportError:
 
 
 logger = logging.getLogger(__name__)
+
+
+def format_address_header(value):
+    if isinstance(value, (list, tuple)):
+        return ", ".join(item for item in value if item)
+    return value
 
 
 @configure.utility(provides=IMailEndpoint, name="smtp")
@@ -183,9 +184,10 @@ class MailerUtility:
 
         message["Subject"] = subject
         message["From"] = sender
-        message["To"] = recipient
-        if cc is not None:
-            message["Cc"] = cc
+        message["To"] = format_address_header(recipient)
+        cc_header = format_address_header(cc)
+        if cc_header:
+            message["Cc"] = cc_header
         if message_id is not None:
             message["Message-Id"] = message_id
         else:

@@ -1,17 +1,15 @@
-from datetime import datetime
-from datetime import timedelta
-from guillotina import task_vars
-from guillotina._settings import app_settings
-from guillotina.auth.users import AnonymousUser
-from guillotina.auth.users import ROOT_USER_ID
-from guillotina.component import get_utility
-from guillotina.interfaces import IApplication
-from guillotina.interfaces import IPrincipal
-from guillotina.profile import profilable
-from guillotina.utils import get_security_policy
+from datetime import datetime, timedelta
 from typing import Optional
 
 import jwt
+
+from guillotina import task_vars
+from guillotina._settings import app_settings
+from guillotina.auth.users import ROOT_USER_ID, AnonymousUser
+from guillotina.component import get_utility
+from guillotina.interfaces import IApplication, IPrincipal
+from guillotina.profile import profilable
+from guillotina.utils import get_security_policy
 
 
 @profilable

@@ -1,21 +1,20 @@
 from guillotina import configure
 from guillotina._settings import app_settings
 from guillotina.catalog.utils import reindex_in_future
-from guillotina.component import query_adapter
-from guillotina.component import query_utility
-from guillotina.interfaces import ICatalogUtility
-from guillotina.interfaces import IContainer
-from guillotina.interfaces import IGroupFolder
-from guillotina.interfaces import IObjectAddedEvent
-from guillotina.interfaces import IObjectModifiedEvent
-from guillotina.interfaces import IObjectMovedEvent
-from guillotina.interfaces import IObjectPermissionsModifiedEvent
-from guillotina.interfaces import IObjectRemovedEvent
-from guillotina.interfaces import IResource
-from guillotina.interfaces import ISecurityInfo
-from guillotina.utils import apply_coroutine
-from guillotina.utils import execute
-from guillotina.utils import find_container
+from guillotina.component import query_adapter, query_utility
+from guillotina.interfaces import (
+    ICatalogUtility,
+    IContainer,
+    IGroupFolder,
+    IObjectAddedEvent,
+    IObjectModifiedEvent,
+    IObjectMovedEvent,
+    IObjectPermissionsModifiedEvent,
+    IObjectRemovedEvent,
+    IResource,
+    ISecurityInfo,
+)
+from guillotina.utils import apply_coroutine, execute, find_container
 
 
 class Indexer:

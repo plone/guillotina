@@ -11,20 +11,19 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-from guillotina.component._compat import _BLANK
-from guillotina.component.interfaces import IComponentLookup
-from guillotina.profile import profilable
-from typing import Type
-from zope.interface import implementer
-from zope.interface import providedBy
-from zope.interface.adapter import AdapterLookup
-from zope.interface.adapter import AdapterRegistry
-from zope.interface.registry import Components
-
 import asyncio
 import logging
 import os
 import time
+from typing import Type
+
+from zope.interface import implementer, providedBy
+from zope.interface.adapter import AdapterLookup, AdapterRegistry
+from zope.interface.registry import Components
+
+from guillotina.component._compat import _BLANK
+from guillotina.component.interfaces import IComponentLookup
+from guillotina.profile import profilable
 
 
 profile_logger = logging.getLogger("guillotina.profile")
@@ -55,9 +54,9 @@ class GuillotinaAdapterLookup(AdapterLookup):
 class DebugGuillotinaAdapterLookup(GuillotinaAdapterLookup):  # pragma: no cover
     @profilable
     async def asubscribers(self, objects, provided):
-        from guillotina.utils import get_current_request, get_authenticated_user_id, get_dotted_name
-        from guillotina.exceptions import RequestNotFound
         from guillotina import task_vars
+        from guillotina.exceptions import RequestNotFound
+        from guillotina.utils import get_authenticated_user_id, get_current_request, get_dotted_name
 
         if len(objects) > 1:
             event = get_dotted_name(objects[1])

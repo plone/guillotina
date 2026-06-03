@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
+from zope.interface import Interface
+
 from guillotina import configure
-from guillotina.component import get_multi_adapter
-from guillotina.component import get_utility
+from guillotina.component import get_multi_adapter, get_utility
 from guillotina.component.interfaces import IFactory
-from guillotina.interfaces import IBehavior
-from guillotina.interfaces import IFactorySerializeToJson
-from guillotina.interfaces import IRequest
-from guillotina.interfaces import ISchemaFieldSerializeToJson
-from guillotina.interfaces import ISchemaSerializeToJson
+from guillotina.interfaces import (
+    IBehavior,
+    IFactorySerializeToJson,
+    IRequest,
+    ISchemaFieldSerializeToJson,
+    ISchemaSerializeToJson,
+)
 from guillotina.profile import profilable
 from guillotina.schema import get_fields_in_order
-from zope.interface import Interface
 
 
 @configure.adapter(for_=(IFactory, IRequest), provides=IFactorySerializeToJson)

@@ -11,88 +11,86 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-from collections import namedtuple
-from collections import OrderedDict as NativeOrderedDict
-from datetime import date
-from datetime import datetime
-from datetime import time
-from datetime import timedelta
-from guillotina.schema._bootstrapfields import Bool
-from guillotina.schema._bootstrapfields import Container  # API import for __init__
-from guillotina.schema._bootstrapfields import Field
-from guillotina.schema._bootstrapfields import Int
-from guillotina.schema._bootstrapfields import Iterable
-from guillotina.schema._bootstrapfields import MinMaxLen
-from guillotina.schema._bootstrapfields import Orderable
-from guillotina.schema._bootstrapfields import Password
-from guillotina.schema._bootstrapfields import Text
-from guillotina.schema._bootstrapfields import TextLine
-from guillotina.schema.exceptions import ConstraintNotSatisfied
-from guillotina.schema.exceptions import InvalidDottedName
-from guillotina.schema.exceptions import InvalidId
-from guillotina.schema.exceptions import InvalidURI
-from guillotina.schema.exceptions import InvalidValue
-from guillotina.schema.exceptions import NotUnique
-from guillotina.schema.exceptions import SchemaNotFullyImplemented
-from guillotina.schema.exceptions import SchemaNotProvided
-from guillotina.schema.exceptions import ValidationError
-from guillotina.schema.exceptions import WrongContainedType
-from guillotina.schema.exceptions import WrongType
-from guillotina.schema.fieldproperty import FieldProperty
-from guillotina.schema.interfaces import IArrayJSONField
-from guillotina.schema.interfaces import IASCII
-from guillotina.schema.interfaces import IASCIILine
-from guillotina.schema.interfaces import IBaseVocabulary
-from guillotina.schema.interfaces import IBool
-from guillotina.schema.interfaces import IBytes
-from guillotina.schema.interfaces import IBytesLine
-from guillotina.schema.interfaces import IChoice
-from guillotina.schema.interfaces import IContextSourceBinder
-from guillotina.schema.interfaces import IDate
-from guillotina.schema.interfaces import IDatetime
-from guillotina.schema.interfaces import IDecimal
-from guillotina.schema.interfaces import IDict
-from guillotina.schema.interfaces import IDottedName
-from guillotina.schema.interfaces import IField
-from guillotina.schema.interfaces import IFloat
-from guillotina.schema.interfaces import IFromUnicode
-from guillotina.schema.interfaces import IFrozenSet
-from guillotina.schema.interfaces import IId
-from guillotina.schema.interfaces import IInt
-from guillotina.schema.interfaces import IInterfaceField
-from guillotina.schema.interfaces import IJSONField
-from guillotina.schema.interfaces import IList
-from guillotina.schema.interfaces import IMaskTextLine
-from guillotina.schema.interfaces import IMinMaxLen
-from guillotina.schema.interfaces import IObject
-from guillotina.schema.interfaces import IObjectJSONField
-from guillotina.schema.interfaces import IOrderedDict
-from guillotina.schema.interfaces import IPassword
-from guillotina.schema.interfaces import ISet
-from guillotina.schema.interfaces import ISource
-from guillotina.schema.interfaces import ISourceText
-from guillotina.schema.interfaces import IText
-from guillotina.schema.interfaces import ITextLine
-from guillotina.schema.interfaces import ITime
-from guillotina.schema.interfaces import ITimedelta
-from guillotina.schema.interfaces import ITuple
-from guillotina.schema.interfaces import IUnionField
-from guillotina.schema.interfaces import IURI
-from guillotina.schema.utils import make_binary
-from guillotina.schema.vocabulary import getVocabularyRegistry
-from guillotina.schema.vocabulary import SimpleVocabulary
-from guillotina.schema.vocabulary import VocabularyRegistryError
-from zope.interface import alsoProvides
-from zope.interface import classImplements
-from zope.interface import implementer
-from zope.interface import Interface
-from zope.interface.interfaces import IInterface
-from zope.interface.interfaces import IMethod
-
 import decimal
 import json
-import jsonschema
 import re
+from collections import OrderedDict as NativeOrderedDict
+from collections import namedtuple
+from datetime import date, datetime, time, timedelta
+
+import jsonschema
+from zope.interface import Interface, alsoProvides, classImplements, implementer
+from zope.interface.interfaces import IInterface, IMethod
+
+from guillotina.schema._bootstrapfields import Container  # API import for __init__
+from guillotina.schema._bootstrapfields import (
+    Bool,
+    Field,
+    Int,
+    Iterable,
+    MinMaxLen,
+    Orderable,
+    Password,
+    Text,
+    TextLine,
+)
+from guillotina.schema.exceptions import (
+    ConstraintNotSatisfied,
+    InvalidDottedName,
+    InvalidId,
+    InvalidURI,
+    InvalidValue,
+    NotUnique,
+    SchemaNotFullyImplemented,
+    SchemaNotProvided,
+    ValidationError,
+    WrongContainedType,
+    WrongType,
+)
+from guillotina.schema.fieldproperty import FieldProperty
+from guillotina.schema.interfaces import (
+    IASCII,
+    IURI,
+    IArrayJSONField,
+    IASCIILine,
+    IBaseVocabulary,
+    IBool,
+    IBytes,
+    IBytesLine,
+    IChoice,
+    IContextSourceBinder,
+    IDate,
+    IDatetime,
+    IDecimal,
+    IDict,
+    IDottedName,
+    IField,
+    IFloat,
+    IFromUnicode,
+    IFrozenSet,
+    IId,
+    IInt,
+    IInterfaceField,
+    IJSONField,
+    IList,
+    IMaskTextLine,
+    IMinMaxLen,
+    IObject,
+    IObjectJSONField,
+    IOrderedDict,
+    IPassword,
+    ISet,
+    ISource,
+    ISourceText,
+    IText,
+    ITextLine,
+    ITime,
+    ITimedelta,
+    ITuple,
+    IUnionField,
+)
+from guillotina.schema.utils import make_binary
+from guillotina.schema.vocabulary import SimpleVocabulary, VocabularyRegistryError, getVocabularyRegistry
 
 
 __docformat__ = "restructuredtext"

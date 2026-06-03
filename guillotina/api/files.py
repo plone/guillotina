@@ -1,21 +1,15 @@
+import mimetypes
+
 from guillotina import configure
 from guillotina._settings import app_settings
 from guillotina.api.content import DefaultOPTIONS
-from guillotina.api.service import DownloadService
-from guillotina.api.service import TraversableFieldService
+from guillotina.api.service import DownloadService, TraversableFieldService
 from guillotina.component import get_multi_adapter
 from guillotina.event import notify
 from guillotina.events import ObjectModifiedEvent
 from guillotina.exceptions import FileNotFoundException
-from guillotina.interfaces import IAsyncBehavior
-from guillotina.interfaces import IFileManager
-from guillotina.interfaces import IResource
-from guillotina.interfaces import IStaticDirectory
-from guillotina.interfaces import IStaticFile
-from guillotina.response import HTTPNotFound
-from guillotina.response import Response
-
-import mimetypes
+from guillotina.interfaces import IAsyncBehavior, IFileManager, IResource, IStaticDirectory, IStaticFile
+from guillotina.response import HTTPNotFound, Response
 
 
 def _traversed_file_doc(summary, parameters=None, responses=None):
@@ -42,13 +36,14 @@ def _traversed_file_doc(summary, parameters=None, responses=None):
 
 
 TUS_PARAMETERS = [
-    {"name": "Upload-Offset", "in": "headers", "required": True, "schema": {"type": "integer"}},
-    {"name": "UPLOAD-LENGTH", "in": "headers", "required": True, "schema": {"type": "integer"}},
-    {"name": "UPLOAD-MD5", "in": "headers", "required": False, "schema": {"type": "string"}},
-    {"name": "UPLOAD-EXTENSION", "in": "headers", "required": False, "schema": {"type": "string"}},
-    {"name": "TUS-RESUMABLE", "in": "headers", "required": True, "schema": {"type": "string"}},
-    {"name": "UPLOAD-METADATA", "in": "headers", "required": False, "schema": {"type": "string"}},
+    {"name": "Upload-Offset", "in": "header", "required": True, "schema": {"type": "integer"}},
+    {"name": "UPLOAD-LENGTH", "in": "header", "required": True, "schema": {"type": "integer"}},
+    {"name": "UPLOAD-MD5", "in": "header", "required": False, "schema": {"type": "string"}},
+    {"name": "UPLOAD-EXTENSION", "in": "header", "required": False, "schema": {"type": "string"}},
+    {"name": "TUS-RESUMABLE", "in": "header", "required": True, "schema": {"type": "string"}},
+    {"name": "UPLOAD-METADATA", "in": "header", "required": False, "schema": {"type": "string"}},
 ]
+
 
 # Static File
 @configure.service(context=IStaticFile, method="GET", permission="guillotina.AccessContent")
@@ -316,8 +311,8 @@ class TusHeadFile(UploadFile):
     **_traversed_file_doc(
         "TUS endpoint",
         parameters=[
-            {"name": "Upload-Offset", "in": "headers", "required": True, "schema": {"type": "integer"}},
-            {"name": "CONTENT-LENGTH", "in": "headers", "required": True, "schema": {"type": "integer"}},
+            {"name": "Upload-Offset", "in": "header", "required": True, "schema": {"type": "integer"}},
+            {"name": "CONTENT-LENGTH", "in": "header", "required": True, "schema": {"type": "integer"}},
         ],
         responses={
             "204": {
@@ -335,8 +330,8 @@ class TusHeadFile(UploadFile):
     **_traversed_file_doc(
         "TUS endpoint",
         parameters=[
-            {"name": "Upload-Offset", "in": "headers", "required": True, "schema": {"type": "integer"}},
-            {"name": "CONTENT-LENGTH", "in": "headers", "required": True, "schema": {"type": "integer"}},
+            {"name": "Upload-Offset", "in": "header", "required": True, "schema": {"type": "integer"}},
+            {"name": "CONTENT-LENGTH", "in": "header", "required": True, "schema": {"type": "integer"}},
             {"name": "file_key", "in": "path", "required": True, "schema": {"type": "string"}},
         ],
         responses={

@@ -1,10 +1,5 @@
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Tuple
-from typing import TypeVar
-
 import types
+from typing import Any, Dict, List, Tuple, TypeVar
 
 
 ResolvableType = TypeVar("ResolvableType", types.ModuleType, types.FunctionType, type)

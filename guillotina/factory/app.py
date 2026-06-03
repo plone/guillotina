@@ -1,38 +1,34 @@
-from copy import deepcopy
-from guillotina import configure
-from guillotina import glogging
-from guillotina import traversal
-from guillotina._settings import app_settings
-from guillotina._settings import default_settings
-from guillotina.behaviors import apply_concrete_behaviors
-from guillotina.component import get_utility
-from guillotina.component import provide_utility
-from guillotina.configure.config import ConfigurationMachine
-from guillotina.content import JavaScriptApplication
-from guillotina.content import load_cached_schema
-from guillotina.content import StaticDirectory
-from guillotina.content import StaticFile
-from guillotina.event import notify
-from guillotina.events import AfterAsyncUtilityLoadedEvent
-from guillotina.events import ApplicationCleanupEvent
-from guillotina.events import ApplicationConfiguredEvent
-from guillotina.events import ApplicationInitializedEvent
-from guillotina.events import BeforeAsyncUtilityLoadedEvent
-from guillotina.events import DatabaseInitializedEvent
-from guillotina.factory.content import ApplicationRoot
-from guillotina.interfaces import IApplication
-from guillotina.interfaces import IDatabase
-from guillotina.interfaces import IDatabaseConfigurationFactory
-from guillotina.utils import lazy_apply
-from guillotina.utils import list_or_dict_items
-from guillotina.utils import resolve_dotted_name
-from guillotina.utils import resolve_path
-from guillotina.utils import secure_passphrase
-from jwcrypto import jwk
-
 import json
 import logging
 import logging.config
+from copy import deepcopy
+
+from jwcrypto import jwk
+
+from guillotina import configure, glogging, traversal
+from guillotina._settings import app_settings, default_settings
+from guillotina.behaviors import apply_concrete_behaviors
+from guillotina.component import get_utility, provide_utility
+from guillotina.configure.config import ConfigurationMachine
+from guillotina.content import JavaScriptApplication, StaticDirectory, StaticFile, load_cached_schema
+from guillotina.event import notify
+from guillotina.events import (
+    AfterAsyncUtilityLoadedEvent,
+    ApplicationCleanupEvent,
+    ApplicationConfiguredEvent,
+    ApplicationInitializedEvent,
+    BeforeAsyncUtilityLoadedEvent,
+    DatabaseInitializedEvent,
+)
+from guillotina.factory.content import ApplicationRoot
+from guillotina.interfaces import IApplication, IDatabase, IDatabaseConfigurationFactory
+from guillotina.utils import (
+    lazy_apply,
+    list_or_dict_items,
+    resolve_dotted_name,
+    resolve_path,
+    secure_passphrase,
+)
 
 
 app_logger = logging.getLogger("guillotina")

@@ -1,14 +1,12 @@
+import typing as t
+
 from guillotina.api.service import Service
 from guillotina.catalog.catalog import DefaultSearchUtility
-from guillotina.component import get_multi_adapter
-from guillotina.component import query_utility
+from guillotina.component import get_multi_adapter, query_utility
 from guillotina.content import Container
-from guillotina.interfaces import IAsyncContainer
-from guillotina.interfaces import IResourceSerializeToJsonSummary
+from guillotina.interfaces import IAsyncContainer, IResourceSerializeToJsonSummary
 from guillotina.interfaces.catalog import ICatalogUtility
 from guillotina.utils import navigate_to
-
-import typing as t
 
 
 class ListGroupsOrUsersService(Service):

@@ -1,8 +1,11 @@
-from .field import BaseCloudFile
+from typing import Optional
+
+from zope.interface import implementer
+
 from guillotina.blob import Blob
 from guillotina.interfaces import IDBFile
-from typing import Optional
-from zope.interface import implementer
+
+from .field import BaseCloudFile
 
 
 @implementer(IDBFile)

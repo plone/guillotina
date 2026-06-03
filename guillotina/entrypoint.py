@@ -1,6 +1,6 @@
-from guillotina.factory import make_app
-
 import os
+
+from guillotina.factory import make_app
 
 
 if "G_CONFIG_FILE" not in os.environ:

@@ -1,12 +1,10 @@
-from guillotina.db.orm.interfaces import IBaseObject
-from guillotina.interfaces import ICatalogDataAdapter
-from guillotina.interfaces import IDatabase
-from zope.interface import Attribute
-from zope.interface import Interface
-from zope.interface import interfaces
-
 import asyncio
 import typing
+
+from zope.interface import Attribute, Interface, interfaces
+
+from guillotina.db.orm.interfaces import IBaseObject
+from guillotina.interfaces import ICatalogDataAdapter, IDatabase
 
 
 class IPartition(Interface):

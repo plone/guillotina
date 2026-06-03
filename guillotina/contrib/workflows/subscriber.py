@@ -1,13 +1,11 @@
+import datetime
+
 from guillotina import configure
 from guillotina.component import query_adapter
-from guillotina.contrib.workflows.interfaces import IWorkflow
-from guillotina.contrib.workflows.interfaces import IWorkflowBehavior
-from guillotina.interfaces import IObjectAddedEvent
-from guillotina.interfaces import IResource
+from guillotina.contrib.workflows.interfaces import IWorkflow, IWorkflowBehavior
+from guillotina.interfaces import IObjectAddedEvent, IResource
 from guillotina.security.utils import apply_sharing
 from guillotina.utils import get_authenticated_user_id
-
-import datetime
 
 
 @configure.subscriber(for_=(IResource, IObjectAddedEvent), priority=1001)  # after indexing

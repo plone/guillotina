@@ -1,7 +1,11 @@
-from datetime import datetime
-from datetime import time
-from guillotina import configure
-from guillotina import schema
+import base64
+import json
+from datetime import datetime, time
+
+import pytest
+from zope.interface import Interface
+
+from guillotina import configure, schema
 from guillotina.addons import Addon
 from guillotina.api.service import _safe_int_or_float_cast
 from guillotina.behaviors.attachment import IAttachment
@@ -9,19 +13,12 @@ from guillotina.behaviors.dublincore import IDublinCore
 from guillotina.configure import contenttype
 from guillotina.content import Item
 from guillotina.fields.patch import PatchField
-from guillotina.interfaces import IAnnotations
-from guillotina.interfaces import IFile
-from guillotina.interfaces import IResource
+from guillotina.interfaces import IAnnotations, IFile, IResource
 from guillotina.test_package import ITestBehavior
 from guillotina.tests import utils
 from guillotina.tests.dbusers.settings import DEFAULT_SETTINGS as DBUSERS_DEFAULT_SETTINGS
 from guillotina.transactions import transaction
 from guillotina.utils import get_behavior
-from zope.interface import Interface
-
-import base64
-import json
-import pytest
 
 
 pytestmark = pytest.mark.asyncio

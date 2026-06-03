@@ -2,20 +2,23 @@ from guillotina.auth import role
 from guillotina.event import notify
 from guillotina.events import ObjectPermissionsModifiedEvent
 from guillotina.exceptions import PreconditionFailed
-from guillotina.interfaces import Deny
-from guillotina.interfaces import IInheritPermissionManager
-from guillotina.interfaces import IInheritPermissionMap
-from guillotina.interfaces import IPrincipalPermissionManager
-from guillotina.interfaces import IPrincipalPermissionMap
-from guillotina.interfaces import IPrincipalRoleManager
-from guillotina.interfaces import IPrincipalRoleMap
-from guillotina.interfaces import IRolePermissionManager
-from guillotina.interfaces import IRolePermissionMap
-from guillotina.security.policy import cached_principals
-from guillotina.security.policy import cached_roles
-from guillotina.security.security_code import principal_permission_manager
-from guillotina.security.security_code import principal_role_manager
-from guillotina.security.security_code import role_permission_manager
+from guillotina.interfaces import (
+    Deny,
+    IInheritPermissionManager,
+    IInheritPermissionMap,
+    IPrincipalPermissionManager,
+    IPrincipalPermissionMap,
+    IPrincipalRoleManager,
+    IPrincipalRoleMap,
+    IRolePermissionManager,
+    IRolePermissionMap,
+)
+from guillotina.security.policy import cached_principals, cached_roles
+from guillotina.security.security_code import (
+    principal_permission_manager,
+    principal_role_manager,
+    role_permission_manager,
+)
 
 
 def protect_view(cls, permission):
@@ -85,7 +88,7 @@ def settings_for_object(ob):
         if inherit_permissions is not None:
             settings = inherit_permissions.get_locked_permissions()
             data["perminhe"] = []
-            for (p, s) in settings:
+            for p, s in settings:
                 if s is Deny:
                     locked_permissions.append(p)
                 data["perminhe"].append({"permission": p, "setting": s})
