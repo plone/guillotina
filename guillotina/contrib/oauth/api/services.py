@@ -88,8 +88,6 @@ def _metadata(request, container):
 
 
 register_well_known_handler("oauth-authorization-server", _metadata)
-# Compatibility alias: some clients probe `openid-configuration`; payload is OAuth AS metadata, not full OIDC.
-register_well_known_handler("openid-configuration", _metadata)
 
 
 class OAuthService(Service):

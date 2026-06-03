@@ -76,9 +76,9 @@ The same cleanup keys may still be set under `oauth` for backward compatibility;
 
 OAuth state is always persisted in PostgreSQL tables (`oauth_clients`, `oauth_authorization_codes`, …). A PostgreSQL database storage is required.
 
-## Discovery and OAuth vs OpenID (`openid-configuration`)
+## Discovery and OpenID Connect
 
-The primary metadata URL is `/.well-known/oauth-authorization-server` ([RFC 8414](https://www.rfc-editor.org/rfc/rfc8414)). The same JSON is also served at `/.well-known/openid-configuration` (container-scoped and RFC 8414 root variants) **as a compatibility alias** for clients that probe the OpenID path. This is still **OAuth authorization server metadata only**—not full OpenID Connect (no `id_token`, `userinfo`, OIDC JWKS, etc.).
+The metadata URL is `/.well-known/oauth-authorization-server` ([RFC 8414](https://www.rfc-editor.org/rfc/rfc8414)). The OAuth contrib does not expose `/.well-known/openid-configuration` because that path identifies OpenID Connect provider metadata, and this contrib does not implement OpenID Connect (`id_token`, UserInfo, OIDC JWKS, subject types, etc.).
 
 ## Allowed `resource` values (RFC 8707)
 
@@ -111,7 +111,6 @@ Endpoints are container scoped:
 
 ```text
 GET  /db/container/.well-known/oauth-authorization-server
-GET  /db/container/.well-known/openid-configuration
 POST /db/container/oauth/register
 GET  /db/container/oauth/authorize
 ```
@@ -120,7 +119,6 @@ RFC 8414 discovery for issuers with a path component (such as `/db/container`) i
 
 ```text
 GET /.well-known/oauth-authorization-server/db/container
-GET /.well-known/openid-configuration/db/container
 ```
 
 When using MCP, protected resource metadata follows [RFC 9728](https://www.rfc-editor.org/rfc/rfc9728):

@@ -52,13 +52,6 @@ def well_known_authorization_server_url(request, container):
     )
 
 
-def well_known_openid_configuration_url(request, container):
-    return (
-        f"{request.scheme}://{request.host}/.well-known/openid-configuration/"
-        f"{issuer_path(request, container)}"
-    )
-
-
 def well_known_protected_resource_url(request, container):
     from guillotina.contrib.oauth.flow.resources import oauth_required_audience
 

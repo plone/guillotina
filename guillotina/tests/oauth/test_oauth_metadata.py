@@ -34,9 +34,8 @@ async def test_rfc_metadata(container_install_requester):
         assert response["issuer"].endswith("/db/guillotina")
         assert response["authorization_endpoint"].endswith("/oauth/authorize")
 
-        response, status = await requester("GET", "/.well-known/openid-configuration/db/guillotina")
-        assert status == 200
-        assert response["issuer"].endswith("/db/guillotina")
+        _response, status = await requester("GET", "/.well-known/openid-configuration/db/guillotina")
+        assert status == 404
 
 
 @pytest.mark.app_settings(OAUTH_SETTINGS)
