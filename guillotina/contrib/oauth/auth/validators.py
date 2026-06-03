@@ -24,7 +24,7 @@ class OAuthJWTValidator:
                 algorithms=[app_settings["jwt"]["algorithm"]],
                 options={"verify_aud": False},
             )
-        except (jwt.exceptions.DecodeError, jwt.exceptions.ExpiredSignatureError, KeyError):
+        except (jwt.exceptions.PyJWTError, KeyError):
             return
         if claims.get("token_type") != "oauth_access_token":
             return

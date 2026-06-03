@@ -61,7 +61,8 @@ oauth:
   authorization_code_ttl: 600     # Time to live in seconds for Authorization Codes (default 10 min)
   access_token_ttl: 3600          # Time to live in seconds for Access Tokens (default 1 hour)
   refresh_token_ttl: 2592000      # Time to live in seconds for Refresh Tokens (default 30 days)
-  require_pkce: true              # PKCE S256 is required for public clients
+  allowed_code_challenge_methods: # PKCE S256 is always required for public clients
+    - S256
   scopes_supported:               # Optional OAuth protocol label (not used for authorization)
     - guillotina:access
 

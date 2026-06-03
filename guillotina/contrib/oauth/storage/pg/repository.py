@@ -42,9 +42,9 @@ def _parse_dt(value):
     if value is None:
         return None
     if isinstance(value, datetime):
-        return value
+        return _aware(value)
     if isinstance(value, str):
-        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+        return _aware(datetime.fromisoformat(value.replace("Z", "+00:00")))
     return value
 
 

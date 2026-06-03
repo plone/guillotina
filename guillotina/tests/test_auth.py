@@ -102,6 +102,14 @@ async def test_oauth_access_token_only_accepts_bearer_transport(token_type, dumm
     assert await OAuthJWTValidator().validate({"type": token_type, "token": access_token}) is None
 
 
+async def test_oauth_access_token_rejects_all_pyjwt_errors(monkeypatch):
+    def raise_invalid_algorithm(*args, **kwargs):
+        raise jwt.exceptions.InvalidAlgorithmError()
+
+    monkeypatch.setattr(jwt, "decode", raise_invalid_algorithm)
+    assert await OAuthJWTValidator().validate({"type": "bearer", "token": "bad.token.value"}) is None
+
+
 async def test_oauth_html_pages_deny_framing(dummy_guillotina):
     response = oauth_error_page("Error", "Message", status=400)
     assert response.headers["Content-Security-Policy"] == "frame-ancestors 'none'"

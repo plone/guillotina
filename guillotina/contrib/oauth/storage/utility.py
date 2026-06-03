@@ -14,8 +14,8 @@ from guillotina.interfaces import IApplication, IDatabase
 
 logger = logging.getLogger("guillotina.contrib.oauth")
 
-_ddl_lock = asyncio.Lock()
-_ddl_initialized = False
+_ddl_locks = {}
+_ddl_initialized = set()
 
 OAUTH_STORAGE_DEFAULTS = {
     "cleanup_interval": 900,
@@ -43,9 +43,11 @@ def get_oauth_storage_settings():
 async def ensure_oauth_tables(storage):
     import asyncpg.exceptions
 
-    global _ddl_initialized
-    async with _ddl_lock:
-        if _ddl_initialized:
+    loop = asyncio.get_running_loop()
+    lock = _ddl_locks.setdefault(id(loop), asyncio.Lock())
+    storage_key = id(storage.pool)
+    async with lock:
+        if storage_key in _ddl_initialized:
             return
         async with storage.pool.acquire() as conn:
             for ddl in OAUTH_DDL:
@@ -57,7 +59,7 @@ async def ensure_oauth_tables(storage):
                         if attempt == 2:
                             raise
                         await asyncio.sleep(0.05)
-        _ddl_initialized = True
+        _ddl_initialized.add(storage_key)
 
 
 @implementer(IOAuthStorageUtility)
