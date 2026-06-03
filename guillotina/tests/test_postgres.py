@@ -14,8 +14,7 @@ from guillotina.db.locks import lock_object_for_write
 from guillotina.db.storages.cockroach import CockroachStorage
 from guillotina.db.storages.pg import PostgresqlStorage
 from guillotina.db.transaction_manager import TransactionManager
-from guillotina.exceptions import ObjectLockedError
-from guillotina.exceptions import ConflictError, ConflictIdOnContainer
+from guillotina.exceptions import ConflictError, ConflictIdOnContainer, ObjectLockedError
 from guillotina.tests import mocks
 from guillotina.tests.utils import create_content
 

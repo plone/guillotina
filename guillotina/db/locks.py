@@ -1,12 +1,11 @@
-from contextlib import asynccontextmanager
-from guillotina import task_vars
-from guillotina.exceptions import ObjectLockedError
-from guillotina.exceptions import ReadOnlyError
-from guillotina.exceptions import TransactionNotFound
-
 import asyncio
-import asyncpg
 import hashlib
+from contextlib import asynccontextmanager
+
+import asyncpg
+
+from guillotina import task_vars
+from guillotina.exceptions import ObjectLockedError, ReadOnlyError, TransactionNotFound
 
 
 def _oid_lock_key(oid: str) -> int:
