@@ -3,6 +3,12 @@ from typing import Any, Awaitable, Callable, Dict, List, Tuple
 
 from guillotina.catalog.catalog import DefaultSearchUtility
 from guillotina.component import query_multi_adapter, query_utility
+from guillotina.contrib.mcp.security import (
+    has_permission,
+    require_access_content,
+    require_permission,
+    require_view_content,
+)
 from guillotina.interfaces import IResourceSerializeToJson, IResourceSerializeToJsonSummary
 from guillotina.interfaces.catalog import ICatalogUtility
 from guillotina.utils import get_content_path, get_current_container, navigate_to
@@ -94,6 +100,8 @@ def _resource_summary(resource: Any, path_hint: str = "") -> Dict[str, Any]:
 
 
 async def _serialize_resource(resource: Any, request: Any) -> Dict[str, Any]:
+    require_access_content(resource)
+    require_view_content(resource)
     serializer = query_multi_adapter((resource, request), IResourceSerializeToJson)
     if serializer is None:
         serializer = query_multi_adapter((resource, request), IResourceSerializeToJsonSummary)
@@ -121,6 +129,7 @@ async def _resolve_target(context: Any, raw_path: Any) -> Tuple[Any, str]:
 
 async def resolve_path_tool(context: Any, request: Any, arguments: Dict[str, Any]) -> Dict[str, Any]:
     target, resolved_path = await _resolve_target(context, arguments.get("path", "/"))
+    require_access_content(target)
     result = {
         "path": resolved_path,
         "resource": _resource_summary(target, get_content_path(target)),
@@ -134,6 +143,7 @@ async def list_children_tool(
     context: Any, request: Any, arguments: Dict[str, Any], default_limit: int = 50
 ) -> Dict[str, Any]:
     target, resolved_path = await _resolve_target(context, arguments.get("path", "/"))
+    require_access_content(target)
     if not hasattr(target, "async_items"):
         raise ValueError("Target path does not point to a folder-like resource")
 
@@ -238,6 +248,8 @@ async def _list_children_from_async_items(
     end_index = page * limit
 
     async for _, child in target.async_items():
+        if not has_permission("guillotina.AccessContent", child):
+            continue
         if count >= start_index and count < end_index:
             item_summary = _resource_summary(child, get_content_path(child))
             if include_serialized:
@@ -259,6 +271,7 @@ async def _list_children_from_async_items(
 
 
 async def search_tool(context: Any, request: Any, arguments: Dict[str, Any]) -> Dict[str, Any]:
+    require_permission("guillotina.SearchContent", context)
     catalog = _get_catalog_utility()
     if catalog is None:
         raise ValueError("Catalog utility is not available")

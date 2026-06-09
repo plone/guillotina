@@ -40,7 +40,7 @@ mcp:
 
 | Setting | Description |
 |--------|-------------|
-| `mcp.enabled` | When `false`, the registry reports disabled metadata. Default: `true`. |
+| `mcp.enabled` | When `false`, the protocol endpoint is unavailable. Default: `true`. |
 | `mcp.server_name` | Name sent in MCP `initialize` (`serverInfo.name`). Default: `guillotina-mcp`. |
 | `mcp.default_child_limit` | Default `limit` for `list_children` when not specified. Default: `50`. |
 
@@ -53,7 +53,7 @@ The MCP protocol is exposed on the **container** (or any resource) that acts as 
 - **URL**: `POST /{db}/{container_path}/@mcp/protocol`
 - **Example**: `POST http://localhost:8080/db/guillotina/@mcp/protocol`
 - **Permission**: `guillotina.MCPExecute` (granted to `guillotina.Manager` by default).
-- **Authentication**: Same as the rest of Guillotina (Basic auth or Bearer JWT from `@login`). The authenticated user’s permissions apply to every tool call.
+- **Authentication**: Same as the rest of Guillotina (Basic auth or Bearer JWT from `@login`). The authenticated user’s permissions apply to every tool and resource call.
 
 Clients must send:
 
@@ -112,14 +112,14 @@ Paths are resolved relative to the **MCP service context** (usually the containe
 **`resolve_path`**
 
 - `path` (string, default `"/"`): absolute (`/foo`) or relative (`foo`) path.
-- `include_serialized` (boolean, default `false`): when `true`, adds a `serialized` key with full Guillotina JSON (fields, behaviors, etc., per registered serializers).
+- `include_serialized` (boolean, default `false`): when `true`, adds a `serialized` key with full Guillotina JSON (fields, behaviors, etc., per registered serializers). Requires `guillotina.ViewContent` on the resolved resource, like a normal `GET`.
 
 **`list_children`**
 
 - `path` (string, default `"/"`).
 - `limit` (integer, 1–200, default from `mcp.default_child_limit`).
 - `page` (integer, default `1`): used when falling back to `async_items()`.
-- `include_serialized` (boolean, default `false`): full JSON per child in each item.
+- `include_serialized` (boolean, default `false`): full JSON per child in each item. Requires `guillotina.ViewContent` on each serialized child, like a normal `GET`.
 
 **`search`**
 
@@ -186,7 +186,7 @@ curl -X POST -u root:root \
 
 **Redis is not required to use MCP.** The protocol endpoint and all built-in tools work without `guillotina.contrib.redis`. If Redis is unavailable, the registry disables tool caching and every call runs directly against the database or catalog.
 
-When `guillotina.contrib.redis` is enabled, cacheable tools (`resolve_path`, `list_children`, `search`) store results in Redis for one hour (including responses with `include_serialized=true`; cache keys differ per argument set).
+When `guillotina.contrib.redis` is enabled, cacheable tools (`resolve_path`, `list_children`, `search`) store results in Redis for one hour (including responses with `include_serialized=true`; cache keys differ per argument set, authenticated principal, container, and context).
 
 Subscribers invalidate the cache on `IObjectAddedEvent`, `IObjectModifiedEvent`, and `IBeforeObjectRemovedEvent` so listings and search results stay consistent after content changes.
 
@@ -198,6 +198,8 @@ Subscribers invalidate the cache on `IObjectAddedEvent`, `IObjectModifiedEvent`,
 | `guillotina.MCPView` | Reserved for view-level MCP services (granted to Manager/Owner). |
 
 Adjust role grants in your application if non-managers should use MCP.
+
+Built-in tools also enforce content permissions internally. Minimal metadata from `resolve_path`, `list_children`, and `summary` requires `guillotina.AccessContent`. Full serialized JSON via `include_serialized=true` additionally requires `guillotina.ViewContent` on the serialized resource, matching Guillotina's default `GET` view.
 
 ## Adding tools for your project
 
