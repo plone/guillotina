@@ -12,9 +12,18 @@ from guillotina.utils import get_database, get_registry
 # packages (e.g. the MCP integration) register additional documents here.
 WELL_KNOWN_HANDLERS = {}
 
+# Registry of protected-resource metadata providers (RFC 9728). Each provider
+# receives (request, container, protected_path) and returns metadata dict or
+# None when it does not handle the requested resource.
+_PROTECTED_RESOURCE_PROVIDERS = []
+
 
 def register_well_known_handler(name, handler):
     WELL_KNOWN_HANDLERS[name] = handler
+
+
+def register_protected_resource_provider(provider):
+    _PROTECTED_RESOURCE_PROVIDERS.append(provider)
 
 
 def _authorization_server_metadata(request, container):
@@ -39,26 +48,32 @@ def _authorization_server_metadata(request, container):
 register_well_known_handler("oauth-authorization-server", _authorization_server_metadata)
 
 
-def _container_path_parts(path_value, *, allow_mcp_suffix=False):
+def _protected_resource_metadata(request, container):
+    protected_path = getattr(request, "oauth_protected_resource_path", None)
+    for provider in _PROTECTED_RESOURCE_PROVIDERS:
+        metadata = provider(request, container, protected_path)
+        if metadata is not None:
+            return metadata
+    raise HTTPNotFound(content={"reason": "Unknown protected resource"})
+
+
+register_well_known_handler("oauth-protected-resource", _protected_resource_metadata)
+
+
+def _container_path_parts(path_value, *, allow_resource_path=False):
     parts = [part for part in path_value.strip("/").split("/") if part]
     if len(parts) < 2:
         raise HTTPNotFound(content={"reason": "Invalid path"})
-    suffix = parts[2:]
-    if allow_mcp_suffix:
-        if suffix and suffix[-2:] != ["@mcp", "protocol"]:
-            raise HTTPNotFound(content={"reason": "Invalid resource path"})
-    elif suffix:
+    if not allow_resource_path and len(parts) > 2:
         raise HTTPNotFound(content={"reason": "Invalid issuer path"})
     return parts[0], parts[1], "/" + "/".join(parts)
 
 
 async def rfc_well_known_response(request, action, target_path, handlers):
-    if action == "oauth-protected-resource":
-        db_id, container_id, protected_resource_path = _container_path_parts(
-            target_path, allow_mcp_suffix=True
-        )
-    else:
-        db_id, container_id, protected_resource_path = _container_path_parts(target_path)
+    allow_resource_path = action == "oauth-protected-resource"
+    db_id, container_id, protected_resource_path = _container_path_parts(
+        target_path, allow_resource_path=allow_resource_path
+    )
     db = await get_database(db_id)
     async with transaction(db=db):
         root = await db.get_transaction_manager().get_root()
@@ -72,6 +87,6 @@ async def rfc_well_known_response(request, action, target_path, handlers):
         task_vars.registry.set(None)
         await get_registry(container)
         get_oauth_store(container, require_installed=True)
-        if action == "oauth-protected-resource":
+        if allow_resource_path:
             request.oauth_protected_resource_path = protected_resource_path
         return handlers[action](request, container)
