@@ -1,10 +1,11 @@
 from guillotina import configure
 from guillotina.api.service import Service
 from guillotina.component import query_utility
-from guillotina.contrib.mcp.interfaces import IMCPToolRegistry
+from guillotina.contrib.mcp.interfaces import IMCPAuthPolicy, IMCPToolRegistry
 from guillotina.contrib.mcp.security import require_access_content
 from guillotina.interfaces import IResource
-from guillotina.response import HTTPNotFound, HTTPServiceUnavailable, Response
+from guillotina.response import HTTPForbidden, HTTPNotFound, HTTPServiceUnavailable, HTTPUnauthorized, Response
+from guillotina.utils import get_authenticated_user, get_security_policy
 
 
 def _get_registry():
@@ -16,23 +17,39 @@ def _get_registry():
     return registry
 
 
+def _get_auth_policy(request, context):
+    policy = query_utility(IMCPAuthPolicy)
+    if policy is not None and policy.is_enabled(request, context):
+        return policy
+
+
 @configure.service(
     method="POST",
     context=IResource,
     name="@mcp/{action}",
-    permission="guillotina.MCPExecute",
+    permission="guillotina.Public",
     summary="MCP Streamable HTTP protocol endpoint (JSON-RPC 2.0)",
     allow_access=True,
 )
 class MCPActionPostService(Service):
     async def __call__(self):
-        require_access_content(self.context)
         action = self.request.matchdict.get("action", "")
         if action == "protocol":
             return await self._handle_protocol()
         raise HTTPNotFound(content={"reason": f"Unknown MCP POST action: {action}"})
 
     async def _handle_protocol(self):
+        auth_policy = _get_auth_policy(self.request, self.context)
+        user = get_authenticated_user()
+        if user is None or getattr(user, "id", "Anonymous User") == "Anonymous User":
+            headers = auth_policy.unauthorized_headers(self.request, self.context) if auth_policy else None
+            raise HTTPUnauthorized(headers=headers)
+        if not get_security_policy(user).check_permission("guillotina.MCPExecute", self.context):
+            raise HTTPForbidden()
+        require_access_content(self.context)
+        if auth_policy is not None and not auth_policy.is_authorized(self.request, self.context):
+            raise HTTPUnauthorized(headers=auth_policy.forbidden_headers(self.request, self.context))
+
         try:
             import anyio
             from mcp.server.streamable_http import StreamableHTTPServerTransport

@@ -71,7 +71,9 @@ register_oauth_audience_resolver(_mcp_protocol_audience_resolver)
 
 
 def _mcp_protected_resource_provider(request, context, protected_path):
-    resource = _mcp_resource_url_from_path(request, context, protected_path)
+    resource = mcp_resource(request, context) if protected_path is None else None
+    if resource is None:
+        resource = _mcp_resource_url_from_path(request, context, protected_path)
     if resource is None:
         return None
     issuer = container_url(request, context)
