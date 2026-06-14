@@ -41,17 +41,6 @@ def validate_issuer(issuer):
     return issuer
 
 
-def issuer_path(request, container):
-    return urlparse(container_url(request, container)).path.lstrip("/")
-
-
-def well_known_authorization_server_url(request, container):
-    return (
-        f"{request.scheme}://{request.host}/.well-known/oauth-authorization-server/"
-        f"{issuer_path(request, container)}"
-    )
-
-
 def well_known_protected_resource_url(request, container):
     from guillotina.contrib.oauth.flow.resources import oauth_required_audience
 

@@ -42,11 +42,6 @@ def validate_redirect_uri(uri):
     return _is_private_use_redirect(parsed)
 
 
-def is_native_redirect_uri(uri):
-    parsed = urlparse(uri)
-    return parsed.scheme not in ("http", "https")
-
-
 def redirect_uri_registered_for_client(client, redirect_uri):
     """Return True only if redirect_uri was registered for this client (no side effects).
 
