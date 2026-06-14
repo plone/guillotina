@@ -77,7 +77,6 @@ async def test_ensure_oauth_tables_tracks_initialization_per_pool(monkeypatch):
             self.executed.append(ddl)
 
     monkeypatch.setattr(utility, "OAUTH_DDL", ["SELECT 1"])
-    monkeypatch.setattr(utility, "_ddl_locks", {})
     monkeypatch.setattr(utility, "_ddl_initialized", set())
 
     first_storage = type("Storage", (), {"pool": FakePool()})()

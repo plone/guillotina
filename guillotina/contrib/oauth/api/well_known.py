@@ -1,9 +1,42 @@
 from guillotina import task_vars
+from guillotina.contrib.oauth.api.urls import container_url
+from guillotina.contrib.oauth.flow.scopes import oauth_scopes_supported
 from guillotina.contrib.oauth.storage.access import get_oauth_store
 from guillotina.interfaces import IContainer
 from guillotina.response import HTTPNotFound
 from guillotina.transactions import transaction
 from guillotina.utils import get_database, get_registry
+
+
+# Registry of ``.well-known`` metadata handlers keyed by document name. Other
+# packages (e.g. the MCP integration) register additional documents here.
+WELL_KNOWN_HANDLERS = {}
+
+
+def register_well_known_handler(name, handler):
+    WELL_KNOWN_HANDLERS[name] = handler
+
+
+def _authorization_server_metadata(request, container):
+    issuer = container_url(request, container)
+    return {
+        "issuer": issuer,
+        "authorization_endpoint": f"{issuer}/oauth/authorize",
+        "token_endpoint": f"{issuer}/oauth/token",
+        "registration_endpoint": f"{issuer}/oauth/register",
+        "revocation_endpoint": f"{issuer}/oauth/revoke",
+        "response_types_supported": ["code"],
+        "grant_types_supported": ["authorization_code", "refresh_token"],
+        "code_challenge_methods_supported": ["S256"],
+        "token_endpoint_auth_methods_supported": ["none"],
+        "revocation_endpoint_auth_methods_supported": ["none"],
+        "resource_indicators_supported": True,
+        "authorization_response_iss_parameter_supported": True,
+        "scopes_supported": oauth_scopes_supported(),
+    }
+
+
+register_well_known_handler("oauth-authorization-server", _authorization_server_metadata)
 
 
 def _container_path_parts(path_value, *, allow_mcp_suffix=False):
