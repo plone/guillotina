@@ -4,7 +4,13 @@ from guillotina.component import query_utility
 from guillotina.contrib.mcp.interfaces import IMCPAuthPolicy, IMCPToolRegistry
 from guillotina.contrib.mcp.security import require_access_content
 from guillotina.interfaces import IResource
-from guillotina.response import HTTPForbidden, HTTPNotFound, HTTPServiceUnavailable, HTTPUnauthorized, Response
+from guillotina.response import (
+    HTTPForbidden,
+    HTTPNotFound,
+    HTTPServiceUnavailable,
+    HTTPUnauthorized,
+    Response,
+)
 from guillotina.utils import get_authenticated_user, get_security_policy
 
 
