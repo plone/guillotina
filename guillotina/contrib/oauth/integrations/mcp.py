@@ -5,8 +5,8 @@ from zope.interface import implementer
 from guillotina import app_settings, configure
 from guillotina.contrib.mcp.interfaces import IMCPAuthPolicy
 from guillotina.contrib.oauth.api.request import normalize_list
-from guillotina.contrib.oauth.api.well_known import register_well_known_handler
 from guillotina.contrib.oauth.api.urls import container_url, well_known_protected_resource_url
+from guillotina.contrib.oauth.api.well_known import register_well_known_handler
 from guillotina.contrib.oauth.flow.resources import (
     register_oauth_audience_resolver,
     register_oauth_resource_resolver,

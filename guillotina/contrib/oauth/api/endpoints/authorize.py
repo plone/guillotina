@@ -59,9 +59,7 @@ async def authorize(service, store):
         return authz_redirect({"error": "invalid_target"})
     scopes = normalize_list(params.get("scope"))
 
-    user, new_token, authenticated_now, early_response = await _ensure_authenticated(
-        service, params, client
-    )
+    user, new_token, authenticated_now, early_response = await _ensure_authenticated(service, params, client)
     if early_response is not None:
         return early_response
 
@@ -82,9 +80,7 @@ async def authorize(service, store):
         secure = ""
         if str(getattr(service.request, "scheme", "") or "").lower() == "https":
             secure = "; Secure"
-        response_obj.headers["Set-Cookie"] = (
-            f"auth_token={new_token}; Path=/; HttpOnly; SameSite=Lax{secure}"
-        )
+        response_obj.headers["Set-Cookie"] = f"auth_token={new_token}; Path=/; HttpOnly; SameSite=Lax{secure}"
     return response_obj
 
 
@@ -201,11 +197,7 @@ async def _issue_or_consent(
     existing_consent = await store.has_consent(ckey)
     # A freshly logged-in request never carries a consent decision: the user
     # only submitted credentials, so always render the consent screen next.
-    decision = (
-        params.get("decision")
-        if service.request.method == "POST" and not authenticated_now
-        else None
-    )
+    decision = params.get("decision") if service.request.method == "POST" and not authenticated_now else None
     if decision in ("allow", "deny") and not csrf_valid(
         params.get(OAUTH_CSRF_FIELD), params, user.id, scopes, resources
     ):
