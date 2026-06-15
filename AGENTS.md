@@ -42,6 +42,16 @@
 - Avoid wrapper layers when task explicitly requires low-level protocol primitives.
 - Never commit credentials or local environment files.
 
+## Code Intention and Clarity
+- Code should read like a book: the flow of a module should tell the story of what is happening.
+- Names must express intent, not implementation details. Ask: "what does the caller care about?"
+  - Prefer `rate_limit_exceeded()` over `check_and_record_rate_limit()`.
+  - Prefer `build_client_from_registration()` over `make_client()`.
+  - Prefer `generate_opaque_token()` over `generate_opaque_token_value()`.
+- Do not hide side effects behind names that look like pure queries.
+- Keep functions small and at a single level of abstraction; each step should read as the next sentence.
+- A name does not need to describe every detail, but it must not lie or obscure the consumer's goal.
+
 ## Task Closeout Notes
 - Update `CHANGELOG.rst` for notable changes.
 - Record branch name, commit hash, validation output, and task evidence in Ops Tracker.
