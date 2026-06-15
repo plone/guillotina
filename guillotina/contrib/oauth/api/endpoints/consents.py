@@ -1,12 +1,13 @@
+from guillotina.auth.users import AnonymousUser
 from guillotina.contrib.oauth.api.endpoints.common import CONSENT_REQUEST_SINGLETON_PARAMS
-from guillotina.contrib.oauth.auth.helpers import current_user_or_none
 from guillotina.contrib.oauth.utils.request import form_content_type_valid, parse_form_encoded
 from guillotina.response import HTTPBadRequest, HTTPNotFound, HTTPUnauthorized, Response
+from guillotina.utils import get_authenticated_user
 
 
 async def list_consents_endpoint(service, store):
-    user = current_user_or_none()
-    if user is None:
+    user = get_authenticated_user()
+    if isinstance(user, AnonymousUser):
         return HTTPUnauthorized(content={"error": "invalid_token"})
 
     consents = await store.list_consents(user.id)
@@ -32,8 +33,8 @@ async def list_consents_endpoint(service, store):
 
 
 async def revoke_consent_endpoint(service, store):
-    user = current_user_or_none()
-    if user is None:
+    user = get_authenticated_user()
+    if isinstance(user, AnonymousUser):
         return HTTPUnauthorized(content={"error": "invalid_token"})
 
     if not form_content_type_valid(service.request):

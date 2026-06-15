@@ -1,6 +1,5 @@
 from guillotina import app_settings
 from guillotina.auth.utils import set_authenticated_user
-from guillotina.utils import get_authenticated_user
 
 
 async def authenticate_user_credentials(username, password):
@@ -13,11 +12,3 @@ async def authenticate_user_credentials(username, password):
         if user is not None:
             set_authenticated_user(user)
             return user
-
-
-def current_user_or_none():
-    """Return the authenticated user, or None when the request is anonymous."""
-    user = get_authenticated_user()
-    if user is None or getattr(user, "id", "Anonymous User") == "Anonymous User":
-        return None
-    return user

@@ -1,12 +1,11 @@
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 from zope.interface import implementer
 
 from guillotina import app_settings
 from guillotina.contrib.oauth.storage.interfaces import IOAuthStore
 from guillotina.contrib.oauth.utils.crypto import token_hash
-from guillotina.contrib.oauth.utils.time import utcnow
 from guillotina.exceptions import TransactionNotFound
 from guillotina.transactions import get_transaction
 
@@ -170,20 +169,17 @@ class PostgresOAuthStore:
                 """
                 SELECT 1 FROM oauth_consents
                 WHERE container_db_key = $1 AND consent_key = $2
-                  AND (expires_at IS NULL OR expires_at > $3)
+                  AND (expires_at IS NULL OR expires_at > now())
                 """,
                 self.container_db_key,
                 consent_key,
-                _ensure_utc(utcnow()),
             )
         return row is not None
 
     async def create_consent(self, consent_key, *, user_id, client_id, scope, resource):
-        now = utcnow()
         ttl = app_settings.get("oauth", {}).get("consent_ttl", 2592000)
         # ttl == 0 means the consent never expires; any other value (including a
         # negative one, used by tests to force expiry) yields an explicit timestamp.
-        expires_at = None if ttl == 0 else _ensure_utc(now + timedelta(seconds=ttl))
         txn, conn = await self._connection()
         async with txn.lock:
             await conn.execute(
@@ -191,7 +187,10 @@ class PostgresOAuthStore:
                 INSERT INTO oauth_consents (
                     container_db_key, consent_key, user_id, client_id, scope, resource,
                     granted_at, expires_at
-                ) VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $8)
+                ) VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb, now(),
+                    CASE WHEN $7::int = 0 THEN NULL
+                         ELSE now() + $7::int * interval '1 second'
+                    END)
                 ON CONFLICT (container_db_key, consent_key) DO UPDATE
                 SET scope = EXCLUDED.scope,
                     resource = EXCLUDED.resource,
@@ -204,8 +203,7 @@ class PostgresOAuthStore:
                 client_id,
                 _to_json_string(list(scope)),
                 _to_json_string(list(resource)),
-                _ensure_utc(now),
-                expires_at,
+                int(ttl),
             )
 
     async def list_consents(self, user_id):
@@ -216,12 +214,11 @@ class PostgresOAuthStore:
                 SELECT consent_key, user_id, client_id, scope, resource, granted_at, expires_at
                 FROM oauth_consents
                 WHERE container_db_key = $1 AND user_id = $2
-                  AND (expires_at IS NULL OR expires_at > $3)
+                  AND (expires_at IS NULL OR expires_at > now())
                 ORDER BY granted_at DESC
                 """,
                 self.container_db_key,
                 user_id,
-                _ensure_utc(utcnow()),
             )
         return [_row_to_consent(row) for row in rows]
 
@@ -278,10 +275,8 @@ class PostgresOAuthStore:
         resource,
         code_challenge,
     ):
-        now = utcnow()
         ttl = app_settings["oauth"].get("authorization_code_ttl", 600)
         code_hash_val = token_hash(raw_code)
-        expires_at = _ensure_utc(now + timedelta(seconds=ttl))
         txn, conn = await self._connection()
         async with txn.lock:
             await conn.execute(
@@ -289,7 +284,8 @@ class PostgresOAuthStore:
                 INSERT INTO oauth_authorization_codes (
                     container_db_key, code_hash, client_id, user_id, redirect_uri,
                     scope, resource, code_challenge, expires_at, created_at
-                ) VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7::jsonb, $8, $9, $10)
+                ) VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7::jsonb, $8,
+                    now() + $9::int * interval '1 second', now())
                 """,
                 self.container_db_key,
                 code_hash_val,
@@ -299,8 +295,7 @@ class PostgresOAuthStore:
                 _to_json_string(list(scope)),
                 _to_json_string(list(resource)),
                 code_challenge,
-                expires_at,
-                _ensure_utc(now),
+                int(ttl),
             )
         return _row_to_code(
             {
@@ -311,8 +306,8 @@ class PostgresOAuthStore:
                 "scope": list(scope),
                 "resource": list(resource),
                 "code_challenge": code_challenge,
-                "expires_at": expires_at,
-                "created_at": now,
+                "expires_at": None,
+                "created_at": None,
             }
         )
 
@@ -326,11 +321,10 @@ class PostgresOAuthStore:
                 FROM oauth_authorization_codes
                 WHERE container_db_key = $1
                   AND code_hash = $2
-                  AND expires_at > $3
+                  AND expires_at > now()
                 """,
                 self.container_db_key,
                 token_hash(code),
-                _ensure_utc(utcnow()),
             )
         return _row_to_code(row)
 
@@ -342,13 +336,12 @@ class PostgresOAuthStore:
                 DELETE FROM oauth_authorization_codes
                 WHERE container_db_key = $1
                   AND code_hash = $2
-                  AND expires_at > $3
+                  AND expires_at > now()
                 RETURNING code_hash, client_id, user_id, redirect_uri,
                           scope, resource, code_challenge, expires_at, created_at
                 """,
                 self.container_db_key,
                 token_hash(code),
-                _ensure_utc(utcnow()),
             )
         return _row_to_code(row)
 
@@ -414,10 +407,8 @@ class PostgresOAuthStore:
         auth_code_hash=None,
         rotated_from=None,
     ):
-        now = utcnow()
         ttl = app_settings["oauth"].get("refresh_token_ttl", 2592000)
         hash_val = token_hash(raw_token)
-        expires_at = _ensure_utc(now + timedelta(seconds=ttl))
         txn, conn = await self._connection()
         async with txn.lock:
             await conn.execute(
@@ -425,7 +416,8 @@ class PostgresOAuthStore:
                 INSERT INTO oauth_refresh_tokens (
                     container_db_key, token_hash, client_id, user_id, scope, resource,
                     expires_at, rotated_from, auth_code_hash, created_at, last_used_at
-                ) VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $8, $9, $10, $11)
+                ) VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb,
+                    now() + $7::int * interval '1 second', $8, $9, now(), now())
                 """,
                 self.container_db_key,
                 hash_val,
@@ -433,20 +425,16 @@ class PostgresOAuthStore:
                 user_id,
                 _to_json_string(list(scope)),
                 _to_json_string(list(resource)),
-                expires_at,
+                int(ttl),
                 rotated_from,
                 auth_code_hash,
-                _ensure_utc(now),
-                _ensure_utc(now),
             )
         return raw_token
 
     async def rotate_refresh_token(self, *, old_refresh_raw, new_refresh_raw, client_id, scope, resource):
         oh = token_hash(old_refresh_raw)
         nh = token_hash(new_refresh_raw)
-        now = utcnow()
         ttl = app_settings["oauth"].get("refresh_token_ttl", 2592000)
-        new_expires = _ensure_utc(now + timedelta(seconds=ttl))
         txn, conn = await self._connection()
         async with txn.lock:
             upd = await conn.fetchrow(
@@ -457,14 +445,13 @@ class PostgresOAuthStore:
                   AND token_hash = $2
                   AND client_id = $3
                   AND revoked_at IS NULL
-                  AND expires_at > $5
+                  AND expires_at > now()
                 RETURNING user_id, auth_code_hash
                 """,
                 self.container_db_key,
                 oh,
                 client_id,
                 nh,
-                _ensure_utc(now),
             )
             if upd is None:
                 return False
@@ -473,7 +460,8 @@ class PostgresOAuthStore:
                 INSERT INTO oauth_refresh_tokens (
                     container_db_key, token_hash, client_id, user_id, scope, resource,
                     expires_at, rotated_from, auth_code_hash, created_at, last_used_at
-                ) VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7, $8, $9, $10, $11)
+                ) VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb,
+                    now() + $7::int * interval '1 second', $8, $9, now(), now())
                 """,
                 self.container_db_key,
                 nh,
@@ -481,11 +469,9 @@ class PostgresOAuthStore:
                 upd["user_id"],
                 _to_json_string(list(scope)),
                 _to_json_string(list(resource)),
-                new_expires,
+                int(ttl),
                 oh,
                 upd["auth_code_hash"],
-                _ensure_utc(now),
-                _ensure_utc(now),
             )
         return True
 
@@ -500,12 +486,11 @@ class PostgresOAuthStore:
                 FROM oauth_refresh_tokens
                 WHERE container_db_key = $1
                   AND token_hash = $2
-                  AND expires_at > $3
+                  AND expires_at > now()
                   AND revoked_at IS NULL
                 """,
                 self.container_db_key,
                 token_hash(token),
-                _ensure_utc(utcnow()),
             )
         return _row_to_refresh(row)
 
@@ -554,6 +539,7 @@ class PostgresOAuthStore:
 
 
 async def cleanup_expired(conn, batch_size=5000):
+    await conn.execute("BEGIN")
     await conn.execute(
         """
         DELETE FROM oauth_authorization_codes
@@ -590,3 +576,4 @@ async def cleanup_expired(conn, batch_size=5000):
         """,
         batch_size,
     )
+    await conn.execute("COMMIT")

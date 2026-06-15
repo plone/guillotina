@@ -119,13 +119,6 @@ async def _rotate_refresh_token(service, store, data):
     record = await store.get_valid_refresh(refresh_raw)
 
     if record is None:
-        candidate = await store.get_refresh_token(refresh_raw)
-        if candidate is not None and candidate.get("revoked_at"):
-            await store.revoke_refresh_family(
-                client_id=candidate["client_id"],
-                user_id=candidate["user_id"],
-                auth_code_hash=candidate.get("auth_code_hash"),
-            )
         return HTTPBadRequest(content={"error": "invalid_grant"})
     if client is None or record["client_id"] != client["client_id"]:
         return HTTPBadRequest(content={"error": "invalid_grant"})

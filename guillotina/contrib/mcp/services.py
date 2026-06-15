@@ -1,5 +1,6 @@
 from guillotina import configure
 from guillotina.api.service import Service
+from guillotina.auth.users import AnonymousUser
 from guillotina.component import query_utility
 from guillotina.contrib.mcp.interfaces import IMCPAuthPolicy, IMCPToolRegistry
 from guillotina.contrib.mcp.security import require_access_content
@@ -47,7 +48,7 @@ class MCPActionPostService(Service):
     async def _handle_protocol(self):
         auth_policy = _get_auth_policy(self.request, self.context)
         user = get_authenticated_user()
-        if user is None or getattr(user, "id", "Anonymous User") == "Anonymous User":
+        if isinstance(user, AnonymousUser):
             headers = auth_policy.unauthorized_headers(self.request, self.context) if auth_policy else None
             raise HTTPUnauthorized(headers=headers)
         if not get_security_policy(user).check_permission("guillotina.MCPExecute", self.context):

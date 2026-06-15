@@ -1,8 +1,9 @@
 from guillotina import app_settings
 from guillotina.auth import authenticate_user
+from guillotina.auth.users import AnonymousUser
 from guillotina.contrib.oauth.api.endpoints.common import AUTHORIZATION_REQUEST_SINGLETON_PARAMS
 from guillotina.contrib.oauth.api.pages import consent_form, login_form, oauth_error_page
-from guillotina.contrib.oauth.auth.helpers import authenticate_user_credentials, current_user_or_none
+from guillotina.contrib.oauth.auth.helpers import authenticate_user_credentials
 from guillotina.contrib.oauth.flow.clients import (
     redirect_uri_registered_for_client,
     redirect_with_params,
@@ -24,6 +25,7 @@ from guillotina.contrib.oauth.utils.request import (
 )
 from guillotina.contrib.oauth.utils.urls import container_issuer_url
 from guillotina.response import HTTPBadRequest, HTTPFound
+from guillotina.utils import get_authenticated_user
 
 
 async def authorization_endpoint(service, store):
@@ -143,8 +145,8 @@ class _AuthenticationResult:
 
 async def _authenticate_user_or_present_login(service, params, client):
     """Resolve the end user, logging in via the form if needed."""
-    user = current_user_or_none()
-    if user is not None:
+    user = get_authenticated_user()
+    if not isinstance(user, AnonymousUser):
         return _AuthenticationResult(user=user)
 
     if not (service.request.method == "POST" and params.get("username")):

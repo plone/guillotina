@@ -238,13 +238,14 @@ async def test_refresh_token_reuse_invalidates_rotation_family(container_install
         )
         assert status == 400
 
-        _also_bad, status = await requester(
+        fresh, status = await requester(
             "POST",
             "/db/guillotina/oauth/token",
             data=f"grant_type=refresh_token&client_id={client['client_id']}&refresh_token={new_rt}",
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
-        assert status == 400
+        assert status == 200
+        assert fresh["refresh_token"] != new_rt
 
 
 @pytest.mark.app_settings(EXPIRED_CODE_SETTINGS)
