@@ -4,32 +4,15 @@ CHANGELOG
 7.1.3 (unreleased)
 ------------------
 
+- OAuth: implement Guillotina OAuth 2.0 authorization server with authorization-code flow,
+  dynamic client registration, token refresh/revocation, consent management and well-known
+  metadata. Compliant with RFC 6749, RFC 7636, RFC 7591, RFC 8414, RFC 9207, RFC 9700 and
+  RFC 9728.
+  [rboixaderg]
 - MCP: enforce Guillotina content permissions for tools and resources,
   require ``ViewContent`` for full serialized JSON, isolate cached tool
   responses by principal/container/context, and invalidate MCP cache on
   permission changes.
-  [rboixaderg]
-- OAuth: add extensible ``resource`` resolvers (:mod:`guillotina.contrib.oauth.flow.resources`), apply MCP
-  protocol URLs only when ``guillotina.contrib.mcp`` is enabled, require redirect URIs to be merged via
-  ``POST /oauth/register`` before ``/oauth/authorize``, validate PKCE ``code_verifier`` (RFC 7636),
-  atomically finalize authorization-code exchange after checks, defend refresh-token rotation against reuse.
-  [rboixaderg]
-- OAuth: drop in-memory and Redis storage backends; PostgreSQL is the only store.
-  [rboixaderg]
-- OAuth: harden per RFC 9700 security BCP: throttle failed credential logins at the authorization endpoint,
-  reject PKCE downgrade (``code_verifier`` without a bound ``code_challenge``), emit the ``iss`` authorization
-  response parameter (RFC 9207) and advertise it in metadata, and derive purpose-specific keys for token
-  hashing and CSRF signing instead of reusing the raw ``jwt.secret``.
-  [rboixaderg]
-- OAuth: require PKCE for all public-client authorization-code flows, enforce registered client scopes,
-  add Redis-backed rate limiting when Redis is configured, and tighten dynamic client registration responses
-  with ``201 Created``, no-store cache headers and ``client_id_issued_at``.
-  [rboixaderg]
-- OAuth: manage stored consents — add a configurable ``consent_ttl`` (default 30 days, ``0`` disables
-  expiry) with an ``expires_at`` column purged by ``oauth_cleanup_expired``, expose
-  ``GET``/``POST /oauth/consents`` for an authenticated user to list and revoke their grants, and make
-  revocation (via the consent endpoint or refresh-token ``/oauth/revoke``) drop the consent so a new
-  authorization can no longer be re-issued silently.
   [rboixaderg]
 
 

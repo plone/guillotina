@@ -7,7 +7,7 @@ from guillotina import task_vars
 from guillotina.contrib.oauth.storage import utility
 from guillotina.contrib.oauth.storage.access import get_oauth_store, oauth_container_db_key
 from guillotina.contrib.oauth.storage.interfaces import IOAuthStore
-from guillotina.contrib.oauth.storage.pg.repository import OAuthRepository, _parse_dt
+from guillotina.contrib.oauth.storage.pg.repository import PostgresOAuthStore, _parse_dt
 from guillotina.contrib.oauth.storage.pg.schema import OAUTH_DDL
 
 
@@ -18,7 +18,7 @@ def assert_oauth_store(store):
 
 
 def test_oauth_repository_implements_interface():
-    store = OAuthRepository("db/guillotina")
+    store = PostgresOAuthStore("db/guillotina")
     assert_oauth_store(store)
 
 

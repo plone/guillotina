@@ -5,7 +5,7 @@ import jwt
 import pytest
 
 from guillotina import app_settings
-from guillotina.contrib.oauth.flow.tokens import access_token_key
+from guillotina.contrib.oauth.utils.crypto import access_token_signing_key
 from guillotina.tests.mcp.test_mcp import PROTOCOL_HEADERS, _skip_if_protocol_unavailable
 from guillotina.tests.oauth.conftest import (
     OAUTH_MCP_SETTINGS,
@@ -135,7 +135,7 @@ async def test_authorize_get_preserves_multiple_resource_parameters(container_in
         token = await token_from_code(requester, client, code, verifier)
         claims = jwt.decode(
             token["access_token"],
-            access_token_key(),
+            access_token_signing_key(),
             algorithms=[app_settings["jwt"]["algorithm"]],
             options={"verify_aud": False},
         )

@@ -2,8 +2,8 @@ import jwt
 import pytest
 
 from guillotina import app_settings
-from guillotina.contrib.oauth.flow.ratelimit import reset_rate_limits
-from guillotina.contrib.oauth.flow.tokens import access_token_key
+from guillotina.contrib.oauth.utils.crypto import access_token_signing_key
+from guillotina.contrib.oauth.utils.ratelimit import reset_rate_limits
 from guillotina.tests.oauth.conftest import (
     OAUTH_SETTINGS,
     authorize_code,
@@ -53,7 +53,7 @@ async def test_code_token_and_refresh_rotation(container_install_requester):
         assert token_headers["Pragma"] == "no-cache"
         claims = jwt.decode(
             token["access_token"],
-            access_token_key(),
+            access_token_signing_key(),
             algorithms=[app_settings["jwt"]["algorithm"]],
             options={"verify_aud": False},
         )

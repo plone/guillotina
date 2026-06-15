@@ -1,7 +1,7 @@
 import pytest
 
-from guillotina.contrib.oauth.flow.clients import consent_key
-from guillotina.contrib.oauth.flow.tokens import opaque_token
+from guillotina.contrib.oauth.flow.consent import build_consent_key
+from guillotina.contrib.oauth.flow.tokens import generate_opaque_token
 from guillotina.tests.oauth.conftest import requires_pg
 from guillotina.tests.oauth.test_oauth_storage_backend import assert_oauth_store
 from guillotina.transactions import transaction
@@ -30,7 +30,7 @@ async def run_oauth_store_contract(store):
 
     scopes = ["guillotina:access"]
     resources = ["http://localhost/db/guillotina"]
-    ckey = consent_key("root", client["client_id"], scopes, resources)
+    ckey = build_consent_key("root", client["client_id"], scopes, resources)
     assert await store.has_consent(ckey) is False
     await store.create_consent(
         ckey,
@@ -41,7 +41,7 @@ async def run_oauth_store_contract(store):
     )
     assert await store.has_consent(ckey) is True
 
-    raw_code = opaque_token("goc_")
+    raw_code = generate_opaque_token("goc_")
     code_record = await store.create_code(
         raw_code=raw_code,
         client_id=client["client_id"],
@@ -53,7 +53,7 @@ async def run_oauth_store_contract(store):
     )
     assert await store.get_active_code(raw_code) is not None
 
-    standalone_refresh = opaque_token("gor_")
+    standalone_refresh = generate_opaque_token("gor_")
     await store.create_refresh_token(
         raw_token=standalone_refresh,
         client_id=client["client_id"],
@@ -66,7 +66,7 @@ async def run_oauth_store_contract(store):
     assert await store.get_valid_refresh(standalone_refresh) is None
     assert (await store.get_refresh_token(standalone_refresh))["revoked_at"] is not None
 
-    linked_refresh = opaque_token("gor_")
+    linked_refresh = generate_opaque_token("gor_")
     await store.create_refresh_token(
         raw_token=linked_refresh,
         client_id=client["client_id"],
@@ -93,7 +93,7 @@ async def run_oauth_store_contract(store):
 )
 async def test_postgresql_oauth_store_contract(guillotina_main):
     from guillotina.component import get_utility
-    from guillotina.contrib.oauth.storage.pg.repository import OAuthRepository
+    from guillotina.contrib.oauth.storage.pg.repository import PostgresOAuthStore
     from guillotina.contrib.oauth.storage.utility import ensure_oauth_tables
     from guillotina.interfaces import IApplication
 
@@ -101,7 +101,7 @@ async def test_postgresql_oauth_store_contract(guillotina_main):
     await ensure_oauth_tables(root["db"].storage)
 
     async with transaction(db=root["db"]):
-        store = OAuthRepository("db/pg-contract")
+        store = PostgresOAuthStore("db/pg-contract")
         await run_oauth_store_contract(store)
 
 

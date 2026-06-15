@@ -32,7 +32,7 @@ app_settings = {
         "revoke_rate_limit": 120,
         "revoke_rate_window": 60,
     },
-    "check_writable_request": "guillotina.contrib.oauth.api.request.check_writable_request",
+    "check_writable_request": "guillotina.contrib.oauth.utils.writable.requires_writable_transaction",
     "auth_token_validators": [
         "guillotina.contrib.oauth.auth.validators.OAuthJWTValidator",
         "guillotina.auth.validators.SaltedHashPasswordValidator",

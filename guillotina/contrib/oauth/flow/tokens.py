@@ -1,35 +1,16 @@
-import calendar
-import hashlib
-import hmac
 import secrets
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 import jwt
 
 from guillotina import app_settings
-from guillotina.contrib.oauth.flow.keys import derive_key
+from guillotina.contrib.oauth.utils.crypto import access_token_signing_key
+from guillotina.contrib.oauth.utils.time import timestamp, utcnow
 
 
-def utcnow():
-    return datetime.utcnow()
-
-
-def timestamp(dt):
-    return int(calendar.timegm(dt.utctimetuple()))
-
-
-def opaque_token(prefix=""):
+def generate_opaque_token(prefix=""):
     value = secrets.token_urlsafe(48)
     return f"{prefix}{value}" if prefix else value
-
-
-def token_hash(token: str) -> str:
-    key = derive_key("token-hash")
-    return hmac.new(key, token.encode("utf-8"), hashlib.sha256).hexdigest()
-
-
-def access_token_key() -> bytes:
-    return derive_key("access-token")
 
 
 def issue_access_token(*, issuer, subject, audience, client_id, scope):
@@ -46,5 +27,5 @@ def issue_access_token(*, issuer, subject, audience, client_id, scope):
         "exp": timestamp(now + timedelta(seconds=ttl)),
         "token_type": "oauth_access_token",
     }
-    token = jwt.encode(claims, access_token_key(), algorithm=app_settings["jwt"]["algorithm"])
+    token = jwt.encode(claims, access_token_signing_key(), algorithm=app_settings["jwt"]["algorithm"])
     return token, claims

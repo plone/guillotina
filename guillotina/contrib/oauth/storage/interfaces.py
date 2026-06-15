@@ -71,9 +71,6 @@ class IOAuthStore(Interface):
     def rotate_refresh_token(self, *, old_refresh_raw, new_refresh_raw, client_id, scope, resource):
         """Mark ``old_refresh_raw`` revoked and persist ``new_refresh_raw``. Return ``False`` if not rotatable."""
 
-    def revoke_refresh_family_for_reuse(self, *, client_id, user_id, auth_code_hash):
-        """Revoke all refresh tokens in the reuse-compromise rotation family."""
-
     def revoke_refresh_family(self, *, client_id, user_id, auth_code_hash):
         """Revoke all refresh tokens in one authorization grant family."""
 

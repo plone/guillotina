@@ -205,7 +205,7 @@ async def test_register_reports_invalid_redirect_uri(container_install_requester
 @pytest.mark.app_settings(RATE_LIMITED_SETTINGS)
 @pytest.mark.parametrize("install_addons", [["oauth"]])
 async def test_register_rate_limited(container_install_requester):
-    from guillotina.contrib.oauth.flow.ratelimit import reset_rate_limits
+    from guillotina.contrib.oauth.utils.ratelimit import reset_rate_limits
 
     reset_rate_limits()
     payload = json.dumps({"redirect_uris": ["http://localhost:9999/callback"]})

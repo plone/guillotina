@@ -599,7 +599,7 @@ async def test_authorize_response_includes_iss(container_install_requester):
 @pytest.mark.parametrize("install_addons", [["oauth"]])
 async def test_authorize_login_rate_limited_after_failures(container_install_requester):
     """Failed credential logins at the authorization endpoint are throttled."""
-    from guillotina.contrib.oauth.flow.ratelimit import reset_rate_limits
+    from guillotina.contrib.oauth.utils.ratelimit import reset_rate_limits
 
     reset_rate_limits()
     async with container_install_requester as requester:

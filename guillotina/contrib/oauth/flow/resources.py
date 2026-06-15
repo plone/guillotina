@@ -15,6 +15,8 @@ from __future__ import annotations
 
 from typing import Callable, FrozenSet, Iterable, List, Optional
 
+from guillotina.contrib.oauth.utils.urls import container_issuer_url
+
 
 ResourceResolver = Callable[..., Iterable[str]]
 AudienceResolver = Callable[..., Optional[str]]
@@ -35,9 +37,7 @@ def register_oauth_audience_resolver(resolver: AudienceResolver) -> None:
 
 
 def _default_container_resolver(request, container):
-    from guillotina.contrib.oauth.api.urls import container_url
-
-    return {container_url(request, container)}
+    return {container_issuer_url(request, container)}
 
 
 def ensure_default_oauth_resources_registered() -> None:
@@ -68,7 +68,6 @@ def oauth_allowed_resources(request, container) -> FrozenSet[str]:
 
 def oauth_required_audience(request, container) -> str:
     from guillotina import app_settings as _apps
-    from guillotina.contrib.oauth.api.urls import container_url
 
     applications = set(_apps.get("applications") or [])
     for resolver in _audience_resolvers:
@@ -80,4 +79,19 @@ def oauth_required_audience(request, container) -> str:
         resource = resolver(request, container)
         if resource:
             return resource
-    return container_url(request, container)
+    return container_issuer_url(request, container)
+
+
+def validate_resource(request, container, resources):
+    from guillotina.contrib.oauth.utils.errors import raise_oauth_error
+    from guillotina.contrib.oauth.utils.request import normalize_list
+
+    base = container_issuer_url(request, container)
+    allowed = oauth_allowed_resources(request, container)
+    if not resources:
+        return [base]
+    resources = normalize_list(resources)
+    for resource in resources:
+        if resource not in allowed:
+            raise_oauth_error("invalid_target", "resource is not allowed")
+    return resources

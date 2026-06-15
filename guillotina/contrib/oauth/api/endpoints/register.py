@@ -1,14 +1,14 @@
 from guillotina import app_settings
-from guillotina.contrib.oauth.api.request import client_identifier
-from guillotina.contrib.oauth.flow.clients import make_client
-from guillotina.contrib.oauth.flow.ratelimit import rate_limit_exceeded
+from guillotina.contrib.oauth.flow.clients import build_client_from_registration
+from guillotina.contrib.oauth.utils.ratelimit import rate_limit_exceeded
+from guillotina.contrib.oauth.utils.request import peer_ip_address
 from guillotina.response import HTTPBadRequest, HTTPTooManyRequests, Response
 
 
-async def register(service, store):
+async def client_registration_endpoint(service, store):
     oauth_settings = app_settings.get("oauth", {})
     if await rate_limit_exceeded(
-        f"oauth-register:{client_identifier(service.request)}",
+        f"oauth-register:{peer_ip_address(service.request)}",
         limit=oauth_settings.get("registration_rate_limit", 20),
         window=oauth_settings.get("registration_rate_window", 600),
     ):
@@ -25,7 +25,7 @@ async def register(service, store):
         )
     data = await service.request.json()
     try:
-        client = make_client(data)
+        client = build_client_from_registration(data)
     except HTTPBadRequest as exc:
         return exc
     await store.create_client(client)

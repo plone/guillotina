@@ -1,27 +1,27 @@
 from guillotina import configure
 from guillotina.api.service import Service
-from guillotina.contrib.oauth.api.endpoints.authorize import authorize
+from guillotina.contrib.oauth.api.endpoints.authorize import authorization_endpoint
 from guillotina.contrib.oauth.api.endpoints.common import OAuthService
-from guillotina.contrib.oauth.api.endpoints.consents import list_consents, revoke_consent
-from guillotina.contrib.oauth.api.endpoints.register import register
-from guillotina.contrib.oauth.api.endpoints.revoke import revoke
-from guillotina.contrib.oauth.api.endpoints.token import token
-from guillotina.contrib.oauth.api.well_known import WELL_KNOWN_HANDLERS, rfc_well_known_response
+from guillotina.contrib.oauth.api.endpoints.consents import list_consents_endpoint, revoke_consent_endpoint
+from guillotina.contrib.oauth.api.endpoints.register import client_registration_endpoint
+from guillotina.contrib.oauth.api.endpoints.revoke import token_revocation_endpoint
+from guillotina.contrib.oauth.api.endpoints.token import token_endpoint
+from guillotina.contrib.oauth.api.well_known import WELL_KNOWN_HANDLERS, serve_well_known_metadata
 from guillotina.interfaces import IApplication, IContainer
 from guillotina.response import HTTPNotFound
 
 
 # Dispatch tables mapping the ``oauth/{action}`` matchdict to its handler.
 OAUTH_GET_ACTIONS = {
-    "authorize": authorize,
-    "consents": list_consents,
+    "authorize": authorization_endpoint,
+    "consents": list_consents_endpoint,
 }
 OAUTH_POST_ACTIONS = {
-    "register": register,
-    "authorize": authorize,
-    "token": token,
-    "revoke": revoke,
-    "consents": revoke_consent,
+    "register": client_registration_endpoint,
+    "authorize": authorization_endpoint,
+    "token": token_endpoint,
+    "revoke": token_revocation_endpoint,
+    "consents": revoke_consent_endpoint,
 }
 
 
@@ -32,7 +32,7 @@ OAUTH_POST_ACTIONS = {
     name=".well-known/{action}",
     allow_access=True,
 )
-class OAuthWellKnown(OAuthService):
+class ContainerOAuthWellKnownService(OAuthService):
     async def __call__(self):
         self.oauth_store()
         action = self.request.matchdict.get("action", "")
@@ -48,14 +48,14 @@ class OAuthWellKnown(OAuthService):
     name=".well-known/{action}/{target_path:path}",
     allow_access=True,
 )
-class OAuthRFCWellKnown(Service):
+class ApplicationOAuthWellKnownService(Service):
     async def __call__(self):
         action = self.request.matchdict.get("action", "")
         if action not in WELL_KNOWN_HANDLERS:
             return HTTPNotFound(content={"reason": f"Unknown well-known endpoint: {action}"})
         target_path = self.request.matchdict.get("target_path", "")
         try:
-            return await rfc_well_known_response(self.request, action, target_path, WELL_KNOWN_HANDLERS)
+            return await serve_well_known_metadata(self.request, action, target_path, WELL_KNOWN_HANDLERS)
         except HTTPNotFound as exc:
             return exc
 
@@ -67,7 +67,7 @@ class OAuthRFCWellKnown(Service):
     name="oauth/{action}",
     allow_access=True,
 )
-class OAuthGet(OAuthService):
+class ContainerOAuthGetService(OAuthService):
     async def __call__(self):
         action = self.request.matchdict.get("action", "")
         handler = OAUTH_GET_ACTIONS.get(action)
@@ -83,7 +83,7 @@ class OAuthGet(OAuthService):
     name="oauth/{action}",
     allow_access=True,
 )
-class OAuthPost(OAuthService):
+class ContainerOAuthPostService(OAuthService):
     async def __call__(self):
         action = self.request.matchdict.get("action", "")
         handler = OAUTH_POST_ACTIONS.get(action)

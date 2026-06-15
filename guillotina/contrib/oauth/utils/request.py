@@ -1,13 +1,6 @@
 from urllib.parse import parse_qs
 
-from guillotina.interfaces import WRITING_VERBS
-from guillotina.response import HTTPBadRequest, HTTPPreconditionFailed
-
-
-def check_writable_request(request):
-    return request.method in WRITING_VERBS or (
-        request.method == "GET" and str(getattr(request, "path", "")).endswith("/oauth/authorize")
-    )
+from guillotina.contrib.oauth.utils.errors import raise_oauth_error
 
 
 def normalize_list(value):
@@ -47,7 +40,7 @@ def form_content_type_valid(request):
     return content_type.split(";", 1)[0].strip().lower() == "application/x-www-form-urlencoded"
 
 
-def client_identifier(request):
+def peer_ip_address(request):
     """Return a stable identifier for the connecting peer.
 
     Uses the direct transport peer address (ASGI ``scope['client']``) rather
@@ -84,17 +77,10 @@ def duplicate_param_names(params, singleton_fields):
 def reject_duplicate_params(params, singleton_fields):
     duplicates = duplicate_param_names(params, singleton_fields)
     if duplicates:
-        oauth_error("invalid_request", f"duplicate parameter: {duplicates[0]}")
+        raise_oauth_error("invalid_request", f"duplicate parameter: {duplicates[0]}")
 
 
 def parse_form_encoded(body, *, singleton_fields=()):
     parsed = parse_qs(body, keep_blank_values=True)
     reject_duplicate_params(parsed, singleton_fields)
     return {key: values if len(values) > 1 else values[0] for key, values in parsed.items()}
-
-
-def oauth_error(error, description=None, status=400):
-    content = {"error": error}
-    if description:
-        content["error_description"] = description
-    raise HTTPBadRequest(content=content) if status == 400 else HTTPPreconditionFailed(content=content)

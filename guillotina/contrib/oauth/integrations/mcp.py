@@ -4,18 +4,18 @@ from zope.interface import implementer
 
 from guillotina import app_settings, configure
 from guillotina.contrib.mcp.interfaces import IMCPAuthPolicy
-from guillotina.contrib.oauth.api.request import normalize_list
-from guillotina.contrib.oauth.api.urls import container_url, well_known_protected_resource_url
 from guillotina.contrib.oauth.api.well_known import register_protected_resource_provider
 from guillotina.contrib.oauth.flow.resources import (
     register_oauth_audience_resolver,
     register_oauth_resource_resolver,
 )
 from guillotina.contrib.oauth.flow.scopes import OAUTH_DEFAULT_SCOPE, oauth_scopes_supported
+from guillotina.contrib.oauth.utils.request import normalize_list
+from guillotina.contrib.oauth.utils.urls import container_issuer_url, well_known_protected_resource_url
 
 
 def _mcp_resource_url_from_path(request, container, path):
-    issuer = urlparse(container_url(request, container))
+    issuer = urlparse(container_issuer_url(request, container))
     target_path = "/" + str(path or "").strip("/")
     container_path = issuer.path.rstrip("/")
     if not target_path.endswith("/@mcp/protocol"):
@@ -26,7 +26,7 @@ def _mcp_resource_url_from_path(request, container, path):
 
 
 def _mcp_resource_url_from_value(request, container, value):
-    issuer = urlparse(container_url(request, container))
+    issuer = urlparse(container_issuer_url(request, container))
     parsed = urlparse(value)
     if parsed.scheme != issuer.scheme or parsed.netloc != issuer.netloc:
         return None
@@ -46,11 +46,11 @@ def mcp_resource(request, container):
         resource = _mcp_resource_url_from_path(request, container, request_path)
         if resource:
             return resource
-    return f"{container_url(request, container)}/@mcp/protocol"
+    return f"{container_issuer_url(request, container)}/@mcp/protocol"
 
 
 def _mcp_protocol_resource_resolver(request, container):
-    resources = {f"{container_url(request, container)}/@mcp/protocol"}
+    resources = {f"{container_issuer_url(request, container)}/@mcp/protocol"}
     params = getattr(request, "oauth_request_params", {}) or {}
     for value in normalize_list(params.get("resource")):
         resource = _mcp_resource_url_from_value(request, container, value)
@@ -76,7 +76,7 @@ def _mcp_protected_resource_provider(request, context, protected_path):
         resource = _mcp_resource_url_from_path(request, context, protected_path)
     if resource is None:
         return None
-    issuer = container_url(request, context)
+    issuer = container_issuer_url(request, context)
     return {
         "resource": resource,
         "authorization_servers": [issuer],

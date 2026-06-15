@@ -1,6 +1,6 @@
 import pytest
 
-from guillotina.contrib.oauth.flow.ratelimit import reset_rate_limits
+from guillotina.contrib.oauth.utils.ratelimit import reset_rate_limits
 from guillotina.tests.oauth.conftest import (
     OAUTH_SETTINGS,
     authorize_code,

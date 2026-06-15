@@ -6,7 +6,7 @@ from guillotina.utils import get_current_container, get_full_content_path, get_u
 from guillotina.utils.misc import build_url
 
 
-def container_url(request, container):
+def container_issuer_url(request, container):
     issuer = app_settings.get("oauth", {}).get("issuer")
     if issuer:
         return validate_issuer(issuer)
@@ -46,18 +46,3 @@ def well_known_protected_resource_url(request, container):
 
     parsed = urlparse(oauth_required_audience(request, container))
     return f"{parsed.scheme}://{parsed.netloc}/.well-known/oauth-protected-resource/{parsed.path.lstrip('/')}"
-
-
-def validate_resource(request, container, resources):
-    from guillotina.contrib.oauth.api.request import normalize_list, oauth_error
-    from guillotina.contrib.oauth.flow.resources import oauth_allowed_resources
-
-    base = container_url(request, container)
-    allowed = oauth_allowed_resources(request, container)
-    if not resources:
-        return [base]
-    resources = normalize_list(resources)
-    for resource in resources:
-        if resource not in allowed:
-            oauth_error("invalid_target", "resource is not allowed")
-    return resources

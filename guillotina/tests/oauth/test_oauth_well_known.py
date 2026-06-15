@@ -54,8 +54,8 @@ async def test_protected_resource_metadata_returns_404_when_no_provider_matches(
 
 
 @pytest.mark.asyncio
-async def test_container_path_parts_allows_resource_suffix():
-    db_id, container_id, protected_path = well_known._container_path_parts(
+async def test_split_well_known_target_path_allows_resource_suffix():
+    db_id, container_id, protected_path = well_known._split_well_known_target_path(
         "/db/guillotina/subfolder/@mcp/protocol", allow_resource_path=True
     )
     assert db_id == "db"
@@ -64,6 +64,6 @@ async def test_container_path_parts_allows_resource_suffix():
 
 
 @pytest.mark.asyncio
-async def test_container_path_parts_rejects_suffix_for_issuer_metadata():
+async def test_split_well_known_target_path_rejects_suffix_for_issuer_metadata():
     with pytest.raises(HTTPNotFound):
-        well_known._container_path_parts("/db/guillotina/extra")
+        well_known._split_well_known_target_path("/db/guillotina/extra")

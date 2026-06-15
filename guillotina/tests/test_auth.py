@@ -6,13 +6,13 @@ import pytest
 from guillotina._settings import app_settings
 from guillotina.auth import validators
 from guillotina.content import Container
-from guillotina.contrib.oauth.api.urls import container_url, validate_issuer
-from guillotina.contrib.oauth.api.views import oauth_error_page
+from guillotina.contrib.oauth.api.pages import oauth_error_page
 from guillotina.contrib.oauth.auth.validators import OAuthJWTValidator
-from guillotina.contrib.oauth.flow.clients import make_client, scopes_registered_for_client
-from guillotina.contrib.oauth.flow.ratelimit import rate_limit_check, rate_limit_exceeded, reset_rate_limits
+from guillotina.contrib.oauth.flow.clients import build_client_from_registration, scopes_registered_for_client
 from guillotina.contrib.oauth.flow.resources import oauth_required_audience, register_oauth_audience_resolver
 from guillotina.contrib.oauth.flow.tokens import issue_access_token
+from guillotina.contrib.oauth.utils.ratelimit import rate_limit_check, rate_limit_exceeded, reset_rate_limits
+from guillotina.contrib.oauth.utils.urls import container_issuer_url, validate_issuer
 from guillotina.response import HTTPBadRequest
 from guillotina.tests.utils import make_mocked_request
 
@@ -123,12 +123,12 @@ async def test_oauth_html_pages_deny_framing(dummy_guillotina):
     }
 )
 async def test_oauth_client_scope_registration_limits_requested_scopes(dummy_guillotina):
-    client = make_client({"redirect_uris": ["http://localhost/callback"]})
+    client = build_client_from_registration({"redirect_uris": ["http://localhost/callback"]})
     assert client["scope"] == "guillotina:access"
     assert scopes_registered_for_client(client, ["guillotina:access"])
     assert not scopes_registered_for_client(client, ["guillotina:access", "guillotina:extra"])
 
-    client = make_client(
+    client = build_client_from_registration(
         {"redirect_uris": ["http://localhost/callback"], "scope": "guillotina:access guillotina:extra"}
     )
     assert scopes_registered_for_client(client, ["guillotina:access", "guillotina:extra"])
@@ -142,7 +142,9 @@ async def test_oauth_client_scope_registration_limits_requested_scopes(dummy_gui
 )
 async def test_oauth_client_registration_rejects_unusable_scope(dummy_guillotina):
     with pytest.raises(HTTPBadRequest):
-        make_client({"redirect_uris": ["http://localhost/callback"], "scope": "guillotina:extra"})
+        build_client_from_registration(
+            {"redirect_uris": ["http://localhost/callback"], "scope": "guillotina:extra"}
+        )
 
 
 async def test_oauth_configured_issuer_must_be_safe():
@@ -176,7 +178,7 @@ async def test_oauth_configured_issuer_overrides_request_headers(dummy_guillotin
     )
     container = Container()
     container.__name__ = "guillotina"
-    assert container_url(request, container) == "https://issuer.example.com/db/guillotina"
+    assert container_issuer_url(request, container) == "https://issuer.example.com/db/guillotina"
 
 
 @pytest.mark.app_settings({"applications": ["guillotina", "guillotina.contrib.oauth"]})
@@ -191,7 +193,7 @@ async def test_oauth_required_audience_defaults_to_container(dummy_guillotina):
 async def test_oauth_required_audience_can_be_extended(dummy_guillotina):
     def resolver(request, container):
         if request.path.endswith("/@custom-protocol"):
-            return f"{container_url(request, container)}/@custom-protocol"
+            return f"{container_issuer_url(request, container)}/@custom-protocol"
 
     register_oauth_audience_resolver(resolver)
     container = Container()
@@ -219,7 +221,7 @@ class _FakeRedisDriver:
     {"applications": ["guillotina", "guillotina.contrib.oauth", "guillotina.contrib.redis"], "redis": {}}
 )
 async def test_oauth_rate_limit_uses_redis_when_configured(monkeypatch, dummy_guillotina):
-    from guillotina.contrib.oauth.flow import ratelimit
+    from guillotina.contrib.oauth.utils import ratelimit
 
     reset_rate_limits()
     driver = _FakeRedisDriver()

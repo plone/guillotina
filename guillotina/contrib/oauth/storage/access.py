@@ -36,6 +36,6 @@ def get_oauth_store(container, *, require_installed=True):
         raise RuntimeError(
             "OAuth storage requires PostgreSQL but the active database storage is not PostgreSQL"
         )
-    from guillotina.contrib.oauth.storage.pg.repository import OAuthRepository
+    from guillotina.contrib.oauth.storage.pg.repository import PostgresOAuthStore
 
-    return OAuthRepository(oauth_container_db_key(container))
+    return PostgresOAuthStore(oauth_container_db_key(container))

@@ -1,7 +1,7 @@
 from guillotina import task_vars
-from guillotina.contrib.oauth.api.urls import container_url
 from guillotina.contrib.oauth.flow.scopes import oauth_scopes_supported
 from guillotina.contrib.oauth.storage.access import get_oauth_store
+from guillotina.contrib.oauth.utils.urls import container_issuer_url
 from guillotina.interfaces import IContainer
 from guillotina.response import HTTPNotFound
 from guillotina.transactions import transaction
@@ -27,7 +27,7 @@ def register_protected_resource_provider(provider):
 
 
 def _authorization_server_metadata(request, container):
-    issuer = container_url(request, container)
+    issuer = container_issuer_url(request, container)
     return {
         "issuer": issuer,
         "authorization_endpoint": f"{issuer}/oauth/authorize",
@@ -60,7 +60,7 @@ def _protected_resource_metadata(request, container):
 register_well_known_handler("oauth-protected-resource", _protected_resource_metadata)
 
 
-def _container_path_parts(path_value, *, allow_resource_path=False):
+def _split_well_known_target_path(path_value, *, allow_resource_path=False):
     parts = [part for part in path_value.strip("/").split("/") if part]
     if len(parts) < 2:
         raise HTTPNotFound(content={"reason": "Invalid path"})
@@ -69,9 +69,9 @@ def _container_path_parts(path_value, *, allow_resource_path=False):
     return parts[0], parts[1], "/" + "/".join(parts)
 
 
-async def rfc_well_known_response(request, action, target_path, handlers):
+async def serve_well_known_metadata(request, action, target_path, handlers):
     allow_resource_path = action == "oauth-protected-resource"
-    db_id, container_id, protected_resource_path = _container_path_parts(
+    db_id, container_id, protected_resource_path = _split_well_known_target_path(
         target_path, allow_resource_path=allow_resource_path
     )
     db = await get_database(db_id)

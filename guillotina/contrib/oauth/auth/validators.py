@@ -2,10 +2,10 @@ import jwt
 
 from guillotina import app_settings, task_vars
 from guillotina.auth import find_user
-from guillotina.contrib.oauth.api.urls import container_url
 from guillotina.contrib.oauth.flow.resources import oauth_required_audience
 from guillotina.contrib.oauth.flow.scopes import OAUTH_DEFAULT_SCOPE
-from guillotina.contrib.oauth.flow.tokens import access_token_key
+from guillotina.contrib.oauth.utils.crypto import access_token_signing_key
+from guillotina.contrib.oauth.utils.urls import container_issuer_url
 
 
 class OAuthJWTValidator:
@@ -20,7 +20,7 @@ class OAuthJWTValidator:
         try:
             claims = jwt.decode(
                 raw,
-                access_token_key(),
+                access_token_signing_key(),
                 algorithms=[app_settings["jwt"]["algorithm"]],
                 options={"verify_aud": False},
             )
@@ -31,7 +31,7 @@ class OAuthJWTValidator:
         request = task_vars.request.get(None)
         container = task_vars.container.get(None)
         if request is not None and container is not None:
-            issuer = container_url(request, container)
+            issuer = container_issuer_url(request, container)
             if claims.get("iss") != issuer:
                 return
             aud = set(claims.get("aud") or [])

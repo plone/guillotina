@@ -18,7 +18,7 @@ from guillotina import app_settings
 
 
 _MAX_TRACKED_KEYS = 50000
-_buckets: "dict[str, deque]" = {}
+_windows: "dict[str, deque]" = {}
 logger = logging.getLogger("guillotina.contrib.oauth")
 
 _redis_driver = None
@@ -30,16 +30,16 @@ def reset_rate_limits():
     """Clear all tracked windows (used by tests)."""
     global _redis_unavailable
     _redis_unavailable = False
-    _buckets.clear()
+    _windows.clear()
 
 
 def _prune_if_needed():
-    if len(_buckets) <= _MAX_TRACKED_KEYS:
+    if len(_windows) <= _MAX_TRACKED_KEYS:
         return
     # Drop the oldest-tracked half. ``dict`` preserves insertion order, which is
     # a good enough approximation of staleness for eviction purposes.
-    for key in list(_buckets.keys())[: len(_buckets) // 2]:
-        _buckets.pop(key, None)
+    for key in list(_windows.keys())[: len(_windows) // 2]:
+        _windows.pop(key, None)
 
 
 def _memory_rate_limit_exceeded(key, *, limit, window, now=None):
@@ -54,16 +54,16 @@ def _memory_rate_limit_exceeded(key, *, limit, window, now=None):
         return False
     now = time.monotonic() if now is None else now
     cutoff = now - window
-    bucket = _buckets.get(key)
-    if bucket is None:
-        bucket = deque()
-        _buckets[key] = bucket
+    window_deque = _windows.get(key)
+    if window_deque is None:
+        window_deque = deque()
+        _windows[key] = window_deque
         _prune_if_needed()
-    while bucket and bucket[0] <= cutoff:
-        bucket.popleft()
-    if len(bucket) >= limit:
+    while window_deque and window_deque[0] <= cutoff:
+        window_deque.popleft()
+    if len(window_deque) >= limit:
         return True
-    bucket.append(now)
+    window_deque.append(now)
     return False
 
 
@@ -78,12 +78,12 @@ def _memory_rate_limit_check(key, *, limit, window, now=None):
         return False
     now = time.monotonic() if now is None else now
     cutoff = now - window
-    bucket = _buckets.get(key)
-    if bucket is None:
+    window_deque = _windows.get(key)
+    if window_deque is None:
         return False
-    while bucket and bucket[0] <= cutoff:
-        bucket.popleft()
-    return len(bucket) >= limit
+    while window_deque and window_deque[0] <= cutoff:
+        window_deque.popleft()
+    return len(window_deque) >= limit
 
 
 def _redis_enabled():
@@ -113,7 +113,7 @@ def _redis_key(key):
     return f"{_REDIS_PREFIX}:{key}"
 
 
-def _decode_redis_bucket(raw):
+def _decode_redis_window(raw):
     if not raw:
         return []
     if isinstance(raw, bytes):
@@ -125,34 +125,34 @@ def _decode_redis_bucket(raw):
     return [float(item) for item in data if isinstance(item, (int, float))]
 
 
-async def _redis_bucket(driver, redis_key, *, window, now):
+async def _redis_window(driver, redis_key, *, window, now):
     cutoff = now - window
-    bucket = _decode_redis_bucket(await driver.get(redis_key))
-    return [item for item in bucket if item > cutoff]
+    window_deque = _decode_redis_window(await driver.get(redis_key))
+    return [item for item in window_deque if item > cutoff]
 
 
-async def _save_redis_bucket(driver, redis_key, bucket, *, window):
-    await driver.set(redis_key, dumps(bucket), expire=max(int(window) + 1, 1))
+async def _save_redis_window(driver, redis_key, window_deque, *, window):
+    await driver.set(redis_key, dumps(window_deque), expire=max(int(window) + 1, 1))
 
 
 async def _redis_rate_limit_exceeded(driver, key, *, limit, window, now=None):
     now = time.time() if now is None else now
     redis_key = _redis_key(key)
-    bucket = await _redis_bucket(driver, redis_key, window=window, now=now)
-    if len(bucket) >= limit:
-        await _save_redis_bucket(driver, redis_key, bucket, window=window)
+    window_deque = await _redis_window(driver, redis_key, window=window, now=now)
+    if len(window_deque) >= limit:
+        await _save_redis_window(driver, redis_key, window_deque, window=window)
         return True
-    bucket.append(now)
-    await _save_redis_bucket(driver, redis_key, bucket, window=window)
+    window_deque.append(now)
+    await _save_redis_window(driver, redis_key, window_deque, window=window)
     return False
 
 
 async def _redis_rate_limit_check(driver, key, *, limit, window, now=None):
     now = time.time() if now is None else now
     redis_key = _redis_key(key)
-    bucket = await _redis_bucket(driver, redis_key, window=window, now=now)
-    await _save_redis_bucket(driver, redis_key, bucket, window=window)
-    return len(bucket) >= limit
+    window_deque = await _redis_window(driver, redis_key, window=window, now=now)
+    await _save_redis_window(driver, redis_key, window_deque, window=window)
+    return len(window_deque) >= limit
 
 
 async def rate_limit_exceeded(key, *, limit, window, now=None):

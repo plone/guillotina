@@ -1,6 +1,6 @@
 import pytest
 
-from guillotina.contrib.oauth.flow.clients import consent_key
+from guillotina.contrib.oauth.flow.consent import build_consent_key
 from guillotina.tests.oauth.conftest import (
     OAUTH_SETTINGS,
     authorize_code,
@@ -123,7 +123,7 @@ async def test_revoke_unknown_consent_returns_404(container_install_requester):
 )
 async def test_consent_ttl_expires(guillotina_main):
     from guillotina.component import get_utility
-    from guillotina.contrib.oauth.storage.pg.repository import OAuthRepository
+    from guillotina.contrib.oauth.storage.pg.repository import PostgresOAuthStore
     from guillotina.contrib.oauth.storage.utility import ensure_oauth_tables
     from guillotina.interfaces import IApplication
     from guillotina.transactions import transaction
@@ -132,10 +132,10 @@ async def test_consent_ttl_expires(guillotina_main):
     await ensure_oauth_tables(root["db"].storage)
 
     async with transaction(db=root["db"]):
-        store = OAuthRepository("db/consent-ttl")
+        store = PostgresOAuthStore("db/consent-ttl")
         scopes = ["guillotina:access"]
         resources = ["http://localhost/db/guillotina"]
-        ckey = consent_key("root", "ttl-client", scopes, resources)
+        ckey = build_consent_key("root", "ttl-client", scopes, resources)
         await store.create_consent(
             ckey,
             user_id="root",
@@ -157,7 +157,7 @@ async def test_consent_ttl_expires(guillotina_main):
 )
 async def test_consent_ttl_zero_never_expires(guillotina_main):
     from guillotina.component import get_utility
-    from guillotina.contrib.oauth.storage.pg.repository import OAuthRepository
+    from guillotina.contrib.oauth.storage.pg.repository import PostgresOAuthStore
     from guillotina.contrib.oauth.storage.utility import ensure_oauth_tables
     from guillotina.interfaces import IApplication
     from guillotina.transactions import transaction
@@ -166,10 +166,10 @@ async def test_consent_ttl_zero_never_expires(guillotina_main):
     await ensure_oauth_tables(root["db"].storage)
 
     async with transaction(db=root["db"]):
-        store = OAuthRepository("db/consent-ttl-zero")
+        store = PostgresOAuthStore("db/consent-ttl-zero")
         scopes = ["guillotina:access"]
         resources = ["http://localhost/db/guillotina"]
-        ckey = consent_key("root", "zero-client", scopes, resources)
+        ckey = build_consent_key("root", "zero-client", scopes, resources)
         await store.create_consent(
             ckey,
             user_id="root",

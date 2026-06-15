@@ -13,7 +13,7 @@ TEMPLATE_DIR = Path(__file__).parent / "templates"
 BRAND_LOGO_PATH = Path(__file__).parents[3] / "static" / "assets" / "brand" / "guillotina-logo-horizontal.svg"
 
 
-def _html(body, status=200):
+def _html_response(body, status=200):
     return Response(
         body=body.encode("utf-8"),
         status=status,
@@ -26,32 +26,32 @@ def _html(body, status=200):
 
 
 @lru_cache(maxsize=None)
-def _template(name):
+def _load_template(name):
     return Template((TEMPLATE_DIR / name).read_text(encoding="utf-8"))
 
 
 @lru_cache(maxsize=None)
-def _template_text(name):
+def _load_template_text(name):
     return (TEMPLATE_DIR / name).read_text(encoding="utf-8")
 
 
 @lru_cache(maxsize=None)
-def _logo_data_uri():
+def _load_logo_data_uri():
     encoded = b64encode(BRAND_LOGO_PATH.read_bytes()).decode("ascii")
     return f"data:image/svg+xml;base64,{encoded}"
 
 
 def _render_template(template_name, **context):
-    return _template(template_name).substitute(context)
+    return _load_template(template_name).substitute(context)
 
 
-def _oauth_page(title, heading, body, *, status=200, tone="default"):
-    return _html(
+def _render_oauth_page(title, heading, body, *, status=200, tone="default"):
+    return _html_response(
         _render_template(
             "base.html",
             title=html_escape(title),
-            logo_src=_logo_data_uri(),
-            style=_template_text("oauth.css"),
+            logo_src=_load_logo_data_uri(),
+            style=_load_template_text("oauth.css"),
             tone=html_escape(tone),
             heading=html_escape(heading),
             body=body,
@@ -90,7 +90,7 @@ def _hidden_inputs(params):
 
 
 def oauth_error_page(title, message, *, status):
-    return _oauth_page(
+    return _render_oauth_page(
         title,
         title,
         _render_template("error.html", message=html_escape(message)),
@@ -108,7 +108,7 @@ def login_form(params, client):
         redirect_uri=html_escape(params.get("redirect_uri", "")),
         hidden_inputs=_hidden_inputs(params),
     )
-    return _oauth_page("Login to Guillotina", "Login required", body)
+    return _render_oauth_page("Login to Guillotina", "Login required", body)
 
 
 def _list_items(values, *, empty):
@@ -147,4 +147,4 @@ def consent_form(params, client, scopes, resources, user):
         resource_items=_list_items(resources, empty="Default Guillotina container"),
         hidden_inputs=_hidden_inputs(consent_params),
     )
-    return _oauth_page("Authorize OAuth Client", f"Allow {raw_client_name}?", body)
+    return _render_oauth_page("Authorize OAuth Client", f"Allow {raw_client_name}?", body)
