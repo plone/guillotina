@@ -1,11 +1,10 @@
 import secrets
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 
 import jwt
 
 from guillotina import app_settings
 from guillotina.contrib.oauth.utils.crypto import access_token_signing_key
-from guillotina.contrib.oauth.utils.time import timestamp, utcnow
 
 
 def generate_opaque_token(prefix=""):
@@ -14,7 +13,7 @@ def generate_opaque_token(prefix=""):
 
 
 def issue_access_token(*, issuer, subject, audience, client_id, scope):
-    now = utcnow()
+    now = datetime.now(timezone.utc)
     ttl = app_settings["oauth"].get("access_token_ttl", 3600)
     claims = {
         "iss": issuer,
@@ -23,8 +22,8 @@ def issue_access_token(*, issuer, subject, audience, client_id, scope):
         "aud": list(audience),
         "client_id": client_id,
         "scope": " ".join(scope),
-        "iat": timestamp(now),
-        "exp": timestamp(now + timedelta(seconds=ttl)),
+        "iat": now,
+        "exp": now + timedelta(seconds=ttl),
         "token_type": "oauth_access_token",
     }
     token = jwt.encode(claims, access_token_signing_key(), algorithm=app_settings["jwt"]["algorithm"])

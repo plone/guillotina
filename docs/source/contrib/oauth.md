@@ -44,10 +44,10 @@ auth_token_validators:
 
 ### 4. Set Write Permissions for GET Requests
 
-Guillotina normally prevents database writes on GET requests. Since the `/oauth/authorize` endpoint (which is a GET request) needs to create/validate authorization states, you must override `check_writable_request`:
+Guillotina normally prevents database writes on GET requests. Since the `/oauth/authorize` endpoint (which is a GET request) needs to create/validate authorization states, `check_writable_request` must allow writes for that path. Loading `guillotina.contrib.oauth` sets this automatically; override only if you use a custom checker:
 
 ```yaml
-check_writable_request: guillotina.contrib.oauth.api.request.check_writable_request
+check_writable_request: guillotina.contrib.oauth.utils.writable.requires_writable_transaction
 ```
 
 ### 5. Customize OAuth Server Settings (Optional)

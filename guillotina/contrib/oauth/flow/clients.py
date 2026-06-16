@@ -1,10 +1,10 @@
+from datetime import datetime, timezone
 from urllib.parse import urlencode, urlparse
 from uuid import uuid4
 
 from guillotina.contrib.oauth.flow.scopes import OAUTH_DEFAULT_SCOPE, oauth_scopes_supported
 from guillotina.contrib.oauth.utils.errors import raise_oauth_error
 from guillotina.contrib.oauth.utils.request import normalize_list
-from guillotina.contrib.oauth.utils.time import timestamp, utcnow
 
 
 SUPPORTED_GRANT_TYPES = {"authorization_code", "refresh_token"}
@@ -98,8 +98,7 @@ def build_client_from_registration(data):
         raise_oauth_error("invalid_client_metadata", f"{OAUTH_DEFAULT_SCOPE} scope is required")
     if not set(scope).issubset(set(oauth_scopes_supported())):
         raise_oauth_error("invalid_client_metadata", "unsupported scope")
-    now_dt = utcnow()
-    now = now_dt.isoformat()
+    now = datetime.now(timezone.utc)
     return {
         "client_id": uuid4().hex,
         "client_name": data.get("client_name") or "OAuth Client",
@@ -108,7 +107,6 @@ def build_client_from_registration(data):
         "response_types": response_types,
         "token_endpoint_auth_method": "none",
         "scope": " ".join(scope),
-        "client_id_issued_at": timestamp(now_dt),
         "created_at": now,
         "updated_at": now,
     }

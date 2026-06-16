@@ -41,7 +41,7 @@ async def client_registration_endpoint(service, store):
             "token_endpoint_auth_method",
         )
     }
-    content["client_id_issued_at"] = client["client_id_issued_at"]
+    content["client_id_issued_at"] = int(client["created_at"].timestamp())
     return Response(
         content=content,
         status=201,
