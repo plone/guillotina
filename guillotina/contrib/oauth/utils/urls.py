@@ -20,10 +20,6 @@ def container_issuer_url(request, container):
     path = get_full_content_path(container)
     if app_settings.get("oauth", {}).get("trust_proxy_headers", False):
         return get_url(request, path).rstrip("/")
-    # Secure default: do not honor client-spoofable forwarding/virtualhost headers
-    # (X-Forwarded-Proto, X-VirtualHost-*) when deriving the OAuth issuer. Only the
-    # transport scheme and the Host header are used. For HTTPS deployments behind a
-    # trusted reverse proxy set oauth.trust_proxy_headers=True, or pin oauth.issuer.
     return build_url(scheme=request.scheme, host=request.host, path=path, query="").rstrip("/")
 
 
@@ -39,10 +35,3 @@ def validate_issuer(issuer):
     if parsed.scheme != "https" and parsed.hostname not in {"localhost", "127.0.0.1", "::1"}:
         raise RuntimeError("oauth.issuer must use https except for localhost development")
     return issuer
-
-
-def well_known_protected_resource_url(request, container):
-    from guillotina.contrib.oauth.flow.resources import oauth_required_audience
-
-    parsed = urlparse(oauth_required_audience(request, container))
-    return f"{parsed.scheme}://{parsed.netloc}/.well-known/oauth-protected-resource/{parsed.path.lstrip('/')}"

@@ -7,8 +7,9 @@ from guillotina.content import Container
 from guillotina.contrib.oauth.api.pages import oauth_error_page
 from guillotina.contrib.oauth.auth.validators import OAuthJWTValidator
 from guillotina.contrib.oauth.flow.clients import build_client_from_registration, scopes_registered_for_client
-from guillotina.contrib.oauth.flow.resources import oauth_required_audience, register_oauth_audience_resolver
 from guillotina.contrib.oauth.flow.tokens import issue_access_token
+from guillotina.contrib.oauth.indicators.access import required_resource_indicator
+from guillotina.contrib.oauth.indicators.registry import register_required_indicator_resolver
 from guillotina.contrib.oauth.utils.ratelimit import rate_limit_check, rate_limit_exceeded, reset_rate_limits
 from guillotina.contrib.oauth.utils.urls import container_issuer_url, validate_issuer
 from guillotina.response import HTTPBadRequest
@@ -136,20 +137,20 @@ async def test_oauth_configured_issuer_overrides_request_headers(dummy_guillotin
 
 @pytest.mark.asyncio
 @pytest.mark.app_settings({"applications": ["guillotina", "guillotina.contrib.oauth"]})
-async def test_oauth_required_audience_can_be_extended(dummy_guillotina):
+async def test_required_resource_indicator_can_be_extended(dummy_guillotina):
     def resolver(request, container):
         if request.path.endswith("/@custom-protocol"):
             return f"{container_issuer_url(request, container)}/@custom-protocol"
 
-    register_oauth_audience_resolver(resolver)
+    register_required_indicator_resolver(resolver)
     container = Container()
     container.__name__ = "guillotina"
 
     request = make_mocked_request("GET", "/db/guillotina/@custom-protocol")
-    assert oauth_required_audience(request, container) == "http://localhost/guillotina/@custom-protocol"
+    assert required_resource_indicator(request, container) == "http://localhost/guillotina/@custom-protocol"
 
     request = make_mocked_request("GET", "/db/guillotina/@addons")
-    assert oauth_required_audience(request, container) == "http://localhost/guillotina"
+    assert required_resource_indicator(request, container) == "http://localhost/guillotina"
 
 
 class _FakeRedisDriver:

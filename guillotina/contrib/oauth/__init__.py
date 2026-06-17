@@ -52,10 +52,13 @@ app_settings = {
 
 
 def includeme(root, settings):
-    from guillotina.contrib.oauth.flow.resources import ensure_default_oauth_resources_registered
+    from guillotina.contrib.oauth.indicators.registry import ensure_default_resource_indicators_registered
 
-    ensure_default_oauth_resources_registered()
+    ensure_default_resource_indicators_registered()
     configure.scan("guillotina.contrib.oauth.install")
     configure.scan("guillotina.contrib.oauth.api.services")
     if "guillotina.contrib.mcp" in set(settings.get("applications") or []):
         configure.scan("guillotina.contrib.oauth.integrations.mcp")
+        from guillotina.contrib.oauth.integrations.mcp import register_mcp_oauth_integration
+
+        register_mcp_oauth_integration()

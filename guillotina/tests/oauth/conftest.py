@@ -13,6 +13,19 @@ from guillotina.tests.fixtures import annotations
 
 pytestmark = pytest.mark.asyncio
 
+
+@pytest.fixture(autouse=True)
+def reset_oauth_integration_registries():
+    from guillotina.contrib.oauth.discovery.protected_resource import reset_protected_resource_providers
+    from guillotina.contrib.oauth.indicators.registry import reset_indicator_registries
+
+    reset_indicator_registries()
+    reset_protected_resource_providers()
+    yield
+    reset_indicator_registries()
+    reset_protected_resource_providers()
+
+
 requires_pg = pytest.mark.skipif(
     annotations["testdatabase"] == "DUMMY",
     reason="requires PostgreSQL (set DATABASE=postgresql)",

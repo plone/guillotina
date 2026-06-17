@@ -1,3 +1,4 @@
+import guillotina.contrib.oauth.discovery  # noqa — triggers well-known handler registrations
 from guillotina import configure
 from guillotina.api.service import Service
 from guillotina.contrib.oauth.api.endpoints.authorize import authorization_endpoint
@@ -6,7 +7,7 @@ from guillotina.contrib.oauth.api.endpoints.consents import list_consents_endpoi
 from guillotina.contrib.oauth.api.endpoints.register import client_registration_endpoint
 from guillotina.contrib.oauth.api.endpoints.revoke import token_revocation_endpoint
 from guillotina.contrib.oauth.api.endpoints.token import token_endpoint
-from guillotina.contrib.oauth.api.well_known import WELL_KNOWN_HANDLERS, serve_well_known_metadata
+from guillotina.contrib.oauth.discovery.routing import WELL_KNOWN_HANDLERS, serve_well_known_metadata
 from guillotina.interfaces import IApplication, IContainer
 from guillotina.response import HTTPNotFound
 

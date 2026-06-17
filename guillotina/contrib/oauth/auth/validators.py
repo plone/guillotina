@@ -2,8 +2,9 @@ import jwt
 
 from guillotina import app_settings, task_vars
 from guillotina.auth import find_user
-from guillotina.contrib.oauth.flow.resources import oauth_required_audience
+from guillotina.contrib.oauth.auth.context import OAuthTokenContext
 from guillotina.contrib.oauth.flow.scopes import OAUTH_DEFAULT_SCOPE
+from guillotina.contrib.oauth.indicators.access import required_resource_indicator
 from guillotina.contrib.oauth.utils.crypto import access_token_signing_key
 from guillotina.contrib.oauth.utils.urls import container_issuer_url
 
@@ -35,7 +36,7 @@ class OAuthJWTValidator:
             if claims.get("iss") != issuer:
                 return
             aud = set(claims.get("aud") or [])
-            if oauth_required_audience(request, container) not in aud:
+            if required_resource_indicator(request, container) not in aud:
                 return
         if not claims.get("client_id"):
             return
@@ -45,12 +46,11 @@ class OAuthJWTValidator:
         token["id"] = claims.get("id", claims.get("sub"))
         token["decoded"] = claims
         user = await find_user(token)
-        if user is not None and user.id == token["id"]:
-            if request is not None:
-                request.oauth = {
-                    "client_id": claims.get("client_id"),
-                    "scopes": scopes,
-                    "resources": set(claims.get("aud") or []),
-                    "claims": claims,
-                }
-            return user
+        if user is not None and user.id == token["id"] and request is not None:
+            request.oauth = OAuthTokenContext(
+                client_id=claims.get("client_id"),
+                scopes=frozenset(scopes),
+                resource_indicators=frozenset(claims.get("aud") or []),
+                claims=claims,
+            )
+        return user

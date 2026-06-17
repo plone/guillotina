@@ -1,6 +1,7 @@
 import pytest
 
-from guillotina.contrib.oauth.api import well_known
+from guillotina.contrib.oauth.discovery import protected_resource as pr
+from guillotina.contrib.oauth.discovery import routing
 from guillotina.response import HTTPNotFound
 
 
@@ -12,12 +13,12 @@ class _FakeRequest:
 @pytest.mark.asyncio
 async def test_register_protected_resource_provider_appends_provider(monkeypatch):
     providers = []
-    monkeypatch.setattr(well_known, "_PROTECTED_RESOURCE_PROVIDERS", providers)
+    monkeypatch.setattr(pr, "_PROTECTED_RESOURCE_PROVIDERS", providers)
 
     def provider(request, container, protected_path):
         return None
 
-    well_known.register_protected_resource_provider(provider)
+    pr.register_protected_resource_provider(provider)
     assert providers == [provider]
 
 
@@ -33,12 +34,12 @@ async def test_protected_resource_metadata_uses_first_matching_provider(monkeypa
         raise AssertionError("should not be called after a matching provider")
 
     monkeypatch.setattr(
-        well_known,
+        pr,
         "_PROTECTED_RESOURCE_PROVIDERS",
         [provider_a, provider_b, provider_c],
     )
     request = _FakeRequest("/db/guillotina/@mcp/protocol")
-    result = well_known._protected_resource_metadata(request, None)
+    result = pr._protected_resource_metadata(request, None)
     assert result == {"resource": "b", "authorization_servers": ["issuer"]}
 
 
@@ -47,15 +48,15 @@ async def test_protected_resource_metadata_returns_404_when_no_provider_matches(
     def provider(request, container, protected_path):
         return None
 
-    monkeypatch.setattr(well_known, "_PROTECTED_RESOURCE_PROVIDERS", [provider])
+    monkeypatch.setattr(pr, "_PROTECTED_RESOURCE_PROVIDERS", [provider])
     request = _FakeRequest("/db/guillotina/unknown-resource")
     with pytest.raises(HTTPNotFound):
-        well_known._protected_resource_metadata(request, None)
+        pr._protected_resource_metadata(request, None)
 
 
 @pytest.mark.asyncio
 async def test_split_well_known_target_path_allows_resource_suffix():
-    db_id, container_id, protected_path = well_known._split_well_known_target_path(
+    db_id, container_id, protected_path = routing._split_well_known_target_path(
         "/db/guillotina/subfolder/@mcp/protocol", allow_resource_path=True
     )
     assert db_id == "db"
@@ -66,4 +67,4 @@ async def test_split_well_known_target_path_allows_resource_suffix():
 @pytest.mark.asyncio
 async def test_split_well_known_target_path_rejects_suffix_for_issuer_metadata():
     with pytest.raises(HTTPNotFound):
-        well_known._split_well_known_target_path("/db/guillotina/extra")
+        routing._split_well_known_target_path("/db/guillotina/extra")

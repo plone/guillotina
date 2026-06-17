@@ -12,9 +12,9 @@ from guillotina.contrib.oauth.flow.clients import (
 from guillotina.contrib.oauth.flow.consent import build_consent_key
 from guillotina.contrib.oauth.flow.csrf import OAUTH_CSRF_FIELD, csrf_valid
 from guillotina.contrib.oauth.flow.pkce import pkce_challenge_valid
-from guillotina.contrib.oauth.flow.resources import validate_resource
 from guillotina.contrib.oauth.flow.scopes import OAUTH_DEFAULT_SCOPE, oauth_scopes_supported
 from guillotina.contrib.oauth.flow.tokens import generate_opaque_token
+from guillotina.contrib.oauth.indicators.grant import validate_resource_indicator
 from guillotina.contrib.oauth.utils.ratelimit import rate_limit_check, rate_limit_exceeded
 from guillotina.contrib.oauth.utils.request import (
     normalize_list,
@@ -55,7 +55,7 @@ async def authorization_endpoint(service, store):
         return _authorization_redirect(redirect_uri, params, issuer, {"error": authorization_error})
 
     try:
-        resources = validate_resource(service.request, service.context, params.get("resource"))
+        resources = validate_resource_indicator(service.request, service.context, params.get("resource"))
     except HTTPBadRequest:
         return _authorization_redirect(redirect_uri, params, issuer, {"error": "invalid_target"})
 
