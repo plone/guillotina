@@ -4,7 +4,8 @@ CHANGELOG
 7.1.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add async context manager to acquire advisory write locks for objects
+  [nilbacardit26]
 
 
 7.1.3 (2026-06-24)
