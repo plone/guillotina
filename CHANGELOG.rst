@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-7.1.3 (unreleased)
+7.1.3 (2026-06-24)
 ------------------
 
 - MCP: enforce Guillotina content permissions for tools and resources,
