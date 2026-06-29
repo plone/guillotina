@@ -1,10 +1,10 @@
-from guillotina.asgi import AsgiApp
-from guillotina.commands import Command
-from guillotina.traversal import TraversalRouter
-
 import os
 import subprocess
 import sys
+
+from guillotina.asgi import AsgiApp
+from guillotina.commands import Command
+from guillotina.traversal import TraversalRouter
 
 
 def create_app():

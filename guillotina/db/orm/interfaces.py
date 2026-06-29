@@ -1,6 +1,5 @@
 # -*- encoding: utf-8 -*-
-from zope.interface import Attribute
-from zope.interface import Interface
+from zope.interface import Attribute, Interface
 
 
 OID_TYPE = SERIAL_TYPE = bytes
@@ -62,4 +61,4 @@ class IBaseObject(Interface):
         """
 
     def register():
-        ...
+        """ """

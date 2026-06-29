@@ -12,14 +12,14 @@
 #
 ##############################################################################
 # flake8: noqa
+import sys
+
+from zope.interface import Interface, implementer
+from zope.interface.interfaces import IInterface
+
 from guillotina.component._declaration import adapter
 from guillotina.component.globalregistry import GuillotinaAdapterRegistry
 from guillotina.component.testfiles.views import IC
-from zope.interface import implementer
-from zope.interface import Interface
-from zope.interface.interfaces import IInterface
-
-import sys
 
 
 def write(x):

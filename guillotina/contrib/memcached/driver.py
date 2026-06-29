@@ -4,18 +4,15 @@ except ImportError:
     print("If you add guillotina.contrib.memcached you need to add emcache on your requirements")
     raise
 
-from guillotina import app_settings
-from guillotina import metrics
-from guillotina.contrib.memcached.exceptions import NoMemcachedConfigured
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-
 import asyncio
-import backoff
 import hashlib
 import logging
+from typing import Any, Dict, List, Optional
+
+import backoff
+
+from guillotina import app_settings, metrics
+from guillotina.contrib.memcached.exceptions import NoMemcachedConfigured
 
 
 try:
@@ -118,7 +115,10 @@ try:
                 counter=MEMCACHED_OPS,
                 histogram=MEMCACHED_OPS_PROCESSING_TIME,
                 labels={"type": operation},
-                error_mappings={"timeout": asyncio.TimeoutError, "cancelled": asyncio.CancelledError},
+                error_mappings={
+                    "timeout": asyncio.TimeoutError,
+                    "cancelled": asyncio.CancelledError,
+                },
             )
 
 except ImportError:
@@ -162,11 +162,13 @@ class MemcachedDriver:
             if self.initialized is False:
                 try:
                     await self._connect()
-                    self.initialized = True
                 except Exception:  # pragma: no cover
                     logger.error("Error initializing memcached driver", exc_info=True)
+                    return
 
-                if _SEND_METRICS is True:
+                self.initialized = True
+
+                if _SEND_METRICS is True and self.client is not None:
                     self._metrics_task = loop.create_task(metrics_probe(self.client))
 
     async def _create_client(self, settings: Dict[str, Any]) -> emcache.Client:
@@ -279,7 +281,6 @@ async def metrics_probe(client: emcache.Client, every: int = 30):
 def update_connection_pool_metrics(
     client: emcache.Client, last_state: Optional[emcache.ConnectionPoolMetrics] = None
 ) -> emcache.ConnectionPoolMetrics:
-
     # Every node will have it's own label
     metrics = client.cluster_managment().connection_pool_metrics()
     for node, node_metrics in metrics.items():

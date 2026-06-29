@@ -1,10 +1,9 @@
-from guillotina.behaviors.dublincore import IDublinCore
-from guillotina.json.utils import convert_interfaces_to_schema
-from guillotina.utils import get_schema_validator
-from guillotina.utils import JSONSchemaRefResolver
-
 import jsonschema
 import pytest
+
+from guillotina.behaviors.dublincore import IDublinCore
+from guillotina.json.utils import convert_interfaces_to_schema
+from guillotina.utils import JSONSchemaRefResolver, get_schema_validator
 
 
 def test_convert_dublin_core(dummy_guillotina):

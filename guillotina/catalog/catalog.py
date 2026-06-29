@@ -1,31 +1,27 @@
+import logging
+import typing
+
+from zope.interface import implementer
+
 from guillotina import configure
 from guillotina.catalog.utils import parse_query
 from guillotina.component import query_adapter
 from guillotina.content import iter_schemata
 from guillotina.db.orm.interfaces import IBaseObject
-from guillotina.directives import index
-from guillotina.directives import merged_tagged_value_dict
-from guillotina.directives import merged_tagged_value_list
-from guillotina.directives import metadata
+from guillotina.directives import index, merged_tagged_value_dict, merged_tagged_value_list, metadata
 from guillotina.exceptions import NoIndexField
-from guillotina.interfaces import IAsyncBehavior
-from guillotina.interfaces import ICatalogDataAdapter
-from guillotina.interfaces import ICatalogUtility
-from guillotina.interfaces import IContainer
-from guillotina.interfaces import IResource
-from guillotina.interfaces import ISecurityInfo
+from guillotina.interfaces import (
+    IAsyncBehavior,
+    ICatalogDataAdapter,
+    ICatalogUtility,
+    IContainer,
+    IResource,
+    ISecurityInfo,
+)
 from guillotina.json.serialize_value import json_compatible
-from guillotina.security.security_code import principal_permission_manager
-from guillotina.security.security_code import role_permission_manager
-from guillotina.security.utils import get_principals_with_access_content
-from guillotina.security.utils import get_roles_with_access_content
-from guillotina.utils import apply_coroutine
-from guillotina.utils import get_content_depth
-from guillotina.utils import get_content_path
-from zope.interface import implementer
-
-import logging
-import typing
+from guillotina.security.security_code import principal_permission_manager, role_permission_manager
+from guillotina.security.utils import get_principals_with_access_content, get_roles_with_access_content
+from guillotina.utils import apply_coroutine, get_content_depth, get_content_path
 
 
 logger = logging.getLogger("guillotina")

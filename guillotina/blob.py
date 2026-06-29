@@ -1,9 +1,9 @@
+from io import BytesIO
+from typing import AsyncIterator, Union
+
 from guillotina._settings import app_settings
 from guillotina.exceptions import BlobChunkNotFound
 from guillotina.transactions import get_transaction
-from io import BytesIO
-from typing import AsyncIterator
-from typing import Union
 
 
 class Blob:

@@ -1,17 +1,15 @@
+import pytest
+
 from guillotina.behaviors.attachment import IAttachment
 from guillotina.blob import Blob
 from guillotina.component import get_multi_adapter
 from guillotina.content import create_content_in_container
 from guillotina.exceptions import BlobChunkNotFound
-from guillotina.files.exceptions import RangeNotFound
-from guillotina.files.exceptions import RangeNotSupported
+from guillotina.files.exceptions import RangeNotFound, RangeNotSupported
 from guillotina.interfaces import IFileManager
 from guillotina.tests.utils import login
 from guillotina.transactions import transaction
-from guillotina.utils import get_behavior
-from guillotina.utils import get_database
-
-import pytest
+from guillotina.utils import get_behavior, get_database
 
 
 pytestmark = pytest.mark.asyncio

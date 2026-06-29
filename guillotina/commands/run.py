@@ -1,12 +1,10 @@
-from guillotina.commands import Command
-from guillotina.utils import get_containers
-from guillotina.utils import iter_databases
-from guillotina.utils import lazy_apply
-
 import importlib.util
 import inspect
 import logging
 import os
+
+from guillotina.commands import Command
+from guillotina.utils import get_containers, iter_databases, lazy_apply
 
 
 logger = logging.getLogger("guillotina")

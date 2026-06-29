@@ -1,20 +1,20 @@
-from .content.groups import Group
-from .content.users import User
 from guillotina import configure
 from guillotina.auth.validators import hash_password
 from guillotina.contrib.dbusers.content.groups import IGroup
 from guillotina.contrib.dbusers.content.users import IUser
 from guillotina.event import notify
-from guillotina.events import BeforeObjectModifiedEvent
-from guillotina.events import NewUserAdded
-from guillotina.events import ObjectAddedEvent
-from guillotina.interfaces import IBeforeObjectModifiedEvent
-from guillotina.interfaces import IBeforeObjectRemovedEvent
-from guillotina.interfaces import IObjectAddedEvent
-from guillotina.interfaces import IPrincipalRoleManager
+from guillotina.events import BeforeObjectModifiedEvent, NewUserAdded, ObjectAddedEvent
+from guillotina.interfaces import (
+    IBeforeObjectModifiedEvent,
+    IBeforeObjectRemovedEvent,
+    IObjectAddedEvent,
+    IPrincipalRoleManager,
+)
 from guillotina.response import HTTPPreconditionFailed
-from guillotina.utils import get_current_container
-from guillotina.utils import navigate_to
+from guillotina.utils import get_current_container, navigate_to
+
+from .content.groups import Group
+from .content.users import User
 
 
 @configure.subscriber(for_=(IUser, IObjectAddedEvent))

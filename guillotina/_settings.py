@@ -1,11 +1,10 @@
-from guillotina import interfaces
-from guillotina.db.uid import generate_uid
-from typing import Any
-from typing import Dict
-
 import copy
 import pickle
 import string
+from typing import Any, Dict
+
+from guillotina import interfaces
+from guillotina.db.uid import generate_uid
 
 
 app_settings: Dict[str, Any] = {

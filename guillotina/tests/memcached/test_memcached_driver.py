@@ -1,16 +1,22 @@
 try:
     import emcache
-    from guillotina.contrib.memcached.driver import MemcachedDriver
-    from guillotina.contrib.memcached.driver import safe_key
-    from guillotina.contrib.memcached.driver import update_connection_pool_metrics
+
+    from guillotina.contrib.memcached.driver import MemcachedDriver, safe_key, update_connection_pool_metrics
 except ModuleNotFoundError:
     emcache = None
 
-from guillotina.utils import resolve_dotted_name
-from unittest import mock
+try:
+    import pymemcache
+except ModuleNotFoundError:
+    pymemcache = None
 
 import asyncio
+from unittest import mock
+
 import pytest
+import pytest_asyncio
+
+from guillotina.utils import resolve_dotted_name
 
 
 pytestmark = pytest.mark.asyncio
@@ -37,6 +43,7 @@ def mocked_create_client():
 
 
 @pytest.mark.skipif(emcache is None, reason="emcache not installed")
+@pytest.mark.skipif(pymemcache is None, reason="pymemcache not installed")
 async def test_create_client_returns_emcache_client(memcached_container, guillotina_main):
     driver = MemcachedDriver()
     assert driver.client is None
@@ -83,6 +90,7 @@ async def test_create_client_sets_configured_params(mocked_create_client, param,
 
 
 @pytest.mark.skipif(emcache is None, reason="emcache not installed")
+@pytest.mark.skipif(pymemcache is None, reason="pymemcache not installed")
 @pytest.mark.app_settings(MEMCACHED_SETTINGS)
 async def test_memcached_ops(memcached_container, guillotina_main, dont_probe_metrics):
     driver = await resolve_dotted_name("guillotina.contrib.memcached").get_driver()
@@ -124,6 +132,7 @@ unsafe_keys = ["a" * 255, "foo bar", b"\x130".decode()]
 
 
 @pytest.mark.skipif(emcache is None, reason="emcache not installed")
+@pytest.mark.skipif(pymemcache is None, reason="pymemcache not installed")
 @pytest.mark.app_settings(MEMCACHED_SETTINGS)
 @pytest.mark.parametrize("unsafe_key", unsafe_keys)
 async def test_memcached_ops_are_safe_key(
@@ -157,7 +166,10 @@ async def test_delete_all():
             watch_mocked.assert_called()
             all_keys.observe.assert_called_with(2)
             driver._client.delete.assert_has_calls(
-                [mock.call(safe_key("foo"), noreply=True), mock.call(safe_key("bar"), noreply=True)]
+                [
+                    mock.call(safe_key("foo"), noreply=True),
+                    mock.call(safe_key("bar"), noreply=True),
+                ]
             )
 
 
@@ -194,7 +206,7 @@ class TestUpdateConnectionPoolMetrics:
         with mock.patch("guillotina.contrib.memcached.driver.MEMCACHED_CREATE_CONNECTION_UPPER") as _upper:
             yield _upper
 
-    @pytest.fixture
+    @pytest_asyncio.fixture()
     async def metrics(self):
         metrics = mock.Mock()
         metrics.cur_connections = 1

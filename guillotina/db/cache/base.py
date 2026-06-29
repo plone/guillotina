@@ -1,10 +1,8 @@
+import typing
+from typing import Any, Dict, List
+
 from guillotina import glogging
 from guillotina.db.orm.interfaces import IBaseObject
-from typing import Any
-from typing import Dict
-from typing import List
-
-import typing
 
 
 logger = glogging.getLogger("guillotina")

@@ -1,10 +1,9 @@
-from guillotina import configure
-from guillotina.interfaces import IAbsoluteURL
-from guillotina.interfaces import IResource
-from guillotina.response import HTTPNotFound
-from guillotina.schema.vocabulary import getVocabularyRegistry
-from guillotina.schema.vocabulary import VocabularyRegistryError
 from os.path import join
+
+from guillotina import configure
+from guillotina.interfaces import IAbsoluteURL, IResource
+from guillotina.response import HTTPNotFound
+from guillotina.schema.vocabulary import VocabularyRegistryError, getVocabularyRegistry
 
 
 @configure.service(

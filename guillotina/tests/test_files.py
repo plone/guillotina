@@ -1,9 +1,8 @@
-from guillotina.exceptions import UnRetryableRequestError
-from guillotina.files.utils import get_contenttype
-from guillotina.files.utils import read_request_data
-from guillotina.tests.utils import get_mocked_request
-
 import pytest
+
+from guillotina.exceptions import UnRetryableRequestError
+from guillotina.files.utils import get_contenttype, read_request_data
+from guillotina.tests.utils import get_mocked_request
 
 
 @pytest.mark.asyncio

@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 from collections import OrderedDict
-from datetime import date
-from datetime import datetime
-from datetime import time
-from datetime import timedelta
+from datetime import date, datetime, time, timedelta
 from decimal import Decimal
+
 from guillotina import configure
 from guillotina.component import query_adapter
 from guillotina.i18n import Message

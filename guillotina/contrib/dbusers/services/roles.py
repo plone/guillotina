@@ -1,7 +1,6 @@
 from guillotina import configure
 from guillotina.api.service import Service
-from guillotina.auth.role import global_roles
-from guillotina.auth.role import local_roles
+from guillotina.auth.role import global_roles, local_roles
 from guillotina.interfaces import IContainer
 
 

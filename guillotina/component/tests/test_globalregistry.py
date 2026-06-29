@@ -43,8 +43,8 @@ class Test_provide_utility(unittest.TestCase):
         return provide_utility(*args, **kw)
 
     def test_anonymous_no_provides(self):
-        from zope.interface import Interface
-        from zope.interface import implementer
+        from zope.interface import Interface, implementer
+
         from guillotina.component.globalregistry import get_global_components
 
         class IFoo(Interface):
@@ -61,6 +61,7 @@ class Test_provide_utility(unittest.TestCase):
 
     def test_named_w_provides(self):
         from zope.interface import Interface
+
         from guillotina.component.globalregistry import get_global_components
 
         class IFoo(Interface):
@@ -85,10 +86,10 @@ class Test_provide_adapter(unittest.TestCase):
         return provide_adapter(*args, **kw)
 
     def test_anonymous_no_provides_no_adapts(self):
-        from zope.interface import Interface
-        from zope.interface import implementer
-        from guillotina.component.globalregistry import get_global_components
+        from zope.interface import Interface, implementer
+
         from guillotina.component._declaration import adapter
+        from guillotina.component.globalregistry import get_global_components
 
         class IFoo(Interface):
             pass
@@ -114,8 +115,8 @@ class Test_provide_adapter(unittest.TestCase):
         self.assertTrue(adapted.context is foo)
 
     def test_named_w_provides_w_adapts(self):
-        from zope.interface import Interface
-        from zope.interface import implementer
+        from zope.interface import Interface, implementer
+
         from guillotina.component.globalregistry import get_global_components
 
         class IFoo(Interface):
@@ -150,10 +151,10 @@ class Test_provide_subscription_adapter(unittest.TestCase):
         return provide_subscription_adapter(*args, **kw)
 
     def test_no_provides_no_adapts(self):
-        from zope.interface import Interface
-        from zope.interface import implementer
-        from guillotina.component.globalregistry import get_global_components
+        from zope.interface import Interface, implementer
+
         from guillotina.component._declaration import adapter
+        from guillotina.component.globalregistry import get_global_components
 
         class IFoo(Interface):
             pass
@@ -180,8 +181,8 @@ class Test_provide_subscription_adapter(unittest.TestCase):
         self.assertTrue(adapted[0].context is foo)
 
     def test_w_provides_w_adapts(self):
-        from zope.interface import Interface
-        from zope.interface import implementer
+        from zope.interface import Interface, implementer
+
         from guillotina.component.globalregistry import get_global_components
 
         class IFoo(Interface):
@@ -217,11 +218,10 @@ class Test_provide_handler(unittest.TestCase):
         return provide_handler(*args, **kw)
 
     def test_no_adapts(self):
-        from zope.interface import Interface
-        from zope.interface import implementer
-        from zope.interface import providedBy
-        from guillotina.component.globalregistry import get_global_components
+        from zope.interface import Interface, implementer, providedBy
+
         from guillotina.component._declaration import adapter
+        from guillotina.component.globalregistry import get_global_components
 
         class IFoo(Interface):
             pass
@@ -245,6 +245,7 @@ class Test_provide_handler(unittest.TestCase):
 
     def test_w_adapts(self):
         from zope.interface import Interface
+
         from guillotina.component.globalregistry import get_global_components
 
         class IFoo(Interface):

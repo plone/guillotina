@@ -1,10 +1,10 @@
-from datetime import datetime
-from datetime import timedelta
-from guillotina._settings import app_settings
-from guillotina.auth import validators
+from datetime import datetime, timedelta
 
 import jwt
 import pytest
+
+from guillotina._settings import app_settings
+from guillotina.auth import validators
 
 
 pytestmark = pytest.mark.asyncio

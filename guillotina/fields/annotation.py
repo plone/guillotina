@@ -1,34 +1,27 @@
-from guillotina import configure
-from guillotina import schema
-from guillotina.annotations import AnnotationData
-from guillotina.component import query_adapter
-from guillotina.db.orm.interfaces import IBaseObject
-from guillotina.exceptions import ValueDeserializationError
-from guillotina.fields import patch
-from guillotina.fields.interfaces import IBucketDictField
-from guillotina.fields.interfaces import IBucketListField
-from guillotina.fields.interfaces import IPatchFieldOperation
-from guillotina.interfaces import IAnnotationData
-from guillotina.interfaces import IAnnotations
-from guillotina.interfaces import IContentBehavior
-from guillotina.interfaces import IFieldValueRenderer
-from guillotina.interfaces import IRequest
-from guillotina.response import HTTPGone
-from guillotina.response import HTTPPreconditionFailed
-from typing import Any
-from typing import AsyncIterator
-from typing import cast
-from typing import List
-from typing import Optional
-from typing import Tuple
-from zope.interface import implementer
-from zope.interface import Interface
-
 import bisect
 import logging
 import time
 import typing
 import uuid
+from typing import Any, AsyncIterator, List, Optional, Tuple, cast
+
+from zope.interface import Interface, implementer
+
+from guillotina import configure, schema
+from guillotina.annotations import AnnotationData
+from guillotina.component import query_adapter
+from guillotina.db.orm.interfaces import IBaseObject
+from guillotina.exceptions import ValueDeserializationError
+from guillotina.fields import patch
+from guillotina.fields.interfaces import IBucketDictField, IBucketListField, IPatchFieldOperation
+from guillotina.interfaces import (
+    IAnnotationData,
+    IAnnotations,
+    IContentBehavior,
+    IFieldValueRenderer,
+    IRequest,
+)
+from guillotina.response import HTTPGone, HTTPPreconditionFailed
 
 
 logger = logging.getLogger("guillotina")

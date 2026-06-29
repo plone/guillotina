@@ -30,7 +30,7 @@
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-import pkg_resources
+from importlib.metadata import version as package_version
 
 extensions = [
     "sphinx.ext.coverage",
@@ -71,7 +71,7 @@ author = "Ramon Navarro Bosch & Nathan Van Gheem"
 # built documents.
 #
 # The short X.Y version.
-version = pkg_resources.get_distribution("guillotina").version.split(".dev")[0]
+version = package_version("guillotina").split(".dev")[0]
 # The full version, including alpha/beta/rc tags.
 release = version
 

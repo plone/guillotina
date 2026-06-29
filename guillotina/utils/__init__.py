@@ -17,6 +17,8 @@ from .content import navigate_to  # noqa
 from .content import valid_id  # noqa
 from .crypto import get_jwk_key  # noqa
 from .crypto import secure_passphrase  # noqa
+from .misc import JSONSchemaRefResolver  # noqa
+from .misc import apply_coroutine  # noqa; noqa
 from .misc import dump_task_vars  # noqa
 from .misc import find_container  # noqa
 from .misc import get_current_container  # noqa
@@ -28,7 +30,6 @@ from .misc import get_registry  # noqa
 from .misc import get_request_scheme  # noqa
 from .misc import get_schema_validator  # noqa
 from .misc import get_url  # noqa
-from .misc import JSONSchemaRefResolver  # noqa
 from .misc import lazy_apply  # noqa
 from .misc import list_or_dict_items  # noqa
 from .misc import load_task_vars  # noqa
@@ -49,9 +50,6 @@ from .modules import resolve_dotted_name  # noqa
 from .modules import resolve_module_path  # noqa
 from .modules import resolve_path  # noqa
 from .navigator import Navigator  # noqa
-
-
-from .misc import apply_coroutine  # noqa; noqa
 
 
 get_object_by_oid = get_object_by_uid

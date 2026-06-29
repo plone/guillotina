@@ -2,21 +2,21 @@ Cython==0.29.24
 asyncpg>=0.28.0
 cffi==1.14.6
 chardet==3.0.4
-jsonschema==2.6.0
+jsonschema==4.24.1
 multidict==6.0.4
 pycparser==2.20
 pycryptodome==3.6.6
 PyJWT~=2.1.0
 python-dateutil==2.8.2
 PyYaml>=5.1
-six==1.11.0
+six==1.17.0
 orjson>=3,<4
 zope.interface==5.1.0
-uvicorn==0.17.6
+uvicorn==0.42.0
 argon2-cffi==18.3.0
 backoff==1.10.0
 prometheus-client==0.8.0
-typing_extensions==3.7.4.3
+typing_extensions==4.14.1
 
 types-chardet==0.1.5
 types-docutils==0.17.0

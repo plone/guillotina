@@ -1,12 +1,13 @@
+import json
+import os
+
+import pytest
+
 from guillotina._settings import app_settings
 from guillotina.component import get_adapter
 from guillotina.db.factory import CockroachDatabaseManager
 from guillotina.db.interfaces import IDatabaseManager
 from guillotina.utils import get_database
-
-import json
-import os
-import pytest
 
 
 pytestmark = pytest.mark.asyncio

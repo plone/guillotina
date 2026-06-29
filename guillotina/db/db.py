@@ -1,7 +1,8 @@
+from zope.interface import implementer_only
+
 from guillotina.content import Folder
 from guillotina.db.orm.interfaces import IBaseObject
 from guillotina.interfaces import IDatabase
-from zope.interface import implementer_only
 
 
 @implementer_only(IDatabase, IBaseObject)

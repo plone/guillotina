@@ -57,7 +57,7 @@ setup(
     install_requires=[
         "uvicorn",
         "websockets",
-        "jsonschema==2.6.0",
+        "jsonschema==4.24.1",
         "python-dateutil",
         "pycryptodome",
         "jwcrypto",
@@ -78,17 +78,17 @@ setup(
     ],
     extras_require={
         "test": [
-            "pytest>=3.8.0,<6.3.0",
+            "pytest>=7.4.0,<8.0.0",
             "docker==7.1.0",
             "backoff",
             "psycopg2-binary",
-            "pytest-asyncio<=0.13.0",
+            "pytest-asyncio>=0.21.0,<0.22.0",
             "pytest-cov",
             "coverage>=4.0.3",
-            "pytest-docker-fixtures",
-            "pytest-rerunfailures<=10.1",
+            "pytest-docker-fixtures==1.4.2",
+            "pytest-rerunfailures>=12.0,<13.0",
             "async-asgi-testclient<2.0.0",
-            "openapi-spec-validator==0.2.9",
+            "openapi-spec-validator==0.8.4",
             "aiohttp>=3.0.0,<4.0.0",
             "asyncmock",
             "prometheus-client",
@@ -111,6 +111,7 @@ setup(
         "memcached": ["emcache"],
         "validation": ["pytz==2020.1"],
         "recaptcha": ["aiohttp<4"],
+        "mcp": ["mcp>=1.0.0"],
     },
     entry_points={
         "console_scripts": [

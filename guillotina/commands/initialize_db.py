@@ -1,7 +1,6 @@
 from guillotina.commands import Command
 from guillotina.component import get_utility
-from guillotina.interfaces import IApplication
-from guillotina.interfaces import IDatabase
+from guillotina.interfaces import IApplication, IDatabase
 
 
 class DatabaseInitializationCommand(Command):

@@ -1,16 +1,18 @@
-from guillotina import configure
-from guillotina import security
-from guillotina.auth.users import ANONYMOUS_USER_ID
-from guillotina.auth.users import ROOT_USER_ID
-from guillotina.interfaces import AllowSingle
-from guillotina.interfaces import IApplication
-from guillotina.interfaces import IDatabase
-from guillotina.interfaces import IInheritPermissionManager
-from guillotina.interfaces import IPrincipalPermissionManager
-from guillotina.interfaces import IRolePermissionManager
-from guillotina.security.security_code import InheritPermissionManager
-from guillotina.security.security_code import PrincipalPermissionManager
-from guillotina.security.security_code import RolePermissionManager
+from guillotina import configure, security
+from guillotina.auth.users import ANONYMOUS_USER_ID, ROOT_USER_ID
+from guillotina.interfaces import (
+    AllowSingle,
+    IApplication,
+    IDatabase,
+    IInheritPermissionManager,
+    IPrincipalPermissionManager,
+    IRolePermissionManager,
+)
+from guillotina.security.security_code import (
+    InheritPermissionManager,
+    PrincipalPermissionManager,
+    RolePermissionManager,
+)
 
 
 @configure.adapter(for_=IDatabase, provides=IInheritPermissionManager)

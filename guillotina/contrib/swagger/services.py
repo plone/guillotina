@@ -1,19 +1,20 @@
-from guillotina import app_settings
-from guillotina import configure
-from guillotina.api.service import Service
-from guillotina.utils import get_authenticated_user
-from guillotina.utils import get_full_content_path
-from guillotina.utils import get_request_scheme
-from guillotina.utils import get_security_policy
-from guillotina.utils import get_url
-from guillotina.utils import resolve_dotted_name
-from urllib.parse import urlparse
-from zope.interface import Interface
-
 import copy
 import json
 import os
-import pkg_resources
+from urllib.parse import urlparse
+
+from zope.interface import Interface
+
+from guillotina import __version__, app_settings, configure
+from guillotina.api.service import Service
+from guillotina.utils import (
+    get_authenticated_user,
+    get_full_content_path,
+    get_request_scheme,
+    get_security_policy,
+    get_url,
+    resolve_dotted_name,
+)
 
 
 here = os.path.dirname(os.path.realpath(__file__))
@@ -163,7 +164,7 @@ class SwaggerDefinitionService(Service):
         definition["servers"][0]["url"] = url
 
         if "version" not in definition["info"]:
-            definition["info"]["version"] = pkg_resources.get_distribution("guillotina").version
+            definition["info"]["version"] = __version__
 
         api_defs = app_settings["api_definition"]
 

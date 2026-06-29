@@ -1,13 +1,14 @@
-from guillotina.contrib.cache.utility import CacheUtility
-
 import pytest
+
+from guillotina.contrib.cache.utility import CacheUtility
 
 
 @pytest.mark.asyncio
 async def test_get_size_of_item():
     rcache = CacheUtility()
-    from guillotina.contrib.cache.utility import _default_size
     import sys
+
+    from guillotina.contrib.cache.utility import _default_size
 
     assert rcache.get_size(dict(a=1)) == _default_size
     assert rcache.get_size(1) == sys.getsizeof(1)

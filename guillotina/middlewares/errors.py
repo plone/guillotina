@@ -1,17 +1,14 @@
-from guillotina import error_reasons
-from guillotina import logger
-from guillotina import response
-from guillotina import task_vars
+import asyncio
+import traceback
+import uuid
+from typing import Optional
+
+from guillotina import error_reasons, logger, response, task_vars
 from guillotina._settings import app_settings
 from guillotina.browser import View
 from guillotina.i18n import default_message_factory as _
 from guillotina.interfaces import IRequest
 from guillotina.traversal import apply_rendering
-from typing import Optional
-
-import asyncio
-import traceback
-import uuid
 
 
 class ErrorsMiddleware:

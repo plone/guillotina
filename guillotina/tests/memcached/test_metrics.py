@@ -3,29 +3,44 @@ try:
 except ModuleNotFoundError:
     MemcachedDriver = None  # type: ignore
 
-from asyncmock import AsyncMock
+from unittest import mock
 
 import pytest
+from asyncmock import AsyncMock
 
 
 pytestmark = pytest.mark.asyncio
+MEMCACHED_SETTINGS = {"applications": ["guillotina", "memcached", "guillotina.contrib.memcached"]}
 
 
 @pytest.mark.skipif(MemcachedDriver is None, reason="emcache not installed")
+@pytest.mark.app_settings(MEMCACHED_SETTINGS)
 class TestMemcachedMetrics:
     async def test_connect_metric(self, metrics_registry, event_loop):
         driver = MemcachedDriver()
-        driver._client = AsyncMock()
-        await driver.initialize(event_loop)
+        client = AsyncMock()
+        with mock.patch.dict(
+            "guillotina.contrib.memcached.driver.app_settings",
+            {"memcached": {"hosts": ["localhost:11211"]}},
+            clear=False,
+        ):
+            with mock.patch(
+                "guillotina.contrib.memcached.driver.emcache.create_client",
+                AsyncMock(return_value=client),
+            ):
+                with mock.patch("guillotina.contrib.memcached.driver._SEND_METRICS", False):
+                    await driver.initialize(event_loop)
         assert (
             metrics_registry.get_sample_value(
-                "guillotina_cache_memcached_ops_total", {"type": "connect", "error": "none"}
+                "guillotina_cache_memcached_ops_total",
+                {"type": "connect", "error": "none"},
             )
             == 1.0
         )
         assert (
             metrics_registry.get_sample_value(
-                "guillotina_cache_memcached_ops_processing_time_seconds_sum", {"type": "connect"}
+                "guillotina_cache_memcached_ops_processing_time_seconds_sum",
+                {"type": "connect"},
             )
             > 0
         )
@@ -43,7 +58,8 @@ class TestMemcachedMetrics:
         )
         assert (
             metrics_registry.get_sample_value(
-                "guillotina_cache_memcached_ops_processing_time_seconds_sum", {"type": "set"}
+                "guillotina_cache_memcached_ops_processing_time_seconds_sum",
+                {"type": "set"},
             )
             > 0
         )
@@ -60,7 +76,8 @@ class TestMemcachedMetrics:
         )
         assert (
             metrics_registry.get_sample_value(
-                "guillotina_cache_memcached_ops_processing_time_seconds_sum", {"type": "get"}
+                "guillotina_cache_memcached_ops_processing_time_seconds_sum",
+                {"type": "get"},
             )
             > 0
         )
@@ -72,13 +89,15 @@ class TestMemcachedMetrics:
         await driver.get("foo")
         assert (
             metrics_registry.get_sample_value(
-                "guillotina_cache_memcached_ops_total", {"type": "get_miss", "error": "none"}
+                "guillotina_cache_memcached_ops_total",
+                {"type": "get_miss", "error": "none"},
             )
             == 1.0
         )
         assert (
             metrics_registry.get_sample_value(
-                "guillotina_cache_memcached_ops_processing_time_seconds_sum", {"type": "get_miss"}
+                "guillotina_cache_memcached_ops_processing_time_seconds_sum",
+                {"type": "get_miss"},
             )
             > 0
         )
@@ -89,13 +108,15 @@ class TestMemcachedMetrics:
         await driver.delete("foo")
         assert (
             metrics_registry.get_sample_value(
-                "guillotina_cache_memcached_ops_total", {"type": "delete", "error": "none"}
+                "guillotina_cache_memcached_ops_total",
+                {"type": "delete", "error": "none"},
             )
             == 1.0
         )
         assert (
             metrics_registry.get_sample_value(
-                "guillotina_cache_memcached_ops_processing_time_seconds_sum", {"type": "delete"}
+                "guillotina_cache_memcached_ops_processing_time_seconds_sum",
+                {"type": "delete"},
             )
             > 0
         )
@@ -106,25 +127,29 @@ class TestMemcachedMetrics:
         await driver.delete_all(["foo", "bar"])
         assert (
             metrics_registry.get_sample_value(
-                "guillotina_cache_memcached_ops_total", {"type": "delete_many", "error": "none"}
+                "guillotina_cache_memcached_ops_total",
+                {"type": "delete_many", "error": "none"},
             )
             == 1.0
         )
         assert (
             metrics_registry.get_sample_value(
-                "guillotina_cache_memcached_ops_processing_time_seconds_sum", {"type": "delete_many"}
+                "guillotina_cache_memcached_ops_processing_time_seconds_sum",
+                {"type": "delete_many"},
             )
             > 0
         )
         assert (
             metrics_registry.get_sample_value(
-                "guillotina_cache_memcached_ops_total", {"type": "delete", "error": "none"}
+                "guillotina_cache_memcached_ops_total",
+                {"type": "delete", "error": "none"},
             )
             == 2.0
         )
         assert (
             metrics_registry.get_sample_value(
-                "guillotina_cache_memcached_ops_processing_time_seconds_sum", {"type": "delete"}
+                "guillotina_cache_memcached_ops_processing_time_seconds_sum",
+                {"type": "delete"},
             )
             > 0
         )

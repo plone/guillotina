@@ -1,7 +1,8 @@
-from guillotina.testing import ADMIN_TOKEN
-
 import json
+
 import pytest
+
+from guillotina.testing import ADMIN_TOKEN
 
 
 pytestmark = pytest.mark.asyncio

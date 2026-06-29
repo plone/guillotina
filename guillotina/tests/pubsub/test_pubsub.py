@@ -1,9 +1,10 @@
-from guillotina.component import get_utility
-from guillotina.interfaces import IPubSubUtility
-
 import asyncio
+
 import pytest
 import pytest_docker_fixtures
+
+from guillotina.component import get_utility
+from guillotina.interfaces import IPubSubUtility
 
 
 @pytest.mark.app_settings(

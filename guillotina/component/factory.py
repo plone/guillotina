@@ -12,10 +12,10 @@
 #
 ##############################################################################
 # flake8: noqa
-from guillotina.component.interfaces import IFactory
-from zope.interface import implementedBy
-from zope.interface import implementer
+from zope.interface import implementedBy, implementer
 from zope.interface.declarations import Implements
+
+from guillotina.component.interfaces import IFactory
 
 
 @implementer(IFactory)

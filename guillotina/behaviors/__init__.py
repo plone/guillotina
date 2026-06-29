@@ -1,14 +1,13 @@
 # so we can scan guillotina.behaviors and load behavior configuration
+from zope.interface import alsoProvides, classImplements
+
+from guillotina.component import get_utilities_for, get_utility
+from guillotina.interfaces import IBehavior, IResourceFactory
+from guillotina.profile import profilable
+
 from . import attachment  # noqa
 from . import dublincore  # noqa
 from . import dynamic  # noqa
-from guillotina.component import get_utilities_for
-from guillotina.component import get_utility
-from guillotina.interfaces import IBehavior
-from guillotina.interfaces import IResourceFactory
-from guillotina.profile import profilable
-from zope.interface import alsoProvides
-from zope.interface import classImplements
 
 
 def apply_concrete_behaviors():

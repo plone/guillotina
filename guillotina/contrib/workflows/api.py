@@ -1,10 +1,8 @@
 from guillotina import configure
 from guillotina.api.service import Service
 from guillotina.component import query_adapter
-from guillotina.contrib.workflows.interfaces import IWorkflow
-from guillotina.contrib.workflows.interfaces import IWorkflowBehavior
-from guillotina.interfaces import IAbsoluteURL
-from guillotina.interfaces import IResource
+from guillotina.contrib.workflows.interfaces import IWorkflow, IWorkflowBehavior
+from guillotina.interfaces import IAbsoluteURL, IResource
 
 
 class Workflow(object):

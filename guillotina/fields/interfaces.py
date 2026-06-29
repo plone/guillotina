@@ -1,5 +1,6 @@
-from guillotina.schema.interfaces import IField
 from zope.interface import Interface
+
+from guillotina.schema.interfaces import IField
 
 
 class IPatchField(IField):

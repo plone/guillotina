@@ -1,15 +1,15 @@
+import asyncio
+from unittest import mock
+from unittest.mock import MagicMock, Mock
+
+import pytest
+
 from guillotina.component import get_utility
 from guillotina.contrib.cache.strategy import BasicCache
 from guillotina.db.transaction import Transaction
 from guillotina.interfaces import ICacheUtility
 from guillotina.tests import mocks
 from guillotina.tests.utils import create_content
-from unittest import mock
-from unittest.mock import MagicMock
-from unittest.mock import Mock
-
-import asyncio
-import pytest
 
 
 pytestmark = pytest.mark.asyncio

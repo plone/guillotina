@@ -1,16 +1,13 @@
+import json
+
+import pytest
+
 from guillotina import utils
 from guillotina.behaviors.dublincore import IDublinCore
-from guillotina.interfaces import IPrincipalRoleManager
-from guillotina.interfaces import IResource
-from guillotina.tests.utils import create_content
-from guillotina.tests.utils import get_mocked_request
-from guillotina.tests.utils import get_root
-from guillotina.tests.utils import login
+from guillotina.interfaces import IPrincipalRoleManager, IResource
+from guillotina.tests.utils import create_content, get_mocked_request, get_root, login
 from guillotina.utils import get_behavior
 from guillotina.utils.navigator import Navigator
-
-import json
-import pytest
 
 
 def test_module_resolve_path():

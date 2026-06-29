@@ -1,9 +1,10 @@
 CHANGELOG
 =========
 
-7.0.7 (unreleased)
+7.1.4 (unreleased)
 ------------------
 
+<<<<<<< docs/guillotina-docs-v2-batch-master
 - Docs: Replace stale linkcheck-ignored external references for Hypercorn and
   plone.restapi users/groups, and clear the docs linkcheck ignore list
   [nilbacardit26]
@@ -33,6 +34,59 @@ CHANGELOG
   [nilbacardit26]
 - Docs: Add ADR for LLM discovery policy decisions (canonical URL, bots, size cap)
   [nilbacardit26]
+=======
+- Nothing changed yet.
+
+
+7.1.3 (2026-06-24)
+------------------
+
+- MCP: enforce Guillotina content permissions for tools and resources,
+  require ``ViewContent`` for full serialized JSON, isolate cached tool
+  responses by principal/container/context, and invalidate MCP cache on
+  permission changes.
+  [rboixaderg]
+
+
+7.1.2 (2026-05-22)
+------------------
+
+- MCP: remove redundant ``serialize_resource`` and confusing
+  ``notify_modified`` built-in tools. Use ``resolve_path`` with
+  ``include_serialized=true`` for full resource JSON.
+  [rboixaderg]
+- Copy backing file storage when duplicating content with cloud file fields,
+  including dict-valued multi-file fields, so duplicated content does not share
+  mutable file blobs with the source object.
+  [nilbacardit26]
+- Replace the docs build usage of deprecated ``pkg_resources`` with
+  ``importlib.metadata`` and update ``sphinxcontrib-httpexample`` for
+  compatibility with current setuptools.
+  [nilbacardit26]
+
+
+7.1.1 (2026-05-15)
+------------------
+
+- Fix list-valued mailer recipient headers for ``To`` and ``Cc``.
+  [nilbacardit26]
+
+
+7.1.0 (2026-05-07)
+------------------
+
+- BREAKING CHANGE: Drop support for Python 3.8 and 3.9. Guillotina is
+  now tested and supported on Python 3.10, 3.11, and 3.12.
+  [nilbacardit26]
+- Add `guillotina.contrib.mcp` with low-level MCP server integration
+  (`mcp.server.lowlevel`), tool registry utility, MCP services,
+  cache invalidation subscribers, and tests/docs coverage.
+- Optimize MCP `list_children` tool to prefer catalog queries and
+  fallback to `async_items` when catalog is unavailable.
+- Upgrade the pytest stack so the CI test environment stays compatible
+  with the optional MCP SDK and its AnyIO pytest plugin on Python 3.10+.
+  [finalchaz, nilbacardit26]
+>>>>>>> master
 - Docs: Update documentation and configuration settings
 - Chore: Update sphinx-guillotina-theme version to 1.0.9
   [rboixaderg]

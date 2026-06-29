@@ -1,6 +1,10 @@
+import logging
+import typing
+
+from zope.interface import alsoProvides
+
 from guillotina import configure
-from guillotina.api.content import DefaultDELETE
-from guillotina.api.content import DefaultPATCH
+from guillotina.api.content import DefaultDELETE, DefaultPATCH
 from guillotina.api.service import Service
 from guillotina.component import get_multi_adapter
 from guillotina.content import create_content_in_container
@@ -8,17 +12,9 @@ from guillotina.contrib.dbusers.content.groups import Group
 from guillotina.contrib.dbusers.services.utils import ListGroupsOrUsersService
 from guillotina.event import notify
 from guillotina.events import ObjectAddedEvent
-from guillotina.interfaces import IContainer
-from guillotina.interfaces import IPATCH
-from guillotina.interfaces import IResourceSerializeToJsonSummary
-from guillotina.response import HTTPNotFound
-from guillotina.response import HTTPPreconditionFailed
-from guillotina.utils import navigate_to
-from guillotina.utils import valid_id
-from zope.interface import alsoProvides
-
-import logging
-import typing
+from guillotina.interfaces import IPATCH, IContainer, IResourceSerializeToJsonSummary
+from guillotina.response import HTTPNotFound, HTTPPreconditionFailed
+from guillotina.utils import navigate_to, valid_id
 
 
 logger = logging.getLogger("guillotina.contrib.dbusers")
