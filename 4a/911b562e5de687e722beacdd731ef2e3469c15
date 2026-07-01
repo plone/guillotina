@@ -1,0 +1,19 @@
+docs/source/_extra/llms-full.txt
+  s_f90c7e9d76271e::t_08471b385d54aa 20,26,32,38,44,50,56,62,68,74
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.4",
+  "base_commit_sha": "4a911b562e5de687e722beacdd731ef2e3469c15",
+  "prompts": {},
+  "sessions": {
+    "s_f90c7e9d76271e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "9432dd4f-69fa-4e55-be41-fa584a2c2140",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Roger Boixader Güell <rboixaderg@gmail.com>"
+    }
+  }
+}
