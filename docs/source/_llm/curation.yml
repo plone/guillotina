@@ -85,7 +85,3 @@ items:
     title: Migration Guide
     summary: Version upgrade notes and migration paths.
     include_full: false
-  - path: ../CHANGELOG.rst
-    title: Changelog
-    summary: Release history and notable changes.
-    include_full: false

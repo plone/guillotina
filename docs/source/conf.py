@@ -30,7 +30,9 @@
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
+from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as package_version
+from pathlib import Path
 
 extensions = [
     "sphinx.ext.coverage",
@@ -71,7 +73,10 @@ author = "Ramon Navarro Bosch & Nathan Van Gheem"
 # built documents.
 #
 # The short X.Y version.
-version = package_version("guillotina").split(".dev")[0]
+try:
+    version = package_version("guillotina").split(".dev")[0]
+except PackageNotFoundError:
+    version = (Path(__file__).resolve().parents[2] / "VERSION").read_text().strip().split(".dev")[0]
 # The full version, including alpha/beta/rc tags.
 release = version
 
@@ -179,8 +184,10 @@ html_extra_path = ["_extra"]
 # Canonical URL base for generated links and sitemap references.
 html_baseurl = "https://guillotina.readthedocs.io/en/latest/"
 
-# Known external links that are currently unavailable/blocked.
-linkcheck_ignore = []
+# Known examples or external endpoints that should not make docs CI flaky.
+linkcheck_ignore = [
+    r"http://localhost:8080/.*",
+]
 
 # If not None, a 'Last updated on:' timestamp is inserted at every page
 # bottom, using the given strftime format.

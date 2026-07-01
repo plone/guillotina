@@ -104,14 +104,19 @@ jobs:
         run: |
           python docs/scripts/generate_llms_assets.py
 
-      - name: Validate llms assets
-        run: |
-          python docs/scripts/check_llms_assets.py
-
       - name: Build documentation
         run: |
           python -m sphinx -b html docs/source docs/build/html
 
-      - name: Check links
+      - name: Validate llms assets
+        run: |
+          python docs/scripts/check_llms_assets.py --html-root docs/build/html
+
+      - name: Check retrieval coverage
+        run: |
+          python docs/scripts/check_retrieval_coverage.py --top-k 5 --min-coverage 0.90
+
+      - name: Check external links
+        continue-on-error: true
         run: |
           python -m sphinx -b linkcheck docs/source docs/build/linkcheck

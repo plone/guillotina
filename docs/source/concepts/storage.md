@@ -1,31 +1,46 @@
 # Storage
 
 ## What it is
-Storage is the persistence layer backing Guillotina resources, typically through
-PostgreSQL/Cockroach integrations and transaction management.
 
-## Why it matters
-Storage performance and correctness directly affect request latency, durability,
-and consistency.
+Storage is the persistence layer behind Guillotina databases. Production systems
+normally use `postgresql`; `cockroach`, `DUMMY`, and `DUMMY_FILE` are also
+available for specific deployment or testing needs.
 
-## How it works
-- Resource changes are staged in transactions.
-- The configured backend persists object state.
-- Search/catalog layers index persisted data for query use-cases.
+## Where it appears
 
-## Minimal example
+Storage is configured under `databases`. The configuration key becomes the first
+URL segment after the host, so a database named `db` is available at `/db`.
+
+## Configure PostgreSQL
+
 ```yaml
-# config excerpt
-storages:
-  mydb:
-    storage: "postgres"
+databases:
+  db:
+    storage: postgresql
+    dsn: postgresql://postgres@localhost:5432/guillotina
+    pool_size: 40
 ```
 
+## Extension points
+
+- Configure multiple databases for separate URL roots.
+- Use `storages` settings when exposing dynamic database creation through the
+  storage APIs.
+- Tune database options such as pool size, object table name, blob table name,
+  and autovacuum behavior for production workloads.
+
 ## Common failures
-- Incorrect backend configuration prevents startup.
-- Slow queries and lock contention degrade API response times.
+
+- Using `postgres` instead of `postgresql` does not match Guillotina's storage
+  backend name.
+- A DSN without the database name is valid for `storages`, but not for a normal
+  configured database.
+- Slow queries, large transactions, and lock contention appear as API latency.
+- Disabling autovacuum requires an external maintenance process.
 
 ## Related pages
+
 - {doc}`transactions`
 - {doc}`catalog`
+- {doc}`../installation/configuration`
 - {doc}`../developer/persistence`

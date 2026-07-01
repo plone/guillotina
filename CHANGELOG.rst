@@ -4,38 +4,12 @@ CHANGELOG
 7.1.4 (unreleased)
 ------------------
 
-<<<<<<< docs/guillotina-docs-v2-batch-master
-- Docs: Replace stale linkcheck-ignored external references for Hypercorn and
-  plone.restapi users/groups, and clear the docs linkcheck ignore list
-  [nilbacardit26]
-- Docs: Expose Developer Guides section from documentation index
-  [nilbacardit26]
-- Docs: Add final documentation quality and rollout readiness report
-  [nilbacardit26]
-- Docs: Add contributor docs and maintenance cadence documentation
-  [nilbacardit26]
-- Docs: Add retrieval benchmark queries and lexical coverage checker script
-  [nilbacardit26]
-- CI: Add docs quality gate job (build, linkcheck, llms checks)
-  [nilbacardit26]
-- Docs: Add generated llms/robots/sitemap assets and Sphinx root publishing config
-  [nilbacardit26]
-- Docs: Add core concepts pages (storage, catalog, middleware, task vars, security model)
-  [nilbacardit26]
-- Docs: Add core concepts pages (architecture, object model, traversal, request/response, transactions)
-  [nilbacardit26]
-- Docs: Add section index pages for concepts, how-to, and operations
-  [nilbacardit26]
-- Docs: Rework root documentation navigation toward Diataxis sections
-  [nilbacardit26]
-- Docs: Phase 1 hygiene updates (stray text cleanup, Python version refresh, link fixes)
-  [nilbacardit26]
-- Docs: Add baseline docs IA artifacts (inventory, redirect map, ADR-001)
-  [nilbacardit26]
-- Docs: Add ADR for LLM discovery policy decisions (canonical URL, bots, size cap)
-  [nilbacardit26]
-=======
-- Nothing changed yet.
+- Docs: Reorganize documentation navigation, add concept/how-to/operations
+  entry points, publish validated LLM discovery assets, add retrieval checks,
+  and add Context7 indexing configuration.
+  [nilbacardit26, rboixaderg]
+- Chore: Update sphinx-guillotina-theme version to 1.0.9
+  [rboixaderg]
 
 
 7.1.3 (2026-06-24)
@@ -86,10 +60,6 @@ CHANGELOG
 - Upgrade the pytest stack so the CI test environment stays compatible
   with the optional MCP SDK and its AnyIO pytest plugin on Python 3.10+.
   [finalchaz, nilbacardit26]
->>>>>>> master
-- Docs: Update documentation and configuration settings
-- Chore: Update sphinx-guillotina-theme version to 1.0.9
-  [rboixaderg]
 
 
 7.0.6 (2025-10-10)

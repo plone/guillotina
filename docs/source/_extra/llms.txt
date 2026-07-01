@@ -21,4 +21,3 @@
 - https://guillotina.readthedocs.io/en/latest/installation/ | Installation and Configuration | Installation, configuration, and deployment docs.
 - https://guillotina.readthedocs.io/en/latest/contrib/ | Contrib Packages | Optional packages and integrations.
 - https://guillotina.readthedocs.io/en/latest/migration/ | Migration Guide | Version upgrade notes and migration paths.
-- https://guillotina.readthedocs.io/en/latest/CHANGELOG.html | Changelog | Release history and notable changes.

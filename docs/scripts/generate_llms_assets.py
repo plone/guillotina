@@ -45,9 +45,6 @@ def _strip_markup(raw: str) -> str:
 def _canonical_url(base_url: str, path_value: str) -> str:
     p = path_value.lstrip("./")
 
-    # Keep docs/source-relative canonical URLs; files outside docs/source stay root-style.
-    p = p.replace("../", "")
-
     if p.endswith("/index.md") or p.endswith("/index.rst"):
         p = p.rsplit("/index.", 1)[0] + "/"
     elif p.endswith(".md") or p.endswith(".rst"):
@@ -57,6 +54,21 @@ def _canonical_url(base_url: str, path_value: str) -> str:
         p = p[1:]
 
     return base_url.rstrip("/") + "/" + p
+
+
+def _resolve_source_path(source_root: Path, path_value: str) -> Path:
+    source_root = source_root.resolve()
+    source_path = (source_root / path_value).resolve()
+
+    try:
+        source_path.relative_to(source_root)
+    except ValueError as exc:
+        raise ValueError(f"Curated path escapes docs source root: {path_value}") from exc
+
+    if not source_path.exists() or not source_path.is_file():
+        raise ValueError(f"Curated source path does not exist: {path_value}")
+
+    return source_path
 
 
 def generate(curation_path: Path, source_root: Path, output_root: Path) -> Dict[str, int]:
@@ -99,18 +111,12 @@ def generate(curation_path: Path, source_root: Path, output_root: Path) -> Dict[
         if not path_value:
             continue
 
+        source_path = _resolve_source_path(source_root, path_value)
         url = _canonical_url(base_url, path_value)
         sitemap_urls.append(url)
         llms_lines.append(f"- {url} | {title} | {summary}")
 
         if not include_full:
-            continue
-
-        source_path = (source_root / path_value).resolve()
-        if not source_path.exists():
-            # Try from repo root for paths like ../CHANGELOG.rst
-            source_path = (source_root.parent / path_value).resolve()
-        if not source_path.exists() or not source_path.is_file():
             continue
 
         body = _strip_markup(source_path.read_text(encoding="utf-8", errors="ignore"))
