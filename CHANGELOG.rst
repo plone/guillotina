@@ -5,8 +5,8 @@ CHANGELOG
 ------------------
 
 - Docs: Reorganize documentation navigation, add concept/how-to/operations
-  entry points, publish validated LLM discovery assets, add retrieval checks,
-  and add Context7 indexing configuration.
+  entry points, publish validated LLM discovery assets, and add Context7
+  indexing configuration.
   [nilbacardit26, rboixaderg]
 - Chore: Update sphinx-guillotina-theme version to 1.0.9
   [rboixaderg]

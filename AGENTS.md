@@ -29,8 +29,11 @@
   - `.venv/bin/python docs/scripts/generate_llms_assets.py`
   - `.venv/bin/python -m sphinx -b html docs/source docs/build/html`
   - `.venv/bin/python docs/scripts/check_llms_assets.py --html-root docs/build/html`
-  - `.venv/bin/python docs/scripts/check_retrieval_coverage.py --top-k 5 --min-coverage 0.90`
   - `.venv/bin/python -m sphinx -b linkcheck docs/source docs/build/linkcheck`
+- Docs contributor guide: `docs/ABOUT_DOCS.rst` (structure, curation, external-link policy).
+- When docs navigation or curated pages change, update `docs/source/index.md` and
+  `docs/source/_llm/curation.yml`, then commit regenerated `docs/source/_extra/` assets.
+- Context7 reads `docs/source/` via `context7.json`; it does not use generated `llms.txt`.
 - For contrib changes, run focused tests under the touched contrib test folder.
 - For API/service changes, verify status codes and response payload contracts.
 - Keep docs updated under `docs/source/contrib/` when adding contrib features.

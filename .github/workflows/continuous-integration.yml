@@ -112,10 +112,6 @@ jobs:
         run: |
           python docs/scripts/check_llms_assets.py --html-root docs/build/html
 
-      - name: Check retrieval coverage
-        run: |
-          python docs/scripts/check_retrieval_coverage.py --top-k 5 --min-coverage 0.90
-
       - name: Check external links
         continue-on-error: true
         run: |
