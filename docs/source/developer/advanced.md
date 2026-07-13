@@ -6,7 +6,7 @@ Guillotina supports the following ASGI ([Asynchronous Server Gateway Interface](
 servers out-of-the-box:
 
 - [Uvicorn](https://www.uvicorn.org/ "Link to Uvicorn") (used by default)
-- [Hypercorn](https://pgjones.gitlab.io/hypercorn/ "Link to Hypercorn")
+- [Hypercorn](https://hypercorn.readthedocs.io/en/latest/ "Link to Hypercorn")
 
 Use the argument `--asgi-server` to choose one of the previous servers:
 

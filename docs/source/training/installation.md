@@ -10,7 +10,7 @@ Please make sure that you have both installed.
 ```
 
 ```shell
-python3.7 -m venv genv
+python3 -m venv genv
 cd genv
 source ./bin/activate
 ```

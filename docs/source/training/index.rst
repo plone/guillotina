@@ -2,7 +2,7 @@ Training
 ========
 
 Prerequisites:
- - `Python 3.7 <https://www.python.org/>`_
+ - `Python 3.10+ <https://www.python.org/>`_
  - `Docker <https://www.docker.com/>`_
  - `Postman <https://www.getpostman.com/>`_
 

@@ -8,7 +8,7 @@ it is especially good for working with client/server network connections.
 
 Python >= 3.4 (best features and performance in 3.6).
 
-This guide will assume you're on Python 3.7.
+This guide assumes you're on Python 3.10+.
 
 ## Explanation
 

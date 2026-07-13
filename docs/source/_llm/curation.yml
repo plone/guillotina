@@ -1,0 +1,87 @@
+site:
+  project_name: Guillotina
+  base_url: https://guillotina.readthedocs.io/en/latest/
+  llms_full_max_bytes: 2097152
+
+# Each item is listed in llms.txt. `include_full: true` also includes content in llms-full.txt.
+items:
+  - path: index.md
+    title: Documentation Home
+    summary: Main documentation landing page and section map.
+    include_full: false
+  - path: quickstart.md
+    title: Quickstart
+    summary: End-to-end first setup and first API usage.
+    include_full: true
+  - path: quick-tour.md
+    title: Quick Tour
+    summary: Feature overview and first extension examples.
+    include_full: true
+  - path: how-to/index.md
+    title: How-To Guides
+    summary: Task-oriented guides for setup, configuration, and troubleshooting.
+    include_full: false
+  - path: concepts/index.md
+    title: Concepts
+    summary: Core architectural concepts and system model.
+    include_full: false
+  - path: concepts/architecture.md
+    title: Architecture
+    summary: ASGI/AsyncIO architecture and extension points.
+    include_full: true
+  - path: concepts/object-model.md
+    title: Object Model
+    summary: Hierarchical content model and URL mapping.
+    include_full: true
+  - path: concepts/traversal.md
+    title: Traversal
+    summary: URL traversal and context resolution behavior.
+    include_full: true
+  - path: concepts/request-response.md
+    title: Request and Response
+    summary: Request lifecycle and response conventions.
+    include_full: true
+  - path: concepts/transactions.md
+    title: Transactions
+    summary: Transaction boundaries, commit, and rollback semantics.
+    include_full: true
+  - path: concepts/storage.md
+    title: Storage
+    summary: Persistence backends and data consistency concerns.
+    include_full: true
+  - path: concepts/catalog.md
+    title: Catalog
+    summary: Search/indexing model and retrieval behavior.
+    include_full: true
+  - path: concepts/middleware.md
+    title: Middleware
+    summary: Request/response middleware pipeline behavior.
+    include_full: true
+  - path: concepts/task-vars.md
+    title: Task Variables
+    summary: Context propagation and request-scoped variables.
+    include_full: true
+  - path: concepts/security-model.md
+    title: Security Model
+    summary: Roles, permissions, and context-based authorization.
+    include_full: true
+  - path: rest/index.rst
+    title: REST API Reference
+    summary: REST endpoints grouped by object type.
+    include_full: false
+  - path: api/index.rst
+    title: Python API Reference
+    summary: Internal API references for components and request/response.
+    include_full: false
+  - path: installation/index.rst
+    title: Installation and Configuration
+    summary: Installation, configuration, and deployment docs.
+    include_full: false
+  - path: contrib/index.rst
+    title: Contrib Packages
+    summary: Optional packages and integrations.
+    include_full: false
+  - path: migration/index.rst
+    title: Migration Guide
+    summary: Version upgrade notes and migration paths.
+    include_full: false

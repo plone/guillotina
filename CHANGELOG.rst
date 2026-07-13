@@ -4,7 +4,12 @@ CHANGELOG
 7.1.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Docs: Reorganize documentation navigation, add concept/how-to/operations
+  entry points, publish validated LLM discovery assets, and add Context7
+  indexing configuration.
+  [nilbacardit26, rboixaderg]
+- Chore: Update sphinx-guillotina-theme version to 1.0.9
+  [rboixaderg]
 
 
 7.1.3 (2026-06-24)
@@ -55,9 +60,6 @@ CHANGELOG
 - Upgrade the pytest stack so the CI test environment stays compatible
   with the optional MCP SDK and its AnyIO pytest plugin on Python 3.10+.
   [finalchaz, nilbacardit26]
-- Docs: Update documentation and configuration settings
-- Chore: Update sphinx-guillotina-theme version to 1.0.9
-  [rboixaderg]
 
 
 7.0.6 (2025-10-10)

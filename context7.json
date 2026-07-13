@@ -1,0 +1,19 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "Guillotina",
+  "description": "AsyncIO REST API framework and resource application server for Python.",
+  "folders": ["docs/source"],
+  "excludeFolders": [
+    "docs/source/_extra",
+    "docs/source/_llm",
+    "docs/source/_static",
+    "docs/source/**/_static"
+  ],
+  "rules": [
+    "Prefer examples based on Guillotina's ASGI request lifecycle.",
+    "Use postgresql as the storage backend name in configuration examples.",
+    "Distinguish conceptual documentation from API reference.",
+    "Prioritize docs under docs/source for user-facing explanations.",
+    "Avoid pseudo-code unless explicitly labelled as conceptual."
+  ]
+}

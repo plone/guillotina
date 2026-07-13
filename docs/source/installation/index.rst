@@ -1,6 +1,5 @@
 Installation/Configuration/Deployment
 =====================================
-production
 
 Contents:
 

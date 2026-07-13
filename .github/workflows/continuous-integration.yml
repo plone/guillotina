@@ -81,3 +81,38 @@ jobs:
         uses: codecov/codecov-action@v1
         with:
           file: ./coverage.xml
+
+  docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.11"
+
+      - name: Install docs dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install -r docs-requirements.txt
+          pip install -e .
+
+      - name: Generate LLM and crawler assets
+        run: |
+          python docs/scripts/generate_llms_assets.py
+
+      - name: Build documentation
+        run: |
+          python -m sphinx -b html docs/source docs/build/html
+
+      - name: Validate llms assets
+        run: |
+          python docs/scripts/check_llms_assets.py --html-root docs/build/html
+
+      - name: Check external links
+        continue-on-error: true
+        run: |
+          python -m sphinx -b linkcheck docs/source docs/build/linkcheck
