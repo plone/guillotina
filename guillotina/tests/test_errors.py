@@ -58,9 +58,7 @@ async def test_unhandle_exception_in_view(container_requester):
 
 async def test_error_response_is_json_even_when_html_accepted(container_requester):
     async with container_requester as requester:
-        response, status, headers = await requester.make_request(
-            "GET", "/db/non", accept="text/html,*/*"
-        )
+        response, status, headers = await requester.make_request("GET", "/db/non", accept="text/html,*/*")
         assert status == 404
         assert "application/json" in headers["Content-Type"]
         assert "text/html" not in headers["Content-Type"]
