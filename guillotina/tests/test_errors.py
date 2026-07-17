@@ -54,3 +54,28 @@ async def test_unhandle_exception_in_view(container_requester):
             handle_mock.side_effect = Exception()
             _, status = await requester("GET", "/db")
             assert status == 500
+
+
+async def test_error_response_is_json_even_when_html_accepted(container_requester):
+    async with container_requester as requester:
+        response, status, headers = await requester.make_request(
+            "GET", "/db/non", accept="text/html,*/*"
+        )
+        assert status == 404
+        assert "application/json" in headers["Content-Type"]
+        assert "text/html" not in headers["Content-Type"]
+        assert b"<html" not in (response if isinstance(response, bytes) else b"")
+
+
+async def test_error_response_does_not_reflect_markup_as_html(container_requester):
+    async with container_requester as requester:
+        payload = "<img src=x onerror=alert(document.domain)>"
+        _, status, headers = await requester.make_request(
+            "POST",
+            "/db/guillotina",
+            data='{{"@type": "{}"}}'.format(payload),
+            accept="text/html,*/*",
+        )
+        assert status >= 400
+        assert "application/json" in headers["Content-Type"]
+        assert "text/html" not in headers["Content-Type"]

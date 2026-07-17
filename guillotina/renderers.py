@@ -74,6 +74,7 @@ class RendererJson(Renderer):
     def get_body(self, value) -> Optional[bytes]:
         if value is not None:
             value = json.dumps(value, cls=GuillotinaJSONEncoder)
+            value = value.replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
             return value.encode("utf-8")
         return None
 

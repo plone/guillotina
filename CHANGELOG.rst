@@ -1,5 +1,12 @@
 CHANGELOG
 =========
+5.5.9 (2026-07-17)
+-------------------
+- Security: Always render error responses (status >= 400) as JSON, ignoring the
+  client ``Accept`` header, and unicode-escape ``<``, ``>`` and ``&`` in JSON
+  responses so request-derived content reflected in error bodies can no longer be
+  served as an executable ``text/html`` document.
+
 5.5.8 (2026-01-08)
 -------------------
 - Update urllib3

@@ -41,6 +41,7 @@ from guillotina.interfaces import IOPTIONS
 from guillotina.interfaces import IPermission
 from guillotina.interfaces import IRenderer
 from guillotina.interfaces import IRequest
+from guillotina.interfaces import IResponse
 from guillotina.interfaces import ITraversable
 from guillotina.profile import profilable
 from guillotina.response import HTTPBadRequest
@@ -225,6 +226,9 @@ class BaseMatchInfo(AbstractMatchInfo):
 
 
 async def apply_rendering(view, request, view_result):
+    if IResponse.providedBy(view_result) and (view_result.status_code or 200) >= 400:
+        renderer = query_multi_adapter((view, request), IRenderer, name="application/json")
+        return await renderer(view_result)
     for ct in get_acceptable_content_types(request):
         renderer = query_multi_adapter((view, request), IRenderer, name=ct)
         if renderer is not None:
