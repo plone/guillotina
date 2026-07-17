@@ -68,11 +68,9 @@ async def test_error_response_is_json_even_when_html_accepted(container_requeste
 async def test_error_response_does_not_reflect_markup_as_html(container_requester):
     async with container_requester as requester:
         payload = "<img src=x onerror=alert(document.domain)>"
+        data = '{{"@type": "{}"}}'.format(payload)
         _, status, headers = await requester.make_request(
-            "POST",
-            "/db/guillotina",
-            data='{{"@type": "{}"}}'.format(payload),
-            accept="text/html,*/*",
+            "POST", "/db/guillotina", data=data, accept="text/html,*/*"
         )
         assert status >= 400
         assert "application/json" in headers["Content-Type"]
