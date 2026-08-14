@@ -10,6 +10,8 @@ CHANGELOG
   [nilbacardit26, rboixaderg]
 - Chore: Update sphinx-guillotina-theme version to 1.0.10
   [rboixaderg]
+- Chore: restrict MCP version for Python 3.10 and above to ensure compatibility
+  [rboixaderg]
 
 
 7.1.3 (2026-06-24)
