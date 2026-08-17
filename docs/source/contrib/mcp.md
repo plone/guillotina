@@ -64,6 +64,8 @@ Accept: application/json, text/event-stream
 
 Without the `Accept` header, the transport may respond with **406 Not Acceptable**.
 
+The endpoint is JSON-only and does not open a GET SSE stream. Per the MCP Streamable HTTP spec, `GET` and `DELETE` on `@mcp/protocol` return **405 Method Not Allowed** with `Allow: POST`, so clients continue with POST/JSON instead of treating a **404** as a dead session.
+
 Example: list tools via JSON-RPC:
 
 ```bash
