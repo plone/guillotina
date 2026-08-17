@@ -8,7 +8,9 @@ CHANGELOG
   entry points, publish validated LLM discovery assets, and add Context7
   indexing configuration.
   [nilbacardit26, rboixaderg]
-- Chore: Update sphinx-guillotina-theme version to 1.0.9
+- Chore: Update sphinx-guillotina-theme version to 1.0.10
+  [rboixaderg]
+- Chore: restrict MCP version for Python 3.10 and above to ensure compatibility
   [rboixaderg]
 
 
