@@ -1,0 +1,25 @@
+guillotina/contrib/mcp/services.py
+  s_31c99951a0ea33::t_410deaedac5450 7-26,94-119
+CHANGELOG.rst
+  s_31c99951a0ea33::t_6e52832b1c32f1 15-17
+docs/source/contrib/mcp.md
+  s_31c99951a0ea33::t_8d6776a900bee7 67-68
+guillotina/tests/mcp/test_mcp.py
+  s_31c99951a0ea33::t_47a0d255cc5539 902-928
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "bf9ff91180f12ad14183ae6ecb09b0002721eda5",
+  "prompts": {},
+  "sessions": {
+    "s_31c99951a0ea33": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "bf173657-3006-449e-8f24-90707b03556f",
+        "model": "grok-4.6"
+      },
+      "human_author": "Roger Boixader Güell <rboixaderg@gmail.com>"
+    }
+  }
+}
