@@ -12,6 +12,9 @@ CHANGELOG
   [rboixaderg]
 - Chore: restrict MCP version for Python 3.10 and above to ensure compatibility
   [rboixaderg]
+- MCP: return HTTP 405 on GET and DELETE ``@mcp/protocol`` so Streamable HTTP
+  clients treat the endpoint as JSON-only instead of a missing session.
+  [rboixaderg]
 
 
 7.1.3 (2026-06-24)

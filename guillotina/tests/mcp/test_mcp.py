@@ -899,6 +899,33 @@ async def test_protocol_unknown_action_returns_404(container_requester):
         assert status == 404
 
 
+def _assert_protocol_method_not_allowed(status, headers):
+    assert status == 405
+    allow = headers.get("Allow") or headers.get("allow") or ""
+    assert "POST" in allow.upper()
+
+
+@pytest.mark.app_settings(MCP_SETTINGS)
+async def test_protocol_get_returns_405_without_sse(container_requester):
+    async with container_requester as requester:
+        _, status, headers = await requester.make_request(
+            "GET",
+            "/db/guillotina/@mcp/protocol",
+            accept="text/event-stream",
+        )
+        _assert_protocol_method_not_allowed(status, headers)
+
+
+@pytest.mark.app_settings(MCP_SETTINGS)
+async def test_protocol_delete_returns_405(container_requester):
+    async with container_requester as requester:
+        _, status, headers = await requester.make_request(
+            "DELETE",
+            "/db/guillotina/@mcp/protocol",
+        )
+        _assert_protocol_method_not_allowed(status, headers)
+
+
 @pytest.mark.app_settings(MCP_SETTINGS)
 async def test_protocol_resource_registry_matches_defaults(container_requester):
     async with container_requester as requester:

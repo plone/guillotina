@@ -4,7 +4,26 @@ from guillotina.component import query_utility
 from guillotina.contrib.mcp.interfaces import IMCPToolRegistry
 from guillotina.contrib.mcp.security import require_access_content
 from guillotina.interfaces import IResource
-from guillotina.response import HTTPNotFound, HTTPServiceUnavailable, Response
+from guillotina.response import HTTPMethodNotAllowed, HTTPNotFound, HTTPServiceUnavailable, Response
+
+
+_MCP_PROTOCOL_POST_METHODS = ["POST"]
+
+
+def _reject_non_post_protocol(context, request, method: str):
+    action = request.matchdict.get("action", "")
+    if action != "protocol":
+        raise HTTPNotFound(content={"reason": f"Unknown MCP {method} action: {action}"})
+    require_access_content(context)
+    if method == "DELETE":
+        reason = "MCP endpoint does not support session termination"
+    else:
+        reason = "MCP endpoint does not offer an SSE stream"
+    raise HTTPMethodNotAllowed(
+        method,
+        _MCP_PROTOCOL_POST_METHODS,
+        content={"reason": reason},
+    )
 
 
 def _get_registry():
@@ -72,3 +91,29 @@ class MCPActionPostService(Service):
         resp._prepared = True
         resp._eof_sent = True
         return resp
+
+
+@configure.service(
+    method="GET",
+    context=IResource,
+    name="@mcp/{action}",
+    permission="guillotina.MCPExecute",
+    summary="MCP Streamable HTTP GET is not offered (JSON-only)",
+    allow_access=True,
+)
+class MCPActionGetService(Service):
+    async def __call__(self):
+        _reject_non_post_protocol(self.context, self.request, "GET")
+
+
+@configure.service(
+    method="DELETE",
+    context=IResource,
+    name="@mcp/{action}",
+    permission="guillotina.MCPExecute",
+    summary="MCP Streamable HTTP session termination is not offered",
+    allow_access=True,
+)
+class MCPActionDeleteService(Service):
+    async def __call__(self):
+        _reject_non_post_protocol(self.context, self.request, "DELETE")
