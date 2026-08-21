@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-7.1.4 (unreleased)
+7.1.4 (2026-08-21)
 ------------------
 
 - Docs: Reorganize documentation navigation, add concept/how-to/operations
