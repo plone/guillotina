@@ -4,7 +4,8 @@ CHANGELOG
 7.1.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix PostgreSQL catalog pagination omitting or repeating objects when sort
+  values tie, by using the object ID as a final ordering key.
 
 
 7.1.4 (2026-08-21)

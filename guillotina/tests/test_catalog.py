@@ -651,6 +651,62 @@ async def test_date_query_pg_catalog_sort(container_requester):
             assert len(results["items"]) == 0
 
 
+@pytest.mark.app_settings({**PG_CATALOG_SETTINGS, "catalog_max_results": 136})
+@pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
+@pytest.mark.parametrize("direction", ["asc", "des"])
+@pytest.mark.parametrize("sort_field", ["creation_date", "title", "missing_sort_field"])
+async def test_search_pagination_with_tied_sort_values(container_requester, direction, sort_field):
+    """Pages must not omit or repeat objects sharing the requested sort value."""
+    count = 136
+    page_size = 12
+    async with container_requester as requester:
+        expected_uids = set()
+        for number in range(count):
+            response, status = await requester(
+                "POST",
+                "/db/guillotina/",
+                data=json.dumps(
+                    {
+                        "@type": "Item",
+                        "id": f"performance-{number:03d}",
+                        "title": "Simultaneous performance",
+                        "creation_date": f"2026-10-16T{18 + number % 2}:00:00+00:00",
+                    }
+                ),
+            )
+            assert status == 201
+            expected_uids.add(response["@uid"])
+
+        query = f"/db/guillotina/@search?type_name=Item&_sort_{direction}={sort_field}"
+        if sort_field == "title":
+            # Exercise tied full-text scores as well as tied dates and NULLs.
+            query += "&title=simultaneous"
+        whole, status = await requester("GET", f"{query}&b_size={count}")
+        assert status == 200
+        assert whole["items_total"] == count
+        assert {item["@uid"] for item in whole["items"]} == expected_uids
+        assert len({item["creation_date"] for item in whole["items"]}) == 2
+
+        items = []
+        for offset in range(0, count, page_size):
+            page, status = await requester("GET", f"{query}&b_size={page_size}&b_start={offset}")
+            assert status == 200
+            assert page["items_total"] == count
+            assert len(page["items"]) == min(page_size, count - offset)
+            items.extend(page["items"])
+
+        uids = [item["@uid"] for item in items]
+        missing = expected_uids - set(uids)
+        assert (
+            len(uids) == len(set(uids)) == count
+        ), f"{len(uids)} rows, {len(set(uids))} distinct IDs, {len(missing)} missing"
+        assert set(uids) == expected_uids
+        assert uids == [item["@uid"] for item in whole["items"]]
+        if sort_field == "creation_date":
+            dates = [item["creation_date"] for item in items]
+            assert dates == sorted(dates, reverse=direction == "des")
+
+
 @pytest.mark.app_settings(PG_CATALOG_SETTINGS)
 @pytest.mark.skipif(NOT_POSTGRES, reason="Only PG")
 async def test_build_pg_query(dummy_guillotina):

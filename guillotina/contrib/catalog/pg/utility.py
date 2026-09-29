@@ -201,6 +201,9 @@ class PGSearchUtility(DefaultSearchUtility):
             if query["sort_on_fields"] and hasattr(order_by_index, "order_by_score")
             else order_by_index.order_by(query["sort_dir"])
         )
+        if not distinct and query["sort_on"] not in (None, "uuid"):
+            # LIMIT/OFFSET need a total order when the requested sort values tie.
+            order += ", zoid ASC"
         sql = """select {} {}
                  from {}
                  where {}
