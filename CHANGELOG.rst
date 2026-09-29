@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-7.1.5 (unreleased)
+7.1.5 (2026-09-29)
 ------------------
 
 - Fix PostgreSQL catalog pagination omitting or repeating objects when sort
