@@ -145,6 +145,13 @@ class TIDConflictError(ConflictError):
     pass
 
 
+class ObjectLockedError(Exception):
+    def __init__(self, oid, retries):
+        super().__init__(f"Object {oid} is locked for modification after {retries} retries")
+        self.oid = oid
+        self.retries = retries
+
+
 class RestartCommit(Exception):
     """
     Commits requires restart
