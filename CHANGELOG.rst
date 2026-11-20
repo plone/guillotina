@@ -4,7 +4,8 @@ CHANGELOG
 7.1.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Cancel and drain pending tasks during test event-loop teardown so their
+  resources are released before another test reuses the loop's file descriptors.
 
 
 7.1.5 (2026-09-29)

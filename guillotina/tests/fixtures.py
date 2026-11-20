@@ -1,6 +1,8 @@
 import asyncio
+import gc
 import json
 import os
+import traceback
 from unittest import mock
 
 import aiohttp
@@ -25,9 +27,11 @@ from guillotina.tests.utils import (
 )
 from guillotina.transactions import get_tm, transaction
 from guillotina.utils import merge_dicts
+from guillotina.utils.asyncio import cancel_tasks
 
 
 _dir = os.path.dirname(os.path.realpath(__file__))
+_UNFINISHED_TASKS = []
 
 DATABASE = os.environ.get("DATABASE", "DUMMY")
 DB_SCHEMA = os.environ.get("DB_SCHEMA", "public")
@@ -61,9 +65,48 @@ def event_loop():
     res._close = res.close
     res.close = lambda: None
 
-    yield res
+    try:
+        yield res
+    finally:
+        try:
+            if not res.is_running() and not res.is_closed():
+                unfinished = _cancel_leftover_tasks(res)
+                res.run_until_complete(res.shutdown_asyncgens())
+                unfinished.extend(task for task in asyncio.all_tasks(res) if not task.done())
+                gc.collect()
+                _keep_unfinished_tasks(res, unfinished)
+        finally:
+            res._close()
 
-    res._close()
+
+def _cancel_leftover_tasks(loop, timeout=5):
+    cancelled, unfinished = cancel_tasks(loop, timeout=timeout)
+    for task in cancelled:
+        if task.done() and not task.cancelled():
+            exception = task.exception()
+            if exception is not None:
+                loop.call_exception_handler(
+                    {
+                        "message": "a leftover task failed:\n"
+                        + "".join(
+                            traceback.format_exception(type(exception), exception, exception.__traceback__)
+                        )
+                    }
+                )
+    return unfinished
+
+
+def _keep_unfinished_tasks(loop, tasks=None):
+    unfinished = set(task for task in tasks or [] if not task.done())
+    unfinished.update(task for task in asyncio.all_tasks(loop) if not task.done())
+    if unfinished:
+        _UNFINISHED_TASKS.extend(unfinished)
+        loop.call_exception_handler(
+            {
+                "message": f"{len(unfinished)} leftover task(s) did not finish "
+                "and are kept until the end of the run"
+            }
+        )
 
 
 def get_dummy_settings(pytest_node=None):

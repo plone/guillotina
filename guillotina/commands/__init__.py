@@ -12,6 +12,7 @@ from guillotina import logger, profile
 from guillotina._settings import app_settings
 from guillotina.factory import make_app
 from guillotina.utils import get_dotted_name, resolve_dotted_name
+from guillotina.utils.asyncio import cancel_tasks
 
 
 try:
@@ -112,7 +113,6 @@ def get_settings(configuration, overrides=None):
 
 
 class Command(object):
-
     profiler = line_profiler = None
     description = ""
     hide = False
@@ -233,17 +233,7 @@ class Command(object):
 
     def _cancel_all_tasks(self, loop):
         # https://github.com/python/cpython/blob/7f7dc673540c47db544878bb32d20d9bd1445b94/Lib/asyncio/runners.py#L55
-        from asyncio import tasks
-
-        to_cancel = tasks.all_tasks(loop)
-        if not to_cancel:
-            return
-
-        for task in to_cancel:
-            task.cancel()
-
-        loop.run_until_complete(tasks.gather(*to_cancel, return_exceptions=True))
-
+        to_cancel, _ = cancel_tasks(loop)
         for task in to_cancel:
             if task.cancelled():
                 continue
