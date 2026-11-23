@@ -4,6 +4,7 @@ CHANGELOG
 7.1.6 (unreleased)
 ------------------
 
+- Update ``multidict`` to 6.0.5 so its Python 3.12 wheel can be installed in CI.
 - Cancel and drain pending tasks during test event-loop teardown so their
   resources are released before another test reuses the loop's file descriptors.
 
