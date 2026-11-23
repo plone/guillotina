@@ -2,6 +2,7 @@ import asyncio
 import gc
 import json
 import os
+import time
 import traceback
 from unittest import mock
 
@@ -70,8 +71,13 @@ def event_loop():
     finally:
         try:
             if not res.is_running() and not res.is_closed():
-                unfinished = _cancel_leftover_tasks(res)
+                deadline = time.monotonic() + 5
+                unfinished = _cancel_leftover_tasks(res, timeout=deadline - time.monotonic())
                 res.run_until_complete(res.shutdown_asyncgens())
+                # Async generator finalizers can schedule more tasks.
+                remaining = deadline - time.monotonic()
+                if remaining > 0:
+                    unfinished.extend(_cancel_leftover_tasks(res, timeout=remaining))
                 unfinished.extend(task for task in asyncio.all_tasks(res) if not task.done())
                 gc.collect()
                 _keep_unfinished_tasks(res, unfinished)
@@ -79,7 +85,7 @@ def event_loop():
             res._close()
 
 
-def _cancel_leftover_tasks(loop, timeout=5):
+def _cancel_leftover_tasks(loop, timeout):
     cancelled, unfinished = cancel_tasks(loop, timeout=timeout)
     for task in cancelled:
         if task.done() and not task.cancelled():

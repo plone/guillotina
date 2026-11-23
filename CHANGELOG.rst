@@ -5,8 +5,9 @@ CHANGELOG
 ------------------
 
 - Update ``multidict`` to 6.0.5 so its Python 3.12 wheel can be installed in CI.
-- Cancel and drain pending tasks during test event-loop teardown so their
-  resources are released before another test reuses the loop's file descriptors.
+- Cancel and drain pending tasks during test event-loop teardown, including tasks
+  started by async generator finalizers, so their resources can be released before
+  another test reuses the loop's file descriptors.
 
 
 7.1.5 (2026-09-29)
