@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-7.1.6 (unreleased)
+7.1.6 (2026-11-25)
 ------------------
 
 - Update ``multidict`` to 6.0.5 so its Python 3.12 wheel can be installed in CI.
